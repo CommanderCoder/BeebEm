@@ -35,7 +35,7 @@ class ViewBeeb: NSView {
     }
     
     override func flagsChanged(with event: NSEvent) {
-        print("flagsChanged  \(event.)" )
+        print("flagsChanged  \(event.keyCode)" )
     }
 
     
