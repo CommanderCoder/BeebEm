@@ -8,6 +8,12 @@
 
 import Cocoa
 
+// NOTE: to get this working again remove the 'Is Initial Controller' from the view controller
+// Also, add this to the Info.plist
+//<key>NSDocumentClass</key>
+//<string>$(PRODUCT_MODULE_NAME).Document</string>
+
+
 class Document: NSDocument {
 
     override init() {

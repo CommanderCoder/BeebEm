@@ -9,11 +9,13 @@
 /* Begin PBXBuildFile section */
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A124A338ED00840082 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A024A338ED00840082 /* ViewController.swift */; };
-		DCCCC2A324A338ED00840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
 		DCCCC2A824A338EE00840082 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A624A338EE00840082 /* Main.storyboard */; };
 		DCCCC2B424A3395F00840082 /* DFS image.icns in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2B224A3395F00840082 /* DFS image.icns */; };
 		DCCCC30624A33E2E00840082 /* Z Random BBC file.icns in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */; };
+		DCCCC30A24A33FDB00840082 /* ViewBeeb.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30924A33FDB00840082 /* ViewBeeb.swift */; };
+		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
+		DCCCC30D24A3D79B00840082 /* beebview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30C24A3D79B00840082 /* beebview.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +68,8 @@
 		DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ArmDisassembler.cc; path = src/ArmDisassembler.cc; sourceTree = "<group>"; };
 		DCCCC30424A33E0E00840082 /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = defines.h; path = src/defines.h; sourceTree = "<group>"; };
 		DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "Z Random BBC file.icns"; path = "src/Z Random BBC file.icns"; sourceTree = "<group>"; };
+		DCCCC30924A33FDB00840082 /* ViewBeeb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewBeeb.swift; sourceTree = "<group>"; };
+		DCCCC30C24A3D79B00840082 /* beebview.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = beebview.cpp; path = src/beebview.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +107,7 @@
 			children = (
 				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
 				DCCCC2A024A338ED00840082 /* ViewController.swift */,
+				DCCCC30924A33FDB00840082 /* ViewBeeb.swift */,
 				DCCCC2A224A338ED00840082 /* Document.swift */,
 				DCCCC2A424A338EE00840082 /* Assets.xcassets */,
 				DCCCC2A624A338EE00840082 /* Main.storyboard */,
@@ -162,6 +167,7 @@
 				DCCCC2C924A33D3700840082 /* z80.cc */,
 				DCCCC2BF24A33D3700840082 /* z80dis.cc */,
 				DCCCC30424A33E0E00840082 /* defines.h */,
+				DCCCC30C24A3D79B00840082 /* beebview.cpp */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -247,9 +253,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCCCC30B24A3441800840082 /* Document.swift in Sources */,
 				DCCCC2A124A338ED00840082 /* ViewController.swift in Sources */,
 				DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */,
-				DCCCC2A324A338ED00840082 /* Document.swift in Sources */,
+				DCCCC30D24A3D79B00840082 /* beebview.cpp in Sources */,
+				DCCCC30A24A33FDB00840082 /* ViewBeeb.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
