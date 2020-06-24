@@ -9,10 +9,27 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
+				<string>uef</string>
+				<string>csw</string>
+				<string>ssd</string>
 				<string>dsd</string>
+				<string>wdd</string>
+				<string>adf</string>
+				<string>adl</string>
+				<string>img</string>
+				<string>dos</string>
+				<string>UEF</string>
+				<string>CSW</string>
+				<string>SSD</string>
+				<string>WDD</string>
+				<string>DSD</string>
+				<string>ADF</string>
+				<string>ADL</string>
+				<string>IMG</string>
+				<string>DOS</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
-			<string></string>
+			<string>DFS image.icns</string>
 			<key>CFBundleTypeName</key>
 			<string>DocumentType</string>
 			<key>CFBundleTypeOSTypes</key>
@@ -38,13 +55,13 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2020 Andrew Hague. All rights reserved.</string>
+	<string>Copyright © 1994/1995 David Alan Gilbert. All rights reserved.</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
