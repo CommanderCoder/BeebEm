@@ -16,6 +16,7 @@
 		DCCCC30A24A33FDB00840082 /* ViewBeeb.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30924A33FDB00840082 /* ViewBeeb.swift */; };
 		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
 		DCCCC30D24A3D79B00840082 /* beebview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30C24A3D79B00840082 /* beebview.cpp */; };
+		DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30E24A3DCC200840082 /* BeebAudio.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +71,7 @@
 		DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "Z Random BBC file.icns"; path = "src/Z Random BBC file.icns"; sourceTree = "<group>"; };
 		DCCCC30924A33FDB00840082 /* ViewBeeb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewBeeb.swift; sourceTree = "<group>"; };
 		DCCCC30C24A3D79B00840082 /* beebview.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = beebview.cpp; path = src/beebview.cpp; sourceTree = "<group>"; };
+		DCCCC30E24A3DCC200840082 /* BeebAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeebAudio.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +107,7 @@
 		DCCCC29D24A338ED00840082 /* BeebEm5 */ = {
 			isa = PBXGroup;
 			children = (
+				DCCCC30E24A3DCC200840082 /* BeebAudio.swift */,
 				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
 				DCCCC2A024A338ED00840082 /* ViewController.swift */,
 				DCCCC30924A33FDB00840082 /* ViewBeeb.swift */,
@@ -255,6 +258,7 @@
 			files = (
 				DCCCC30B24A3441800840082 /* Document.swift in Sources */,
 				DCCCC2A124A338ED00840082 /* ViewController.swift in Sources */,
+				DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */,
 				DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */,
 				DCCCC30D24A3D79B00840082 /* beebview.cpp in Sources */,
 				DCCCC30A24A33FDB00840082 /* ViewBeeb.swift in Sources */,

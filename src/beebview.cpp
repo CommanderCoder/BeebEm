@@ -31,7 +31,7 @@ extern "C"
 
     void setPixelsInCPP(unsigned char* data)
     {
-        printf("[setPixelsInCPP] %d\n",data[0]);
+//        printf("[setPixelsInCPP] %d\n",data[0]);
         data[0]=0;
     }
 

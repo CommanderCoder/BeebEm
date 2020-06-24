@@ -8,9 +8,6 @@
 
 import Cocoa
 
-import AppKit
-
-
 @IBDesignable
 class ViewBeeb: NSView {
 
@@ -24,9 +21,23 @@ class ViewBeeb: NSView {
     
     
     
+    // allow key detection
+    override var acceptsFirstResponder: Bool { return true }
+        
+    override func keyDown(with event: NSEvent) {
+     print("Keydown "+(event.characters ?? "nil"))
+        start_audio()
+    }
     
+    override func keyUp(with event: NSEvent) {
+     print("Keyup "+(event.characters ?? "nil"))
+        stop_audio()
+    }
     
-    
+    override func flagsChanged(with event: NSEvent) {
+        print("flagsChanged  \(event.)" )
+    }
+
     
     
     
@@ -35,13 +46,16 @@ class ViewBeeb: NSView {
     
     
     //--- test code
-    
+    var beebAudio = BeebAudio()
+
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         print("started 1")
         
         timer = Timer.scheduledTimer(timeInterval: 1.0/Double(fps), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
+
+        init_audio()
 
     }
     
@@ -128,4 +142,29 @@ class ViewBeeb: NSView {
     }
     
     
+}
+
+
+
+
+
+
+extension ViewBeeb {
+
+  // MARK: - Sound
+
+    func init_audio()
+    {
+        beebAudio.init_audio()
+    }
+    
+    func start_audio()
+    {
+        beebAudio.start_audio()
+    }
+
+    func stop_audio()
+    {
+        beebAudio.stop_audio()
+    }
 }
