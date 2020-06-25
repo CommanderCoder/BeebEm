@@ -149,10 +149,12 @@ void Write_ACIA_Control(unsigned char CReg) {
 		SetACIAStatus(7);
 	}
 
+#if 0 //ACH
 	// Change serial port settings
 	if ((SerialChannel==RS423) && (SerialPortEnabled) && (mSerialHandle != -1) ) {
 		SetSerialPortFormat(Data_Bits, Stop_Bits, Parity, RTS);
 	}
+#endif
 }
 
 void Write_ACIA_Tx_Data(unsigned char Data) {
@@ -180,7 +182,9 @@ void Write_ACIA_Tx_Data(unsigned char Data) {
 		TapeTrigger=TotalCycles + 2000000/(baud/8) * TapeClockSpeed/5600;
 	}
 
-	if ((SerialChannel==RS423) && (SerialPortEnabled)) 
+    #if 0 //ACH
+
+	if ((SerialChannel==RS423) && (SerialPortEnabled))
 	{
 		
 		if (mSerialHandle != -1)
@@ -213,6 +217,7 @@ void Write_ACIA_Tx_Data(unsigned char Data) {
 			}
 		}
 	}
+#endif
 }
 
 void Write_SERPROC(unsigned char Data) {
@@ -241,13 +246,13 @@ void Write_SERPROC(unsigned char Data) {
 
 	// Note, the PC serial port (or at least win32) does not allow different transmit/receive rates
 	// So we will use the higher of the two
-
+#if 0//ACH
 	if ( (SerialChannel==RS423) && (mSerialHandle != -1) ) {
 		HigherRate=Tx_Rate;
 		if (Rx_Rate>Tx_Rate) HigherRate=Rx_Rate;
 		SetSerialPortBaud(Tx_Rate, Rx_Rate);
 	}
-	
+#endif
 }
 
 unsigned char Read_ACIA_Status(void) {
@@ -319,7 +324,7 @@ void Serial_Poll(void)
 
 static bool wait_for_tx = false;
 static int delay = 0;
-
+#if 0 //ACH
 	if ((SerialChannel==RS423) && (SerialPortEnabled) && (TouchScreenEnabled) )
 	{
 		if (TouchScreenPoll() == true)
@@ -373,8 +378,9 @@ static int delay = 0;
 			HandleData(SerialPortGetChar());
 		}
 		
-	} 
-	
+	}
+#endif
+    
 	if (SerialChannel==CASSETTE)
 	{
 		if (TapeRecording)
@@ -575,12 +581,15 @@ void CloseUEF(void) {
 		RxD=0;
 		if (TapeControlEnabled)
 		{
+#if 0 //ACH - tape close
 			const ControlID dbControlID = { 'SLST', 0 };
 			ControlRef dbControl;
 			
 			GetControlByID (mTCWindow, &dbControlID, &dbControl);
 			RemoveDataBrowserItems(dbControl, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
-		}
+#endif
+            
+        }
 		
 	}
 }
@@ -795,6 +804,7 @@ bool map_file(char *file_name)
 	
 	return(true);
 }
+#if 0 //ACH - tape control
 
 //*******************************************************************
 
@@ -1100,6 +1110,7 @@ void TapeControlCloseDialog()
 	TapePlaying=true;
 	TapeRecording=false;
 }
+#endif
 
 void TapeControlOpenFile(char *UEFName)
 {
@@ -1114,12 +1125,14 @@ void TapeControlOpenFile(char *UEFName)
 				return;
 			}
 		}
+        #if 0 //ACH - tape openfile
 		const ControlID dbControlID = { 'SLST', 0 };
 		ControlRef dbControl;
 			
 		GetControlByID (mTCWindow, &dbControlID, &dbControl);
 		RemoveDataBrowserItems(dbControl, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
 		AddDataBrowserItems(dbControl, kDataBrowserNoItem, map_lines, NULL, kDataBrowserItemNoProperty);
+        #endif
 
 		TapeControlUpdateCounter(0);
 
@@ -1140,6 +1153,7 @@ void TapeControlUpdateCounter(int tape_time)
 			i--;
 
 		//		SendMessage(hwndMap, LB_SETCURSEL, (WPARAM)i, 0);
+#if 0 //ACH - tape updatecounter
 
 		const ControlID dbControlID = { 'SLST', 0 };
 		ControlRef dbControl;
@@ -1148,6 +1162,8 @@ void TapeControlUpdateCounter(int tape_time)
 		j = i + 1;
 		SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &j, kDataBrowserItemsAssign);
 		RevealDataBrowserItem(dbControl, j, kDataBrowserNoItem, kDataBrowserRevealOnly);
+#endif
+        
 	}
 }
 

@@ -1,4 +1,10 @@
+
+#include <CoreFoundation/CoreFoundation.h>
+extern "C" {
+
 #include "plist.h"
+
+#if 1 //ACH - property list
 
 void WriteMyPropertyListToFile( CFPropertyListRef propertyList,
             CFURLRef fileURL ) 
@@ -97,4 +103,8 @@ CFStringRef pVal;
 	{
 		strcpy(value, Default);
 	}
+}
+
+#endif
+
 }

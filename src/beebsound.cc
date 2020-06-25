@@ -345,9 +345,9 @@ void PlayUpTil(double DestTime) {
 			}
 
 			/* Make it a bit louder under Windows */
-			if (Extras) 
-				tmptotal/=Extras; 
-			else 
+			if (Extras)
+				tmptotal/=Extras;
+			else
 				tmptotal=0;
 
 			SoundBuf[bufptr] = (tmptotal/SoundVolume)+128;
@@ -358,14 +358,16 @@ void PlayUpTil(double DestTime) {
 
 	  if (SoundEnabled)
 	  {
+		audev_play_buff(SoundBuf, bufptr);
 
-	    audev_play_buff(SoundBuf, bufptr);
+#if 0 //ACH - movie sound
 
 		if (mainWin->m_pMovie)
 		{
 			memcpy(mainWin->m_soundBufferPtr + mainWin->m_soundBufferLen, SoundBuf, bufptr);
 			mainWin->m_soundBufferLen += bufptr; 
 		}
+#endif
 	  
 	  }
  /*   fprintf(stderr,"PlayUpTil: After write: bufptr=%d OurTime=%f\n",bufptr,OurTime);*/
@@ -482,7 +484,7 @@ void SoundTrigger_Real(void) {
 
   SoundTrigger=TotalCycles+SoundAutoTriggerTime;
 
-//	WriteLog(" After : TotalCycles = %d, XtraCycles = %d, SoundTrigger = %d\n", 
+//	WriteLog(" After : TotalCycles = %d, XtraCycles = %d, SoundTrigger = %d\n",
 //			 TotalCycles, XtraCycles, SoundTrigger, SoundCycles);
 
 }; /* SoundTrigger_Real */
@@ -640,7 +642,7 @@ void Sound_RegWrite(int value) {
    //if (VolChange<4) fprintf(sndlog,"Channel %d - Volume %d at %lu Cycles\n",VolChange,value &15,SoundCycles);
   };
 
-  if (trigger) 
+  if (trigger)
     SoundTrigger_Real();
   
 }; /* Sound_RegWrite */

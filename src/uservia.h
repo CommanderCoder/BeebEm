@@ -28,7 +28,9 @@
 #include "viastate.h"
 #include "via.h"
 
+#if 0 //ACH
 extern WindowRef mBreakOutWindow; 
+#endif
 extern VIAState UserVIAState;
 extern unsigned char WTDelay1,WTDelay2;
 extern int RTC_Enabled;
@@ -41,8 +43,10 @@ void BreakOutOpenDialog(void);
 void BreakOutCloseDialog(void);
 void ShowInputs(unsigned char data);
 void ShowOutputs(unsigned char data);
+#if 0 //ACH
 int GetValue(OSType box);
 void SetValue(OSType box, int State);
+#endif
 
 void uservia_dumpstate(void);
 

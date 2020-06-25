@@ -111,6 +111,7 @@ CFStringRef pTitle;
 	GetKeysUsed(Keys);
 
 //	fprintf(stderr, "%s\n", Keys);
+#if 0 //ACH - showkey
 
 	const ControlID dbControlID = { 'ass ', 0 };
 	ControlRef dbControl;
@@ -133,6 +134,7 @@ CFStringRef pTitle;
 		GetControlByID (mUKWindow, &dbKeyID, &dbControl);
 		SetControlValue(dbControl, 0);
 	}
+#endif
 	LastButton = key;
 }
 
@@ -143,6 +145,8 @@ OSStatus UKWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 	int i;
     HICommand command; 
     OSStatus err = noErr;
+#if 0 //ACH - command handler
+
     err = GetEventParameter(event, kEventParamDirectObject,
 							typeHICommand, NULL, sizeof(HICommand), NULL, &command);
     require_noerr (err, CantGetParameter);
@@ -181,7 +185,7 @@ OSStatus UKWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 	{
 		ShowKey(command.commandID);
 	}
-
+#endif
 CantGetParameter:
 		return err;
 }
@@ -216,6 +220,7 @@ static OSStatus UKWindowEventHandler(EventHandlerCallRef nextHandler, EventRef e
     
 	return err;
 }
+#if 0 //ACH -  keyboard dialogs
 
 void UserKeyboardOpenDialog()
 {
@@ -260,6 +265,7 @@ void UserKeyboardCloseDialog()
 	}
 	mUKWindow = NULL;
 }
+#endif
 
 /****************************************************************************/
 void SetBBCKeyForVKEY( int Key )
@@ -514,6 +520,7 @@ void SetRowCol( int ctrlID )
 
 bool LoadUserKeyboard( const char *path )
 {
+    #if 0 //ACH
 	CFStringRef keyboardFile = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingASCII);
 	CFURLRef	keyboardFileUrl = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,    
 																keyboardFile,			// file path name
@@ -525,7 +532,6 @@ bool LoadUserKeyboard( const char *path )
 		fprintf(stderr, "Cannot create keyboard file URL for file %s\n", path);
 		return false;
 	}
-	
 	CFMutableDictionaryRef dict = (CFMutableDictionaryRef) CreateMyPropertyListFromFile(keyboardFileUrl);
 	
 	if (dict == NULL)
@@ -547,12 +553,15 @@ bool LoadUserKeyboard( const char *path )
 		UserKeymap[i][1] = GetDictNum(dict, keyRef, transTable1[i][1]);
 		CFRelease(keyRef);
 	}
-	
+    #endif
+
 	return true;
 }
 
 void SaveUserKeyboard( char *path )
 {
+    #if 0 //ACH
+
 	// Create a dictionary for the keyboard mappings.
 	CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault,
 															0,
@@ -592,4 +601,5 @@ void SaveUserKeyboard( char *path )
 	CFRelease(dict);
 	CFRelease(keyboardFileUrl);
 	CFRelease(keyboardFile);
+#endif
 }

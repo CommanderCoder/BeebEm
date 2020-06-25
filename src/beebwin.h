@@ -24,8 +24,10 @@
 
 #include <Carbon/Carbon.h>
 #include <string.h>
+#if 0 //ACH - quicktime
 #include <QuickTime/QuickTime.h>
 #include <QuickTime/QTML.h>
+#endif
 
 #include "port.h"
 #include "video.h"
@@ -257,6 +259,7 @@ public:
 	void ImportDiscFiles(int menuId);
 	void ExportDiscFiles(int menuId);
 
+#if 0 //ACH - capture video
 public:
 		
 	void CaptureVideo();
@@ -285,6 +288,7 @@ public:
 	long	m_frameSkipCount;
 	long	m_frameDuration;
 	long	m_frameSize;
+#endif
 	long	m_skip;
 	long	m_captureresolution;
 	

@@ -57,7 +57,7 @@ int uef_create(char *name)
 	gzFile uef_file;
 
 	uef_close();
-
+#if 0 //ACH - uef create
 	uef_file = gzopen(name, "wb");
 	if (uef_file == NULL)
 	{
@@ -74,6 +74,7 @@ int uef_create(char *name)
 
 	gzclose(uef_file);
 	strcpy(uef_file_name, name);
+    #endif
 
 	return(1);
 }
@@ -91,6 +92,7 @@ int uef_open(char *name)
 	uef_chunk_info *ch;
 
 	uef_close();
+    #if 0 //ACH - uef open
 
 	uef_file = gzopen(name, "rb");
 	if (uef_file == NULL)
@@ -238,7 +240,7 @@ int uef_open(char *name)
 
 	gzclose(uef_file);
 	strcpy(uef_file_name, name);
-
+#endif
 	return(1);
 }
 
@@ -448,6 +450,7 @@ int uef_write_chunk(void)
 	gzFile uef_file;
 	int ok = 1;
 	int l;
+    #if 0 //ACH - uef write
 
 	if (uef_file_name[0])
 	{
@@ -491,7 +494,7 @@ int uef_write_chunk(void)
 
 		gzclose(uef_file);
 	}
-
+#endif
 	return(ok);
 }
 
@@ -581,6 +584,7 @@ float uef_decode_float(unsigned char *Float)
 
 	return(Result);
 }
+#if 0 //ACH - gzip
 
 int gzget16(gzFile f)
 {
@@ -613,3 +617,4 @@ void gzput32(gzFile f, int b)
 	gzputc(f, (b >> 16) & 0xff);
 	gzputc(f, (b >> 24) & 0xff);
 }
+#endif

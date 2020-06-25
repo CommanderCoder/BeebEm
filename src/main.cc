@@ -41,9 +41,11 @@
 #include "speech.h"
 #include "main.h"
 
+#if 0 //ACH  -push/pop symbolic hotkey
+
 extern void * PushSymbolicHotKeyMode(OptionBits inOptions) __attribute__((weak_import));
 extern void PopSymbolicHotKeyMode(void * inToken)          __attribute__((weak_import));
-
+#endif
 
 FILE *tlog;
 int trace;
@@ -55,8 +57,10 @@ BeebWin *mainWin;
 unsigned char MachineType;
 Boolean quitNow;
 
-const char *Version="4.0a";
-const char *VersionDate="22nd July 2017";
+const char *Version="5.0a";
+const char *VersionDate="25th June 2020";
+
+#if 0 //ACH - window handlers and event loops
 
 void AtExitHandler(void) {
   delete mainWin;
@@ -512,21 +516,31 @@ static void RunApplicationEventLoopWithCooperativeThreadSupport(void)
         ReleaseEvent(dummyEvent);
     }
 }
-	
-int main(int argc,char *argv[]) 
+
+#endif
+
+extern "C" int beeb_main(int argc,char *argv[])
 {
 void *token;
 int i;
 
-//	tlog = fopen("/users/jonwelch/trace.log", "wt");
-  tlog = NULL;
+    // NEED TO TURN OFF SANDBOXING IN ENTITLEMENTS FILE TO GET LOCAL FOLDERS TO WORK
+    
+  fprintf(stderr, "Version: %s %s\n", Version, VersionDate);
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current working dir: %s\n", cwd);
+    } else {
+        perror("getcwd() error");
+        return 1;
+    }
 
-  WriteLog("Version: %s %s\n", Version, VersionDate);
 
   for (i = 0; i < argc; ++i)
-	WriteLog("Arg %d = %s\n", i, argv[i]);
+	fprintf(stderr, "Arg %d = %s\n", i, argv[i]);
 
   mainWin=new BeebWin();
+#if 0 //ACH - main init hotkey
 
   atexit(AtExitHandler);
 
@@ -535,7 +549,11 @@ int i;
     token = PushSymbolicHotKeyMode(kHIHotKeyModeAllDisabled);
   }
 
- 
+
+  tlog = fopen("/users/jonwelch/trace.log", "wt");
+//  tlog = NULL;
+#endif
+    
   done = 0;
   
   mainWin->Initialise(argv[0]);
@@ -546,6 +564,7 @@ int i;
   mainWin->ResetBeebSystem(MachineType,TubeEnabled,1); 
   mainWin->SetRomMenu();
   mainWin->SetSoundMenu();
+#if 0 //ACH - main init events
 
   EventTypeSpec    eventTypes[7];
   EventHandlerUPP  handlerUPP;
@@ -600,14 +619,17 @@ int i;
   fprintf(stderr, "Shutting Down ...\n");
   
   if (tlog) fclose(tlog);
-  
+#endif
+
   SoundReset();
-	
+
+#if 0 //ACH - symbolic hotkey
   if (PopSymbolicHotKeyMode != NULL)
   {
      PopSymbolicHotKeyMode(token);
   }
-  
+#endif
+
   return(0);
 } /* main */
 

@@ -644,8 +644,10 @@ void DebugUserViaState()
 OSStatus BreakOutWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
 	int bit;
-    HICommand command; 
+    
+    HICommand command;
     OSStatus err = noErr;
+    #if 0 //ACH
     err = GetEventParameter(event, kEventParamDirectObject,
 							typeHICommand, NULL, sizeof(HICommand), NULL, &command);
     require_noerr (err, CantGetParameter);
@@ -737,6 +739,7 @@ OSStatus BreakOutWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef 
 			ShowBitKey(BitKey, command.commandID);
 		}
 
+#endif
 CantGetParameter:
 		return err;
 }
@@ -789,6 +792,7 @@ void BreakOutOpenDialog()
 
 	if (mBreakOutWindow == NULL)
 	{
+        #if 0//ACH
 		// Create a Nib reference passing the name of the nib file (without the .nib extension)
 		// CreateNibReference only searches into the application bundle.
 		CreateNibReference(CFSTR("main"), &nibRef);
@@ -805,7 +809,7 @@ void BreakOutOpenDialog()
 								   NewEventHandlerUPP (BreakOutWindowEventHandler), 
 								   GetEventTypeCount(BreakOutEvents), BreakOutEvents, 
 								   mBreakOutWindow, NULL);
-		
+#endif
 		ShowInputs( (UserVIAState.orb & UserVIAState.ddrb) | (UserVIAState.irb & (~UserVIAState.ddrb)) );
 		ShowOutputs(UserVIAState.orb);
 		
@@ -826,13 +830,15 @@ void BreakOutCloseDialog()
 {
 	if (mBreakOutWindow)
 	{
+#if 0//ACH
 		HideWindow(mBreakOutWindow);
 		DisposeWindow(mBreakOutWindow);
+#endif
 	}
 	mBreakOutWindow = NULL;
 	mainWin->SetMenuCommandIDCheck('upbo', false);
 }
-
+#if 0 //ACH
 int GetValue(OSType box)
 
 {
@@ -858,6 +864,8 @@ void SetValue(OSType box, int State)
 	SetControlValue(dbControl, State);
 }
 
+#endif
+
 void ShowOutputs(unsigned char data)
 {
 static unsigned char last_data = 0;
@@ -865,6 +873,7 @@ unsigned char changed_bits;
 	
 	if (mBreakOutWindow)
 	{
+#if 0//ACH
 		if (data != last_data)
 		{
 			changed_bits = data ^ last_data;
@@ -878,6 +887,7 @@ unsigned char changed_bits;
 			if (changed_bits & 0x01) { if ((UserVIAState.ddrb & 0x01) == 0x01) SetValue('uob0', (data & 0x01) != 0); else SetValue('uob0', 0); }
 			last_data = data;
 		}
+#endif
 	}
 }
 
@@ -888,6 +898,7 @@ unsigned char changed_bits;
 
 	if (mBreakOutWindow)
 	{
+#if 0 //ACH
 		if (data != last_data)
 		{
 			changed_bits = data ^ last_data;
@@ -901,6 +912,7 @@ unsigned char changed_bits;
 			if (changed_bits & 0x01) { if ((UserVIAState.ddrb & 0x01) == 0x00) SetValue('uib0', (data & 0x01) == 0); else SetValue('uib0', 0); }
 			last_data = data;
 		}
+        #endif
 	}
 }
 
@@ -919,6 +931,7 @@ CFStringRef pTitle;
 	dbKeyID.signature = ctrlID;
 	dbKeyID.id = 0;
 	
+    #if 0//ACH
 	GetControlByID (mBreakOutWindow, &dbKeyID, &dbControl);
 
 	pTitle = CFStringCreateWithCString (kCFAllocatorDefault, Keys, kCFStringEncodingASCII);
@@ -929,7 +942,6 @@ CFStringRef pTitle;
 
 	if ( (LastBitButton != 0) && (LastBitButton != ctrlID) )
 	{
-
 		ControlID dbKeyID;
 		
 		dbKeyID.signature = LastBitButton;
@@ -938,7 +950,9 @@ CFStringRef pTitle;
 		GetControlByID (mBreakOutWindow, &dbKeyID, &dbControl);
 
 		SetControlValue(dbControl, 0);
-	}
+        
+    }
+    #endif
 
 	LastBitButton = ctrlID;
 

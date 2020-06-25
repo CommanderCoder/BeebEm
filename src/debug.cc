@@ -28,9 +28,20 @@ static bool LastAddrInROM = false;
 static bool DebugHost = false;
 static bool DebugParasite = false;
 
-
+#if 0 //ACH
 //*******************************************************************
 // Data structs
+
+enum PSRFlags {
+	FlagC=1,
+	FlagZ=2,
+	FlagI=4,
+	FlagD=8,
+	FlagB=16,
+	FlagV=64,
+	FlagN=128
+};
+#endif
 
 #define MAX_LINES 1024          // Max lines in info window
 #define LINES_IN_INFO 43        // Visible lines in info window
@@ -351,6 +362,7 @@ void DebugMemoryDump(int addr, int count, bool host);
 void DebugExecuteCommand();
 
 //*******************************************************************
+#if 0 //ACH - debugging command handler
 
 OSStatus DebugWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
@@ -605,10 +617,14 @@ void DebugCloseDialog()
 	memset(Breakpoints, 0, MAX_BPS * sizeof(Breakpoint));
 	mainWin->SetMenuCommandIDCheck('dbgr', false);
 }
+
+#endif
+
 void DebugDisplayInfo(const char *info)
 {
 static int max = 0;
-	
+    #if 0 //ACH - display info
+
 //	fprintf(stderr, "%s\n", info);
 
 	if (strlen(info) > max)
@@ -640,8 +656,10 @@ static int max = 0;
 	
 	SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &debug_lines, kDataBrowserItemsAssign);
 	RevealDataBrowserItem(dbControl, debug_lines, kDataBrowserNoItem, kDataBrowserRevealOnly);
+#endif
 }
 
+#if 0 //ACH - set/get box values
 int GetCheckBoxValue(OSType box)
 
 {
@@ -666,9 +684,12 @@ void SetCheckBoxValue(OSType box, int State)
 	GetControlByID (mDebugWindow, &dbControlID, &dbControl);
 	SetControlValue(dbControl, State);
 }
+#endif
 
 void DebugDisplayTrace(DebugType type, bool host, const char *info)
 {
+    #if 0 //ACH - debug trace
+
 	if (DebugEnabled)
 	{
 		switch (type)
@@ -744,10 +765,12 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 				break;
 		}
 	}
+#endif
 }
 
 bool DebugDisassembler(int addr, int Accumulator, int XReg, int YReg, int PSR, bool host)
 {
+#if 0 //ACH - disassembler
 	char str[150];
 	int i;
 	
@@ -873,11 +896,12 @@ bool DebugDisassembler(int addr, int Accumulator, int XReg, int YReg, int PSR, b
 	if ((DebugHost && host) || !DebugHost)
 		if (InstCount > 0)
 			InstCount--;
-	
+#endif
 	return(TRUE);
 }
 
 //*******************************************************************
+#if 0 //ACH - debug commands
 
 void DebugExecuteCommand()
 {
@@ -1078,6 +1102,7 @@ void DebugExecuteCommand()
 		DebugDisplayInfo(info);
 	}
 }
+#endif
 
 int DebugReadMem(int addr, bool host)
 {

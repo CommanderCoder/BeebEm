@@ -7,9 +7,10 @@
  *
  */
 
+#if 0 //ACH
 extern unsigned char TouchScreenEnabled;
 extern unsigned char EthernetPortEnabled;
-extern WindowRef mSerialPortWindow; 
+extern WindowRef mSerialPortWindow;
 extern int mSerialHandle;
 extern WindowRef mEthernetPortWindow; 
 extern int mEthernetHandle;
@@ -46,3 +47,4 @@ void SetSerialPortBaud(int Tx_Rate, int Rx_Rate);
 void SerialPortWrite(unsigned char TDR);
 unsigned char SerialPortGetChar(void);
 int SerialPortIsChar(void);
+#endif
