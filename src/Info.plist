@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>uef</string>
+				<string>csw</string>
+				<string>ssd</string>
+				<string>dsd</string>
+				<string>wdd</string>
+				<string>adf</string>
+				<string>adl</string>
+				<string>img</string>
+				<string>dos</string>
+				<string>UEF</string>
+				<string>CSW</string>
+				<string>SSD</string>
+				<string>WDD</string>
+				<string>DSD</string>
+				<string>ADF</string>
+				<string>ADL</string>
+				<string>IMG</string>
+				<string>DOS</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>DFS image.icns</string>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>text/plain</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Mac BeebEm Disc Image</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>****</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>BeebEm4</string>
+	<key>CFBundleIconFile</key>
+	<string>beebem.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.apple.beebem</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>JJF1</string>
+	<key>CFBundleVersion</key>
+	<string>4.0</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+</dict>
+</plist>
