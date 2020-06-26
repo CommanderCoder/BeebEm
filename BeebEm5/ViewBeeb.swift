@@ -53,7 +53,7 @@ class ViewBeeb: NSView {
         super.init(coder: coder)
         print("started 1")
         
-        timer = Timer.scheduledTimer(timeInterval: 1.0/Double(fps), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 1.0/Double(cpuspeed), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
 
         init_audio()
         init_cpu()
@@ -101,7 +101,7 @@ class ViewBeeb: NSView {
     }
         
     private var timer: Timer!
-    private let fps=60
+    private let cpuspeed=2000000
 
     private var x = 0
     private let range = 200
