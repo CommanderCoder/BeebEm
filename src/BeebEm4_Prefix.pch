@@ -1,5 +1,0 @@
-//
-// Prefix header for all source files of the 'BeebEm3' target in the 'BeebEm3' project.
-//
-
-#include <Carbon/Carbon.h>
