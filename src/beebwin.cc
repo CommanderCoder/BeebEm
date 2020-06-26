@@ -1805,7 +1805,6 @@ char			Title[100];
 	SetDiscWriteProtects();
 	
 }
-#if 0 //ACH - preferences
 
 /****************************************************************************/
 void BeebWin::SavePreferences()
@@ -1879,14 +1878,16 @@ CFStringRef pTitle;
 	AddDictNum(dict, CFSTR("TeleTextServer"), TeleTextServer);
 	AddDictNum(dict, CFSTR("HardDriveEnabled"), HardDriveEnabled);
 	AddDictNum(dict, CFSTR("SerialPortEnabled"), SerialPortEnabled);
+#if 0 //ACH - preferences
 	AddDictNum(dict, CFSTR("EthernetPortEnabled"), EthernetPortEnabled);
 	AddDictNum(dict, CFSTR("TouchScreenEnabled"), TouchScreenEnabled);
+#endif
 	AddDictNum(dict, CFSTR("RTCEnabled"), RTC_Enabled);
 	AddDictNum(dict, CFSTR("InvertBackground"), m_Invert);
 	AddDictNum(dict, CFSTR("WriteProtectOnLoad"), m_WriteProtectOnLoad);
 	AddDictNum(dict, CFSTR("NativeFDC"), NativeFDC);
 	AddDictNum(dict, CFSTR("FDCType"), FDCType);
-	
+
 	for (i = 0; i < 256; ++i)
 	{
 		sprintf(temp, "Row%d", i);
@@ -1926,7 +1927,7 @@ CFStringRef pTitle;
 
 	CFRelease(pIni);
 }
-#endif
+
 /****************************************************************************/
 void BeebWin::LoadPreferences()
 {
@@ -1940,8 +1941,7 @@ char temp[256];
 
 int LEDByte;
 
-#if 0 //ACH - preferences
-	// Create a URL that specifies the file we will create to 
+	// Create a URL that specifies the file we will create to
 	// hold the XML data.
 
 	sprintf(path, "%sbeebem.ini", RomPath);
@@ -2068,13 +2068,14 @@ int LEDByte;
 	m_captureresolution = GetDictNum(dict, CFSTR("CaptureResolution"), 2);
 	TranslateCapture();
 	
+#if 0 //ACH - preferences
 	SerialPortEnabled = GetDictNum(dict, CFSTR("SerialPortEnabled"), 0);
 	EthernetPortEnabled = GetDictNum(dict, CFSTR("EthernetPortEnabled"), 0);
 	TouchScreenEnabled = GetDictNum(dict, CFSTR("TouchScreenEnabled"), 0);
 	RTC_Enabled = GetDictNum(dict, CFSTR("RTCEnabled"), 0);
 
+#endif
 	SavePreferences();
-    #endif
 }
 
 
@@ -4604,6 +4605,7 @@ void BeebWin::TogglePrinter()
 
 }
 
+#endif
 void BeebWin::TranslatePrinterPort()
 {
 	switch (m_MenuIdPrinterPort)
@@ -4617,7 +4619,6 @@ void BeebWin::TranslatePrinterPort()
 	}
 }
 
-#endif
 void SaveEmuUEF(FILE *SUEF) {
 	char EmuName[16];
 	fput16(0x046C,SUEF);

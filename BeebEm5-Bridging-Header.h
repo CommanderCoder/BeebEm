@@ -4,3 +4,9 @@
 
 int getIntFromCPP();
 void setPixelsInCPP(unsigned char* data);
+
+
+// BEEBEM
+int beeb_main(int argc,char *argv[]);
+void Exec6502Instruction();
+

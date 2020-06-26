@@ -85,7 +85,7 @@ void Init6502core(void);
 
 /*-------------------------------------------------------------------------*/
 /* Execute one 6502 instruction, move program counter on                   */
-void Exec6502Instruction(void);
+extern "C" void Exec6502Instruction(void);
 
 void DoNMI(void);
 void core_dumpstate(void);

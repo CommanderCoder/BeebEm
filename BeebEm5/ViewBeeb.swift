@@ -56,7 +56,8 @@ class ViewBeeb: NSView {
         timer = Timer.scheduledTimer(timeInterval: 1.0/Double(fps), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
 
         init_audio()
-
+        init_cpu()
+        
     }
     
 
@@ -93,6 +94,10 @@ class ViewBeeb: NSView {
 //        let ct = CACurrentMediaTime()//.truncatingRemainder(dividingBy: 1)
 //        print(ct-lasttime)
 //        lasttime=ct
+        
+        exec_cpu()
+
+
     }
         
     private var timer: Timer!
@@ -166,5 +171,41 @@ extension ViewBeeb {
     func stop_audio()
     {
         beebAudio.stop_audio()
+    }
+}
+
+
+extension ViewBeeb{
+    
+    func init_cpu()
+    {
+        
+        let s0 = strdup("alpha")
+        let s1 = strdup("beta")
+        let s2 = strdup("gama")
+        let s3 = strdup("delta")
+
+
+        var arr = [s0,s1,s2,s3]
+        let ac = Int32(arr.count)
+
+
+        // pass the 'arr' into the closure as the variable p as unsafe mutable bytes - this is
+        // so that beeb_main can modify them if necessary
+        arr.withUnsafeMutableBytes { (p) -> () in
+            // find the base address of the UnsafeMutableRawBufferPointer (it is a UnsafeMutableRawPointer)
+            // get the typed pointer to the base address assuming it is already bound to a type
+            // in this case it will make pp : UnsafeMutablePointer<Int8>
+            // self is the arr instance
+            let pp = p.baseAddress?.assumingMemoryBound(to: UnsafeMutablePointer<Int8>?.self)
+            beeb_main(ac,pp)
+        }
+
+    }
+    func exec_cpu()
+    {
+        
+        Exec6502Instruction()
+
     }
 }
