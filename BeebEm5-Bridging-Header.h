@@ -2,11 +2,16 @@
 //  Use this file to import your target's public headers that you would like to expose to Swift.
 //
 
-int getIntFromCPP();
-void setPixelsInCPP(unsigned char* data);
-
 
 // BEEBEM
-int beeb_main(int argc,char *argv[]);
+struct PixelData{
+    unsigned char a;
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+};
+
+int beeb_main(int argc, char *argv[]);
 void Exec6502Instruction();
+void beeb_video(int argc, struct PixelData buffer[]);
 

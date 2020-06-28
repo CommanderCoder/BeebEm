@@ -47,35 +47,31 @@ class ViewBeeb: NSView {
     
     //--- test code
     var beebAudio = BeebAudio()
+    // pixeldata
+    var pixelData : [PixelData]
 
     
     required init?(coder: NSCoder) {
+        length = 200
+        range = length
+        pixelData = [PixelData](repeating: redPixel, count: length * length)
+
         super.init(coder: coder)
         print("started 1")
         
-        timer = Timer.scheduledTimer(timeInterval: 1.0/Double(cpuspeed), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 1.0/Double(fpsSpeed), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
 
         init_audio()
         init_cpu()
         
     }
-    
 
      func drawScreen(_ dirtyRect: NSRect) {
         
         // Drawing code here.
         let context = NSGraphicsContext.current?.cgContext
 
-
-        var pixelData = [PixelData](repeating: redPixel, count: length * length)
-        var cData : [UInt8] = [1,2,3]
-        setPixelsInCPP(&cData)
-
-        let X = x*length
-        pixelData.replaceSubrange(X..<(X+range), with: repeatElement(purplePixel, count: range))
-//        pixelData.replaceSubrange(400..<(400+range), with: repeatElement(purplePixel, count: range))
         // Update pixels
-        
         let image = imageFromARGB32Bitmap(pixels: pixelData, width: length, height: length)
         // image is a CGimage
         
@@ -88,34 +84,24 @@ class ViewBeeb: NSView {
     @objc func tick() {
         setNeedsDisplay(self.visibleRect)
 
-        x += 1
-        x %= range-2
-
 //        let ct = CACurrentMediaTime()//.truncatingRemainder(dividingBy: 1)
 //        print(ct-lasttime)
 //        lasttime=ct
         
         exec_cpu()
+        
+        update_video()
 
 
     }
         
     private var timer: Timer!
-    private let cpuspeed=2000000
+    private let fpsSpeed=120
 
     private var x = 0
-    private let range = 200
+    private let range : Int
     
-    private var a = getIntFromCPP()
-
-    public struct PixelData {
-        var a:UInt8 = 255
-        var r:UInt8
-        var g:UInt8
-        var b:UInt8
-    }
-    
-    let length:Int = 200
+    let length : Int
     let redPixel = PixelData(a: 255, r: 192, g: 0, b: 0)
     let purplePixel = PixelData(a: 255, r: 192, g: 0, b: 255)
 
@@ -207,5 +193,15 @@ extension ViewBeeb{
         
         Exec6502Instruction()
 
+    }
+    
+    func update_video()
+    {
+        let ac = Int32(pixelData.count)
+
+        pixelData.withUnsafeMutableBytes{(p)->() in
+            let pp = p.baseAddress?.assumingMemoryBound(to: PixelData.self)
+            beeb_video(ac,pp)
+        }
     }
 }
