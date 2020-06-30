@@ -216,7 +216,7 @@ extern "C" void beeb_handlekeys(long eventkind, short keycode, char charCode)
                 NewCaps = keycode & 0x0800;
                 NewCmd = keycode & 0x0100;
 
-                fprintf(stderr, "Key modifier : code = %08x\n", keycode);
+//                fprintf(stderr, "Key modifier : code = %08x\n", keycode);
                 
                 if (LastShift != NewShift) if (LastShift) mainWin->KeyUp(200); else mainWin->KeyDown(200);
                 if (LastCtrl  != NewCtrl)  if (LastCtrl)  mainWin->KeyUp(201); else mainWin->KeyDown(201);
@@ -600,38 +600,39 @@ struct PixelData {
 };
 
 
-int x = 0;
+int y = 0;
 const int width = 640;
 const int height = 512;
-PixelData purplePixel =  {255, 192, 0, 255};
+PixelData greenPixel =  {255, 0, 255, 0};
 
 
-const int bpp = 4;
-char videobuffer[bpp * width * height]; // 200x200 by 4 bytes
+const int bpp = 4; // 4 bytes or 32 bits
+unsigned char videobuffer[bpp * width * height]; // 200x200 by 4 bytes
 
 extern "C" void beeb_video(int count,  struct PixelData buffer[])
 {
+    assert(count==width*height);
     // fill in contents of video buffer
     for (int i = 0; i < width*height; i++)
     {
-        buffer[i].a = videobuffer[0+i*bpp];
-        buffer[i].r = videobuffer[1+i*bpp];
-        buffer[i].g = videobuffer[2+i*bpp];
-        buffer[i].b = videobuffer[3+i*bpp];
+        buffer[i].b = videobuffer[0+(i*bpp)];
+        buffer[i].g = videobuffer[1+(i*bpp)];
+        buffer[i].r = videobuffer[2+(i*bpp)];
+        buffer[i].a = videobuffer[3+(i*bpp)];
     }
     
     // move a purple line everytime this is updated (50fps)
-    x += 1;
-    x %= height-2;
+    y += 1;
+    y %= height-2;
 
     //purple line
-    int X = x*height;
+    int X = y*width;
     for (int i = 0; i < width; i++)
     {
-        buffer[X+i].a = purplePixel.a;
-        buffer[X+i].r = purplePixel.r;
-        buffer[X+i].g = purplePixel.g;
-        buffer[X+i].b = purplePixel.b;
+        buffer[X+i].a = greenPixel.a;
+        buffer[X+i].r = greenPixel.r;
+        buffer[X+i].g = greenPixel.g;
+        buffer[X+i].b = greenPixel.b;
     }
     
 }

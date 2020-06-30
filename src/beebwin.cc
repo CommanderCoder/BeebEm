@@ -1372,7 +1372,7 @@ void BeebWin::updateLines(int starty, int nlines)
 //    GetPortBounds(mWin, &destR);
 
     // ACH - normally get width and height from the window
-    destR = {0,0,640,512};
+    destR = {0,0,512,640};  //top, left, bottom, right
 
     width = destR.right;
     height = destR.bottom;
@@ -1422,13 +1422,13 @@ void BeebWin::updateLines(int starty, int nlines)
         srcR.bottom = starty + nlines;
     }
     
-    int_fast32_t *pPtr32;
+    int_fast32_t *pPtr32; // on 32 bit machine this was 'long' which ought to be 32 bits
     int_fast32_t *pRPtr32;
-    int_fast16_t *pPtr16;
+    int_fast16_t *pPtr16;  // on 32 bit machine this was 'short' which ought to be 16 bits
     int_fast16_t *pRPtr16;
 
     PixMapHandle    pmh;
-    Ptr             buffer;
+    Ptr             buffer;  // Ptr is a char which is 8 bits
     int                bpr;
     float            scalex;
     float            scaley;
@@ -1446,13 +1446,13 @@ void BeebWin::updateLines(int starty, int nlines)
 //        buffer = GetPixBaseAddr(pmh);
 //        bpp = GetPixDepth(pmh);
     bpr = 640*4;// 640 pixels per row, 4 bytes per pixel
+    buffer = videobuffer; // videobuffer is char, 8 bits ; size is 640x512x4
     bpp = 32; // 4 bytes per pixel
-    buffer = videobuffer;
 
     //    fprintf(stderr, "bpp = %d\n", bpp);
         
 //        GetPixBounds(pmh, &rect);
-    rect = {0,0,640,512};
+    rect = {0,0,512,640}; //top, left, bottom, right
     
     if (bpp == 32)
     {
@@ -1471,37 +1471,31 @@ void BeebWin::updateLines(int starty, int nlines)
     //    fprintf(stderr, "rect : top = %d, left = %d, bottom = %d, right = %d\n", rect.top, rect.left, rect.bottom, rect.right);
 
     // NO IDEA WHAT HAPPENS IF THIS IS FULLSCREEN - WHAT PAINTS IT?
-    
-//    if (TeletextEnabled)
-//    {
-//    for (j=0;j<height;++j)
-//    {
-//        printf("%02d : ",j);
-//        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-//        for (i=0;i<width;++i)
-//        {
-//            int v = m_RGB32[p[i]];
-//            v&=0xf;
-//            printf("%1x",v);
-//        }
-//        printf("\n");
-//
-//    }
-//    printf("\n\n");
-//    }
+    p = m_screen;
+    char* bufferptr = (buffer - rect.top * bpr - rect.left * 4 - yAdj * bpr);  // Skip past rows for window's menu bar,
+    pRPtr32 = (int_fast32_t *) bufferptr;
+
     scalex = (float) ((srcR.right - srcR.left)) / (float) ((width));
     scaley = (float) ((srcR.bottom - srcR.top)) / (float) ((height));
+    int sx[2000];
 
-    height = 320;
-    p = m_screen;
-    pRPtr32 = (int_fast32_t *) (buffer);        // Skip past rows for window's     scalex = 1;
+    for (i = 0; i < width; ++i)
+    {
+        sx[i] = (int) (i * scalex);
+    }
+
     for (j = 0; j < height; ++j)
     {
-        p = m_screen + j*800;
-        pPtr32 = pRPtr32;
+        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
+        pPtr32 = pRPtr32 + xAdj;
         for (i = 0; i < width; ++i)
-            *pPtr32++ = (int_fast32_t)m_RGB32[p[i]];
-
+        {
+            uint32_t val = (uint32_t)m_RGB32[p[sx[i]]];
+            // argb
+//            val |= 0xff003f00;
+            *pPtr32++ = val;
+        }
+        
         pRPtr32 += ppr;
     }
 
