@@ -732,11 +732,16 @@ int i;
   
   // Call the event loop
   RunApplicationEventLoopWithCooperativeThreadSupport();
+#endif
 
+    return(0);
+}
+
+extern "C" int beeb_end()
+{
   fprintf(stderr, "Shutting Down ...\n");
   
   if (tlog) fclose(tlog);
-#endif
 
   SoundReset();
 

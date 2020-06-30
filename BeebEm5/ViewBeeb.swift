@@ -55,7 +55,7 @@ class ViewBeeb: NSView {
     private let width : Int
     private let height : Int
     private var videoRefresh: Timer!
-    private let fpsSpeed = 50 //Hz
+    private let fpsSpeed = 100 //Hz
     private var pixelData : [PixelData]
 
 
@@ -75,6 +75,10 @@ class ViewBeeb: NSView {
         init_cpu()
         
         run_cpu_on_thread()
+    }
+    
+    deinit {
+        end_cpu()
     }
 
     // to use as a selector need @objc
@@ -177,6 +181,11 @@ extension ViewBeeb{
             let pp = p.baseAddress?.assumingMemoryBound(to: UnsafeMutablePointer<Int8>?.self)
             beeb_main(CommandLine.argc, pp)
         }
+    }
+    
+    func end_cpu()
+    {
+        beeb_end()
     }
 
     func update_video()
