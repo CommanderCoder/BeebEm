@@ -156,6 +156,77 @@ static OSStatus MainWindowCommandHandler(
 CantGetParameter:
     return err;
 }
+#endif
+
+extern "C" void beeb_handlekeys(long eventkind, short keycode, char charCode)
+{
+     static int ctrl = 0x0000;
+     int LastShift, LastCtrl, LastCaps, LastCmd;
+     int NewShift, NewCtrl, NewCaps;
+     static int NewCmd = 0;
+    
+    switch (eventkind)
+    {
+        case kEventRawKeyDown:
+
+
+        //      fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+                if ( (NewCmd) && (keycode == 6) )
+                {
+                    fprintf(stderr, "cmd-Z pressed, NewCmd = %d\n", NewCmd);
+                    if (mainWin->m_isFullScreen)
+                    {
+
+ //                       EndFullScreen(mainWin->m_RestoreState, nil);
+                        mainWin->m_isFullScreen = 0;
+                        mainWin->SetMenuCommandIDCheck('vfsc', false);
+                    }
+                } else if ( (NewCmd) && (NewCtrl) && (keycode == 1) )
+                {
+                    fprintf(stderr, "ctrl-cmd-S pressed, NewCmd = %d\n", NewCmd);
+//                    mainWin->m_PrintScreen = true;
+                } else if ( (NewCmd) && (keycode == 8) )
+                {
+                    fprintf(stderr, "cmd-C pressed, NewCmd = %d\n", NewCmd);
+//                    mainWin->doCopy();
+                } else if ( (NewCmd) && (keycode == 9) )
+                {
+                    fprintf(stderr, "cmd-V pressed, NewCmd = %d\n", NewCmd);
+//                    mainWin->doPaste();
+                } else if ( (NewCmd) && (keycode == 17) )
+                {
+                    trace_186 = 1 - trace_186;
+                }
+              else
+                {
+                    mainWin->KeyDown(keycode);
+                }
+            break;
+          case kEventRawKeyUp:
+    //        fprintf(stderr, "Key released: code = %d, '%c'\n", keycode, charCode);
+            mainWin->KeyUp(keycode);
+            break;
+          case kEventRawKeyModifiersChanged:
+                LastCmd = ctrl & 0x0100;
+                LastShift = ctrl & 0x0200;
+                LastCtrl = ctrl & 0x1000;
+                LastCaps = ctrl & 0x0800;
+                NewShift = keycode & 0x0200;
+                NewCtrl = keycode & 0x1000;
+                NewCaps = keycode & 0x0800;
+                NewCmd = keycode & 0x0100;
+
+                fprintf(stderr, "Key modifier : code = %08x\n", keycode);
+                
+                if (LastShift != NewShift) if (LastShift) mainWin->KeyUp(200); else mainWin->KeyDown(200);
+                if (LastCtrl  != NewCtrl)  if (LastCtrl)  mainWin->KeyUp(201); else mainWin->KeyDown(201);
+                if (LastCaps  != NewCaps)  if (LastCaps)  mainWin->KeyUp(202); else mainWin->KeyDown(202);
+                ctrl = keycode;
+            break;
+    }
+}
+
+#if 0//ach - eventhandler
 
 static OSStatus EventHandler (
     EventHandlerCallRef handler, EventRef event, void *data)
@@ -616,11 +687,11 @@ int i;
   EventHandlerUPP  handlerUPP;
 
   eventTypes[0].eventClass = kEventClassKeyboard;
-  eventTypes[0].eventKind  = 1;
+  eventTypes[0].eventKind  = 1; // kEventRawKeyDown
   eventTypes[1].eventClass = kEventClassKeyboard;
-  eventTypes[1].eventKind  = 3;
+  eventTypes[1].eventKind  = 3; // kEventRawKeyUp
   eventTypes[2].eventClass = kEventClassKeyboard;
-  eventTypes[2].eventKind  = 4;
+  eventTypes[2].eventKind  = 4; // kEventRawKeyModifiersChanged
 
   eventTypes[3].eventClass = kEventClassMouse;
   eventTypes[3].eventKind  = kEventMouseDown;

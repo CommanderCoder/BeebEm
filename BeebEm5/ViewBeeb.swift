@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Carbon
 
 @IBDesignable
 class ViewBeeb: NSView {
@@ -26,17 +27,18 @@ class ViewBeeb: NSView {
     override var acceptsFirstResponder: Bool { return true }
         
     override func keyDown(with event: NSEvent) {
-     print("Keydown "+(event.characters ?? "nil"))
-        start_audio()
+        let cs = event.characters?.cString(using: .ascii)?[0] ?? 64
+        beeb_handlekeys(kEventRawKeyDown, event.keyCode, cs)
     }
     
     override func keyUp(with event: NSEvent) {
-     print("Keyup "+(event.characters ?? "nil"))
-        stop_audio()
+        let cs = event.characters?.cString(using: .ascii)?[0] ?? 64
+        beeb_handlekeys(kEventRawKeyUp, event.keyCode, cs)
     }
     
     override func flagsChanged(with event: NSEvent) {
-        print("flagsChanged  \(event.keyCode)" )
+        let kc = UInt16((event.modifierFlags.rawValue << 8) & 0xffff)
+        beeb_handlekeys(kEventRawKeyModifiersChanged, kc, 0)
     }
 
     
