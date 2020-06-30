@@ -157,26 +157,23 @@ extension ViewBeeb{
     
     func init_cpu()
     {
+        var commandline : [UnsafeMutablePointer<Int8>?] = []
         
-        let s0 = strdup("alpha")
-        let s1 = strdup("beta")
-        let s2 = strdup("gama")
-        let s3 = strdup("delta")
-
-
-        var arr = [s0,s1,s2,s3]
-        let ac = Int32(arr.count)
-
-
+        // convert the Strings to UnsafeMutablePointer<Int8>? suitable for passing to C
+        for a in 0 ..< Int(CommandLine.argc)
+        {
+            commandline.append(strdup(CommandLine.arguments[a]))
+        }
+        
         // pass the 'arr' into the closure as the variable p as unsafe mutable bytes - this is
         // so that beeb_main can modify them if necessary
-        arr.withUnsafeMutableBytes { (p) -> () in
+        commandline.withUnsafeMutableBytes { (p) -> () in
             // find the base address of the UnsafeMutableRawBufferPointer (it is a UnsafeMutableRawPointer)
             // get the typed pointer to the base address assuming it is already bound to a type
             // in this case it will make pp : UnsafeMutablePointer<Int8>
             // self is the arr instance
             let pp = p.baseAddress?.assumingMemoryBound(to: UnsafeMutablePointer<Int8>?.self)
-            beeb_main(ac,pp)
+            beeb_main(CommandLine.argc, pp)
         }
     }
 
