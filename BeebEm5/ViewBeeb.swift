@@ -19,7 +19,8 @@ class ViewBeeb: NSView {
     }
     
     
-    
+    // keyboard
+
     
     // allow key detection
     override var acceptsFirstResponder: Bool { return true }
@@ -45,66 +46,57 @@ class ViewBeeb: NSView {
     
     
     
-    //--- test code
+    // audio
     var beebAudio = BeebAudio()
-    // pixeldata
-    var pixelData : [PixelData]
 
-    
+    // video
+    private let width : Int
+    private let height : Int
+    private var videoRefresh: Timer!
+    private let fpsSpeed = 50 //Hz
+    private var pixelData : [PixelData]
+
+
+
     required init?(coder: NSCoder) {
-        length = 200
-        range = length
-        pixelData = [PixelData](repeating: redPixel, count: length * length)
-
-        super.init(coder: coder)
-        print("started 1")
+        width = 640
+        height = 512
+        pixelData = [PixelData](repeating: PixelData(a:0,r:0,g:0,b:0), count: width * height)
         
-        timer = Timer.scheduledTimer(timeInterval: 1.0/Double(fpsSpeed), target: self, selector: #selector(tick), userInfo: nil, repeats: true)
-
+        super.init(coder: coder)
+        
+        // update the video 50 times a second
+        videoRefresh = Timer.scheduledTimer(timeInterval: 1.0/Double(fpsSpeed), target: self,
+                                     selector: #selector(videorefresh), userInfo: nil, repeats: true)
+       
         init_audio()
         init_cpu()
         
+        run_cpu_on_thread()
     }
 
+    // to use as a selector need @objc
+    @objc
+    func videorefresh()
+    {
+        // every 50th of a second
+        update_video()
+        setNeedsDisplay(self.visibleRect)
+    }
+    
+ 
      func drawScreen(_ dirtyRect: NSRect) {
         
         // Drawing code here.
         let context = NSGraphicsContext.current?.cgContext
 
-        // Update pixels
-        let image = imageFromARGB32Bitmap(pixels: pixelData, width: length, height: length)
+        // Update pixels in image with those from pixeldata
+        let image = imageFromARGB32Bitmap(pixels: pixelData, width: width, height: height)
         // image is a CGimage
         
         context?.draw(image, in: dirtyRect)
     }
-    
-    var lasttime = 0.0
-    
-    // to use as a selector need @objc
-    @objc func tick() {
-        setNeedsDisplay(self.visibleRect)
-
-//        let ct = CACurrentMediaTime()//.truncatingRemainder(dividingBy: 1)
-//        print(ct-lasttime)
-//        lasttime=ct
         
-        exec_cpu()
-        
-        update_video()
-
-
-    }
-        
-    private var timer: Timer!
-    private let fpsSpeed=120
-
-    private var x = 0
-    private let range : Int
-    
-    let length : Int
-    let redPixel = PixelData(a: 255, r: 192, g: 0, b: 0)
-    let purplePixel = PixelData(a: 255, r: 192, g: 0, b: 255)
-
     private let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
     private let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
 
@@ -186,22 +178,31 @@ extension ViewBeeb{
             let pp = p.baseAddress?.assumingMemoryBound(to: UnsafeMutablePointer<Int8>?.self)
             beeb_main(ac,pp)
         }
-
     }
-    func exec_cpu()
-    {
-        
-        Exec6502Instruction()
 
-    }
-    
     func update_video()
     {
         let ac = Int32(pixelData.count)
-
+        
+        // call beeb_video() with a pointer to the raw pixel data
         pixelData.withUnsafeMutableBytes{(p)->() in
             let pp = p.baseAddress?.assumingMemoryBound(to: PixelData.self)
             beeb_video(ac,pp)
         }
     }
+
+//    var lasttime = 0
+    func run_cpu_on_thread()
+    {
+        DispatchQueue.global(qos: .utility).async {
+            // run the cpu on a separate concurrent thread (global) - quality of service only needs to be utility
+            while true {
+//                let ct = CACurrentMediaTime()//.truncatingRemainder(dividingBy: 1)
+//                print("cpu = \(ct-self.lasttime) ms")
+//                self.lasttime=ct
+                  Exec6502Instruction()
+            }
+        }
+    }
+           
 }

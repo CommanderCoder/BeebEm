@@ -68,8 +68,8 @@ public:
 	WindowRef mWindow; 
 	PixMap mBitMap;
 	CTabPtr mCT;
-	long m_RGB32[256];
-	int m_RGB16[256];
+	int_fast32_t m_RGB32[256];
+	int_fast16_t m_RGB16[256];
 	char m_clipboard[32768];
 	int m_clipboardlen;
 	int	m_clipboardptr;

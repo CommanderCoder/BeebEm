@@ -530,34 +530,32 @@ struct PixelData {
 
 
 int x = 0;
-int range = 200;
-int length = 200;
-PixelData redPixel = {255, 192, 0, 0};
+const int width = 640;
+const int height = 512;
 PixelData purplePixel =  {255, 192, 0, 255};
+
+
+const int bpp = 4;
+char videobuffer[bpp * width * height]; // 200x200 by 4 bytes
 
 extern "C" void beeb_video(int count,  struct PixelData buffer[])
 {
-    x += 1;
-    x %= range-2;
-
-//    printf("update video %d\n",count);
-    buffer[0].r = 255;
-    buffer[1].r = 255;
-    buffer[2].r = 255;
-    buffer[count-1].r = 255;
-
-    // fill in red
-    for (int i = 0; i < range*range; i++)
+    // fill in contents of video buffer
+    for (int i = 0; i < width*height; i++)
     {
-        buffer[i].a = redPixel.a;
-        buffer[i].r = redPixel.r;
-        buffer[i].g = redPixel.g;
-        buffer[i].b = redPixel.b;
+        buffer[i].a = videobuffer[0+i*bpp];
+        buffer[i].r = videobuffer[1+i*bpp];
+        buffer[i].g = videobuffer[2+i*bpp];
+        buffer[i].b = videobuffer[3+i*bpp];
     }
     
+    // move a purple line everytime this is updated (50fps)
+    x += 1;
+    x %= height-2;
+
     //purple line
-    int X = x*length;
-    for (int i = 0; i < range; i++)
+    int X = x*height;
+    for (int i = 0; i < width; i++)
     {
         buffer[X+i].a = purplePixel.a;
         buffer[X+i].r = purplePixel.r;

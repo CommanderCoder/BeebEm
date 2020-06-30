@@ -629,14 +629,16 @@ SixteenUChars *BeebWin::GetLinePtr16(int y)
 		return((SixteenUChars *)(m_screen+(MAX_VIDEO_SCAN_LINES*800)));
 	return((SixteenUChars *)(m_screen + d));
 }
-#if 0 //ACH - blittask prototype
+
+#if 0
+ //ACH - blittask prototype
+ //ACH - copy bitmap to window <<<<
+ //ACH - create bitmap context and blit buffers  <<<<<
 
 static OSStatus blittask1(void *parameter);
-#endif
 
 void BeebWin::updateLines(int starty, int nlines)
 {
-#if 0 //ACH - copy bitmap to window <<<<
 CGrafPtr mWin;
 
 // OSStatus err;
@@ -680,9 +682,7 @@ CGrafPtr mWin;
 	}
 	
 	CopyBits ( (BitMap *) &mBitMap, GetPortBitMapForCopyBits(mWin), &srcR, &destR, srcCopy, nil);
-#endif
 }; /* BeebWin::updateLines */
-#if 0 //ACH - create bitmap context and blit buffers  <<<<<
 
 CGContextRef MyCreateBitmapContext (int pixelsWide, int pixelsHigh, int bpp)
 {
@@ -1308,11 +1308,308 @@ RgnHandle reg;
 	SetRectRgn(reg, destR.left, destR.top, destR.right, destR.bottom);
 
 	QDFlushPortBuffer(mWin, reg);
+}
+#endif
+
+extern char videobuffer[];
+
+// NEW updateLines based on bufferblit
+void BeebWin::updateLines(int starty, int nlines)
+{
+    register int i, j;
+    char *p;
+    int width, height;
+
+
+    ++m_ScreenRefreshCount;
+
+    if (m_Motion_Blur > 0)
+    {
+        switch (m_Motion_Blur)
+        {
+            case 1 :            // 2 Frames
+                j = 32;
+                break;
+            case 2 :            // 4 Frames
+                j = 16;
+                break;
+            case 3 :            // 8 Frames
+                j = 8;
+                break;
+        }
+    
+        for (i = 0; i < 800 * 512; ++i)
+        {
+            if (m_screen[i] != 0)
+            {
+                m_screen_blur[i] = m_screen[i];
+            }
+            else if (m_screen_blur[i] != 0)
+            {
+                m_screen_blur[i] += j;
+                if (m_screen_blur[i] > 63)
+                    m_screen_blur[i] = 0;
+            }
+        }
+        memcpy(m_screen, m_screen_blur, 800 * 512);
+    }
+    
+    //    fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
+
+    Rect destR;
+    Rect srcR;
+
+    if (m_isFullScreen)
+    {
+//        mWin = GetWindowPort(m_FullScreenWindow);
+//        SetPortWindowPort(m_FullScreenWindow);
+    }
+    else
+    {
+//        mWin = GetWindowPort(mWindow);
+//        SetPortWindowPort(mWindow);
+    }
+//    GetPortBounds(mWin, &destR);
+
+    // ACH - normally get width and height from the window
+    destR = {0,0,640,512};
+
+    width = destR.right;
+    height = destR.bottom;
+
+    int xAdj = 0;
+    int yAdj = 0;
+    
+    if (m_isFullScreen && m_maintainAspectRatio)
+    {
+        float m_XRatioCrop = 0.0f;
+        float m_YRatioCrop = 0.0f;
+        float m_XRatioAdj;
+        float m_YRatioAdj;
+        int w = width * 4;
+        int h = height * 5;
+        if (w > h)
+        {
+            m_XRatioAdj = (float) height / (float) width * (float) 5 / (float) 4;
+            m_XRatioCrop = (1.0f - m_XRatioAdj) / 2.0f;
+        }
+        else if (w < h)
+        {
+            m_YRatioAdj = (float) width / (float) height * (float) 4 / (float) 5;
+            m_YRatioCrop = (1.0f - m_YRatioAdj) / 2.0f;
+        }
+        xAdj = (int)(m_XRatioCrop * (float) (width));
+        yAdj = (int)(m_YRatioCrop * (float) (height));
+        
+        width = width - 2 * xAdj;
+        height = height - 2 * yAdj;
+        
+    }
+    
+    srcR.left = 0;
+    srcR.right = ActualScreenWidth;
+
+    //    fprintf(stderr, "ActualScreenWidth = %d\n", ActualScreenWidth);
+
+    if (TeletextEnabled)
+    {
+        srcR.top = 0;
+        srcR.bottom = 512;
+    }
+    else
+    {
+        srcR.top = starty;
+        srcR.bottom = starty + nlines;
+    }
+    
+    int_fast32_t *pPtr32;
+    int_fast32_t *pRPtr32;
+    int_fast16_t *pPtr16;
+    int_fast16_t *pRPtr16;
+
+    PixMapHandle    pmh;
+    Ptr             buffer;
+    int                bpr;
+    float            scalex;
+    float            scaley;
+    int                ppr;
+    Rect            rect;
+    int                bpp;
+ 
+//        LockPortBits(mWin);
+
+//        pmh = GetPortPixMap(mWin);
+
+//        LockPixels(pmh);
+
+//        bpr = GetPixRowBytes(pmh);
+//        buffer = GetPixBaseAddr(pmh);
+//        bpp = GetPixDepth(pmh);
+    bpr = 640*4;// 640 pixels per row, 4 bytes per pixel
+    bpp = 32; // 4 bytes per pixel
+    buffer = videobuffer;
+
+    //    fprintf(stderr, "bpp = %d\n", bpp);
+        
+//        GetPixBounds(pmh, &rect);
+    rect = {0,0,640,512};
+    
+    if (bpp == 32)
+    {
+        ppr = bpr / 4;
+    }
+    else if (bpp == 16)
+    {
+        ppr = bpr / 2;
+    }
+    else
+    {
+        ppr = bpr;
+    }
+        
+    //    fprintf(stderr, "dest : top = %d, left = %d, bottom = %d, right = %d\n", destR.top, destR.left, destR.bottom, destR.right);
+    //    fprintf(stderr, "rect : top = %d, left = %d, bottom = %d, right = %d\n", rect.top, rect.left, rect.bottom, rect.right);
+
+    // NO IDEA WHAT HAPPENS IF THIS IS FULLSCREEN - WHAT PAINTS IT?
+    
+//    if (TeletextEnabled)
+//    {
+//    for (j=0;j<height;++j)
+//    {
+//        printf("%02d : ",j);
+//        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
+//        for (i=0;i<width;++i)
+//        {
+//            int v = m_RGB32[p[i]];
+//            v&=0xf;
+//            printf("%1x",v);
+//        }
+//        printf("\n");
+//
+//    }
+//    printf("\n\n");
+//    }
+    scalex = (float) ((srcR.right - srcR.left)) / (float) ((width));
+    scaley = (float) ((srcR.bottom - srcR.top)) / (float) ((height));
+
+    height = 320;
+    p = m_screen;
+    pRPtr32 = (int_fast32_t *) (buffer);        // Skip past rows for window's     scalex = 1;
+    for (j = 0; j < height; ++j)
+    {
+        p = m_screen + j*800;
+        pPtr32 = pRPtr32;
+        for (i = 0; i < width; ++i)
+            *pPtr32++ = (int_fast32_t)m_RGB32[p[i]];
+
+        pRPtr32 += ppr;
+    }
+
+// END TEST
+    
+        if (rect.top != 0)        // running full screen - don't paint !
+        {
+        
+            p = m_screen;
+
+            printf("%d : %d\n",
+                   0 - rect.top * bpr - rect.left * 4 - yAdj * bpr,
+                   0 - rect.top * bpr - rect.left * 2 - yAdj * bpr);
+            
+            pRPtr32 = (int_fast32_t *) (buffer - rect.top * bpr - rect.left * 4 - yAdj * bpr);        // Skip past rows for window's menu bar, rect.top = -22 (on my system), plus any left margin
+            pRPtr16 = (short *) (buffer - rect.top * bpr - rect.left * 2 - yAdj * bpr);        // Skip past rows for window's menu bar, rect.top = -22 (on my system)
+
+            scalex = (float) ((srcR.right - srcR.left)) / (float) ((width));
+            scaley = (float) ((srcR.bottom - srcR.top)) / (float) ((height));
+        
+
+    // Pre-calculate the x scaling factor for speed
+
+    int sx[2000];
+
+            for (i = 0; i < width; ++i)
+            {
+                sx[i] = (int) (i * scalex);
+            }
+
+            switch (bpp)
+            {
+                case 32 :
+                    for (j = 0; j < height; ++j)
+                    {
+                        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
+                        pPtr32 = pRPtr32 + xAdj;
+                        for (i = 0; i < width; ++i)
+                            *pPtr32++ = m_RGB32[p[sx[i]]];
+                        
+                        pRPtr32 += ppr;
+                        
+                    }
+                    break;
+                case 16 :
+                    for (j = 0; j < height; ++j)
+                    {
+                        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
+                        pPtr16 = pRPtr16 + xAdj;
+                        
+                        for (i = 0; i < width; ++i)
+                            *pPtr16++ = m_RGB16[p[sx[i]]];
+                        
+                        pRPtr16 += ppr;
+                        
+                    }
+                    break;
+            }
+            
+    /*
+            
+            for (j = destR.top; j < destR.bottom; ++j)
+            {
+                p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
+
+                for (i = destR.left; i < destR.right; ++i)
+                {
+                    switch (bpp)
+                    {
+                        case 32 :
+                            *pPtr32++ = m_RGB32[p[sx[i]]];
+                            break;
+                        case 16 :
+                            *pPtr16++ = m_RGB16[p[sx[i]]];
+                            break;
+                    }
+                }
+
+                pPtr32 += (ppr - destR.right);
+                pPtr16 += (ppr - destR.right);
+
+            }
+    */
+            
+        }
+    
+
+
+        if (m_PrintScreen)
+        {
+
+            if (TeletextEnabled)
+            {
+                DumpScreen(0);
+            }
+            else
+            {
+                DumpScreen(starty);
+            }
+            
+            m_PrintScreen = false;
+        }
 
 }
 
 void BeebWin::DumpScreen(int offset)
 {
+#if 0 //ACH - dumpscreen
 FILE *f;
 int i, j, x, y1, y2, s, c;
 char *p;
@@ -1485,8 +1782,10 @@ char FileName[256];
 	}
 
 	fclose(f);
+#endif
 }
 
+#if 0 //ACH - blittasks
 static OSStatus blittask1(void *parameter)
 {
 unsigned long data;
@@ -2549,7 +2848,7 @@ void BeebWin::TranslateWindowSize(int size)
 		m_YWinSize = 1200;
 		break;
 	}
-    #if 0//ACH
+#if 0//ACH
 
 	SizeWindow(mWindow, m_XWinSize, m_YWinSize, false);
 	RepositionWindow(mWindow, NULL, kWindowCenterOnMainScreen);
@@ -2807,7 +3106,7 @@ CFStringRef pTitle;
 		CFRelease(pTitle);
 
 	}
-    #endif
+#endif
 }
 
 /****************************************************************************/
@@ -3158,6 +3457,7 @@ PaletteHandle gPalette;
 
   UpdateMonitorMenu();
 
+#endif
   for (int i = 0; i < LED_COL_BASE + 4; ++i)
   {
 	m_RGB32[i] = ((( ((mCT->ctTable[i].rgb.red >> 8) << 8)  + (mCT->ctTable[i].rgb.green >> 8)) << 8) + (mCT->ctTable[i].rgb.blue >> 8));
@@ -3168,7 +3468,6 @@ PaletteHandle gPalette;
 //	WriteLog("RGB32[%d] = %08x, RGB16[%d] = %04x\n", i, m_RGB32[i], i, m_RGB16[i]);
   
   }
-#endif
 }
 #if 0 //ACH - command handler <<<<<<
 OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);

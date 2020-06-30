@@ -11,6 +11,14 @@
 		DC6A476624A541F1007E4276 /* ArmDisassembler.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */; };
 		DC6A476924A54541007E4276 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476824A54541007E4276 /* libz.tbd */; };
 		DC6A476B24A54DA3007E4276 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */; };
+		DC85C5F224AB1BE300CCD72E /* Roms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EA24AB1BE300CCD72E /* Roms.cfg */; };
+		DC85C5F324AB1BE300CCD72E /* Phroms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */; };
+		DC85C5F424AB1BE300CCD72E /* beebem.ini in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EC24AB1BE300CCD72E /* beebem.ini */; };
+		DC85C5F524AB1BE300CCD72E /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5ED24AB1BE300CCD72E /* README.txt */; };
+		DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */; };
+		DC85C5F724AB1BE300CCD72E /* README_MAC.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */; };
+		DC85C5F824AB1BE300CCD72E /* Roms_Torch.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */; };
+		DC85C5F924AB1BE300CCD72E /* Econet.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F124AB1BE300CCD72E /* Econet.cfg */; };
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A124A338ED00840082 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A024A338ED00840082 /* ViewController.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
@@ -58,6 +66,14 @@
 /* Begin PBXFileReference section */
 		DC6A476824A54541007E4276 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		DC85C5EA24AB1BE300CCD72E /* Roms.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms.cfg; sourceTree = "<group>"; };
+		DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Phroms.cfg; sourceTree = "<group>"; };
+		DC85C5EC24AB1BE300CCD72E /* beebem.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = beebem.ini; sourceTree = "<group>"; };
+		DC85C5ED24AB1BE300CCD72E /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
+		DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README_MAC.txt; sourceTree = "<group>"; };
+		DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms_Torch.cfg; sourceTree = "<group>"; };
+		DC85C5F124AB1BE300CCD72E /* Econet.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Econet.cfg; sourceTree = "<group>"; };
 		DCCCC29B24A338ED00840082 /* BeebEm5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeebEm5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCCCC29E24A338ED00840082 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DCCCC2A024A338ED00840082 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -178,9 +194,25 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		DC85C5E924AB1BC300CCD72E /* ini */ = {
+			isa = PBXGroup;
+			children = (
+				DC85C5EC24AB1BE300CCD72E /* beebem.ini */,
+				DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */,
+				DC85C5F124AB1BE300CCD72E /* Econet.cfg */,
+				DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */,
+				DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */,
+				DC85C5ED24AB1BE300CCD72E /* README.txt */,
+				DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */,
+				DC85C5EA24AB1BE300CCD72E /* Roms.cfg */,
+			);
+			name = ini;
+			sourceTree = "<group>";
+		};
 		DCCCC29224A338ED00840082 = {
 			isa = PBXGroup;
 			children = (
+				DC85C5E924AB1BC300CCD72E /* ini */,
 				DCD4ADE624A4D54A0000C40A /* Headers */,
 				DCCCC30324A33D4400840082 /* Bridging */,
 				DCCCC2B524A33A3000840082 /* Sources */,
@@ -389,8 +421,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
+				DC85C5F324AB1BE300CCD72E /* Phroms.cfg in Resources */,
+				DC85C5F724AB1BE300CCD72E /* README_MAC.txt in Resources */,
+				DC85C5F224AB1BE300CCD72E /* Roms.cfg in Resources */,
+				DC85C5F824AB1BE300CCD72E /* Roms_Torch.cfg in Resources */,
 				DCCCC2B424A3395F00840082 /* DFS image.icns in Resources */,
+				DC85C5F924AB1BE300CCD72E /* Econet.cfg in Resources */,
+				DC85C5F424AB1BE300CCD72E /* beebem.ini in Resources */,
+				DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */,
 				DCCCC2A824A338EE00840082 /* Main.storyboard in Resources */,
+				DC85C5F524AB1BE300CCD72E /* README.txt in Resources */,
 				DCCCC30624A33E2E00840082 /* Z Random BBC file.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
