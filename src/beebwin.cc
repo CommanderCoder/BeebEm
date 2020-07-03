@@ -2858,7 +2858,97 @@ void BeebWin::doLED(int sx,bool on) {
 	doUHorizLine(mainWin->cols[((on)?1:0)+colbase],tsy,sx,8);
 	doUHorizLine(mainWin->cols[((on)?1:0)+colbase],tsy,sx,8);
 };
- 
+
+extern "C" int beeb_HandleCommand(unsigned int cmdID)
+{
+    char* cmdCHR = (char*)&cmdID;
+    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+    return mainWin->HandleCommand(cmdID);
+}
+
+
+
+extern "C" int swift_GetOneFileWithPreview ();
+
+
+extern "C" int swift_SaveFile ();//const char *path, FSSpec *fs);
+
+int SaveFile (const char *path, FSSpec *fs)
+{
+#if 0//ACH
+    NavReplyRecord    myReply;
+    NavDialogOptions    myDialogOptions;
+    NavEventUPP    myEventUPP = NULL;
+    OSErr        myErr = noErr;
+    OSType    fileTypeToSave = 'TEXT', fileCreator = 'jjf0';
+
+      // specify the options for the dialog box
+      NavGetDefaultDialogOptions(&myDialogOptions);
+      myDialogOptions.dialogOptionFlags += kNavNoTypePopup;
+      myDialogOptions.dialogOptionFlags += kNavDontAutoTranslate;
+      
+      // prompt the user for a file
+      myErr = NavPutFile(NULL, &myReply, &myDialogOptions, myEventUPP, fileTypeToSave, fileCreator, NULL);
+
+      if ((myErr == noErr) && myReply.validRecord) {
+        AEKeyword    myKeyword;
+        DescType    myActualType;
+        Size      myActualSize = 0;
+        FSSpec        theFSSpec;
+        FSRef       theFSRef;
+        
+        myErr = AEGetNthPtr(&(myReply.selection), 1, typeFSS, &myKeyword, &myActualType, &theFSSpec, sizeof(FSSpec), &myActualSize);
+
+        if ((myErr == noErr) && myReply.validRecord)
+        {
+            myErr = FSpCreate(&theFSSpec, fileCreator, fileTypeToSave, smSystemScript);
+            myErr = FSpMakeFSRef(&theFSSpec, &theFSRef);
+            UInt8 *ptr;
+            ptr = (UInt8 *) path;
+            FSRefMakePath(&theFSRef, ptr, 255);
+            fprintf(stderr, "Picked %s\n", path);
+            unlink(path);
+            if (fs) memcpy(fs, &theFSSpec, sizeof(FSSpec));
+        }
+            
+        NavDisposeReply(&myReply);
+      }
+
+      DisposeNavEventUPP(myEventUPP);
+
+      return (myErr);
+#endif
+    
+    return swift_SaveFile();
+}
+
+
+char filePath[256];
+
+void BeebWin::ReadDisc(int drive)
+{
+    if (swift_GetOneFileWithPreview()) // DiscFilterProc
+    {
+        LoadDisc(drive, filePath);
+    }
+}
+
+
+void BeebWin::LoadTape()
+{
+    if (swift_GetOneFileWithPreview()) // UEFFilterProc
+    {
+        LoadTapeFromPath(filePath);
+    }
+}
+
+
+extern "C" void beeb_setFilePath(const char* _path)
+{
+    strncpy(filePath, _path, 256);
+}
+
+
 #if 0 //ACH  - readdisc
 void BeebWin::ReadDisc(int drive)
 
@@ -2871,6 +2961,7 @@ char path[256];
 	LoadDisc(drive, path);
 }
 
+
 void BeebWin::LoadTape()
 {
 	OSErr err = noErr;
@@ -2881,6 +2972,7 @@ void BeebWin::LoadTape()
 	LoadTapeFromPath(path);
 }
 #endif
+
 
 void BeebWin::LoadTapeFromPath(char *path)
 {
@@ -3466,6 +3558,8 @@ PaletteHandle gPalette;
 #if 0 //ACH - command handler <<<<<<
 OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
 
+#endif
+
 OSStatus BeebWin::HandleCommand(UInt32 cmdID)
 
 {
@@ -3485,7 +3579,7 @@ OSStatus err = noErr;
 
 				CFStringRef pTitle;
 				pTitle = CFStringCreateWithCString (kCFAllocatorDefault, WindowTitle, kCFStringEncodingASCII);
-				SetWindowTitleWithCFString(mWindow, pTitle);
+//ACH				SetWindowTitleWithCFString(mWindow, pTitle);
 				CFRelease(pTitle);
 			}
 			else
@@ -3815,12 +3909,12 @@ OSStatus err = noErr;
 			{
 				short width = m_XWinSize;
 				short height = m_YWinSize;
-				BeginFullScreen(&m_RestoreState, nil, &width, &height, &m_FullScreenWindow, nil, fullScreenHideCursor);
+//ACH				BeginFullScreen(&m_RestoreState, nil, &width, &height, &m_FullScreenWindow, nil, fullScreenHideCursor);
 				fprintf(stderr, "Actual screen dimensions %d, %d\n", width, height);
 			}
 			else
 			{
-				EndFullScreen(m_RestoreState, nil);
+//ACH				EndFullScreen(m_RestoreState, nil);
 			}
 			break;
 		case 'vmar':
@@ -3963,7 +4057,9 @@ OSStatus err = noErr;
         case 'ifd3':
 			i = cmdID - 'ifd0';
             fprintf(stderr, "Import Files From Disc %d selected\n", i);
+#if 0 //ACH
 			ImportDiscFiles(i);
+#endif
             break;
 
 		case 'efd0':
@@ -3972,7 +4068,9 @@ OSStatus err = noErr;
         case 'efd3':
 			i = cmdID - 'efd0';
             fprintf(stderr, "Export Files To Disc %d selected\n", i);
+#if 0 //ACH
 			ExportDiscFiles(i);
+#endif
             break;
 			
         case 'roma':
@@ -4064,6 +4162,7 @@ OSStatus err = noErr;
 				m_printerbufferlen = 0;
 			}
 				
+#if 0//ACH
 			if (PrinterFile())
 			{
 				/* If printer is enabled then need to disable it before changing file */
@@ -4092,6 +4191,7 @@ OSStatus err = noErr;
 				TranslatePrinterPort();
 				TogglePrinter();		// Turn printer back on
 			}
+#endif
             break;
 
 		case 'pclp':
@@ -4133,12 +4233,12 @@ OSStatus err = noErr;
 
 		case 'copy':
             fprintf(stderr, "Copy selected\n");
-			doCopy();
+//			doCopy();
 			break;
 			
 		case 'past':
             fprintf(stderr, "Paste selected\n");
-			doPaste();
+//			doPaste();
 			break;
 			
 // AMX Mouse
@@ -4316,14 +4416,17 @@ OSStatus err = noErr;
 
 		case 'tpco':
             fprintf(stderr, "Tape Control selected\n");
+#if 0 //ACH
 			if (TapeControlEnabled)
 				TapeControlCloseDialog();
 			else
 				TapeControlOpenDialog();
-			break;
+#endif
+            break;
 			
 		case 'dbgr':
             fprintf(stderr, "Debug selected\n");
+#if 0 //ACH
 			if (DebugEnabled)
 			{
 				DebugCloseDialog();
@@ -4334,10 +4437,12 @@ OSStatus err = noErr;
 				DebugOpenDialog();
 				SetMenuCommandIDCheck('dbgr', true);
 			}
+#endif
 			break;
         
 		case 'upbo':
             fprintf(stderr, "User Port Breakout Box\n");
+#if 0 //ACH
 			if (mBreakOutWindow)
 			{
 				BreakOutCloseDialog();
@@ -4348,7 +4453,8 @@ OSStatus err = noErr;
 					BreakOutOpenDialog();
 					SetMenuCommandIDCheck('upbo', true);
 				}
-				break;
+#endif
+            break;
 			
 		case 'uprm':
             fprintf(stderr, "User Port RTC Module\n");
@@ -4364,21 +4470,23 @@ OSStatus err = noErr;
 			SInt16 r;
 			char buff[256];
 			
-			sprintf(buff, "MacBeebEm Ver %s", Version);
-			CopyCStringToPascal(buff, S1);
-			sprintf(buff, "Mac Conversion By Jon Welch\n\njon@g7jjf.com\nhttp://www.g7jjf.com\n%s", VersionDate);
-			CopyCStringToPascal(buff, S2);
-			StandardAlert( kAlertNoteAlert, S1, S2, NULL, &r);
+//ACH			sprintf(buff, "MacBeebEm Ver %s", Version);
+//ACH			CopyCStringToPascal(buff, S1);
+//ACH			sprintf(buff, "Mac Conversion By Jon Welch\n\njon@g7jjf.com\nhttp://www.g7jjf.com\n%s", VersionDate);
+//ACH			CopyCStringToPascal(buff, S2);
+//ACH			StandardAlert( kAlertNoteAlert, S1, S2, NULL, &r);
 			
 			break;
 			
 		case 'kusr':
             fprintf(stderr, "Define User Keyboard selected\n");
+#if 0 //ACH
 			if (mUKWindow == NULL)
 				UserKeyboardOpenDialog();
 			else
 				UserKeyboardCloseDialog();
-			break;
+#endif
+            break;
 
 		case 'lukm':
             fprintf(stderr, "Load user key map selected\n");
@@ -4408,6 +4516,7 @@ OSStatus err = noErr;
 			
 			// Tape
 			
+#if 0//ACH
         case 'vidc':
             fprintf(stderr, "Capture Video selected\n");
 			SetMenuCommandIDCheck('vidc', true);
@@ -4418,7 +4527,7 @@ OSStatus err = noErr;
             fprintf(stderr, "End Capture Video selected\n");
 			EndCaptureVideo();
             break;
-
+#endif
         case 'skp0':
             fprintf(stderr, "Frame Skip 0 selected\n");
 			m_skip = 0;
@@ -4569,7 +4678,7 @@ OSStatus err = noErr;
 		
         case 'rs42':
             fprintf(stderr, "RS423 On/Off selected\n");
-			
+#if 0//ACH
 			if (TouchScreenEnabled)
 			{
 				TouchScreenClose();
@@ -4593,12 +4702,13 @@ OSStatus err = noErr;
 			SetMenuCommandIDCheck('sdts', (TouchScreenEnabled) ? true : false);
 			SetMenuCommandIDCheck('sdep', (EthernetPortEnabled) ? true : false);
 			SetMenuCommandIDCheck('sdsp', (mSerialHandle != -1) ? true : false);
-			
+#endif
 			break;
 			
         case 'sdts':
             fprintf(stderr, "Touch Screen selected\n");
-			
+#if 0//ACH
+
 			if (mSerialHandle != -1)
 			{
 				CloseSerialPort(mSerialHandle);
@@ -4632,9 +4742,12 @@ OSStatus err = noErr;
 				SetMenuCommandIDCheck('sdsp', false);
 				TouchScreenOpen();
 			}
+#endif
 			break;
 
 		case 'sdep':
+#if 0//ACH
+
             fprintf(stderr, "Remote Ethernet Port ... selected\n");
 			
 			if (mSerialHandle != -1)
@@ -4669,10 +4782,12 @@ OSStatus err = noErr;
 				SetMenuCommandIDCheck('rs42', false);
 				SetMenuCommandIDCheck('sdep', false);
 			}
+#endif
 			break;
 			
 		case 'sdsp':
             fprintf(stderr, "Serial Port... selected\n");
+#if 0//ACH
 
 			if (TouchScreenEnabled)
 			{
@@ -4704,12 +4819,15 @@ OSStatus err = noErr;
 				SerialPortCloseDialog();
 				SetMenuCommandIDCheck('sdsp', false);
 			}
+#endif
 			break;
 
 		case 'page':
             fprintf(stderr, "Page Setup... selected\n");
+#if 0 //ACH
 			DoPageSetup();
-			break;
+#endif
+            break;
 
 		case 'prns':
             fprintf(stderr, "Print... selected\n");
@@ -4847,6 +4965,15 @@ OSErr err = noErr;
 
 void BeebWin::RestoreState()
 {
+    if (swift_GetOneFileWithPreview()) // UEFFilterProc
+    {
+        LoadUEFState(filePath);
+    }
+}
+
+#if 0//ACH
+void BeebWin::RestoreState()
+{
 char path[256];  
 OSErr err = noErr;
 
@@ -4854,6 +4981,7 @@ OSErr err = noErr;
 	if (err) return;
 	LoadUEFState(path);
 }
+#endif
 
 bool BeebWin::PrinterFile()
 {
@@ -4898,7 +5026,6 @@ void BeebWin::TogglePrinter()
 
 }
 
-#endif
 void BeebWin::TranslatePrinterPort()
 {
 	switch (m_MenuIdPrinterPort)
@@ -4964,7 +5091,7 @@ void BeebWin::LoadUserKeyMap ()
 
 void BeebWin::SaveUserKeyMap ()
 {
-    #if 0//ACH
+#if 0//ACH
 	OSErr err = noErr;
 	char path[256];
 	
@@ -5081,6 +5208,8 @@ void BeebWin::TranslateAMX(void)
 		break;
 	}
 }
+
+
 #if 0 //ACH - capture video
 
 void BeebWin::CaptureVideo()
