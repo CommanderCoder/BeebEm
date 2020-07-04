@@ -12,6 +12,7 @@ import AVFoundation
 class BeebAudio: NSObject {
     let engine = AVAudioEngine()
     
+    @available(OSX 10.15, *)
     func init_audio()
     {
         let square = { (phase: Float) -> Float in

@@ -144,7 +144,11 @@ extension ViewBeeb {
 
     func init_audio()
     {
-        beebAudio.init_audio()
+        if #available(OSX 10.15, *) {
+            beebAudio.init_audio()
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     func start_audio()
