@@ -61,6 +61,7 @@
 		DCD4AE3524A4D6970000C40A /* z80_support.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D624A33D3700840082 /* z80_support.cc */; };
 		DCD4AE3624A4D6970000C40A /* z80.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C924A33D3700840082 /* z80.cc */; };
 		DCD4AE3724A4D6970000C40A /* z80dis.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BF24A33D3700840082 /* z80dis.cc */; };
+		DCE7B8B724B09D2300FF4CFB /* beebem5-distribution.zip in Resources */ = {isa = PBXBuildFile; fileRef = DCE7B8B624B09D2300FF4CFB /* beebem5-distribution.zip */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -170,6 +171,7 @@
 		DCD4AE1024A4D5700000C40A /* z80mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = z80mem.h; path = src/z80mem.h; sourceTree = "<group>"; };
 		DCD4AE1124A4D5700000C40A /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debug.h; path = src/debug.h; sourceTree = "<group>"; };
 		DCD4AE1224A4D5700000C40A /* mode7font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mode7font.h; path = src/mode7font.h; sourceTree = "<group>"; };
+		DCE7B8B624B09D2300FF4CFB /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +214,7 @@
 		DCCCC29224A338ED00840082 = {
 			isa = PBXGroup;
 			children = (
+				DCE7B8B624B09D2300FF4CFB /* beebem5-distribution.zip */,
 				DC85C5E924AB1BC300CCD72E /* ini */,
 				DCD4ADE624A4D54A0000C40A /* Headers */,
 				DCCCC30324A33D4400840082 /* Bridging */,
@@ -422,6 +425,7 @@
 			files = (
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
 				DC85C5F324AB1BE300CCD72E /* Phroms.cfg in Resources */,
+				DCE7B8B724B09D2300FF4CFB /* beebem5-distribution.zip in Resources */,
 				DC85C5F724AB1BE300CCD72E /* README_MAC.txt in Resources */,
 				DC85C5F224AB1BE300CCD72E /* Roms.cfg in Resources */,
 				DC85C5F824AB1BE300CCD72E /* Roms_Torch.cfg in Resources */,
