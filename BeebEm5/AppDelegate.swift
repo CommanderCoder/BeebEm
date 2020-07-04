@@ -8,6 +8,34 @@
 
 import Cocoa
 
+
+func conv(_ str: String) -> UInt32
+{
+    var  v: UInt32 = 0
+    let  i = str.count-1
+    for (index, element) in str.unicodeScalars.enumerated()
+    {
+        if index == 4
+        {
+            break
+        }
+        v += element.value << ((i-index)*8)
+    }
+    return v
+}
+
+func conv(_ value: UInt32) -> String
+{
+    var  s: String = ""
+    let  i = 4
+    for index in 1...i
+    {
+        // if unicode not recognised - use '@'
+        s.append( Character(UnicodeScalar(value >> ((i-index)*8)&0xff) ?? UnicodeScalar(64)))
+    }
+    return s
+}
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -25,16 +53,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true;
     }
 
-    func conv(_ str: String) -> UInt32
-    {
-        var  v: UInt32 = 0
-        let  i = str.count-1
-        for (index, element) in str.unicodeScalars.enumerated()
-        {
-            v += element.value << ((i-index)*8)
-        }
-        return v
-    }
 
     @IBAction func HandleCommand (_ sender: NSMenuItem) {
         
@@ -45,18 +63,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 
+@objc enum FileFilter :Int {
+    case DISC
+    case UEF
+    case IFD
+    case KEYBOARD
+}
 // allow access to this in C
 @_cdecl("swift_GetOneFileWithPreview")
-public func swift_GetOneFileWithPreview( ) -> Int
+func swift_GetOneFileWithPreview( _ fileexts : FileFilter) -> Int
 {
     let dialog = NSOpenPanel()
 
-    dialog.title                   = "Choose a file | Our Code World"
+    dialog.title                   = "Choose a file | Beeb Em"
     dialog.showsResizeIndicator    = true
     dialog.showsHiddenFiles        = false
     dialog.allowsMultipleSelection = false
     dialog.canChooseDirectories    = false
-    dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"];
+    switch fileexts {
+    case .DISC:
+        dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"];
+    case .UEF:
+        dialog.allowedFileTypes        = ["uef", "csw"];
+    case .IFD:
+        dialog.allowedFileTypes        = ["ssd", "dsd", "inf"];
+    case .KEYBOARD:
+        dialog.allowedFileTypes        = ["kmap"];
+    }
 
     if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
         let result = dialog.url // Pathname of the file
@@ -84,4 +117,36 @@ public func swift_SaveFile()
 {
     let path = "a selected file."
     print("Save File to \(path)")
+}
+
+
+@_cdecl("swift_SetMenuCheck")
+public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
+{
+    
+    func itemByIdentifier(id: String) -> NSMenuItem? {
+
+      func recurse(menu: NSMenu) -> NSMenuItem? {
+        for item in menu.items {
+            if item.identifier?.rawValue == id {
+            return item
+          } else if let submenu = item.submenu {
+            if let item = recurse(menu: submenu) {
+              return item
+            }
+          }
+        }
+        return nil
+      }
+        guard let mainmenu = NSApplication.shared.mainMenu else { return nil }
+
+        return recurse(menu: mainmenu)
+
+    }
+    
+    let cmdSTR =  conv(cmd)
+    if let n = itemByIdentifier(id:cmdSTR)
+    {
+        n.state = check ? .on : .off
+    }
 }

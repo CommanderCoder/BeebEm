@@ -2866,11 +2866,10 @@ extern "C" int beeb_HandleCommand(unsigned int cmdID)
     return mainWin->HandleCommand(cmdID);
 }
 
+extern "C" enum FileFilter { DISC, UEF, IDF, KEYBOARD };
 
-
-extern "C" int swift_GetOneFileWithPreview ();
-
-
+extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
+extern "C" int swift_GetOneFileWithPreview (FileFilter exts);
 extern "C" int swift_SaveFile ();//const char *path, FSSpec *fs);
 
 int SaveFile (const char *path, FSSpec *fs)
@@ -2927,7 +2926,7 @@ char filePath[256];
 
 void BeebWin::ReadDisc(int drive)
 {
-    if (swift_GetOneFileWithPreview()) // DiscFilterProc
+    if (swift_GetOneFileWithPreview(DISC)) // DiscFilterProc
     {
         LoadDisc(drive, filePath);
     }
@@ -2936,7 +2935,7 @@ void BeebWin::ReadDisc(int drive)
 
 void BeebWin::LoadTape()
 {
-    if (swift_GetOneFileWithPreview()) // UEFFilterProc
+    if (swift_GetOneFileWithPreview(UEF)) // UEFFilterProc
     {
         LoadTapeFromPath(filePath);
     }
@@ -3440,10 +3439,11 @@ void BeebWin::SetTapeSpeedMenu(void)
 
 void BeebWin::SetMenuCommandIDCheck(UInt32 commandID, bool check)
 {
+    swift_SetMenuCheck(commandID, check);
+#if 0//ACH - menu check
 	MenuRef			menu = nil;
 	MenuItemIndex	i;
 	OSStatus		err;
-#if 0 //ACH - menu IDs
 	err = GetIndMenuItemWithCommandID(nil, commandID, 1, &menu, &i);
 	if (!err)
 	{
@@ -4965,7 +4965,7 @@ OSErr err = noErr;
 
 void BeebWin::RestoreState()
 {
-    if (swift_GetOneFileWithPreview()) // UEFFilterProc
+    if (swift_GetOneFileWithPreview(UEF)) // UEFFilterProc
     {
         LoadUEFState(filePath);
     }

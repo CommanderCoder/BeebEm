@@ -19,5 +19,3 @@ void beeb_handlekeys(long eventkind, unsigned short keycode, char charCode);
 
 int beeb_HandleCommand(unsigned int cmdID);
 void beeb_setFilePath(const char* _path);
-
-
