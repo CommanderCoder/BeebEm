@@ -158,7 +158,7 @@ CantGetParameter:
 }
 #endif
 
-extern "C" void beeb_handlekeys(long eventkind, short keycode, char charCode)
+extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charCode)
 {
      static int ctrl = 0x0000;
      int LastShift, LastCtrl, LastCaps, LastCmd;
@@ -207,16 +207,46 @@ extern "C" void beeb_handlekeys(long eventkind, short keycode, char charCode)
             mainWin->KeyUp(keycode);
             break;
           case kEventRawKeyModifiersChanged:
-                LastCmd = ctrl & 0x0100;
-                LastShift = ctrl & 0x0200;
-                LastCtrl = ctrl & 0x1000;
-                LastCaps = ctrl & 0x0800;
-                NewShift = keycode & 0x0200;
-                NewCtrl = keycode & 0x1000;
-                NewCaps = keycode & 0x0800;
-                NewCmd = keycode & 0x0100;
 
-//                fprintf(stderr, "Key modifier : code = %08x\n", keycode);
+            /* Cocoa Event Handling used to be:
+             cmd 0x0000
+             shift 0x0200
+             alphalock 0x0400
+             option 0x0800
+             ctrl 0x1000
+             rightcmd 0x0001
+             rightshift 0x2000
+             rightoption 0x4000
+             rightctrl 0x8000
+             */
+            
+            /* new codes are (left/right or toggle):
+             cmd 0x100008
+             shift 0x20002
+             alphalock 0x10000 & 0x00000  - toggle on off - unused as keycodes from mac will be capslocked too
+             option 0x80020
+             ctrl 0x40001
+             rightshift 0x20004
+             rightoption 0x80040 - available for COPY
+             rightctrl 0x42001 - unused as only one ctrl key
+             rightcmd 0x100010 - available for COPY
+             fn  0x800000
+             
+             */
+                // ALPHALOCK key is unused
+            
+                LastShift = ctrl & 0x20006; // capture left and right shift
+                LastCtrl = ctrl & 0x40001; // capture left
+                LastCaps = ctrl & 0x80020; // capture left
+                LastCmd = ctrl & 0x100018; // capture left and right CMD
+
+                NewShift = keycode & 0x20006; // capture left and right shift
+                NewCtrl = keycode & 0x40001; // capture left
+                NewCaps = keycode & 0x80020; // capture left
+                NewCmd = keycode &  0x100018; // capture left and right CMD
+
+            
+//                fprintf(stderr, "Key modifier : code = %016x\n", keycode);
                 
                 if (LastShift != NewShift) if (LastShift) mainWin->KeyUp(200); else mainWin->KeyDown(200);
                 if (LastCtrl  != NewCtrl)  if (LastCtrl)  mainWin->KeyUp(201); else mainWin->KeyDown(201);

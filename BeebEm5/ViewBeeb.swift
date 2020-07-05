@@ -28,17 +28,17 @@ class ViewBeeb: NSView {
         
     override func keyDown(with event: NSEvent) {
         let cs = event.characters?.cString(using: .ascii)?[0] ?? 64
-        beeb_handlekeys(kEventRawKeyDown, event.keyCode, cs)
+        beeb_handlekeys(kEventRawKeyDown, UInt(event.keyCode), cs)
     }
     
     override func keyUp(with event: NSEvent) {
         let cs = event.characters?.cString(using: .ascii)?[0] ?? 64
-        beeb_handlekeys(kEventRawKeyUp, event.keyCode, cs)
+        beeb_handlekeys(kEventRawKeyUp, UInt(event.keyCode), cs)
     }
     
     override func flagsChanged(with event: NSEvent) {
-        let kc = UInt16((event.modifierFlags.rawValue << 8) & 0xffff)
-        beeb_handlekeys(kEventRawKeyModifiersChanged, kc, 0)
+//       print("\(String(event.modifierFlags.rawValue, radix: 16))")
+        beeb_handlekeys(kEventRawKeyModifiersChanged, event.modifierFlags.rawValue, 0)
     }
 
     
@@ -55,7 +55,7 @@ class ViewBeeb: NSView {
     private let width : Int
     private let height : Int
     private var videoRefresh: Timer!
-    private let fpsSpeed = 100 //Hz
+    private let fpsSpeed = 500 //Hz
     private var pixelData : [PixelData]
 
 
