@@ -17,8 +17,10 @@ class ViewBeeb: NSView {
 
         // Drawing code here.
         drawScreen(dirtyRect)
+
+        guard let mainwindow = NSApplication.shared.mainWindow else {return}
+        mainwindow.title = windowTitle;
     }
-    
     
     // keyboard
 
@@ -55,10 +57,8 @@ class ViewBeeb: NSView {
     private let width : Int
     private let height : Int
     private var videoRefresh: Timer!
-    private let fpsSpeed = 500 //Hz
+    private let fpsSpeed = 50 //Hz
     private var pixelData : [PixelData]
-
-
 
     required init?(coder: NSCoder) {
         width = 640
@@ -66,7 +66,7 @@ class ViewBeeb: NSView {
         pixelData = [PixelData](repeating: PixelData(a:0,r:0,g:0,b:0), count: width * height)
         
         super.init(coder: coder)
-        
+
         // update the video 50 times a second
         videoRefresh = Timer.scheduledTimer(timeInterval: 1.0/Double(fpsSpeed), target: self,
                                      selector: #selector(videorefresh), userInfo: nil, repeats: true)

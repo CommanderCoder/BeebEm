@@ -2870,7 +2870,8 @@ extern "C" enum FileFilter { DISC, UEF, IDF, KEYBOARD };
 
 extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
 extern "C" int swift_GetOneFileWithPreview (FileFilter exts);
-extern "C" int swift_SaveFile ();//const char *path, FSSpec *fs);
+extern "C" int swift_SaveFile (const char *path);//, FSSpec *fs);
+extern "C" void swift_SetWindowTitleWithCString(const char*);
 
 int SaveFile (const char *path, FSSpec *fs)
 {
@@ -2878,7 +2879,9 @@ int SaveFile (const char *path, FSSpec *fs)
     NavReplyRecord    myReply;
     NavDialogOptions    myDialogOptions;
     NavEventUPP    myEventUPP = NULL;
+#endif
     OSErr        myErr = noErr;
+    #if 0//ACH
     OSType    fileTypeToSave = 'TEXT', fileCreator = 'jjf0';
 
       // specify the options for the dialog box
@@ -2918,7 +2921,9 @@ int SaveFile (const char *path, FSSpec *fs)
       return (myErr);
 #endif
     
-    return swift_SaveFile();
+    swift_SaveFile(path);
+    
+    return (myErr);
 }
 
 
@@ -3178,20 +3183,25 @@ void BeebWin::DisplayTiming(void)
 {
 #if 0 //ACH - title
 CFStringRef pTitle;
+    #endif
 
 	if (m_ShowSpeedAndFPS && !m_isFullScreen)
 	{
 		sprintf(m_szTitle, "%s  Speed: %2.2f  fps: %2d",
 				WindowTitle, m_RelativeSpeed, (int)m_FramesPerSecond);
 
+#if 0 //ACH - title
 		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, m_szTitle, kCFStringEncodingASCII);
 
 		SetWindowTitleWithCFString(mWindow, pTitle);
 		
 		CFRelease(pTitle);
 
-	}
+#else
+        // set the window title via swift
+        swift_SetWindowTitleWithCString(m_szTitle);
 #endif
+	}
 }
 
 /****************************************************************************/
