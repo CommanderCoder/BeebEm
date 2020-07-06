@@ -199,16 +199,16 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Video Options" id="xot-Ez-ZB7">
                                                 <items>
-                                                    <menuItem title="Record @ 768x576" identifier="skp1" id="SwS-FD-LoC">
+                                                    <menuItem title="Record @ 768x576" id="SwS-FD-LoC">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
-                                                    <menuItem title="Record @ Display Resolution" state="on" identifier="skp1" id="mBI-pd-vQP">
+                                                    <menuItem title="Record @ Display Resolution" state="on" id="mBI-pd-vQP">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
-                                                    <menuItem title="Record @ 1/2 Display Resolution" identifier="skp1" id="MPn-dM-cBk">
+                                                    <menuItem title="Record @ 1/2 Display Resolution" id="MPn-dM-cBk">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
-                                                    <menuItem title="Record @ 1/4 Display Resolution" identifier="skp1" id="ayh-Xh-dKu">
+                                                    <menuItem title="Record @ 1/4 Display Resolution" id="ayh-Xh-dKu">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="Ek5-O9-tp4"/>
@@ -251,10 +251,10 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem title="Capture Video" identifier="opn0" id="ac9-43-tfN">
+                                        <menuItem title="Capture Video" id="ac9-43-tfN">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
-                                        <menuItem title="End Video" identifier="opn0" id="VdD-fL-jl2">
+                                        <menuItem title="End Video" id="VdD-fL-jl2">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="fFF-n8-q7J">
@@ -269,23 +269,35 @@
                                                     <menuItem title="Item 3" enabled="NO" id="jui-Go-rKI">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
-                                                    <menuItem title="End Video" enabled="NO" identifier="opn0" id="9ku-L8-gff">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4Xb-N8-b8L"/>
-                                                        </connections>
-                                                    </menuItem>
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem title="Invert Background" keyEquivalent="i" identifier="opn0" id="GHh-GQ-rFW"/>
-                                        <menuItem title="Page Setup..." keyEquivalent="P" identifier="opn0" id="ouY-Q6-pOB"/>
-                                        <menuItem title="Print Window..." keyEquivalent="p" identifier="opn0" id="cfg-78-HXi"/>
-                                        <menuItem title="Copy Window To Clipboard" keyEquivalent="c" identifier="opn0" id="Hls-MX-G3A">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                        <menuItem title="Invert Background" keyEquivalent="i" identifier="invb" id="GHh-GQ-rFW">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="tAo-6V-vMA"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Screen Snapshot" keyEquivalent="s" identifier="opn0" id="Mlw-Z4-Y2w">
+                                        <menuItem title="Page Setup..." keyEquivalent="P" identifier="page" id="ouY-Q6-pOB">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="0Rk-Yg-Vrm"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Print Window..." keyEquivalent="p" identifier="prns" id="cfg-78-HXi">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="XKL-8w-Rvc"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Copy Window To Clipboard" keyEquivalent="c" identifier="cpyc" id="Hls-MX-G3A">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Gm8-V2-P3x"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Screen Snapshot" keyEquivalent="s" identifier="swtd" id="Mlw-Z4-Y2w">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="xgR-UC-k59"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -294,24 +306,44 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Edit" id="9Kr-j3-eRl">
                                     <items>
-                                        <menuItem title="Copy" keyEquivalent="c" id="Vd9-ke-hoI"/>
-                                        <menuItem title="Paste" keyEquivalent="v" id="cGu-3Y-Nki"/>
+                                        <menuItem title="Copy" keyEquivalent="c" id="Vd9-ke-hoI">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="RmQ-dl-8Ob"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Paste" keyEquivalent="v" id="cGu-3Y-Nki">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="tCw-oI-fGx"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kSl-S3-LsY"/>
                                         <menuItem title="Import Files From Disc" id="JvR-tQ-gVi">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Import Files From Disc" id="lPi-o9-LFx">
                                                 <items>
-                                                    <menuItem title="Disc 0" id="cn9-BL-SNR">
+                                                    <menuItem title="Disc 0" identifier="ifd0" id="cn9-BL-SNR">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="6n2-P6-mGd"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Disc 1" id="NgY-K5-QyW">
+                                                    <menuItem title="Disc 1" identifier="ifd1" id="NgY-K5-QyW">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="rY6-0m-Oz7"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Disc 2" id="Saq-P2-wUc">
+                                                    <menuItem title="Disc 2" identifier="ifd2" id="Saq-P2-wUc">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="dCt-WS-xzY"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Disc 3" id="wXC-EU-dRd">
+                                                    <menuItem title="Disc 3" identifier="ifd3" id="wXC-EU-dRd">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="gUk-RU-FWN"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
@@ -320,17 +352,29 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Export Files From Disc" id="nsx-2u-csr">
                                                 <items>
-                                                    <menuItem title="Disc 0" id="HH0-SJ-gxU">
+                                                    <menuItem title="Disc 0" identifier="efd0" id="HH0-SJ-gxU">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="okr-dq-yo0"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Disc 1" id="Zez-7j-wJB">
+                                                    <menuItem title="Disc 1" identifier="efd1" id="Zez-7j-wJB">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="m3l-dk-UsT"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Disc 2" id="EPA-2z-h53">
+                                                    <menuItem title="Disc 2" identifier="efd2" id="EPA-2z-h53">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="h0I-v6-XaE"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Disc 3" id="Gl0-WI-FZL">
+                                                    <menuItem title="Disc 3" identifier="efd3" id="Gl0-WI-FZL">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="cRP-0h-ssx"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
@@ -346,26 +390,45 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Tape Speed" id="7el-kR-vKq">
                                                 <items>
-                                                    <menuItem title="Fast" id="x4b-yt-QJo">
+                                                    <menuItem title="Fast" identifier="tpfa" id="x4b-yt-QJo">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ug5-WZ-4jI"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Medium Fast" id="UmG-dj-dpm">
+                                                    <menuItem title="Medium Fast" identifier="tpmf" id="UmG-dj-dpm">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="rW8-7Z-dmi"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Medium Slow" id="R4c-K0-bsN">
+                                                    <menuItem title="Medium Slow" identifier="tpms" id="R4c-K0-bsN">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="CRK-sN-jos"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Normal" state="on" id="e29-J2-IdV">
+                                                    <menuItem title="Normal" state="on" identifier="tpno" id="e29-J2-IdV">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="yVy-L5-dZi"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem title="Rewind Tape" keyEquivalent="t" id="nO1-Tz-jtG">
+                                        <menuItem title="Rewind Tape" keyEquivalent="t" identifier="tpre" id="nO1-Tz-jtG">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="muZ-LQ-iw3"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Unlock Tape" keyEquivalent="T" id="KuQ-ut-gWA"/>
-                                        <menuItem title="Tape Control" keyEquivalent="t" id="SKV-Tt-ndz">
+                                        <menuItem title="Unlock Tape" keyEquivalent="T" identifier="tpul" id="KuQ-ut-gWA">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="3CE-Q5-WHD"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Tape Control" keyEquivalent="t" identifier="tpco" id="SKV-Tt-ndz">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES"/>
                                             <connections>
                                                 <segue destination="T4f-Fh-Zp8" kind="show" id="s6w-Jv-cMf"/>
@@ -374,6 +437,9 @@
                                         <menuItem isSeparatorItem="YES" id="7zK-jb-yBs"/>
                                         <menuItem title="Printer On/Off" id="FKn-R7-plf">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="3yG-77-oQ9"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="Printer Destination" id="9Tf-NC-3hX">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -389,21 +455,33 @@
                                             </menu>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="luM-K3-gXP"/>
-                                        <menuItem title="RS423 On/Off" id="m1O-Bu-o4v">
+                                        <menuItem title="RS423 On/Off" toolTip="rs42" id="m1O-Bu-o4v">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="lVu-8f-uAz"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="RS423 Destination" id="n53-6M-Xpn">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="RS423 Destination" id="gMl-G7-q3O">
                                                 <items>
-                                                    <menuItem title="Serial Port..." id="7Yy-T8-wB0">
+                                                    <menuItem title="Serial Port..." identifier="sdsp" id="7Yy-T8-wB0">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="7AP-TA-mxx"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Remote Ethernet Port..." id="M24-Z3-HVu">
+                                                    <menuItem title="Remote Ethernet Port..." identifier="sdep" id="M24-Z3-HVu">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="x16-Ws-nEh"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Microvitec Touch Screen" id="E9B-gw-GZt">
+                                                    <menuItem title="Microvitec Touch Screen" identifier="sdts" id="E9B-gw-GZt">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Ptg-Be-06p"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
@@ -415,21 +493,87 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="pj0-tT-0No">
                                     <items>
-                                        <menuItem title="Enter Full Screen" keyEquivalent="f" id="jOx-oD-OhQ">
+                                        <menuItem title="Enter Full Screen" keyEquivalent="f" identifier="vfsc" id="jOx-oD-OhQ">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
-                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="zZF-FD-3ST"/>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Z6a-dd-ZSK"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Maintain Aspect Ratio In Full Screen" state="on" id="9xK-he-g9R">
+                                        <menuItem title="Maintain Aspect Ratio In Full Screen" state="on" identifier="vmar" id="9xK-he-g9R">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="mE9-V6-moN"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="Window Sizes" id="kvr-Z3-g3X">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Window Sizes" id="grF-Pp-KKV">
                                                 <items>
-                                                    <menuItem title="640x512" state="on" id="Ju7-7f-flc">
+                                                    <menuItem title="160x128" identifier="siz1" id="Ju7-7f-flc">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4eT-u5-Hza"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="240x192" identifier="siz2" id="0Oo-3g-jFP">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="VdV-GY-Oqs"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="320x256" identifier="siz3" id="1aA-tv-SMo">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="iOd-GL-rbP"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="640x256" identifier="siz4" id="MPm-mn-Krv">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="lQk-LV-vPT"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="640x512" state="on" identifier="siz5" id="Oek-G3-RQF">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="KVC-gt-OcQ"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="800x600" identifier="siz6" id="17S-jV-oSG">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="mmN-hW-Dy1"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="1024x512" identifier="siz7" id="gae-Z0-N6a">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="EWA-wW-Fle"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="1024x768" identifier="siz8" id="D1K-mw-4h8">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="vUY-ID-TTr"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="1280x1024" identifier="siz9" id="rJe-jK-pMd">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="AEA-Ov-MaT"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="1440x1080" identifier="siza" id="NzN-uX-uSX">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="6MI-9Q-Fh6"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="1600x1200" identifier="sizb" id="ZWr-xi-I3w">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="UT6-Sy-Nbx"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
@@ -665,46 +809,80 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Sound" id="cC9-d7-m6V">
                                     <items>
-                                        <menuItem title="Sound On/Off" state="on" keyEquivalent="m" id="uBm-ZC-eWO"/>
-                                        <menuItem title="Speech On/Off" id="zRO-7A-8kS">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                        <menuItem title="Sound On/Off" state="on" keyEquivalent="m" identifier="sond" id="uBm-ZC-eWO">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="DqI-pB-cEe"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Sound Chip" state="on" id="G8Q-5f-HKS">
+                                        <menuItem title="Speech On/Off" identifier="sped" id="zRO-7A-8kS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Sw7-ia-Lxv"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Sound Chip" state="on" identifier="sndc" id="G8Q-5f-HKS">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="pS1-mz-5fj"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="dMJ-AJ-760"/>
                                         <menuItem title="Sound Effects" id="9kC-tS-lP0">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Sound Effects" id="tOM-zy-QcS">
                                                 <items>
-                                                    <menuItem title="Cassette Relay" state="on" id="Wu5-IP-Xiv">
+                                                    <menuItem title="Cassette Relay" state="on" identifier="tpcr" id="Wu5-IP-Xiv">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4dH-iI-gLZ"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Cassette Input" state="on" id="Mar-tt-ip6">
+                                                    <menuItem title="Cassette Input" state="on" identifier="tpso" id="Mar-tt-ip6">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="vW9-Bw-FIx"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Disc Drives" id="tGS-Kf-r3Y">
+                                                    <menuItem title="Disc Drives" identifier="ddso" id="tGS-Kf-r3Y">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="yIz-qb-aXA"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="x3M-8L-Sny"/>
-                                        <menuItem title="Full Volume" id="aCS-tx-2Gr">
+                                        <menuItem title="Full Volume" identifier="volf" id="aCS-tx-2Gr">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="hSi-Pw-Plr"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="High Volume" id="i37-Xt-VxN">
+                                        <menuItem title="High Volume" identifier="volh" id="i37-Xt-VxN">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="IDe-Le-n8k"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Medium Volume" state="on" id="CrX-ZI-wMJ">
+                                        <menuItem title="Medium Volume" state="on" identifier="volm" id="CrX-ZI-wMJ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="YbO-6t-waO"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Low Volume" id="Hhg-kQ-TgK">
+                                        <menuItem title="Low Volume" identifier="voll" id="Hhg-kQ-TgK">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="pKu-DC-S9h"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="usZ-XJ-D99"/>
-                                        <menuItem title="Exponential Volume" state="on" id="Nrt-CJ-Fpt">
+                                        <menuItem title="Exponential Volume" state="on" identifier="snev" id="Nrt-CJ-Fpt">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Jop-br-RDT"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -713,39 +891,73 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="AMX" id="4PP-Ef-s4z">
                                     <items>
-                                        <menuItem title="On/Off" keyEquivalent="a" id="xWf-m6-1sp"/>
+                                        <menuItem title="On/Off" keyEquivalent="a" identifier="amxo" id="xWf-m6-1sp">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="EzC-04-W3H"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="lMb-AU-oq8"/>
-                                        <menuItem title="L+R for Middle" state="on" id="wQw-39-8lS">
+                                        <menuItem title="L+R for Middle" state="on" identifier="amxl" id="wQw-39-8lS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="SOO-u3-Iny"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4Jr-AO-3ih"/>
-                                        <menuItem title="Map to 160x256" id="Seq-XG-No8">
+                                        <menuItem title="Map to 160x256" identifier="amx1" id="Seq-XG-No8">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="FFa-0m-Agi"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Map to 320x256" id="SgP-tC-SzZ">
+                                        <menuItem title="Map to 320x256" identifier="amx3" id="SgP-tC-SzZ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Nse-pQ-Lit"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Map to 640x256" state="on" id="EU1-CX-qRh">
+                                        <menuItem title="Map to 640x256" state="on" identifier="amx6" id="EU1-CX-qRh">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="VuR-7q-QjW"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="B1O-c1-eQy"/>
-                                        <menuItem title="Adjust +50%" id="YlU-as-zs5">
+                                        <menuItem title="Adjust +50%" identifier="axp5" id="YlU-as-zs5">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Bfk-Bs-Drb"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Adjust +30%" id="T7g-EI-TMS">
+                                        <menuItem title="Adjust +30%" identifier="axp3" id="T7g-EI-TMS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ZnB-Xq-AvV"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Adjust +10%" id="bsz-MS-9T7">
+                                        <menuItem title="Adjust +10%" identifier="axp1" id="bsz-MS-9T7">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4Cy-bB-h7e"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Adjust -10%" id="EE4-sV-lDK">
+                                        <menuItem title="Adjust -10%" identifier="axm1" id="EE4-sV-lDK">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="i0K-4n-g3l"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Adjust -30%" id="FTo-WW-Vip">
+                                        <menuItem title="Adjust -30%" identifier="axm3" id="FTo-WW-Vip">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="RSc-EC-TCQ"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Adjust -50%" id="jV4-Y3-Cax">
+                                        <menuItem title="Adjust -50%" identifier="axm5" id="jV4-Y3-Cax">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="kt5-9E-NU7"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -851,110 +1063,194 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Allow ROM writes" id="YgA-Vo-j1u">
                                                 <items>
-                                                    <menuItem title="0 Empty" id="dxO-6d-7Tz">
+                                                    <menuItem title="0 Empty" identifier="roma" id="dxO-6d-7Tz">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="RxS-6D-fOK"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="1 Empty" id="bR5-CM-Jtj">
+                                                    <menuItem title="1 Empty" identifier="romb" id="bR5-CM-Jtj">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="zSX-BW-wXt"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="2 Empty" id="ke3-c0-sJH">
+                                                    <menuItem title="2 Empty" identifier="romc" id="ke3-c0-sJH">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="d46-me-wKL"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="3 Empty" id="zYq-Du-eaP">
+                                                    <menuItem title="3 Empty" identifier="romd" id="zYq-Du-eaP">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="tiz-Ot-cvX"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="4 Empty" state="on" id="66x-ug-1Yd">
+                                                    <menuItem title="4 Empty" state="on" identifier="rome" id="66x-ug-1Yd">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Kty-21-w9v"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="5 Empty" state="on" id="Lov-0i-7O9">
+                                                    <menuItem title="5 Empty" state="on" identifier="romf" id="Lov-0i-7O9">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="fCk-Jr-Im1"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="6 Empty" state="on" id="gRw-9Y-8EO">
+                                                    <menuItem title="6 Empty" state="on" identifier="romg" id="gRw-9Y-8EO">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="aeG-ZF-qaD"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="7 Empty" state="on" id="UZB-BF-VAB">
+                                                    <menuItem title="7 Empty" state="on" identifier="romh" id="UZB-BF-VAB">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="xo7-4Z-X8y"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="8 Empty" id="N5P-Sx-47h">
+                                                    <menuItem title="8 Empty" identifier="romi" id="N5P-Sx-47h">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="kPQ-7J-PXY"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="9 Empty" id="Hh1-eh-QeI">
+                                                    <menuItem title="9 Empty" identifier="romj" id="Hh1-eh-QeI">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="C3Q-5j-23z"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="a Empty" id="6GD-Ek-3nI">
+                                                    <menuItem title="a Empty" identifier="romk" id="6GD-Ek-3nI">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="CSI-jw-LIf"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="b Empty" id="T9w-eC-jQX">
+                                                    <menuItem title="b Empty" identifier="roml" id="T9w-eC-jQX">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="jrN-Tb-CRW"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="c Empty" id="q3x-qh-SOg">
+                                                    <menuItem title="c Empty" identifier="romm" id="q3x-qh-SOg">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="SeV-YW-q0p"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="d Empty" id="fDh-R6-8cA">
+                                                    <menuItem title="d Empty" identifier="romn" id="fDh-R6-8cA">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="QIk-z2-w7k"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="e Empty" id="TOW-pQ-CuM">
+                                                    <menuItem title="e Empty" identifier="romo" id="TOW-pQ-CuM">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="X5h-F8-gP3"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="f Empty" id="DwN-S9-fcR">
+                                                    <menuItem title="f Empty" identifier="romp" id="DwN-S9-fcR">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="PGc-OO-zVI"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="39z-hv-2GQ"/>
-                                        <menuItem title="Ignore Illegal Instructions" state="on" id="fnA-Ln-t6h">
+                                        <menuItem title="Ignore Illegal Instructions" state="on" identifier="igil" id="fnA-Ln-t6h">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="UFD-cN-6Cx"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="Undocumented Instructions" id="UBG-RV-Zna">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Undocumented Instructions" id="KnH-Zz-4dz">
                                                 <items>
-                                                    <menuItem title="Documented Only" id="3Lj-3t-UZB">
+                                                    <menuItem title="Documented Only" identifier="docu" id="3Lj-3t-UZB">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="mUg-cs-tZM"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Common Extras" state="on" id="2kM-uX-F9w">
+                                                    <menuItem title="Common Extras" state="on" identifier="extr" id="2kM-uX-F9w">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="DWl-ff-nQK"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Full Set" id="eMi-eS-z9Y">
+                                                    <menuItem title="Full Set" identifier="full" id="eMi-eS-z9Y">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="cl6-eg-ivC"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="KHH-9j-NHh"/>
-                                        <menuItem title="Basic Hardware Only" id="95e-19-sl5">
+                                        <menuItem title="Basic Hardware Only" identifier="hard" id="95e-19-sl5">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="PLE-q2-8RC"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="EN6-j0-pOy"/>
-                                        <menuItem title="Econet On/Off" id="oPA-sP-s8b">
+                                        <menuItem title="Econet On/Off" identifier="enet" id="oPA-sP-s8b">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="oyc-nB-QHc"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem title="Teletext Adapter" id="MTk-hS-vEs">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Teletext Adapter" id="xXa-Dw-oBJ">
                                                 <items>
-                                                    <menuItem title="Teletext Adapter On/Off" id="brB-OO-mjr">
+                                                    <menuItem title="Teletext Adapter On/Off" identifier="txte" id="brB-OO-mjr">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="hTy-8T-kov"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Use Data Files" id="Y9V-Lv-S5N">
+                                                    <menuItem title="Use Data Files" identifier="txtd" id="Y9V-Lv-S5N">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="gMi-fl-gNq"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="Use UDP Server" id="SJ0-sa-HXe">
+                                                    <menuItem title="Use UDP Server" identifier="txts" id="SJ0-sa-HXe">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="MFZ-kc-UU9"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem title="Hard Drive On/Off" id="SQq-j9-CXc">
+                                        <menuItem title="Hard Drive On/Off" identifier="hdre" id="SQq-j9-CXc">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="wKz-jA-ne4"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="oa0-Ea-k4g"/>
-                                        <menuItem title="User Port Breakout box" id="pal-E8-XOQ">
+                                        <menuItem title="User Port Breakout box" identifier="upbo" id="pal-E8-XOQ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="6HW-6c-E7W"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="User Port RTC Module" id="pVE-u1-k5X">
+                                        <menuItem title="User Port RTC Module" identifier="uprm" id="pVE-u1-k5X">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="shS-Kc-g5U"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -963,14 +1259,23 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Options" id="qX5-Aq-fzf">
                                     <items>
-                                        <menuItem title="Analogue Mousestick" id="8EQ-ua-287">
+                                        <menuItem title="Analogue Mousestick" identifier="msea" id="8EQ-ua-287">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="NMA-f5-nyG"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Digital Mousestick" id="Snh-id-pjU">
+                                        <menuItem title="Digital Mousestick" identifier="msed" id="Snh-id-pjU">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="J5l-U6-MMb"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Freeze When Minimised" id="LRQ-wF-ox3">
+                                        <menuItem title="Freeze When Minimised" identifier="ofwm" id="LRQ-wF-ox3">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="c0k-00-3Tt"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4qr-lk-NYG"/>
                                         <menuItem title="Define User Keyboard" id="B1I-rl-rOd">
@@ -979,22 +1284,37 @@
                                                 <segue destination="Z3G-lH-LH8" kind="show" id="lQr-K2-Upq"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Load User Keyboard" id="DY7-0r-t6c">
+                                        <menuItem title="Load User Keyboard" identifier="lukm" id="DY7-0r-t6c">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="YfS-5x-hun"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Save User Keyboard" id="REN-dV-bwf">
+                                        <menuItem title="Save User Keyboard" identifier="sukm" id="REN-dV-bwf">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="3QV-ul-Dmm"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="30f-hm-6UV"/>
-                                        <menuItem title="User Defined Mapping" id="Dlw-PT-80g">
+                                        <menuItem title="User Defined Mapping" identifier="kusr" id="Dlw-PT-80g">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="moe-3e-tZ0"/>
+                                            </connections>
                                         </menuItem>
-                                        <menuItem title="Default Keyboard Mapping" state="on" id="zW2-SY-jy0">
+                                        <menuItem title="Default Keyboard Mapping" state="on" identifier="dkm " id="zW2-SY-jy0">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="eZV-A7-3vu"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="5aR-mw-FVS"/>
-                                        <menuItem title="Map A,S to CAPS,CTRL" id="czA-Zd-avb">
+                                        <menuItem title="Map A,S to CAPS,CTRL" identifier="kmas" id="czA-Zd-avb">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="31x-wz-sS1"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="3Lt-gs-dqO"/>
                                         <menuItem title="Debugger" id="EGB-oy-uKF">
@@ -1099,13 +1419,13 @@
                                 <rect key="frame" x="10" y="10" width="250" height="477"/>
                                 <subviews>
                                     <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PYA-DV-aBZ">
-                                        <rect key="frame" x="5" y="298" width="225" height="174"/>
+                                        <rect key="frame" x="5" y="422" width="225" height="50"/>
                                         <clipView key="contentView" id="1Ze-UJ-oX8">
-                                            <rect key="frame" x="1" y="0.0" width="223" height="173"/>
+                                            <rect key="frame" x="1" y="0.0" width="223" height="49"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="e8Q-4B-KIB" viewBased="YES" id="vSr-8C-rGL">
-                                                    <rect key="frame" x="0.0" y="0.0" width="223" height="148"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="223" height="24"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1207,31 +1527,31 @@
                                         </tableHeaderView>
                                     </scrollView>
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="3" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4ZH-xh-W8A">
-                                        <rect key="frame" x="0.0" y="5" width="250" height="246"/>
+                                        <rect key="frame" x="0.0" y="5" width="250" height="370"/>
                                         <subviews>
                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oKo-CY-Tv1">
-                                                <rect key="frame" x="-6" y="106" width="66" height="32"/>
+                                                <rect key="frame" x="-6" y="168" width="66" height="32"/>
                                                 <buttonCell key="cell" type="push" title="Play" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="MdD-15-5ZY">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wl4-rq-D1Q">
-                                                <rect key="frame" x="51" y="106" width="69" height="32"/>
+                                                <rect key="frame" x="51" y="168" width="69" height="32"/>
                                                 <buttonCell key="cell" type="push" title="Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Y4J-fH-eGg">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tv8-we-Rzw">
-                                                <rect key="frame" x="111" y="106" width="71" height="32"/>
+                                                <rect key="frame" x="111" y="168" width="71" height="32"/>
                                                 <buttonCell key="cell" type="push" title="Eject" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CTI-xm-flE">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="9m2-F2-WDy">
-                                                <rect key="frame" x="173" y="106" width="83" height="32"/>
+                                                <rect key="frame" x="173" y="168" width="83" height="32"/>
                                                 <buttonCell key="cell" type="push" title="Record" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="216-dx-mJV">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
