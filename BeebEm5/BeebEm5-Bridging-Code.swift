@@ -24,7 +24,7 @@ var windowTitle = "-"
 
 // allow access to this in C
 @_cdecl("swift_GetOneFileWithPreview")
-func swift_GetOneFileWithPreview( _ fileexts : FileFilter) -> Int
+func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: Int, fileexts : FileFilter) -> Int
 {
     let dialog = NSOpenPanel()
 
@@ -53,8 +53,10 @@ func swift_GetOneFileWithPreview( _ fileexts : FileFilter) -> Int
             // path contains the file path e.g
             // /Users/ourcodeworld/Desktop/file.txt
             
-            // set the filepath back in the C code
-            beeb_setFilePath(path)
+            // set the filepath back in the C code - fill with zeros first
+            filepath.assign(repeating: 0, count: bytes)
+            filepath.assign(from: path, count: path.count)
+
             return 1
         }
     }
@@ -64,11 +66,29 @@ func swift_GetOneFileWithPreview( _ fileexts : FileFilter) -> Int
 }
 
 @_cdecl("swift_SaveFile")
-public func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>)
+public func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int)
 {
-    filepath.assign(from: "Andrew", count: 6)
+    let dialog = NSSavePanel()
+
+    dialog.title                   = "Choose a file | BeebEm5"
+    dialog.showsResizeIndicator    = true
+    dialog.showsHiddenFiles        = false
+
+    if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
+        guard let result = dialog.url else { return } // Pathname of the file
+
+        let path: String = result.path
         
-    print("Save File to \(filepath)")
+        // path contains the file path e.g
+        // /Users/ourcodeworld/Desktop/file.txt
+        
+        // set the filepath back in the C code.. fill with zeros first
+        filepath.assign(repeating: 0, count: bytes)
+        filepath.assign(from: path, count: path.count)
+            
+        print("Picked \(String(cString:filepath))")
+    
+    }
 }
 
 @_cdecl("swift_SetWindowTitleWithCString")

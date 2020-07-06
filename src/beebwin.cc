@@ -2869,8 +2869,8 @@ extern "C" int beeb_HandleCommand(unsigned int cmdID)
 extern "C" enum FileFilter { DISC, UEF, IDF, KEYBOARD };
 
 extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
-extern "C" int swift_GetOneFileWithPreview (FileFilter exts);
-extern "C" int swift_SaveFile (const char *path);//, FSSpec *fs);
+extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
+extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
 extern "C" void swift_SetWindowTitleWithCString(const char*);
 
 int SaveFile (const char *path, FSSpec *fs)
@@ -2881,7 +2881,7 @@ int SaveFile (const char *path, FSSpec *fs)
     NavEventUPP    myEventUPP = NULL;
 #endif
     OSErr        myErr = noErr;
-    #if 0//ACH
+#if 0//ACH
     OSType    fileTypeToSave = 'TEXT', fileCreator = 'jjf0';
 
       // specify the options for the dialog box
@@ -2920,47 +2920,22 @@ int SaveFile (const char *path, FSSpec *fs)
 
       return (myErr);
 #endif
-    
-    swift_SaveFile(path);
+    swift_SaveFile(path, 256);
     
     return (myErr);
 }
 
-
-char filePath[256];
-
-void BeebWin::ReadDisc(int drive)
-{
-    if (swift_GetOneFileWithPreview(DISC)) // DiscFilterProc
-    {
-        LoadDisc(drive, filePath);
-    }
-}
-
-
-void BeebWin::LoadTape()
-{
-    if (swift_GetOneFileWithPreview(UEF)) // UEFFilterProc
-    {
-        LoadTapeFromPath(filePath);
-    }
-}
-
-
-extern "C" void beeb_setFilePath(const char* _path)
-{
-    strncpy(filePath, _path, 256);
-}
-
-
-#if 0 //ACH  - readdisc
 void BeebWin::ReadDisc(int drive)
 
 {
 OSErr err = noErr;
 char path[256];
 
-	err = GetOneFileWithPreview(path, DiscFilterProc);
+#if 0//ACH
+    err = GetOneFileWithPreview(path, DiscFilterProc);
+#else
+    err = swift_GetOneFileWithPreview(path, 256, DISC);
+#endif
 	if (err) return;
 	LoadDisc(drive, path);
 }
@@ -2971,11 +2946,14 @@ void BeebWin::LoadTape()
 	OSErr err = noErr;
 	char path[256];
 	
-	err = GetOneFileWithPreview(path, UEFFilterProc);
+#if 0//ACH
+    err = GetOneFileWithPreview(path, DiscFilterProc);
+#else
+    err = swift_GetOneFileWithPreview(path, 256, UEF);
+#endif
 	if (err) return;
 	LoadTapeFromPath(path);
 }
-#endif
 
 
 void BeebWin::LoadTapeFromPath(char *path)
@@ -4975,23 +4953,17 @@ OSErr err = noErr;
 
 void BeebWin::RestoreState()
 {
-    if (swift_GetOneFileWithPreview(UEF)) // UEFFilterProc
-    {
-        LoadUEFState(filePath);
-    }
-}
-
-#if 0//ACH
-void BeebWin::RestoreState()
-{
 char path[256];  
 OSErr err = noErr;
 
+#if 0//ACH
 	err = GetOneFileWithPreview(path, UEFFilterProc);
+#else
+    err = swift_GetOneFileWithPreview(path, 256, UEF);
+#endif
 	if (err) return;
 	LoadUEFState(path);
 }
-#endif
 
 bool BeebWin::PrinterFile()
 {
@@ -5087,21 +5059,21 @@ void LoadEmuUEF(FILE *SUEF, int Version) {
 
 void BeebWin::LoadUserKeyMap ()
 {
-#if 0//ACH
 	OSErr err = noErr;
 	char path[256];
 	
-	err = GetOneFileWithPreview(path, KeyboardFilterProc);
-	if (err != noErr) return;
+#if 0//ACH
+    err = GetOneFileWithPreview(path, KeyboardFilterProc);
+#else
+    err = swift_GetOneFileWithPreview(path, 256, KEYBOARD);
+#endif
+    if (err != noErr) return;
 	
 	LoadUserKeyboard(path);
-#endif
-    
 }
 
 void BeebWin::SaveUserKeyMap ()
 {
-#if 0//ACH
 	OSErr err = noErr;
 	char path[256];
 	
@@ -5112,7 +5084,6 @@ void BeebWin::SaveUserKeyMap ()
 		strcat(path, ".kmap");
 	
 	SaveUserKeyboard (path);
-#endif
     
 }
 
