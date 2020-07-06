@@ -127,34 +127,47 @@ func conv(_ value: UInt32) -> String
     return s
 }
 
+
+func itemByIdentifier(id: String) -> NSMenuItem? {
+
+  func recurse(menu: NSMenu) -> NSMenuItem? {
+    for item in menu.items {
+        if item.identifier?.rawValue == id {
+        return item
+      } else if let submenu = item.submenu {
+        if let item = recurse(menu: submenu) {
+          return item
+        }
+      }
+    }
+    return nil
+  }
+    guard let mainmenu = NSApplication.shared.mainMenu else { return nil }
+
+    return recurse(menu: mainmenu)
+
+}
+
 // set the tick on the menu with a 4 character identifier
 @_cdecl("swift_SetMenuCheck")
 public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 {
-    
-    func itemByIdentifier(id: String) -> NSMenuItem? {
-
-      func recurse(menu: NSMenu) -> NSMenuItem? {
-        for item in menu.items {
-            if item.identifier?.rawValue == id {
-            return item
-          } else if let submenu = item.submenu {
-            if let item = recurse(menu: submenu) {
-              return item
-            }
-          }
-        }
-        return nil
-      }
-        guard let mainmenu = NSApplication.shared.mainMenu else { return nil }
-
-        return recurse(menu: mainmenu)
-
-    }
-    
     let cmdSTR =  conv(cmd)
     if let n = itemByIdentifier(id:cmdSTR)
     {
         n.state = check ? .on : .off
     }
+}
+
+
+@_cdecl("swift_SetMenuItemTextWithCString")
+public func swift_SetMenuItemTextWithCString(_ cmd: UInt32, _ text: UnsafePointer<CChar>) -> Int
+{
+    let cmdSTR =  conv(cmd)
+    if let n = itemByIdentifier(id:cmdSTR)
+    {
+        n.title = String(cString: text)
+        return 0
+    }
+    return 1
 }

@@ -99,6 +99,16 @@ char CDiscType[2]; // Current disc types
 static const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
 
 
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
+
+extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
+extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
+extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
+extern "C" void swift_SetWindowTitleWithCString(const char* title);
+extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
+
+
+
 // Row,Col - Physical mapping
 int transTable1[256][2]={
 	4,1,	5,1,	3,2,	4,3,   // 0  ASDF
@@ -1897,7 +1907,6 @@ void BeebWin::Initialise(char *home)
 /****************************************************************************/
 void BeebWin::SetRomMenu(void)
 {
-#if 0 //ACH - RomMenu
 char Title[19];
 int i;
 
@@ -1912,6 +1921,7 @@ OSStatus		err;
 		if (Title[2] == 0)
 			strcpy(&Title[2], "Empty");
 
+#if 0//ACH
 		err = GetIndMenuItemWithCommandID(nil, 'roma' + i, 1, &menu, &j);
 		if (!err)
 		{
@@ -1930,10 +1940,16 @@ OSStatus		err;
 		{
 			fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
 		}
+#else
+        err = swift_SetMenuItemTextWithCString('roma' + i, Title);
+        if (err)
+        {
+            fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
+        }
+#endif
 		
 		SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
 	}
-#endif
 }
 #if 0 //ACH - RomMenu
 
@@ -2866,12 +2882,6 @@ extern "C" int beeb_HandleCommand(unsigned int cmdID)
     return mainWin->HandleCommand(cmdID);
 }
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
-
-extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
-extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
-extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
-extern "C" void swift_SetWindowTitleWithCString(const char*);
 
 int SaveFile (const char *path, FSSpec *fs)
 {
@@ -3565,10 +3575,14 @@ OSStatus err = noErr;
 				m_ShowSpeedAndFPS = false;
 				SetMenuCommandIDCheck('sfps', false);
 
+#if 0//ACH
 				CFStringRef pTitle;
 				pTitle = CFStringCreateWithCString (kCFAllocatorDefault, WindowTitle, kCFStringEncodingASCII);
-//ACH				SetWindowTitleWithCFString(mWindow, pTitle);
+				SetWindowTitleWithCFString(mWindow, pTitle);
 				CFRelease(pTitle);
+#else
+                swift_SetWindowTitleWithCString(WindowTitle);
+#endif
 			}
 			else
 			{
