@@ -1,0 +1,52 @@
+NOTES
+
+1x Menu
+   main (29)
+
+10 menu items
+
+BeebEm
+File
+Comms
+View
+Speed
+Sound
+AMX
+Hardware (BBC Model -> BBC Model B [bbcb])
+Options (analogue mousestick,.. Define User Keyboard,..)
+Window  (minimise, zoom, etc.)
+
+
+4x Windows
+1.  BBC Emulator (166)
+2.  Tape Control (386)
+3.  User Defined Keyboard Mapping (396)
+4.  BeebEm Debugger (600)
+
+
+BBC Emulator
+bounds 0,0,512,640
+
+Tape Control
+bounds 0 0 621 349
+viewframe 0 0 349 621
+
+5 subviews
+
+ 4 buttons (Play, Stop, Eject, Record)
+ (tppl, tpst, tpej, tprc)
+ bounds and viewframe
+
+ 1 listview 3 columns
+ [name, blck, leng]
+ Filename, Block, Length
+ (slst)
+ bounds and viewframe
+
+
+User Defined Kayboard Mapping
+  81 buttons and labels
+
+Debugger
+  36 buttons, checkboxes and text
+
