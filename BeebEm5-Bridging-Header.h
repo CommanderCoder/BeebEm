@@ -13,7 +13,7 @@ struct PixelData{
 
 int beeb_main(int argc, char *argv[]);
 int beeb_end();
-void Exec6502Instruction();
+void beeb_MainCpuLoop();
 void beeb_video(int argc, struct PixelData buffer[]);
 void beeb_handlekeys(long eventkind, unsigned long keycode, char charCode);
 
