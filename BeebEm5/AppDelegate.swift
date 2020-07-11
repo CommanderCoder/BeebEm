@@ -8,11 +8,9 @@
 
 import Cocoa
 
-
-
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate {
-
+class AppDelegate: NSObject, NSApplicationDelegate
+{
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
     }
@@ -24,10 +22,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true;
     }
-
+    
     @IBAction func HandleCommand (_ sender: NSMenuItem) {
         
         let cmd: String = sender.identifier?.rawValue ?? "none"
+//        print(cmd)
         beeb_HandleCommand(conv(cmd))
     }
+    
+    @IBOutlet weak var tapeControlMenuItem: NSMenuItem!
 }

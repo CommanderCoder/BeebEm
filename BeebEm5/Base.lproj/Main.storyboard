@@ -384,7 +384,7 @@
                             </menuItem>
                             <menuItem title="Comms" id="Fjn-Bo-Y6t" userLabel="Comms">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Comms" id="Caa-NZ-Zhk">
+                                <menu key="submenu" title="Comms" autoenablesItems="NO" id="Caa-NZ-Zhk">
                                     <items>
                                         <menuItem title="Tape Speed" id="BcG-N1-vac">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -431,7 +431,8 @@
                                         <menuItem title="Tape Control" keyEquivalent="t" identifier="tpco" id="SKV-Tt-ndz">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES"/>
                                             <connections>
-                                                <segue destination="T4f-Fh-Zp8" kind="show" id="s6w-Jv-cMf"/>
+                                                <action selector="tapeControlMenuItem:" target="Voe-Tx-rLC" id="8gy-b9-w3Y"/>
+                                                <segue destination="T4f-Fh-Zp8" kind="show" id="Kwo-wY-9ji"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="7zK-jb-yBs"/>
@@ -489,7 +490,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="View" id="Rvr-Wr-mdB" userLabel="Edit">
+                            <menuItem title="View" id="Rvr-Wr-mdB">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="pj0-tT-0No">
                                     <items>
@@ -676,7 +677,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Speed" id="uZC-TN-qdu" userLabel="Edit">
+                            <menuItem title="Speed" id="uZC-TN-qdu">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Speed" id="8fC-RA-jTP">
                                     <items>
@@ -805,7 +806,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Sound" id="l4J-WC-l9k" userLabel="Edit">
+                            <menuItem title="Sound" id="l4J-WC-l9k">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Sound" id="cC9-d7-m6V">
                                     <items>
@@ -887,7 +888,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="AMX" id="X4h-2R-uhy" userLabel="Edit">
+                            <menuItem title="AMX" id="X4h-2R-uhy">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="AMX" id="4PP-Ef-s4z">
                                     <items>
@@ -962,7 +963,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Hardware" id="XWS-5L-DDH" userLabel="Edit">
+                            <menuItem title="Hardware" id="XWS-5L-DDH">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Hardware" id="Fmq-oL-cYA">
                                     <items>
@@ -1255,7 +1256,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Options" id="9ou-cC-LFa" userLabel="Edit">
+                            <menuItem title="Options" id="9ou-cC-LFa">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Options" id="qX5-Aq-fzf">
                                     <items>
@@ -1359,9 +1360,6 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="View" id="H8h-7b-M4v">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                            </menuItem>
                             <menuItem title="Help" id="wpr-3q-Mcd">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
@@ -1380,7 +1378,11 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="BeebEm5" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="BeebEm5" customModuleProvider="target">
+                    <connections>
+                        <outlet property="tapeControlMenuItem" destination="SKV-Tt-ndz" id="4Yv-IS-gvm"/>
+                    </connections>
+                </customObject>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1431,7 +1433,7 @@
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                     <tableColumns>
-                                                        <tableColumn width="100" minWidth="40" maxWidth="1000" id="Fxd-fp-D7P" userLabel="Filename">
+                                                        <tableColumn identifier="NAME" width="100" minWidth="40" maxWidth="1000" id="Fxd-fp-D7P" userLabel="Filename">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Filename">
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1443,7 +1445,7 @@
                                                             </textFieldCell>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView identifier="FilenameCellID" id="upp-7c-lhu">
+                                                                <tableCellView id="upp-7c-lhu">
                                                                     <rect key="frame" x="1" y="1" width="100" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
@@ -1463,7 +1465,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn width="47" minWidth="40" maxWidth="1000" id="Z1I-UR-yYg" userLabel="Block">
+                                                        <tableColumn identifier="BLCK" width="47" minWidth="40" maxWidth="1000" id="Z1I-UR-yYg" userLabel="Block">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Block">
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1475,7 +1477,7 @@
                                                             </textFieldCell>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView identifier="BlockCellID" id="eE8-AA-waO">
+                                                                <tableCellView id="eE8-AA-waO">
                                                                     <rect key="frame" x="104" y="1" width="47" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
@@ -1495,7 +1497,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn width="64" minWidth="10" maxWidth="3.4028234663852886e+38" id="Yf9-S8-ZYi" userLabel="Length">
+                                                        <tableColumn identifier="LENG" width="64" minWidth="10" maxWidth="3.4028234663852886e+38" id="Yf9-S8-ZYi" userLabel="Length">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Length">
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1507,7 +1509,7 @@
                                                             </textFieldCell>
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
-                                                                <tableCellView identifier="LengthCellID" id="EWX-Zl-Tw2">
+                                                                <tableCellView id="EWX-Zl-Tw2">
                                                                     <rect key="frame" x="154" y="1" width="64" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
@@ -1550,7 +1552,7 @@
                                             <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="3" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4ZH-xh-W8A">
                                                 <rect key="frame" x="0.0" y="5" width="248" height="26"/>
                                                 <subviews>
-                                                    <button verticalHuggingPriority="750" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="oKo-CY-Tv1">
+                                                    <button identifier="tppl" verticalHuggingPriority="750" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="oKo-CY-Tv1">
                                                         <rect key="frame" x="-6" y="-2" width="64" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="52" id="ghg-jX-KLa"/>
@@ -1559,27 +1561,39 @@
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
                                                         </buttonCell>
+                                                        <connections>
+                                                            <action selector="TCHandleCommand:" target="tcv-Q8-lYO" id="oeJ-Ur-Vqk"/>
+                                                        </connections>
                                                     </button>
-                                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wl4-rq-D1Q">
+                                                    <button identifier="tpst" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wl4-rq-D1Q">
                                                         <rect key="frame" x="49" y="-2" width="69" height="32"/>
                                                         <buttonCell key="cell" type="push" title="Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Y4J-fH-eGg">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
                                                         </buttonCell>
+                                                        <connections>
+                                                            <action selector="TCHandleCommand:" target="tcv-Q8-lYO" id="G7S-RM-vqB"/>
+                                                        </connections>
                                                     </button>
-                                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tv8-we-Rzw">
+                                                    <button identifier="tpej" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tv8-we-Rzw">
                                                         <rect key="frame" x="109" y="-2" width="71" height="32"/>
                                                         <buttonCell key="cell" type="push" title="Eject" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CTI-xm-flE">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
                                                         </buttonCell>
+                                                        <connections>
+                                                            <action selector="TCHandleCommand:" target="tcv-Q8-lYO" id="blm-Jt-z60"/>
+                                                        </connections>
                                                     </button>
-                                                    <button verticalHuggingPriority="750" horizontalCompressionResistancePriority="751" translatesAutoresizingMaskIntoConstraints="NO" id="9m2-F2-WDy">
+                                                    <button identifier="tprc" verticalHuggingPriority="750" horizontalCompressionResistancePriority="751" translatesAutoresizingMaskIntoConstraints="NO" id="9m2-F2-WDy">
                                                         <rect key="frame" x="171" y="-2" width="83" height="32"/>
                                                         <buttonCell key="cell" type="push" title="Record" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="216-dx-mJV">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
                                                         </buttonCell>
+                                                        <connections>
+                                                            <action selector="TCHandleCommand:" target="tcv-Q8-lYO" id="0jj-zi-GWR"/>
+                                                        </connections>
                                                     </button>
                                                 </subviews>
                                                 <constraints>
@@ -1640,7 +1654,7 @@
                 </viewController>
                 <customObject id="PY0-eV-NOa" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="402" y="1125"/>
+            <point key="canvasLocation" x="472" y="1085"/>
         </scene>
         <!--Debugger Window Controller-->
         <scene sceneID="NXs-KR-xTs">
@@ -2508,7 +2522,7 @@ DQ
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="640" height="512"/>
-                        <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
                         <connections>
                             <outlet property="delegate" destination="jGA-0Y-lOj" id="98r-iN-zZc"/>
                         </connections>

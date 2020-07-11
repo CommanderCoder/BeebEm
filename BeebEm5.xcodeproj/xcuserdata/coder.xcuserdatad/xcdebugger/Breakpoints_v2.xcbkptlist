@@ -14,8 +14,8 @@
             filePath = "src/beebwin.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "4860"
-            endingLineNumber = "4860"
+            startingLineNumber = "4858"
+            endingLineNumber = "4858"
             landmarkName = "BeebWin::HandleCommand(cmdID)"
             landmarkType = "7">
          </BreakpointContent>

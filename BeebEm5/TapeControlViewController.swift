@@ -8,33 +8,11 @@
 
 import Cocoa
 
-
-public struct Metadata: CustomDebugStringConvertible, Equatable {
-
-  let name: String
-  let block: Int
-  let length: Int
-
-    init(name: String, block: Int, length: Int ) {
-    self.name = name
-    self.block = block
-    self.length = length
-  }
-
-  public var debugDescription: String {
-    return name + " " + "block: \(block)" + " length: \(length)"
-  }
-
-}
-
+weak var tcViewControllerInstance : TapeControlViewController?
 
 class TapeControlViewController: NSViewController {
 
     @IBOutlet weak var tableView: NSTableView!
-    
-    var directoryItems : [Metadata]?
-    let sizeFormatter = ByteCountFormatter()
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,27 +20,47 @@ class TapeControlViewController: NSViewController {
         
         tableView.delegate = self
         tableView.dataSource = self
-
+        
+        tcViewControllerInstance = self
     }
     
-    override var representedObject: Any? {
-      didSet {
-        reloadFileList()
-
-      }
+    func selectRowInTable(_ row: UInt){
+        tableView.selectRowIndexes(.init(integer:Int(row-1)), byExtendingSelection: false)
     }
     
     func reloadFileList() {
-//      directoryItems = directory?.contentsOrderedBy(sortOrder, ascending: sortAscending)
-      tableView.reloadData()
+        tableView.reloadData()
     }
 
+    override func viewDidAppear() {
+        beeb_TapeControlOpenDialog()
+        // setAutoenablesItems must be disabled on the NSMenu containing this item in the storyboard
+        
+        if let appDel = NSApplication.shared.delegate as? AppDelegate {
+            appDel.tapeControlMenuItem.isEnabled = false;
+        }
+    }
+
+    override func viewDidDisappear() {
+        beeb_TapeControlCloseDialog()
+        // setAutoenablesItems must be disabled on the NSMenu containing this item in the storyboard
+        if let appDel = NSApplication.shared.delegate as? AppDelegate {
+            appDel.tapeControlMenuItem.isEnabled = true;
+        }
+    }
+
+    @IBAction func TCHandleCommand(_ sender: NSButton) {
+        let cmd: String = sender.identifier?.rawValue ?? "none"
+        beeb_TCHandleCommand(conv(cmd));
+    }
+    
+    
 }
 
 extension TapeControlViewController: NSTableViewDataSource {
   
   func numberOfRows(in tableView: NSTableView) -> Int {
-    return 5
+    return beeb_getTableRowsCount("TapeControl")
   }
 
 }
@@ -70,38 +68,35 @@ extension TapeControlViewController: NSTableViewDataSource {
 extension TapeControlViewController: NSTableViewDelegate {
 
   fileprivate enum CellIdentifiers {
-    static let FilenameCell = "FilenameCellID"
-    static let BlockCell = "BlockCellID"
-    static let LengthCell = "LengthCellID"
+    static let FilenameCell = NSUserInterfaceItemIdentifier(rawValue: "NAME")
+    static let BlockCell = NSUserInterfaceItemIdentifier(rawValue: "BLCK")
+    static let LengthCell = NSUserInterfaceItemIdentifier(rawValue: "LENG")
   }
 
+// this function will create a cell - by the column (as a tablecolumn) and the row (as an integer))
   func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
 
+    // GET DATA FOR THE CELL AS SOME TEXT INTO
     var text: String = ""
-    var cellIdentifier: String = ""
+    let cellIdentifier: NSUserInterfaceItemIdentifier = tableColumn!.identifier
     
-    // 1
-    let item = Metadata (name:String(row), block:row*3, length:row*5)
-
-    // 2
-    if tableColumn == tableView.tableColumns[0] {
-      text = item.name
-      cellIdentifier = CellIdentifiers.FilenameCell
-    } else if tableColumn == tableView.tableColumns[1] {
-      text =  String(item.block)
-      cellIdentifier = CellIdentifiers.BlockCell
-    } else if tableColumn == tableView.tableColumns[2] {
-      text =  String(item.length)
-      cellIdentifier = CellIdentifiers.LengthCell
-    }
+    text = String(cString: beeb_getTableCellData(conv(cellIdentifier.rawValue), row+1))
 
     // 3
-    if let cell = tableView.makeView(withIdentifier:  NSUserInterfaceItemIdentifier(rawValue: cellIdentifier), owner: nil) as? NSTableCellView {
+    if let cell = tableView.makeView(withIdentifier: cellIdentifier , owner: nil) as? NSTableCellView {
       cell.textField?.stringValue = text
       return cell
     }
     return nil
   }
-
+    
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        print("\(#function) \(tableView.selectedRow) \(notification.name)")
+    }
+    
+    func tableViewSelectionIsChanging(_ notification: Notification) {
+        
+        print("\(#function) \(tableView.selectedRow) \(notification.name)")
+    }
 }
 

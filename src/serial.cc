@@ -95,6 +95,12 @@ unsigned int SerialBuffer = 0, SerialWriteBuffer = 0;
 
 FILE *serlog;
 
+
+extern "C" void swift_SelectItem(const char* tableid, long numberOfSelections, DataBrowserItemID *listOfSelections);
+extern "C" void swift_UEFNewFile(const char* filename);
+extern "C" long swift_Alert(const char* line1, const char* line2, bool hasCancel);
+extern "C" void swift_UpdateItem(const char* menu, long numberOfItems);
+
 WindowRef mTCWindow = NULL; 
 
 void SetACIAStatus(unsigned char bit) {
@@ -149,12 +155,10 @@ void Write_ACIA_Control(unsigned char CReg) {
 		SetACIAStatus(7);
 	}
 
-#if 0 //ACH
 	// Change serial port settings
 	if ((SerialChannel==RS423) && (SerialPortEnabled) && (mSerialHandle != -1) ) {
 		SetSerialPortFormat(Data_Bits, Stop_Bits, Parity, RTS);
 	}
-#endif
 }
 
 void Write_ACIA_Tx_Data(unsigned char Data) {
@@ -182,7 +186,6 @@ void Write_ACIA_Tx_Data(unsigned char Data) {
 		TapeTrigger=TotalCycles + 2000000/(baud/8) * TapeClockSpeed/5600;
 	}
 
-    #if 0 //ACH
 
 	if ((SerialChannel==RS423) && (SerialPortEnabled))
 	{
@@ -217,7 +220,6 @@ void Write_ACIA_Tx_Data(unsigned char Data) {
 			}
 		}
 	}
-#endif
 }
 
 void Write_SERPROC(unsigned char Data) {
@@ -246,13 +248,11 @@ void Write_SERPROC(unsigned char Data) {
 
 	// Note, the PC serial port (or at least win32) does not allow different transmit/receive rates
 	// So we will use the higher of the two
-#if 0//ACH
 	if ( (SerialChannel==RS423) && (mSerialHandle != -1) ) {
 		HigherRate=Tx_Rate;
 		if (Rx_Rate>Tx_Rate) HigherRate=Rx_Rate;
 		SetSerialPortBaud(Tx_Rate, Rx_Rate);
 	}
-#endif
 }
 
 unsigned char Read_ACIA_Status(void) {
@@ -324,7 +324,6 @@ void Serial_Poll(void)
 
 static bool wait_for_tx = false;
 static int delay = 0;
-#if 0 //ACH
 	if ((SerialChannel==RS423) && (SerialPortEnabled) && (TouchScreenEnabled) )
 	{
 		if (TouchScreenPoll() == true)
@@ -379,7 +378,6 @@ static int delay = 0;
 		}
 		
 	}
-#endif
     
 	if (SerialChannel==CASSETTE)
 	{
@@ -587,6 +585,8 @@ void CloseUEF(void) {
 			
 			GetControlByID (mTCWindow, &dbControlID, &dbControl);
 			RemoveDataBrowserItems(dbControl, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
+#else
+            swift_UpdateItem("clearallitems", 0);
 #endif
             
         }
@@ -810,7 +810,7 @@ bool map_file(char *file_name)
 
 OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
-    HICommand command; 
+    HICommand command;
     OSStatus err = noErr;
     err = GetEventParameter(event, kEventParamDirectObject,
 							typeHICommand, NULL, sizeof(HICommand), NULL, &command);
@@ -818,6 +818,16 @@ OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 	
 	err = noErr;
 	switch (command.commandID)
+#else
+
+//swift
+OSStatus TCWindowCommandHandler(UInt32 cmdID)
+{
+    OSStatus err = noErr;
+
+    switch (cmdID)
+#endif
+
     {
         case 'tppl':
             fprintf(stderr, "Tape Control Play selected\n");
@@ -865,6 +875,7 @@ OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 				if (UEFOpen)
 				{
 
+#if 0 //ACH
 					CopyCStringToPascal("Append to current tape file :", S1);
 					CopyCStringToPascal(UEFTapeName, S2);
 					
@@ -881,6 +892,14 @@ OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 						SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &map_lines, kDataBrowserItemsAssign);
 						
 					}
+#else
+                    // http://mirror.informatimago.com/next/developer.apple.com/documentation/Carbon/Reference/databrow_reference/databrowser_ref/constant_21.html#//apple_ref/doc/uid/TP30000969-CH202-C009004
+                    
+                    r = swift_Alert("Append to current tape file :",UEFTapeName,true);
+                    // select item number 1 from all the items in maplist
+                    if (r == 1)// OK
+                        swift_SelectItem("SLST_assign", 1,(DataBrowserItemID *) &map_lines);
+#endif
 				}
 				else
 				{
@@ -895,9 +914,13 @@ OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 						{
 							fclose(fd);
 
+#if 0 //ACH
 							CopyCStringToPascal("File already exists", S1);
 							CopyCStringToPascal("Overwrite file ?", S2);
 							StandardAlert( kAlertNoteAlert, S1, S2, &alertParameters, &r);
+#else
+                            r = swift_Alert("File already exists","Overwrite file ?",true);
+#endif
 						}
 						
 						if (r == 1)		// OK
@@ -909,11 +932,15 @@ OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 							}
 							else
 							{
+#if 0 //ACH
+
 								CopyCStringToPascal("Error creating tape file:", S1);
 								CopyCStringToPascal(UEFTapeName, S2);
 								alertParameters.cancelButton	= 0;
 								StandardAlert( kAlertNoteAlert, S1, S2, &alertParameters, &r);
-								
+#else
+                                r = swift_Alert("Error creating tape file:", UEFTapeName, false);
+#endif
 								UEFTapeName[0] = 0;
 								r = 2;			// Cancel
 							}
@@ -940,6 +967,7 @@ CantGetParameter:
 		return err;
 }
 
+#if 0 //ACH -- catch window close, see beeb_TapeControlCloseDialog
 static OSStatus TCWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus err = noErr;
@@ -1076,7 +1104,18 @@ void TapeControlOpenDialog()
 			NewDataBrowserItemDataUPP( (DataBrowserItemDataProcPtr) TCWindowCallback);
 		SetDataBrowserCallbacks(dbControl, &dbCallbacks);
 		SetAutomaticControlDragTrackingEnabledForWindow(mTCWindow, true);
-		
+#else
+
+extern "C" void beeb_TapeControlOpenDialog()
+{
+    int Clock;
+
+    TapeControlEnabled = TRUE;
+
+    if (true)
+    {
+#endif
+
 		if (UEFOpen)
 		{
 			Clock = TapeClock;
@@ -1097,6 +1136,7 @@ void TapeControlOpenDialog()
 	}
 }
 
+#if 0 //ACH
 void TapeControlCloseDialog()
 {
 	if (mTCWindow)
@@ -1105,12 +1145,15 @@ void TapeControlCloseDialog()
 		DisposeWindow(mTCWindow);
 	}
 	mTCWindow = NULL;
+#else
+extern "C" void beeb_TapeControlCloseDialog()
+{
+#endif
 	TapeControlEnabled = FALSE;
 	map_lines = 0;
 	TapePlaying=true;
 	TapeRecording=false;
 }
-#endif
 
 void TapeControlOpenFile(char *UEFName)
 {
@@ -1125,14 +1168,16 @@ void TapeControlOpenFile(char *UEFName)
 				return;
 			}
 		}
-        #if 0 //ACH - tape openfile
+#if 0 //ACH - tape openfile
 		const ControlID dbControlID = { 'SLST', 0 };
 		ControlRef dbControl;
 			
 		GetControlByID (mTCWindow, &dbControlID, &dbControl);
 		RemoveDataBrowserItems(dbControl, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
 		AddDataBrowserItems(dbControl, kDataBrowserNoItem, map_lines, NULL, kDataBrowserItemNoProperty);
-        #endif
+#else
+        swift_UpdateItem("SLST_clear", map_lines);
+#endif
 
 		TapeControlUpdateCounter(0);
 
@@ -1162,6 +1207,9 @@ void TapeControlUpdateCounter(int tape_time)
 		j = i + 1;
 		SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &j, kDataBrowserItemsAssign);
 		RevealDataBrowserItem(dbControl, j, kDataBrowserNoItem, kDataBrowserRevealOnly);
+#else
+        j = i + 1;
+        swift_SelectItem("SLST_reveal", 1, (DataBrowserItemID *)&j);
 #endif
         
 	}
@@ -1271,3 +1319,69 @@ void LoadSerialUEF(FILE *SUEF)
 		}
 	}
 }
+
+extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
+{
+    char* cmdCHR = (char*)&cmdID;
+    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+    return TCWindowCommandHandler(cmdID);
+}
+    
+extern "C" long beeb_getTableRowsCount(const char* tablename)
+{
+    if (UEFOpen)
+        return map_lines;
+    return 0;
+}
+
+char temp[256];
+
+extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
+{
+    char* propertyCHR = (char*)&property;
+
+//    printf("%c%c%c%c data %ld", propertyCHR[3], propertyCHR[2], propertyCHR[1], propertyCHR[0], itemID);
+    
+    switch(property)
+    {
+        case 'NAME' :
+            
+            strcpy(temp, map_desc[itemID - 1]);
+            temp[12] = 0;
+            
+            break;
+
+        case 'BLCK' :
+            
+            strcpy(temp, map_desc[itemID - 1] + 13);
+            temp[2] = 0;
+            
+            break;
+
+        case 'LENG' :
+            
+            strcpy(temp, map_desc[itemID - 1] + 16);
+            
+            break;
+            
+        case 3 :
+            long s;
+            s = itemID - 1;
+            if (s >= 0 && s < map_lines)
+            {
+                if (CSWOpen)
+                {
+                    csw_ptr = map_time[s];
+                }
+                else
+                {
+                    TapeClock=map_time[s];
+                }
+                OldClock=0;
+                TapeTrigger=TotalCycles+TAPECYCLES;
+            }
+            break;
+    }
+    return temp;
+}
+

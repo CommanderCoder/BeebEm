@@ -2377,13 +2377,11 @@ int LEDByte;
 	m_captureresolution = GetDictNum(dict, CFSTR("CaptureResolution"), 2);
 	TranslateCapture();
 	
-#if 0 //ACH - preferences
 	SerialPortEnabled = GetDictNum(dict, CFSTR("SerialPortEnabled"), 0);
 	EthernetPortEnabled = GetDictNum(dict, CFSTR("EthernetPortEnabled"), 0);
 	TouchScreenEnabled = GetDictNum(dict, CFSTR("TouchScreenEnabled"), 0);
 	RTC_Enabled = GetDictNum(dict, CFSTR("RTCEnabled"), 0);
 
-#endif
 	SavePreferences();
 }
 
