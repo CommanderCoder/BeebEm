@@ -185,9 +185,8 @@ public func swift_UpdateItem(_ text: UnsafePointer<CChar>, _ b:Int)
 @_cdecl("swift_SelectItem")
 public func swift_SelectItem(_ text: UnsafePointer<CChar>, _ b:Int, _ c: UnsafePointer<UInt>)
 {
-    print("\(#function) \(String(cString:text)) \(b) \(c.pointee)")
-    tcViewControllerInstance?.selectRowInTable(c.pointee)
-    tcViewControllerInstance?.reloadFileList()
+    print("\(#function) \(String(cString:text)) \(b) ")
+    tcViewControllerInstance?.selectRowInTable(UInt(b))
 }
 
 @_cdecl("swift_UEFNewFile")

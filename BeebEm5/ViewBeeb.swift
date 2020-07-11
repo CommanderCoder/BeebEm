@@ -101,6 +101,8 @@ class ViewBeeb: NSView {
         // image is a CGimage
         
         context?.draw(image, in: dirtyRect)
+        
+        tcViewControllerInstance?.update()
     }
         
     private let rgbColorSpace = CGColorSpaceCreateDeviceRGB()

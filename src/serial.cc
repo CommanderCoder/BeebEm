@@ -1209,7 +1209,7 @@ void TapeControlUpdateCounter(int tape_time)
 		RevealDataBrowserItem(dbControl, j, kDataBrowserNoItem, kDataBrowserRevealOnly);
 #else
         j = i + 1;
-        swift_SelectItem("SLST_reveal", 1, (DataBrowserItemID *)&j);
+        swift_SelectItem("SLST_reveal", j, NULL);
 #endif
         
 	}

@@ -14,6 +14,8 @@ class TapeControlViewController: NSViewController {
 
     @IBOutlet weak var tableView: NSTableView!
     
+    private var dirty = 0
+    private var selectedRow : UInt = 0
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
@@ -25,11 +27,12 @@ class TapeControlViewController: NSViewController {
     }
     
     func selectRowInTable(_ row: UInt){
-        tableView.selectRowIndexes(.init(integer:Int(row-1)), byExtendingSelection: false)
+        selectedRow = row-1 // needs to start at 0
+        dirty |= 2
     }
     
     func reloadFileList() {
-        tableView.reloadData()
+        dirty |= 1
     }
 
     override func viewDidAppear() {
@@ -55,6 +58,27 @@ class TapeControlViewController: NSViewController {
     }
     
     
+    func update() {
+        switch dirty{
+        case 1:
+            print("updating dirty \(dirty)")
+            tableView.reloadData()
+            print("done dirty")
+        case 2:
+            print("updating dirty \(dirty)")
+            tableView.selectRowIndexes(.init(integer:Int(selectedRow)), byExtendingSelection: false)
+            print("done dirty")
+        case 3:
+            print("updating dirty \(dirty)")
+            tableView.reloadData()
+            tableView.selectRowIndexes(.init(integer:Int(selectedRow)), byExtendingSelection: false)
+            print("done dirty")
+        default:
+            () // or break
+        }
+        dirty = 0
+
+    }
 }
 
 extension TapeControlViewController: NSTableViewDataSource {
@@ -87,16 +111,14 @@ extension TapeControlViewController: NSTableViewDelegate {
       cell.textField?.stringValue = text
       return cell
     }
+    
     return nil
   }
     
     func tableViewSelectionDidChange(_ notification: Notification) {
         print("\(#function) \(tableView.selectedRow) \(notification.name)")
-    }
-    
-    func tableViewSelectionIsChanging(_ notification: Notification) {
+        beeb_getTableCellData(3,tableView.selectedRow+1) // needs to start at 1
         
-        print("\(#function) \(tableView.selectedRow) \(notification.name)")
     }
 }
 
