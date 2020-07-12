@@ -57,12 +57,12 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
             filepath.assign(repeating: 0, count: bytes)
             filepath.assign(from: path, count: path.count)
 
-            return 1
+            return 0 // no issues
         }
     }
 //      User clicked on "Cancel"
 // or   the result URL was nil
-    return 0
+    return 1 // error
 }
 
 @_cdecl("swift_SaveFile")
@@ -127,34 +127,98 @@ func conv(_ value: UInt32) -> String
     return s
 }
 
+
+func itemByIdentifier(id: String) -> NSMenuItem? {
+
+  func recurse(menu: NSMenu) -> NSMenuItem? {
+    for item in menu.items {
+        if item.identifier?.rawValue == id {
+        return item
+      } else if let submenu = item.submenu {
+        if let item = recurse(menu: submenu) {
+          return item
+        }
+      }
+    }
+    return nil
+  }
+    guard let mainmenu = NSApplication.shared.mainMenu else { return nil }
+
+    return recurse(menu: mainmenu)
+
+}
+
 // set the tick on the menu with a 4 character identifier
 @_cdecl("swift_SetMenuCheck")
 public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 {
-    
-    func itemByIdentifier(id: String) -> NSMenuItem? {
-
-      func recurse(menu: NSMenu) -> NSMenuItem? {
-        for item in menu.items {
-            if item.identifier?.rawValue == id {
-            return item
-          } else if let submenu = item.submenu {
-            if let item = recurse(menu: submenu) {
-              return item
-            }
-          }
-        }
-        return nil
-      }
-        guard let mainmenu = NSApplication.shared.mainMenu else { return nil }
-
-        return recurse(menu: mainmenu)
-
-    }
-    
     let cmdSTR =  conv(cmd)
     if let n = itemByIdentifier(id:cmdSTR)
     {
         n.state = check ? .on : .off
     }
+}
+
+
+@_cdecl("swift_SetMenuItemTextWithCString")
+public func swift_SetMenuItemTextWithCString(_ cmd: UInt32, _ text: UnsafePointer<CChar>) -> Int
+{
+    let cmdSTR =  conv(cmd)
+    if let n = itemByIdentifier(id:cmdSTR)
+    {
+        n.title = String(cString: text)
+        return 0
+    }
+    return 1
+}
+
+
+
+@_cdecl("swift_UpdateItem")
+public func swift_UpdateItem(_ text: UnsafePointer<CChar>, _ b:Int)
+{
+    print("\(#function) \(String(cString:text)) \(b)")
+    tcViewControllerInstance?.reloadFileList()
+}
+
+
+@_cdecl("swift_SelectItem")
+public func swift_SelectItem(_ text: UnsafePointer<CChar>, _ b:Int, _ c: UnsafePointer<UInt>)
+{
+    print("\(#function) \(String(cString:text)) \(b) ")
+    tcViewControllerInstance?.selectRowInTable(UInt(b))
+}
+
+@_cdecl("swift_UEFNewFile")
+public func swift_UEFNewFile(_ text: UnsafePointer<CChar>)
+{
+    print("\(#function) \(String(cString:text))")
+    tcViewControllerInstance?.reloadFileList()
+}
+
+
+
+@_cdecl("swift_Alert")
+public func swift_Alert(_ text: UnsafePointer<CChar>, _ text2: UnsafePointer<CChar>,_ hasCancel:Bool) -> Int
+{
+    
+    let a = NSAlert()
+    a.messageText = String(cString: text)
+   a.informativeText = String(cString: text2)
+   //   .alertFirstButtonReturn
+   a.addButton(withTitle: "OK")
+
+
+   //   .alertSecondButtonReturn
+    if hasCancel
+    {
+        a.addButton(withTitle: "Cancel")
+    }
+    
+    a.alertStyle = .warning
+    let res = a.runModal()
+    let val = res == .alertFirstButtonReturn ? 1:2
+    print(String(cString:text)+" "+String(cString:text2)+" "+String(hasCancel))
+    tcViewControllerInstance?.reloadFileList()
+    return val
 }

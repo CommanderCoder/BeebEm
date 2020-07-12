@@ -101,6 +101,8 @@ class ViewBeeb: NSView {
         // image is a CGimage
         
         context?.draw(image, in: dirtyRect)
+        
+        tcViewControllerInstance?.update()
     }
         
     private let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
@@ -208,11 +210,12 @@ extension ViewBeeb{
     {
         DispatchQueue.global(qos: .utility).async {
             // run the cpu on a separate concurrent thread (global) - quality of service only needs to be utility
+            
             while true {
 //                let ct = CACurrentMediaTime()//.truncatingRemainder(dividingBy: 1)
 //                print("cpu = \(ct-self.lasttime) ms")
 //                self.lasttime=ct
-                  Exec6502Instruction()
+                  beeb_MainCpuLoop()
             }
         }
     }

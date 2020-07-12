@@ -80,24 +80,29 @@ bool mStartAgain = false;
 
 void DeactControl(OSType box)
 {
+#if 0//ACH
 	const ControlID dbControlID = { box, 0 };
 	ControlRef dbControl;
 	
 	GetControlByID (mEthernetPortWindow, &dbControlID, &dbControl);
     DeactivateControl(dbControl);
+#endif
 }
 
 void ActControl(OSType box)
 {
+#if 0//ACH
 	const ControlID dbControlID = { box, 0 };
 	ControlRef dbControl;
 	
 	GetControlByID (mEthernetPortWindow, &dbControlID, &dbControl);
     ActivateControl(dbControl);
+#endif
 }
 
 void SetEPText(OSType box, char *text)
 {
+#if 0//ACH
 	CFStringRef pTitle;
 	
 	const ControlID dbControlID = { box, 0 };
@@ -110,11 +115,12 @@ void SetEPText(OSType box, char *text)
     SetControlData(dbControl, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &pTitle);
 	
 	CFRelease(pTitle);
+#endif
 }
 
 void GetEPText(OSType box, char *text)
 {
-
+#if 0//ACH
     ControlID kCmd = { box, 0 };
     ControlRef Cmd;
     CFStringRef cmd_text;
@@ -126,24 +132,28 @@ void GetEPText(OSType box, char *text)
 	CFStringGetCString (cmd_text, text, 32, kCFStringEncodingASCII);
 	
 	CFRelease (cmd_text);
+#endif
 }
 
 int GetEPValue(OSType box)
 
 {
-	ControlID dbControlID;
-	ControlRef dbControl;
 	int ret;
-	
+#if 0//ACH
+    ControlID dbControlID;
+    ControlRef dbControl;
+
 	dbControlID.signature = box;
 	dbControlID.id = 0;
 	GetControlByID (mEthernetPortWindow, &dbControlID, &dbControl);
 	ret = GetControlValue(dbControl);
-	return ret;
+#endif
+    return ret;
 }
 
 void SetEPValue(OSType box, int State)
 {
+#if 0//ACH
 	ControlID dbControlID;
 	ControlRef dbControl;
 	
@@ -151,7 +161,10 @@ void SetEPValue(OSType box, int State)
 	dbControlID.id = 0;
 	GetControlByID (mEthernetPortWindow, &dbControlID, &dbControl);
 	SetControlValue(dbControl, State);
+#endif
 }
+
+#if 0//ACH
 
 //*******************************************************************
 
@@ -317,6 +330,7 @@ void EthernetPortCloseDialog()
 	}
 	mEthernetPortWindow = NULL;
 }
+#endif
 
 void LowerDCD(void)
 
@@ -334,6 +348,8 @@ void RaiseDCD(void)
 	WriteLog("Raise DCD\n");
 	UserVIAWrite(0x0c, 0x00);
 }
+
+#if 0//ACH
 
 OSStatus MyEthernetPortStatusThread(void *parameter)
 {
@@ -507,9 +523,11 @@ top: ;
 	mListenTaskID = NULL;
 	return noErr;
 }
+#endif
 
 void EthernetPortOpen(void)
 {
+#if 0//ACH -- ethernet
 	int i;
 	
 	if (mEthernetHandle > 0)
@@ -540,6 +558,7 @@ void EthernetPortOpen(void)
 			WriteLog("Connection Opened\n");
 		}
 	}
+#endif
 
 }
 
@@ -681,6 +700,7 @@ void EthernetPortStore(unsigned char data)
 
 void EthernetPortClose(void)
 {
+#if 0 //ACH
 
 	if (mEthernetHandle > 0)
 	{
@@ -715,6 +735,7 @@ void EthernetPortClose(void)
 	mEthernetPortStatusTaskID = NULL;
 	mEthernetPortReadTaskID = NULL;
 	
+#endif
 	WriteLog("EthernetPortClose\n");
 }
 
@@ -910,6 +931,7 @@ int RXHead = 0;
 int RXTail = 0;
 int RXLen = 0;
 
+#if 0//ACH
 //*******************************************************************
 
 OSStatus SerialPortWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
@@ -1131,6 +1153,7 @@ void SerialPortCloseDialog()
 	}
 	mSerialPortWindow = NULL;
 }
+#endif
 
 // Given the path to a serial device, open the device and configure it.
 // Return the file descriptor associated with the device.

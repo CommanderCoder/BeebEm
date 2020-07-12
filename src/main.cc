@@ -620,7 +620,21 @@ static void RunApplicationEventLoopWithCooperativeThreadSupport(void)
 
 #endif
 
+extern "C" void beeb_MainCpuLoop()
+{
+    int c;
+    c = 20;
 
+// Menu GUI more responsive if running less than real time
+    
+    if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
+    {
+        c = c * mainWin->m_RealTimeTarget;
+    }
+    
+    for (int i = 0; i < c; ++i)
+        Exec6502Instruction();
+}
 // testing - this should be in a 'header'
 struct PixelData {
     unsigned char a;

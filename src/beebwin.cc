@@ -99,6 +99,16 @@ char CDiscType[2]; // Current disc types
 static const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
 
 
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
+
+extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
+extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
+extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
+extern "C" void swift_SetWindowTitleWithCString(const char* title);
+extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
+
+
+
 // Row,Col - Physical mapping
 int transTable1[256][2]={
 	4,1,	5,1,	3,2,	4,3,   // 0  ASDF
@@ -1897,7 +1907,6 @@ void BeebWin::Initialise(char *home)
 /****************************************************************************/
 void BeebWin::SetRomMenu(void)
 {
-#if 0 //ACH - RomMenu
 char Title[19];
 int i;
 
@@ -1912,6 +1921,7 @@ OSStatus		err;
 		if (Title[2] == 0)
 			strcpy(&Title[2], "Empty");
 
+#if 0//ACH
 		err = GetIndMenuItemWithCommandID(nil, 'roma' + i, 1, &menu, &j);
 		if (!err)
 		{
@@ -1930,10 +1940,16 @@ OSStatus		err;
 		{
 			fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
 		}
+#else
+        err = swift_SetMenuItemTextWithCString('roma' + i, Title);
+        if (err)
+        {
+            fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
+        }
+#endif
 		
 		SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
 	}
-#endif
 }
 #if 0 //ACH - RomMenu
 
@@ -2361,13 +2377,11 @@ int LEDByte;
 	m_captureresolution = GetDictNum(dict, CFSTR("CaptureResolution"), 2);
 	TranslateCapture();
 	
-#if 0 //ACH - preferences
 	SerialPortEnabled = GetDictNum(dict, CFSTR("SerialPortEnabled"), 0);
 	EthernetPortEnabled = GetDictNum(dict, CFSTR("EthernetPortEnabled"), 0);
 	TouchScreenEnabled = GetDictNum(dict, CFSTR("TouchScreenEnabled"), 0);
 	RTC_Enabled = GetDictNum(dict, CFSTR("RTCEnabled"), 0);
 
-#endif
 	SavePreferences();
 }
 
@@ -2866,12 +2880,6 @@ extern "C" int beeb_HandleCommand(unsigned int cmdID)
     return mainWin->HandleCommand(cmdID);
 }
 
-extern "C" enum FileFilter { DISC, UEF, IDF, KEYBOARD };
-
-extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
-extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
-extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
-extern "C" void swift_SetWindowTitleWithCString(const char*);
 
 int SaveFile (const char *path, FSSpec *fs)
 {
@@ -3565,10 +3573,14 @@ OSStatus err = noErr;
 				m_ShowSpeedAndFPS = false;
 				SetMenuCommandIDCheck('sfps', false);
 
+#if 0//ACH
 				CFStringRef pTitle;
 				pTitle = CFStringCreateWithCString (kCFAllocatorDefault, WindowTitle, kCFStringEncodingASCII);
-//ACH				SetWindowTitleWithCFString(mWindow, pTitle);
+				SetWindowTitleWithCFString(mWindow, pTitle);
 				CFRelease(pTitle);
+#else
+                swift_SetWindowTitleWithCString(WindowTitle);
+#endif
 			}
 			else
 			{
@@ -4045,9 +4057,7 @@ OSStatus err = noErr;
         case 'ifd3':
 			i = cmdID - 'ifd0';
             fprintf(stderr, "Import Files From Disc %d selected\n", i);
-#if 0 //ACH
 			ImportDiscFiles(i);
-#endif
             break;
 
 		case 'efd0':
@@ -4056,9 +4066,7 @@ OSStatus err = noErr;
         case 'efd3':
 			i = cmdID - 'efd0';
             fprintf(stderr, "Export Files To Disc %d selected\n", i);
-#if 0 //ACH
 			ExportDiscFiles(i);
-#endif
             break;
 			
         case 'roma':
@@ -5197,7 +5205,7 @@ void BeebWin::CaptureVideo()
 {
 	FSSpec fileSpec;
 	OSErr err = noErr;
-	char path[256];  
+	char path[256];
 	
 	if (m_pMovie)
 		EndCaptureVideo();
@@ -5215,7 +5223,7 @@ void BeebWin::CaptureVideo()
 }
 
 void MacQTOpenVideoComponent(ComponentInstance *rci)
-{	
+{
 	OSStatus			err;
 	ComponentInstance	ci;
 	
@@ -5232,7 +5240,7 @@ void MacQTOpenVideoComponent(ComponentInstance *rci)
 		len = CFDataGetLength(data);
 		hdl = NewHandleClear((Size) len);
 		if (MemError() == noErr)
-		{	
+		{
 			HLock(hdl);
 			CFDataGetBytes(data, CFRangeMake(0, len), (unsigned char *) *hdl);
 			err = SCSetInfo(ci, scSettingsStateType, &hdl);
@@ -5398,48 +5406,683 @@ void BeebWin::EndCaptureVideo()
 {
 OSErr err;
 short resId =movieInDataForkResID;
-	
-	if (m_pMovie == NULL) return;
-	
-	SetMenuCommandIDCheck('vidc', false);
+    
+    if (m_pMovie == NULL) return;
+    
+    SetMenuCommandIDCheck('vidc', false);
 
-	err = SCCompressSequenceEnd(m_ci);
-	if (err != noErr) fprintf(stderr, "SCCompressSequenceEnd error %d\n", err);
-		
-	if (m_pMedia) EndMediaEdits(m_pMedia);
-	if (m_pTrack) InsertMediaIntoTrack(m_pTrack, 0, 0, GetMediaDuration(m_pMedia), fixed1);
+    err = SCCompressSequenceEnd(m_ci);
+    if (err != noErr) fprintf(stderr, "SCCompressSequenceEnd error %d\n", err);
+        
+    if (m_pMedia) EndMediaEdits(m_pMedia);
+    if (m_pTrack) InsertMediaIntoTrack(m_pTrack, 0, 0, GetMediaDuration(m_pMedia), fixed1);
 
-	if (m_sMedia) EndMediaEdits(m_sMedia);
-	if (m_sTrack) InsertMediaIntoTrack(m_sTrack, 0, 0, GetMediaDuration(m_sMedia), fixed1);
+    if (m_sMedia) EndMediaEdits(m_sMedia);
+    if (m_sTrack) InsertMediaIntoTrack(m_sTrack, 0, 0, GetMediaDuration(m_sMedia), fixed1);
 
-	if (m_pMovie) AddMovieResource(m_pMovie, m_resRefNum, &resId, NULL);
-	
-	if (m_resRefNum != 0) CloseMovieFile(m_resRefNum);
-	
-	MacQTCloseVideoComponent(m_ci);
-	
-	if (m_soundDesc)
-	{
-		DisposeHandle( (Handle) m_soundDesc);
-		m_soundDesc = NULL;
-	}
-	
-	if (m_soundBuffer)
-	{
-		DisposeHandle( (Handle) m_soundBuffer);
-		m_soundBuffer = NULL;
-	}
+    if (m_pMovie) AddMovieResource(m_pMovie, m_resRefNum, &resId, NULL);
+    
+    if (m_resRefNum != 0) CloseMovieFile(m_resRefNum);
+    
+    MacQTCloseVideoComponent(m_ci);
+    
+    if (m_soundDesc)
+    {
+        DisposeHandle( (Handle) m_soundDesc);
+        m_soundDesc = NULL;
+    }
+    
+    if (m_soundBuffer)
+    {
+        DisposeHandle( (Handle) m_soundBuffer);
+        m_soundBuffer = NULL;
+    }
 
-	if (m_pMovie)
-	{
-		DisposeMovie(m_pMovie);
-		m_pMovie = NULL;
-	}
-	
-	ExitMovies();
-	
-	m_pMovie = NULL;
-	
+    if (m_pMovie)
+    {
+        DisposeMovie(m_pMovie);
+        m_pMovie = NULL;
+    }
+    
+    ExitMovies();
+    
+    m_pMovie = NULL;
+    
+}
+#endif
+
+void BeebWin::doCopy()
+{
+    
+    if (PrinterEnabled)
+        TogglePrinter();
+
+    if (PrinterFileHandle != NULL)
+    {
+        fclose(PrinterFileHandle);
+        PrinterFileHandle = NULL;
+    }
+    SetMenuCommandIDCheck('pfle', false);
+        
+    m_MenuIdPrinterPort = IDM_PRINTER_CLIPBOARD;
+    SetMenuCommandIDCheck('pclp', true);
+    TranslatePrinterPort();
+    TogglePrinter();        // Turn printer back on
+        
+    m_printerbufferlen = 0;
+        
+    m_clipboard[0] = 2;
+    m_clipboard[1] = 'L';
+    m_clipboard[2] = '.';
+    m_clipboard[3] = 13;
+    m_clipboard[4] = 3;
+    m_clipboardlen = 5;
+    m_clipboardptr = 0;
+    m_printerbufferlen = 0;
+    SetupClipboard();
 }
 
+void BeebWin::doPaste()
+{
+PasteboardRef outPasteboard;
+OSStatus err;
+ItemCount itemCount;
+
+    err = PasteboardCreate(kPasteboardClipboard, &outPasteboard);
+
+    // Count the number of items on the pasteboard so we can iterate through them.
+    err = PasteboardGetItemCount( outPasteboard, &itemCount );
+
+    for( UInt32 itemIndex = 1; itemIndex <= itemCount; itemIndex++ )
+    {
+        PasteboardItemID  itemID;
+        CFArrayRef      flavorTypeArray;
+        CFIndex        flavorCount;
+                
+        // Every item is identified by a unique value.
+        err = PasteboardGetItemIdentifier( outPasteboard, itemIndex, &itemID );
+                
+        // The item's flavor types are retreived as an array which we are responsible for
+        // releaseing later. It's important to take into account all flavors, their flags
+        // and the context the data will be used when deciding which flavor ought to be used.
+        // The flavor type array is a CFType and we'll need to call CFRelease on it later.
+        err = PasteboardCopyItemFlavors( outPasteboard, itemID, &flavorTypeArray );
+                
+        // Count the number of flavors in the item so we can iterate through them.
+        flavorCount = CFArrayGetCount( flavorTypeArray );
+                
+        for( CFIndex flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++ )
+        {
+            CFStringRef flavorType;
+            CFDataRef   flavorData;
+            CFIndex     flavorDataSize;
+            char        flavorTypeStr[128];
+                    
+            // grab the flavor name so we can extract it's flags and data
+            flavorType = (CFStringRef)CFArrayGetValueAtIndex( flavorTypeArray, flavorIndex );
+                    
+            // Having looked at the item's flavors and their flags we've settled on the data
+            // we want to reteive.  Because we're copying the flavor data we'll need to
+            // dispose of it via CFRelease when we no longer need it.
+            err = PasteboardCopyItemFlavorData( outPasteboard, itemID, flavorType, &flavorData );
+                    
+            flavorDataSize = CFDataGetLength( flavorData );
+                    
+            // Now that we have the flavor, flags, and data we need to format it nicely for the text view.
+            CFStringGetCString( flavorType, flavorTypeStr, 128, kCFStringEncodingMacRoman );
+                    
+            if (strcmp(flavorTypeStr, "com.apple.traditional-mac-plain-text") == 0)
+            {
+                for( short dataIndex = 0; dataIndex <= flavorDataSize; dataIndex++ )
+                {
+                    char byte = *(CFDataGetBytePtr( flavorData ) + dataIndex);
+                    fprintf(stderr, "Clipboard %d = %d\n", dataIndex, byte);
+                    m_clipboard[dataIndex] = byte;
+                }
+                        
+                m_clipboardlen = flavorDataSize;
+                m_clipboardptr = 0;
+                SetupClipboard();
+            }
+                    
+        }
+                
+        CFRelease(flavorTypeArray);
+    }
+
+    CFRelease(outPasteboard);
+
+}
+
+#if 0//ACH
+
+//--------------------------------------------------------------------------------------------------
+/////////////////////////////// Support for Copy/Paste of PDF Data /////////////////////////////////
+//--------------------------------------------------------------------------------------------------
+
+// To create PDF data for the Pasteboard, we need to set up a CFDataConsumer that collects data in a CFMutableDataRef.
+// Here are the two required callbacks:
+
+static size_t MyCFDataPutBytes(void* info, const void* buffer, size_t count)
+{
+    CFDataAppendBytes((CFMutableDataRef)info, (const UInt8 *) buffer, count);
+    return count;
+}
+
+static void MyCFDataRelease(void* info)
+{
+    CFRelease((CFMutableDataRef)info);
+}
+
+void MyDrawIntoPDFPage(CGContextRef pdfContext, PMRect pageRect, int starty, int nlines)
+{
+    CGrafPtr mWin;
+    register int i, j;
+    char *p;
+    
+    Rect destR;
+    Rect srcR;
+    
+    mWin = GetWindowPort(mainWin->mWindow);
+    SetPortWindowPort(mainWin->mWindow);
+    GetPortBounds(mWin, &destR);
+    
+    srcR.left = 0;
+    srcR.right = ActualScreenWidth;
+    
+    if (TeletextEnabled)
+    {
+        srcR.top = 0;
+        srcR.bottom = 512;
+    }
+    else
+    {
+        srcR.top = starty;
+        srcR.bottom = starty + nlines;
+    }
+    
+    long *pPtr32;
+    short *pPtr16;
+    
+    CGContextRef myBitmapContext;
+    
+    PixMapHandle    pmh;
+    int                bpp;
+    char            col;
+    
+    LockPortBits(mWin);
+    pmh = GetPortPixMap(mWin);
+    LockPixels(pmh);
+    bpp = GetPixDepth(pmh);
+    
+    UnlockPixels(pmh);
+    UnlockPortBits(mWin);
+    
+    myBitmapContext = MyCreateBitmapContext(srcR.right - srcR.left, srcR.bottom - srcR.top, bpp);
+    
+    pPtr32 = (long *) CGBitmapContextGetData (myBitmapContext);
+    pPtr16 = (short *) CGBitmapContextGetData (myBitmapContext);
+    
+    p = mainWin->m_screen;
+    
+    for (j = srcR.top; j < srcR.bottom; ++j)
+    {
+        p = mainWin->m_screen + j * 800 + srcR.left;
+        
+        for (i = srcR.left; i < srcR.right; ++i)
+        {
+            col = *p++;
+
+            switch (bpp)
+            {
+                case 32 :
+                    if (mainWin->m_Invert)
+                    {
+                        if (col == 0) *pPtr32++ = 0xffffffff;
+                        else if (col == 7) *pPtr32++ = ( (mainWin->palette_type == mainWin->AMBER) || (mainWin->palette_type == mainWin->GREEN) ) ? mainWin->m_RGB32[7] : mainWin->m_RGB32[0];
+                        else *pPtr32++ = mainWin->m_RGB32[col];
+                    }
+                    else *pPtr32++ = mainWin->m_RGB32[col];
+                    break;
+                case 16 :
+                    if (mainWin->m_Invert)
+                    {
+                        if (col == 0) *pPtr16++ = 0x7fff;
+                        else if (col == 7) *pPtr16++ = ( (mainWin->palette_type == mainWin->AMBER) || (mainWin->palette_type == mainWin->GREEN) ) ? mainWin->m_RGB16[7] : mainWin->m_RGB16[0];
+                        else *pPtr16++ = mainWin->m_RGB16[col];
+                    }
+                    else *pPtr16++ = mainWin->m_RGB16[col];
+                    break;
+            }
+        }
+    }
+    
+    CGImageRef myImage;
+    
+    //    CGColorSpaceRef genericColorSpace = GetGenericRGBColorSpace();
+    
+    CGRect  docRect = CGRectMake (pageRect.left, pageRect.top, pageRect.right, pageRect.bottom);
+    
+//    CGContextBeginPage(pdfContext, &docRect);
+    
+    // ensure that we are drawing in the correct color space, a calibrated color space
+
+    CGColorSpaceRef colorSpace;
+    colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+    
+    CGContextSetFillColorSpace(pdfContext, colorSpace);
+    CGContextSetStrokeColorSpace(pdfContext, colorSpace);
+    
+    CGColorSpaceRelease(colorSpace);
+
+    myImage = CGBitmapContextCreateImage(myBitmapContext);
+    
+    docRect.origin.x = pageRect.right / 2 - (destR.right - destR.left) / 2;
+    docRect.origin.y = pageRect.bottom / 2 - (destR.bottom - destR.top) / 2;
+
+    docRect.size.width = (destR.right - destR.left);
+    docRect.size.height = (destR.bottom - destR.top);
+    
+    CGContextDrawImage(pdfContext, docRect, myImage);
+
+//    CGContextEndPage(pdfContext);
+    
+    CGContextRelease(myBitmapContext);
+    
+    CGImageRelease(myImage);
+
+}
+
+void CopyToClipBoardAsPDF(int starty, int nlines)
+{
+    //    fprintf(stderr, "Print %d (%c) to clipboard\n", Value, Value);
+    
+    PasteboardRef outPasteboard;
+    OSStatus err;
+    
+    CGRect  docRect = CGRectMake (0, 0, mainWin->m_XWinSize, mainWin->m_YWinSize);
+    
+    CFDataRef       pdfData = CFDataCreateMutable (kCFAllocatorDefault, 0);
+    CGContextRef            pdfContext;
+    CGDataConsumerRef       consumer;
+    CGDataConsumerCallbacks cfDataCallbacks = {MyCFDataPutBytes, MyCFDataRelease };
+    
+    err = PasteboardCreate(kPasteboardClipboard, &outPasteboard);
+    
+    err = PasteboardClear( outPasteboard );
+    
+    consumer = CGDataConsumerCreate ((void*)pdfData, &cfDataCallbacks);// 2
+    
+    pdfContext = CGPDFContextCreate (consumer, &docRect, NULL);// 3
+    
+    PMRect    pageRect;
+    pageRect.top = 0;
+    pageRect.left = 0;
+    pageRect.bottom = mainWin->m_YWinSize;
+    pageRect.right = mainWin->m_XWinSize;
+    
+    CGContextBeginPage(pdfContext, &docRect);
+    
+    MyDrawIntoPDFPage (pdfContext, pageRect, starty, nlines);
+    
+    CGContextEndPage(pdfContext);
+    
+    CGContextRelease (pdfContext);
+    
+    PasteboardPutItemFlavor( outPasteboard, (PasteboardItemID)1,
+                            kUTTypePDF, pdfData, kPasteboardFlavorNoFlags );
+    
+    CGDataConsumerRelease (consumer);
+    
+    CFRelease(outPasteboard);
+    
+}
 #endif
+
+/****************************************************************************/
+/* Disc Import / Export */
+
+static DFS_DISC_CATALOGUE dfsCat;
+static int filesSelected[DFS_MAX_CAT_SIZE];
+static int numSelected;
+static char szExportFolder[MAX_PATH];
+
+// File export
+
+/*
+int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+{
+    switch (uMsg)
+    {
+        case BFFM_INITIALIZED:
+            if (szExportFolder[0])
+            {
+                SendMessage(hwnd, BFFM_SETEXPANDED, TRUE, (LPARAM)szExportFolder);
+                SendMessage(hwnd, BFFM_SETSELECTION, TRUE, (LPARAM)szExportFolder);
+            }
+            break;
+    }
+    return 0;
+}
+*/
+
+/*
+BOOL CALLBACK DiscExportDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    char str[100];
+    HWND hwndList;
+    char szDisplayName[MAX_PATH];
+    int i, j;
+    
+    hwndList = GetDlgItem(hwndDlg, IDC_EXPORTFILELIST);
+    
+    switch (message)
+    {
+        case WM_INITDIALOG:
+            SendMessage(hwndList, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), (LPARAM)MAKELPARAM(FALSE,0));
+            
+            for (i = 0; i < dfsCat.numFiles; ++i)
+            {
+                sprintf(str, "%c.%-7s %06X %06X %06X",
+                        dfsCat.fileAttrs[i].directory,
+                        dfsCat.fileAttrs[i].filename,
+                        dfsCat.fileAttrs[i].loadAddr & 0xffffff,
+                        dfsCat.fileAttrs[i].execAddr & 0xffffff,
+                        dfsCat.fileAttrs[i].length);
+                j = (int)SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)str);
+                // List is sorted so store catalogue index in list's item data
+                SendMessage(hwndList, LB_SETITEMDATA, j, (LPARAM)i);
+            }
+            return TRUE;
+            
+        case WM_COMMAND:
+            switch (LOWORD(wParam))
+        {
+            case IDOK:
+                numSelected = (int)SendMessage(
+                                               hwndList, LB_GETSELITEMS, (WPARAM)DFS_MAX_CAT_SIZE, (LPARAM)filesSelected);
+                if (numSelected)
+                {
+                    // Convert list indices to catalogue indices
+                    for (i = 0; i < numSelected; ++i)
+                    {
+                        filesSelected[i] = (int)SendMessage(hwndList, LB_GETITEMDATA, filesSelected[i], 0);
+                    }
+                    
+                    // Get folder to export to
+                    BROWSEINFO bi;
+                    memset(&bi, 0, sizeof(bi));
+                    bi.hwndOwner = hwndDlg; // m_hWnd;
+                    bi.pszDisplayName = szDisplayName;
+                    bi.lpszTitle = "Select folder for exported files:";
+                    bi.ulFlags = BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
+                    bi.lpfn = BrowseCallbackProc;
+                    LPITEMIDLIST idList = SHBrowseForFolder(&bi);
+                    if (idList == NULL)
+                    {
+                        wParam = IDCANCEL;
+                    }
+                    else if (SHGetPathFromIDList(idList, szExportFolder) == FALSE)
+                    {
+                        MessageBox(hwndDlg, "Invalid folder selected", WindowTitle, MB_OK|MB_ICONWARNING);
+                        wParam = IDCANCEL;
+                    }
+                    if (idList != NULL)
+                        CoTaskMemFree(idList);
+                }
+                
+                EndDialog(hwndDlg, wParam);
+                return TRUE;
+                
+            case IDCANCEL:
+                EndDialog(hwndDlg, wParam);
+                return TRUE;
+        }
+    }
+    return FALSE;
+}
+*/
+void BeebWin::ExportDiscFiles(int menuId)
+{
+/*
+    bool success = true;
+    int drive;
+    int type;
+    char szDiscFile[MAX_PATH];
+    int heads;
+    int side;
+    char szErrStr[500];
+    int i, n;
+    
+    if (menuId == 0 || menuId == 2)
+        drive = 0;
+    else
+        drive = 1;
+    
+    if (MachineType != 3 && NativeFDC)
+    {
+        // 8271 controller
+        Get8271DiscInfo(drive, szDiscFile, &heads);
+    }
+    else
+    {
+        // 1770 controller
+        Get1770DiscInfo(drive, &type, szDiscFile);
+        if (type == 0)
+            heads = 1;
+        else if (type == 1)
+            heads = 2;
+        else
+        {
+            // ADFS - not currently supported
+            MessageBox(m_hWnd, "Export from ADFS disc not supported", WindowTitle, MB_OK|MB_ICONWARNING);
+            return;
+        }
+    }
+    
+    // Check for no disk loaded
+    if (szDiscFile[0] == 0 || heads == 1 && (menuId == 2 || menuId == 3))
+    {
+        sprintf(szErrStr, "No disc loaded in drive %d", menuId);
+        MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OK|MB_ICONWARNING);
+        return;
+    }
+    
+    // Read the catalogue
+    if (menuId == 0 || menuId == 1)
+        side = 0;
+    else
+        side = 1;
+    
+    success = dfs_get_catalogue(szDiscFile, heads, side, &dfsCat);
+    if (!success)
+    {
+        sprintf(szErrStr, "Failed to read catalogue from disc:\n  %s", szDiscFile);
+        MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OK|MB_ICONERROR);
+        return;
+    }
+    
+    // Show export dialog
+    if (DialogBox(hInst, MAKEINTRESOURCE(IDD_DISCEXPORT), m_hWnd, (DLGPROC)DiscExportDlgProc) != IDOK ||
+        numSelected == 0)
+    {
+        return;
+    }
+    
+    // Export the files
+    n = 0;
+    for (i = 0; i < numSelected; ++i)
+    {
+        success = dfs_export_file(szDiscFile, heads, side, &dfsCat,
+                                  filesSelected[i], szExportFolder, szErrStr);
+        if (success)
+        {
+            n++;
+        }
+        else
+        {
+            success = true;
+            if (MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL)
+            {
+                success = false;
+                break;
+            }
+        }
+    }
+    
+    sprintf(szErrStr, "Files successfully exported: %d", n);
+    MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OK|MB_ICONINFORMATION);
+*/
+}
+
+
+// File import
+void BeebWin::ImportDiscFiles(int menuId)
+{
+    OSErr err = noErr;
+    char path[256];
+    bool success = true;
+    int drive;
+    int type;
+    char szDiscFile[MAX_PATH];
+    int heads;
+    int side;
+    char szErrStr[500];
+    char szFolder[MAX_PATH];
+    char fileSelection[4096];
+    char baseName[MAX_PATH];
+    char *fileName;
+    static char fileNames[DFS_MAX_CAT_SIZE*2][MAX_PATH]; // Allow user to select > cat size
+    int numFiles;
+    int i, n;
+    
+    if (menuId == 0 || menuId == 2)
+        drive = 0;
+    else
+        drive = 1;
+    
+    if (MachineType != 3 && NativeFDC)
+    {
+        // 8271 controller
+        Get8271DiscInfo(drive, szDiscFile, &heads);
+    }
+    else
+    {
+        // 1770 controller
+        Get1770DiscInfo(drive, &type, szDiscFile);
+        if (type == 0)
+            heads = 1;
+        else if (type == 1)
+            heads = 2;
+        else
+        {
+            // ADFS - not currently supported
+            fprintf(stderr, "Import to ADFS disc not supported\n");
+            return;
+        }
+    }
+    
+    // Check for no disk loaded
+    if (szDiscFile[0] == 0 || heads == 1 && (menuId == 2 || menuId == 3))
+    {
+        fprintf(stderr, "No disc loaded in drive %d\n", menuId);
+        return;
+    }
+    
+    // Read the catalogue
+    if (menuId == 0 || menuId == 1)
+        side = 0;
+    else
+        side = 1;
+    
+    success = dfs_get_catalogue(szDiscFile, heads, side, &dfsCat);
+    if (!success)
+    {
+        fprintf(stderr, "Failed to read catalogue from disc:\n  %s\n", szDiscFile);
+        return;
+    }
+    
+    // Get list of files to import
+#if 0//ACH
+    err = GetOneFileWithPreview(path, IFDFilterProc);
+#else
+    err = swift_GetOneFileWithPreview(path, 256, IFD);
+#endif
+    if (err) return;
+    
+    // Parse the file selection string
+    strcpy(fileSelection, path);
+    // Only one file selected
+    fileName = strrchr(fileSelection, '/');
+    if (fileName != NULL)
+    {
+        *fileName = 0;
+        fileName++;
+    } else fileName = fileSelection;
+    
+    strcpy(szFolder, fileSelection);
+    
+    numFiles = 0;
+    while (numFiles < DFS_MAX_CAT_SIZE*2 && fileName[0] != 0)
+    {
+        // Strip .INF off
+        strcpy(baseName, fileName);
+        i = (int)strlen(baseName);
+        if (i > 4 && strcmp(baseName + i - 4, ".inf") == 0)
+            baseName[i - 4] = 0;
+        
+        // Check for duplicate
+        for (i = 0; i < numFiles; ++i)
+        {
+            if (strcmp(baseName, fileNames[i]) == 0)
+                break;
+        }
+        if (i == numFiles)
+        {
+            strcpy(fileNames[numFiles], baseName);
+            numFiles++;
+        }
+        
+        fileName = fileName + strlen(fileName) + 1;
+    }
+    
+    // Import the files
+    n = 0;
+    for (i = 0; i < numFiles; ++i)
+    {
+        success = dfs_import_file(szDiscFile, heads, side, &dfsCat, fileNames[i], szFolder, szErrStr);
+        if (success)
+        {
+            n++;
+        }
+        else
+        {
+            success = true;
+            fprintf(stderr, "%s\n", szErrStr);
+            success = false;
+            break;
+        }
+    }
+    
+    fprintf(stderr, "Files successfully imported: %d\n", n);
+    
+    // Re-read disc image
+    if (MachineType != 3 && NativeFDC)
+    {
+        // 8271 controller
+        Eject8271DiscImage(drive);
+        if (heads == 2)
+            LoadSimpleDSDiscImage(szDiscFile, drive, 80);
+        else
+            LoadSimpleDiscImage(szDiscFile, drive, 0, 80);
+    }
+    else
+    {
+        // 1770 controller
+        Close1770Disc(drive);
+        if (heads == 2)
+            Load1770DiscImage(szDiscFile, drive, 1);
+        else
+            Load1770DiscImage(szDiscFile, drive, 0);
+    }
+}
