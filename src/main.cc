@@ -622,18 +622,27 @@ static void RunApplicationEventLoopWithCooperativeThreadSupport(void)
 
 extern "C" void beeb_MainCpuLoop()
 {
-    int c;
-    c = 20;
-
-// Menu GUI more responsive if running less than real time
-    
-    if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
+#if 0 //ACH- iswindowcollapsed
+    if ( (mainWin->m_FreezeWhenInactive) && (IsWindowCollapsed(mainWin->mWindow)) )
     {
-        c = c * mainWin->m_RealTimeTarget;
+        beeb_usleep(1000 * 500);        // sleep for 0.5 secs
     }
-    
-    for (int i = 0; i < c; ++i)
-        Exec6502Instruction();
+    else
+#endif
+    {
+        int c;
+        c = 20;
+
+    // Menu GUI more responsive if running less than real time
+        
+        if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
+        {
+            c = c * mainWin->m_RealTimeTarget;
+        }
+        
+        for (int i = 0; i < c; ++i)
+            Exec6502Instruction();
+    }
 }
 // testing - this should be in a 'header'
 struct PixelData {
@@ -665,7 +674,7 @@ extern "C" void beeb_video(int count,  struct PixelData buffer[])
         buffer[i].a = videobuffer[3+(i*bpp)];
     }
     
-    // move a purple line everytime this is updated (50fps)
+    // move a green line everytime this is updated (50fps)
     y += 1;
     y %= height-2;
 

@@ -68,12 +68,16 @@ class ViewBeeb: NSView {
         super.init(coder: coder)
 
         // update the video 50 times a second
-        videoRefresh = Timer.scheduledTimer(timeInterval: 1.0/Double(fpsSpeed), target: self,
-                                     selector: #selector(videorefresh), userInfo: nil, repeats: true)
-       
+        videoRefresh = Timer.scheduledTimer(timeInterval: 1.0/Double(fpsSpeed),
+                        target: self,
+                        selector: #selector(videorefresh),
+                        userInfo: nil,
+                        repeats: true)
+
         init_audio()
         init_cpu()
         
+        // run cpu on a thread so it's not tied to the view redraw
         run_cpu_on_thread()
     }
     
