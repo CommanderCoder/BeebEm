@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DC04C64924BE059900D46EAC /* beebem5-distribution.zip in Resources */ = {isa = PBXBuildFile; fileRef = DC04C64824BE059900D46EAC /* beebem5-distribution.zip */; };
 		DC43595124B62F4F002624FE /* serialdevices.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2DA24A33D3700840082 /* serialdevices.cc */; };
 		DC6A476524A54160007E4276 /* Arm.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C824A33D3700840082 /* Arm.cc */; };
 		DC6A476624A541F1007E4276 /* ArmDisassembler.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */; };
@@ -55,11 +56,11 @@
 		DCD4AE3524A4D6970000C40A /* z80_support.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D624A33D3700840082 /* z80_support.cc */; };
 		DCD4AE3624A4D6970000C40A /* z80.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C924A33D3700840082 /* z80.cc */; };
 		DCD4AE3724A4D6970000C40A /* z80dis.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BF24A33D3700840082 /* z80dis.cc */; };
-		DCE7B8B724B09D2300FF4CFB /* beebem5-distribution.zip in Resources */ = {isa = PBXBuildFile; fileRef = DCE7B8B624B09D2300FF4CFB /* beebem5-distribution.zip */; };
 		DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 		DC59F1A224BE01D000687D2A /* beebem5-distribution */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "beebem5-distribution"; sourceTree = "<group>"; };
 		DC6A476824A54541007E4276 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -173,7 +174,6 @@
 		DCD4AE1024A4D5700000C40A /* z80mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = z80mem.h; path = src/z80mem.h; sourceTree = "<group>"; };
 		DCD4AE1124A4D5700000C40A /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debug.h; path = src/debug.h; sourceTree = "<group>"; };
 		DCD4AE1224A4D5700000C40A /* mode7font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mode7font.h; path = src/mode7font.h; sourceTree = "<group>"; };
-		DCE7B8B624B09D2300FF4CFB /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 		DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeebEm5-Bridging-Code.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -217,6 +217,7 @@
 		DCABC08F24BDFCFB00C0D754 /* Install */ = {
 			isa = PBXGroup;
 			children = (
+				DC04C64824BE059900D46EAC /* beebem5-distribution.zip */,
 				DC59F1A224BE01D000687D2A /* beebem5-distribution */,
 				DCABC09424BDFCFB00C0D754 /* make_distribution.sh */,
 			);
@@ -451,14 +452,7 @@
 			files = (
 				DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */,
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
-				DC85C5F324AB1BE300CCD72E /* Phroms.cfg in Resources */,
-				DCE7B8B724B09D2300FF4CFB /* beebem5-distribution.zip in Resources */,
-				DC85C5F724AB1BE300CCD72E /* README_MAC.txt in Resources */,
-				DC85C5F224AB1BE300CCD72E /* Roms.cfg in Resources */,
-				DC85C5F824AB1BE300CCD72E /* Roms_Torch.cfg in Resources */,
-				DCCCC2B424A3395F00840082 /* DFS image.icns in Resources */,
-				DC85C5F924AB1BE300CCD72E /* Econet.cfg in Resources */,
-				DC85C5F424AB1BE300CCD72E /* beebem.ini in Resources */,
+				DC04C64924BE059900D46EAC /* beebem5-distribution.zip in Resources */,
 				DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */,
 				DCCCC2A824A338EE00840082 /* Main.storyboard in Resources */,
 				DC85C5F524AB1BE300CCD72E /* README.txt in Resources */,
