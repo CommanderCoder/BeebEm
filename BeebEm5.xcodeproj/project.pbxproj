@@ -12,20 +12,105 @@
 		DC6A476624A541F1007E4276 /* ArmDisassembler.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */; };
 		DC6A476924A54541007E4276 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476824A54541007E4276 /* libz.tbd */; };
 		DC6A476B24A54DA3007E4276 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */; };
-		DC85C5F224AB1BE300CCD72E /* Roms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EA24AB1BE300CCD72E /* Roms.cfg */; };
-		DC85C5F324AB1BE300CCD72E /* Phroms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */; };
-		DC85C5F424AB1BE300CCD72E /* beebem.ini in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EC24AB1BE300CCD72E /* beebem.ini */; };
 		DC85C5F524AB1BE300CCD72E /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5ED24AB1BE300CCD72E /* README.txt */; };
 		DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */; };
-		DC85C5F724AB1BE300CCD72E /* README_MAC.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */; };
-		DC85C5F824AB1BE300CCD72E /* Roms_Torch.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */; };
-		DC85C5F924AB1BE300CCD72E /* Econet.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F124AB1BE300CCD72E /* Econet.cfg */; };
 		DC907FDD24B52C8200B99036 /* TapeControlViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */; };
+		DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */; };
+		DCABC0FD24BDFCFB00C0D754 /* make_distribution.sh in Resources */ = {isa = PBXBuildFile; fileRef = DCABC09424BDFCFB00C0D754 /* make_distribution.sh */; };
+		DCABC10024BDFCFB00C0D754 /* RelayOff.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC09924BDFCFB00C0D754 /* RelayOff.snd */; };
+		DCABC10124BDFCFB00C0D754 /* README_MAC.txt in Resources */ = {isa = PBXBuildFile; fileRef = DCABC09A24BDFCFB00C0D754 /* README_MAC.txt */; };
+		DCABC10224BDFCFB00C0D754 /* BIOS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC09C24BDFCFB00C0D754 /* BIOS.ROM */; };
+		DCABC10324BDFCFB00C0D754 /* 6502TUBE.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC09D24BDFCFB00C0D754 /* 6502TUBE.ROM */; };
+		DCABC10424BDFCFB00C0D754 /* BASIC2.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC09F24BDFCFB00C0D754 /* BASIC2.ROM */; };
+		DCABC10524BDFCFB00C0D754 /* MCP120.CBL in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A024BDFCFB00C0D754 /* MCP120.CBL */; };
+		DCABC10624BDFCFB00C0D754 /* ADFS-1.30.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A124BDFCFB00C0D754 /* ADFS-1.30.ROM */; };
+		DCABC10724BDFCFB00C0D754 /* OS12.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A224BDFCFB00C0D754 /* OS12.ROM */; };
+		DCABC10824BDFCFB00C0D754 /* ATS-3.0-1.rom in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A324BDFCFB00C0D754 /* ATS-3.0-1.rom */; };
+		DCABC10924BDFCFB00C0D754 /* DDFS-1.54.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A424BDFCFB00C0D754 /* DDFS-1.54.ROM */; };
+		DCABC10A24BDFCFB00C0D754 /* ZCODE.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A524BDFCFB00C0D754 /* ZCODE.ROM */; };
+		DCABC10B24BDFCFB00C0D754 /* WDFS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A624BDFCFB00C0D754 /* WDFS.ROM */; };
+		DCABC10C24BDFCFB00C0D754 /* DNFS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A724BDFCFB00C0D754 /* DNFS.ROM */; };
+		DCABC10D24BDFCFB00C0D754 /* BASIC2.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0A924BDFCFB00C0D754 /* BASIC2.ROM */; };
+		DCABC10E24BDFCFB00C0D754 /* B+MOS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0AA24BDFCFB00C0D754 /* B+MOS.ROM */; };
+		DCABC10F24BDFCFB00C0D754 /* ADFS-1.30.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0AB24BDFCFB00C0D754 /* ADFS-1.30.ROM */; };
+		DCABC11024BDFCFB00C0D754 /* WDFS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0AC24BDFCFB00C0D754 /* WDFS.ROM */; };
+		DCABC11124BDFCFB00C0D754 /* DFS-2.26.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0AD24BDFCFB00C0D754 /* DFS-2.26.ROM */; };
+		DCABC11224BDFCFB00C0D754 /* Z80.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0AE24BDFCFB00C0D754 /* Z80.ROM */; };
+		DCABC11324BDFCFB00C0D754 /* CCPN102.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0AF24BDFCFB00C0D754 /* CCPN102.ROM */; };
+		DCABC11424BDFCFB00C0D754 /* ARMeval_100.rom in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B024BDFCFB00C0D754 /* ARMeval_100.rom */; };
+		DCABC11524BDFCFB00C0D754 /* ANFS-4.25-2201351.rom in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B224BDFCFB00C0D754 /* ANFS-4.25-2201351.rom */; };
+		DCABC11624BDFCFB00C0D754 /* BASIC4.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B324BDFCFB00C0D754 /* BASIC4.ROM */; };
+		DCABC11724BDFCFB00C0D754 /* EDIT.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B424BDFCFB00C0D754 /* EDIT.ROM */; };
+		DCABC11824BDFCFB00C0D754 /* DFS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B524BDFCFB00C0D754 /* DFS.ROM */; };
+		DCABC11924BDFCFB00C0D754 /* VIEW.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B624BDFCFB00C0D754 /* VIEW.ROM */; };
+		DCABC11A24BDFCFB00C0D754 /* ATS-3.0-1.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B724BDFCFB00C0D754 /* ATS-3.0-1.ROM */; };
+		DCABC11B24BDFCFB00C0D754 /* TFS-2.50.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B824BDFCFB00C0D754 /* TFS-2.50.ROM */; };
+		DCABC11C24BDFCFB00C0D754 /* MOS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0B924BDFCFB00C0D754 /* MOS.ROM */; };
+		DCABC11D24BDFCFB00C0D754 /* ZCODE.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0BA24BDFCFB00C0D754 /* ZCODE.ROM */; };
+		DCABC11E24BDFCFB00C0D754 /* ADFS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0BB24BDFCFB00C0D754 /* ADFS.ROM */; };
+		DCABC11F24BDFCFB00C0D754 /* MCP122.ABM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0BC24BDFCFB00C0D754 /* MCP122.ABM */; };
+		DCABC12024BDFCFB00C0D754 /* TERMINAL.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0BD24BDFCFB00C0D754 /* TERMINAL.ROM */; };
+		DCABC12124BDFCFB00C0D754 /* VIEWSHT.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0BE24BDFCFB00C0D754 /* VIEWSHT.ROM */; };
+		DCABC12224BDFCFB00C0D754 /* BASIC2.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C024BDFCFB00C0D754 /* BASIC2.ROM */; };
+		DCABC12324BDFCFB00C0D754 /* OS12.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C124BDFCFB00C0D754 /* OS12.ROM */; };
+		DCABC12424BDFCFB00C0D754 /* IBOS.rom in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C224BDFCFB00C0D754 /* IBOS.rom */; };
+		DCABC12524BDFCFB00C0D754 /* WDFS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C324BDFCFB00C0D754 /* WDFS.ROM */; };
+		DCABC12624BDFCFB00C0D754 /* DNFS.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C424BDFCFB00C0D754 /* DNFS.ROM */; };
+		DCABC12724BDFCFB00C0D754 /* HIBASIC3.ROM in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C524BDFCFB00C0D754 /* HIBASIC3.ROM */; };
+		DCABC12824BDFCFB00C0D754 /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C624BDFCFB00C0D754 /* COPYRIGHT.txt */; };
+		DCABC12924BDFCFB00C0D754 /* Test.uef in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C824BDFCFB00C0D754 /* Test.uef */; };
+		DCABC12A24BDFCFB00C0D754 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0C924BDFCFB00C0D754 /* LICENSE */; };
+		DCABC12B24BDFCFB00C0D754 /* RelayOn.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0CA24BDFCFB00C0D754 /* RelayOn.snd */; };
+		DCABC12C24BDFCFB00C0D754 /* Roms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0CB24BDFCFB00C0D754 /* Roms.cfg */; };
+		DCABC12D24BDFCFB00C0D754 /* VM61003.BIN in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0CE24BDFCFB00C0D754 /* VM61003.BIN */; };
+		DCABC12E24BDFCFB00C0D754 /* PHROMUS in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0CF24BDFCFB00C0D754 /* PHROMUS */; };
+		DCABC12F24BDFCFB00C0D754 /* VM61002.BIN in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D024BDFCFB00C0D754 /* VM61002.BIN */; };
+		DCABC13024BDFCFB00C0D754 /* phromsus.txt in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D124BDFCFB00C0D754 /* phromsus.txt */; };
+		DCABC13124BDFCFB00C0D754 /* VM71003A.BIN in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D224BDFCFB00C0D754 /* VM71003A.BIN */; };
+		DCABC13224BDFCFB00C0D754 /* VM61005.BIN in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D324BDFCFB00C0D754 /* VM61005.BIN */; };
+		DCABC13324BDFCFB00C0D754 /* PHROMA in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D424BDFCFB00C0D754 /* PHROMA */; };
+		DCABC13424BDFCFB00C0D754 /* VM61004.BIN in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D524BDFCFB00C0D754 /* VM61004.BIN */; };
+		DCABC13524BDFCFB00C0D754 /* Econet.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D624BDFCFB00C0D754 /* Econet.cfg */; };
+		DCABC13724BDFCFB00C0D754 /* HeadSeek.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D824BDFCFB00C0D754 /* HeadSeek.snd */; };
+		DCABC13824BDFCFB00C0D754 /* HeadStep.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0D924BDFCFB00C0D754 /* HeadStep.snd */; };
+		DCABC13924BDFCFB00C0D754 /* DriveMotor.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0DA24BDFCFB00C0D754 /* DriveMotor.snd */; };
+		DCABC13A24BDFCFB00C0D754 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0DB24BDFCFB00C0D754 /* README.txt */; };
+		DCABC13B24BDFCFB00C0D754 /* Phroms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0DC24BDFCFB00C0D754 /* Phroms.cfg */; };
+		DCABC13D24BDFCFB00C0D754 /* HeadUnload.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0DE24BDFCFB00C0D754 /* HeadUnload.snd */; };
+		DCABC13E24BDFCFB00C0D754 /* Roms_Torch.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0DF24BDFCFB00C0D754 /* Roms_Torch.cfg */; };
+		DCABC13F24BDFCFB00C0D754 /* cmos.ram in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E124BDFCFB00C0D754 /* cmos.ram */; };
+		DCABC14024BDFCFB00C0D754 /* beebem.ini in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E224BDFCFB00C0D754 /* beebem.ini */; };
+		DCABC14124BDFCFB00C0D754 /* HeadLoad.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E324BDFCFB00C0D754 /* HeadLoad.snd */; };
+		DCABC14224BDFCFB00C0D754 /* scsi1.dat in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E524BDFCFB00C0D754 /* scsi1.dat */; };
+		DCABC14324BDFCFB00C0D754 /* scsi0.dat in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E624BDFCFB00C0D754 /* scsi0.dat */; };
+		DCABC14424BDFCFB00C0D754 /* scsi2.dat in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E724BDFCFB00C0D754 /* scsi2.dat */; };
+		DCABC14524BDFCFB00C0D754 /* scsi3.dat in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E824BDFCFB00C0D754 /* scsi3.dat */; };
+		DCABC14624BDFCFB00C0D754 /* econet_level_1_utils.ssd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0E924BDFCFB00C0D754 /* econet_level_1_utils.ssd */; };
+		DCABC14724BDFCFB00C0D754 /* Games.ssd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0EA24BDFCFB00C0D754 /* Games.ssd */; };
+		DCABC14824BDFCFB00C0D754 /* sasi0.dat in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0EB24BDFCFB00C0D754 /* sasi0.dat */; };
+		DCABC14924BDFCFB00C0D754 /* BBCMaster512-Disc1-DosPlusBoot.adl in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0EC24BDFCFB00C0D754 /* BBCMaster512-Disc1-DosPlusBoot.adl */; };
+		DCABC14A24BDFCFB00C0D754 /* CPM_Utilities_Disc.dsd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0ED24BDFCFB00C0D754 /* CPM_Utilities_Disc.dsd */; };
+		DCABC14B24BDFCFB00C0D754 /* l3server.adl in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0EE24BDFCFB00C0D754 /* l3server.adl */; };
+		DCABC14C24BDFCFB00C0D754 /* L3FS-ISW.adl in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0EF24BDFCFB00C0D754 /* L3FS-ISW.adl */; };
+		DCABC14D24BDFCFB00C0D754 /* Welcome.ssd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F024BDFCFB00C0D754 /* Welcome.ssd */; };
+		DCABC14E24BDFCFB00C0D754 /* scsi0.dsc in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F124BDFCFB00C0D754 /* scsi0.dsc */; };
+		DCABC14F24BDFCFB00C0D754 /* scsi1.dsc in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F224BDFCFB00C0D754 /* scsi1.dsc */; };
+		DCABC15024BDFCFB00C0D754 /* scsi3.dsc in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F324BDFCFB00C0D754 /* scsi3.dsc */; };
+		DCABC15124BDFCFB00C0D754 /* MasterWelcome.adl in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F424BDFCFB00C0D754 /* MasterWelcome.adl */; };
+		DCABC15224BDFCFB00C0D754 /* scsi2.dsc in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F524BDFCFB00C0D754 /* scsi2.dsc */; };
+		DCABC15324BDFCFB00C0D754 /* L3-Utils.dsd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F624BDFCFB00C0D754 /* L3-Utils.dsd */; };
+		DCABC15424BDFCFB00C0D754 /* econet_level_2_utils.ssd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F724BDFCFB00C0D754 /* econet_level_2_utils.ssd */; };
+		DCABC15524BDFCFB00C0D754 /* armdisc3.adl in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F824BDFCFB00C0D754 /* armdisc3.adl */; };
+		DCABC15624BDFCFB00C0D754 /* Test.ssd in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0F924BDFCFB00C0D754 /* Test.ssd */; };
+		DCABC15724BDFCFB00C0D754 /* teletext.fnt in Resources */ = {isa = PBXBuildFile; fileRef = DCABC0FA24BDFCFB00C0D754 /* teletext.fnt */; };
+		DCABC15B24BDFE8600C0D754 /* beebem.png in Resources */ = {isa = PBXBuildFile; fileRef = DCABC15924BDFE8600C0D754 /* beebem.png */; };
+		DCABC15D24BDFEE800C0D754 /* beebem.icns in Resources */ = {isa = PBXBuildFile; fileRef = DCABC15C24BDFEE800C0D754 /* beebem.icns */; };
+		DCABC16224BDFF5C00C0D754 /* i86time.c in Sources */ = {isa = PBXBuildFile; fileRef = DCABC15F24BDFF5B00C0D754 /* i86time.c */; };
+		DCABC16324BDFF5C00C0D754 /* instr86.c in Sources */ = {isa = PBXBuildFile; fileRef = DCABC16024BDFF5B00C0D754 /* instr86.c */; };
+		DCABC16424BDFF5C00C0D754 /* debug_org.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCABC16124BDFF5C00C0D754 /* debug_org.cc */; };
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
 		DCCCC2A824A338EE00840082 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A624A338EE00840082 /* Main.storyboard */; };
-		DCCCC2B424A3395F00840082 /* DFS image.icns in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2B224A3395F00840082 /* DFS image.icns */; };
-		DCCCC30624A33E2E00840082 /* Z Random BBC file.icns in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */; };
 		DCCCC30A24A33FDB00840082 /* ViewBeeb.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30924A33FDB00840082 /* ViewBeeb.swift */; };
 		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
 		DCCCC30D24A3D79B00840082 /* beebview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30C24A3D79B00840082 /* beebview.cpp */; };
@@ -77,6 +162,98 @@
 		DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms_Torch.cfg; sourceTree = "<group>"; };
 		DC85C5F124AB1BE300CCD72E /* Econet.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Econet.cfg; sourceTree = "<group>"; };
 		DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapeControlViewController.swift; sourceTree = "<group>"; };
+		DCABC09424BDFCFB00C0D754 /* make_distribution.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = make_distribution.sh; sourceTree = "<group>"; };
+		DCABC09924BDFCFB00C0D754 /* RelayOff.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RelayOff.snd; sourceTree = "<group>"; };
+		DCABC09A24BDFCFB00C0D754 /* README_MAC.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README_MAC.txt; sourceTree = "<group>"; };
+		DCABC09C24BDFCFB00C0D754 /* BIOS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = BIOS.ROM; sourceTree = "<group>"; };
+		DCABC09D24BDFCFB00C0D754 /* 6502TUBE.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = 6502TUBE.ROM; sourceTree = "<group>"; };
+		DCABC09F24BDFCFB00C0D754 /* BASIC2.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = BASIC2.ROM; sourceTree = "<group>"; };
+		DCABC0A024BDFCFB00C0D754 /* MCP120.CBL */ = {isa = PBXFileReference; lastKnownFileType = file; path = MCP120.CBL; sourceTree = "<group>"; };
+		DCABC0A124BDFCFB00C0D754 /* ADFS-1.30.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ADFS-1.30.ROM"; sourceTree = "<group>"; };
+		DCABC0A224BDFCFB00C0D754 /* OS12.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = OS12.ROM; sourceTree = "<group>"; };
+		DCABC0A324BDFCFB00C0D754 /* ATS-3.0-1.rom */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ATS-3.0-1.rom"; sourceTree = "<group>"; };
+		DCABC0A424BDFCFB00C0D754 /* DDFS-1.54.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = "DDFS-1.54.ROM"; sourceTree = "<group>"; };
+		DCABC0A524BDFCFB00C0D754 /* ZCODE.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = ZCODE.ROM; sourceTree = "<group>"; };
+		DCABC0A624BDFCFB00C0D754 /* WDFS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = WDFS.ROM; sourceTree = "<group>"; };
+		DCABC0A724BDFCFB00C0D754 /* DNFS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = DNFS.ROM; sourceTree = "<group>"; };
+		DCABC0A924BDFCFB00C0D754 /* BASIC2.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = BASIC2.ROM; sourceTree = "<group>"; };
+		DCABC0AA24BDFCFB00C0D754 /* B+MOS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = "B+MOS.ROM"; sourceTree = "<group>"; };
+		DCABC0AB24BDFCFB00C0D754 /* ADFS-1.30.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ADFS-1.30.ROM"; sourceTree = "<group>"; };
+		DCABC0AC24BDFCFB00C0D754 /* WDFS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = WDFS.ROM; sourceTree = "<group>"; };
+		DCABC0AD24BDFCFB00C0D754 /* DFS-2.26.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = "DFS-2.26.ROM"; sourceTree = "<group>"; };
+		DCABC0AE24BDFCFB00C0D754 /* Z80.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = Z80.ROM; sourceTree = "<group>"; };
+		DCABC0AF24BDFCFB00C0D754 /* CCPN102.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = CCPN102.ROM; sourceTree = "<group>"; };
+		DCABC0B024BDFCFB00C0D754 /* ARMeval_100.rom */ = {isa = PBXFileReference; lastKnownFileType = file; path = ARMeval_100.rom; sourceTree = "<group>"; };
+		DCABC0B224BDFCFB00C0D754 /* ANFS-4.25-2201351.rom */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ANFS-4.25-2201351.rom"; sourceTree = "<group>"; };
+		DCABC0B324BDFCFB00C0D754 /* BASIC4.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = BASIC4.ROM; sourceTree = "<group>"; };
+		DCABC0B424BDFCFB00C0D754 /* EDIT.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = EDIT.ROM; sourceTree = "<group>"; };
+		DCABC0B524BDFCFB00C0D754 /* DFS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = DFS.ROM; sourceTree = "<group>"; };
+		DCABC0B624BDFCFB00C0D754 /* VIEW.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = VIEW.ROM; sourceTree = "<group>"; };
+		DCABC0B724BDFCFB00C0D754 /* ATS-3.0-1.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ATS-3.0-1.ROM"; sourceTree = "<group>"; };
+		DCABC0B824BDFCFB00C0D754 /* TFS-2.50.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TFS-2.50.ROM"; sourceTree = "<group>"; };
+		DCABC0B924BDFCFB00C0D754 /* MOS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = MOS.ROM; sourceTree = "<group>"; };
+		DCABC0BA24BDFCFB00C0D754 /* ZCODE.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = ZCODE.ROM; sourceTree = "<group>"; };
+		DCABC0BB24BDFCFB00C0D754 /* ADFS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = ADFS.ROM; sourceTree = "<group>"; };
+		DCABC0BC24BDFCFB00C0D754 /* MCP122.ABM */ = {isa = PBXFileReference; lastKnownFileType = file; path = MCP122.ABM; sourceTree = "<group>"; };
+		DCABC0BD24BDFCFB00C0D754 /* TERMINAL.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = TERMINAL.ROM; sourceTree = "<group>"; };
+		DCABC0BE24BDFCFB00C0D754 /* VIEWSHT.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = VIEWSHT.ROM; sourceTree = "<group>"; };
+		DCABC0C024BDFCFB00C0D754 /* BASIC2.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = BASIC2.ROM; sourceTree = "<group>"; };
+		DCABC0C124BDFCFB00C0D754 /* OS12.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = OS12.ROM; sourceTree = "<group>"; };
+		DCABC0C224BDFCFB00C0D754 /* IBOS.rom */ = {isa = PBXFileReference; lastKnownFileType = file; path = IBOS.rom; sourceTree = "<group>"; };
+		DCABC0C324BDFCFB00C0D754 /* WDFS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = WDFS.ROM; sourceTree = "<group>"; };
+		DCABC0C424BDFCFB00C0D754 /* DNFS.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = DNFS.ROM; sourceTree = "<group>"; };
+		DCABC0C524BDFCFB00C0D754 /* HIBASIC3.ROM */ = {isa = PBXFileReference; lastKnownFileType = file; path = HIBASIC3.ROM; sourceTree = "<group>"; };
+		DCABC0C624BDFCFB00C0D754 /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
+		DCABC0C824BDFCFB00C0D754 /* Test.uef */ = {isa = PBXFileReference; lastKnownFileType = file; path = Test.uef; sourceTree = "<group>"; };
+		DCABC0C924BDFCFB00C0D754 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		DCABC0CA24BDFCFB00C0D754 /* RelayOn.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RelayOn.snd; sourceTree = "<group>"; };
+		DCABC0CB24BDFCFB00C0D754 /* Roms.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms.cfg; sourceTree = "<group>"; };
+		DCABC0CE24BDFCFB00C0D754 /* VM61003.BIN */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = VM61003.BIN; sourceTree = "<group>"; };
+		DCABC0CF24BDFCFB00C0D754 /* PHROMUS */ = {isa = PBXFileReference; lastKnownFileType = file; path = PHROMUS; sourceTree = "<group>"; };
+		DCABC0D024BDFCFB00C0D754 /* VM61002.BIN */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = VM61002.BIN; sourceTree = "<group>"; };
+		DCABC0D124BDFCFB00C0D754 /* phromsus.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = phromsus.txt; sourceTree = "<group>"; };
+		DCABC0D224BDFCFB00C0D754 /* VM71003A.BIN */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = VM71003A.BIN; sourceTree = "<group>"; };
+		DCABC0D324BDFCFB00C0D754 /* VM61005.BIN */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = VM61005.BIN; sourceTree = "<group>"; };
+		DCABC0D424BDFCFB00C0D754 /* PHROMA */ = {isa = PBXFileReference; lastKnownFileType = file; path = PHROMA; sourceTree = "<group>"; };
+		DCABC0D524BDFCFB00C0D754 /* VM61004.BIN */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = VM61004.BIN; sourceTree = "<group>"; };
+		DCABC0D624BDFCFB00C0D754 /* Econet.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Econet.cfg; sourceTree = "<group>"; };
+		DCABC0D824BDFCFB00C0D754 /* HeadSeek.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HeadSeek.snd; sourceTree = "<group>"; };
+		DCABC0D924BDFCFB00C0D754 /* HeadStep.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HeadStep.snd; sourceTree = "<group>"; };
+		DCABC0DA24BDFCFB00C0D754 /* DriveMotor.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DriveMotor.snd; sourceTree = "<group>"; };
+		DCABC0DB24BDFCFB00C0D754 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		DCABC0DC24BDFCFB00C0D754 /* Phroms.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Phroms.cfg; sourceTree = "<group>"; };
+		DCABC0DE24BDFCFB00C0D754 /* HeadUnload.snd */ = {isa = PBXFileReference; lastKnownFileType = file; path = HeadUnload.snd; sourceTree = "<group>"; };
+		DCABC0DF24BDFCFB00C0D754 /* Roms_Torch.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms_Torch.cfg; sourceTree = "<group>"; };
+		DCABC0E124BDFCFB00C0D754 /* cmos.ram */ = {isa = PBXFileReference; lastKnownFileType = file; path = cmos.ram; sourceTree = "<group>"; };
+		DCABC0E224BDFCFB00C0D754 /* beebem.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = beebem.ini; sourceTree = "<group>"; };
+		DCABC0E324BDFCFB00C0D754 /* HeadLoad.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HeadLoad.snd; sourceTree = "<group>"; };
+		DCABC0E524BDFCFB00C0D754 /* scsi1.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi1.dat; sourceTree = "<group>"; };
+		DCABC0E624BDFCFB00C0D754 /* scsi0.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi0.dat; sourceTree = "<group>"; };
+		DCABC0E724BDFCFB00C0D754 /* scsi2.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi2.dat; sourceTree = "<group>"; };
+		DCABC0E824BDFCFB00C0D754 /* scsi3.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi3.dat; sourceTree = "<group>"; };
+		DCABC0E924BDFCFB00C0D754 /* econet_level_1_utils.ssd */ = {isa = PBXFileReference; lastKnownFileType = file; path = econet_level_1_utils.ssd; sourceTree = "<group>"; };
+		DCABC0EA24BDFCFB00C0D754 /* Games.ssd */ = {isa = PBXFileReference; lastKnownFileType = file; path = Games.ssd; sourceTree = "<group>"; };
+		DCABC0EB24BDFCFB00C0D754 /* sasi0.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = sasi0.dat; sourceTree = "<group>"; };
+		DCABC0EC24BDFCFB00C0D754 /* BBCMaster512-Disc1-DosPlusBoot.adl */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BBCMaster512-Disc1-DosPlusBoot.adl"; sourceTree = "<group>"; };
+		DCABC0ED24BDFCFB00C0D754 /* CPM_Utilities_Disc.dsd */ = {isa = PBXFileReference; lastKnownFileType = file; path = CPM_Utilities_Disc.dsd; sourceTree = "<group>"; };
+		DCABC0EE24BDFCFB00C0D754 /* l3server.adl */ = {isa = PBXFileReference; lastKnownFileType = file; path = l3server.adl; sourceTree = "<group>"; };
+		DCABC0EF24BDFCFB00C0D754 /* L3FS-ISW.adl */ = {isa = PBXFileReference; lastKnownFileType = file; path = "L3FS-ISW.adl"; sourceTree = "<group>"; };
+		DCABC0F024BDFCFB00C0D754 /* Welcome.ssd */ = {isa = PBXFileReference; lastKnownFileType = file; path = Welcome.ssd; sourceTree = "<group>"; };
+		DCABC0F124BDFCFB00C0D754 /* scsi0.dsc */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi0.dsc; sourceTree = "<group>"; };
+		DCABC0F224BDFCFB00C0D754 /* scsi1.dsc */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi1.dsc; sourceTree = "<group>"; };
+		DCABC0F324BDFCFB00C0D754 /* scsi3.dsc */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi3.dsc; sourceTree = "<group>"; };
+		DCABC0F424BDFCFB00C0D754 /* MasterWelcome.adl */ = {isa = PBXFileReference; lastKnownFileType = file; path = MasterWelcome.adl; sourceTree = "<group>"; };
+		DCABC0F524BDFCFB00C0D754 /* scsi2.dsc */ = {isa = PBXFileReference; lastKnownFileType = file; path = scsi2.dsc; sourceTree = "<group>"; };
+		DCABC0F624BDFCFB00C0D754 /* L3-Utils.dsd */ = {isa = PBXFileReference; lastKnownFileType = file; path = "L3-Utils.dsd"; sourceTree = "<group>"; };
+		DCABC0F724BDFCFB00C0D754 /* econet_level_2_utils.ssd */ = {isa = PBXFileReference; lastKnownFileType = file; path = econet_level_2_utils.ssd; sourceTree = "<group>"; };
+		DCABC0F824BDFCFB00C0D754 /* armdisc3.adl */ = {isa = PBXFileReference; lastKnownFileType = file; path = armdisc3.adl; sourceTree = "<group>"; };
+		DCABC0F924BDFCFB00C0D754 /* Test.ssd */ = {isa = PBXFileReference; lastKnownFileType = file; path = Test.ssd; sourceTree = "<group>"; };
+		DCABC0FA24BDFCFB00C0D754 /* teletext.fnt */ = {isa = PBXFileReference; lastKnownFileType = file; path = teletext.fnt; sourceTree = "<group>"; };
+		DCABC15924BDFE8600C0D754 /* beebem.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = beebem.png; path = src/beebem.png; sourceTree = "<group>"; };
+		DCABC15C24BDFEE800C0D754 /* beebem.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = beebem.icns; path = src/beebem.icns; sourceTree = "<group>"; };
+		DCABC15F24BDFF5B00C0D754 /* i86time.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = i86time.c; path = src/i86time.c; sourceTree = "<group>"; };
+		DCABC16024BDFF5B00C0D754 /* instr86.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = instr86.c; path = src/instr86.c; sourceTree = "<group>"; };
+		DCABC16124BDFF5C00C0D754 /* debug_org.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debug_org.cc; path = src/debug_org.cc; sourceTree = "<group>"; };
 		DCCCC29B24A338ED00840082 /* BeebEm5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeebEm5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCCCC29E24A338ED00840082 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DCCCC2A224A338ED00840082 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -212,9 +389,203 @@
 			name = ini;
 			sourceTree = "<group>";
 		};
+		DCABC08F24BDFCFB00C0D754 /* Install */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC09424BDFCFB00C0D754 /* make_distribution.sh */,
+				DCABC09824BDFCFB00C0D754 /* beebem5-distribution */,
+			);
+			path = Install;
+			sourceTree = "<group>";
+		};
+		DCABC09824BDFCFB00C0D754 /* beebem5-distribution */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC09924BDFCFB00C0D754 /* RelayOff.snd */,
+				DCABC09A24BDFCFB00C0D754 /* README_MAC.txt */,
+				DCABC09B24BDFCFB00C0D754 /* BeebFile */,
+				DCABC0C624BDFCFB00C0D754 /* COPYRIGHT.txt */,
+				DCABC0C724BDFCFB00C0D754 /* Tapes */,
+				DCABC0C924BDFCFB00C0D754 /* LICENSE */,
+				DCABC0CA24BDFCFB00C0D754 /* RelayOn.snd */,
+				DCABC0CB24BDFCFB00C0D754 /* Roms.cfg */,
+				DCABC0CC24BDFCFB00C0D754 /* pics */,
+				DCABC0CD24BDFCFB00C0D754 /* Phroms */,
+				DCABC0D624BDFCFB00C0D754 /* Econet.cfg */,
+				DCABC0D824BDFCFB00C0D754 /* HeadSeek.snd */,
+				DCABC0D924BDFCFB00C0D754 /* HeadStep.snd */,
+				DCABC0DA24BDFCFB00C0D754 /* DriveMotor.snd */,
+				DCABC0DB24BDFCFB00C0D754 /* README.txt */,
+				DCABC0DC24BDFCFB00C0D754 /* Phroms.cfg */,
+				DCABC0DE24BDFCFB00C0D754 /* HeadUnload.snd */,
+				DCABC0DF24BDFCFB00C0D754 /* Roms_Torch.cfg */,
+				DCABC0E024BDFCFB00C0D754 /* beebstate */,
+				DCABC0E224BDFCFB00C0D754 /* beebem.ini */,
+				DCABC0E324BDFCFB00C0D754 /* HeadLoad.snd */,
+				DCABC0E424BDFCFB00C0D754 /* diskimg */,
+				DCABC0FA24BDFCFB00C0D754 /* teletext.fnt */,
+			);
+			path = "beebem5-distribution";
+			sourceTree = "<group>";
+		};
+		DCABC09B24BDFCFB00C0D754 /* BeebFile */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC09C24BDFCFB00C0D754 /* BIOS.ROM */,
+				DCABC09D24BDFCFB00C0D754 /* 6502TUBE.ROM */,
+				DCABC09E24BDFCFB00C0D754 /* BBC */,
+				DCABC0A824BDFCFB00C0D754 /* BPLUS */,
+				DCABC0AE24BDFCFB00C0D754 /* Z80.ROM */,
+				DCABC0AF24BDFCFB00C0D754 /* CCPN102.ROM */,
+				DCABC0B024BDFCFB00C0D754 /* ARMeval_100.rom */,
+				DCABC0B124BDFCFB00C0D754 /* M128 */,
+				DCABC0BF24BDFCFB00C0D754 /* BBCINT */,
+				DCABC0C524BDFCFB00C0D754 /* HIBASIC3.ROM */,
+			);
+			path = BeebFile;
+			sourceTree = "<group>";
+		};
+		DCABC09E24BDFCFB00C0D754 /* BBC */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC09F24BDFCFB00C0D754 /* BASIC2.ROM */,
+				DCABC0A024BDFCFB00C0D754 /* MCP120.CBL */,
+				DCABC0A124BDFCFB00C0D754 /* ADFS-1.30.ROM */,
+				DCABC0A224BDFCFB00C0D754 /* OS12.ROM */,
+				DCABC0A324BDFCFB00C0D754 /* ATS-3.0-1.rom */,
+				DCABC0A424BDFCFB00C0D754 /* DDFS-1.54.ROM */,
+				DCABC0A524BDFCFB00C0D754 /* ZCODE.ROM */,
+				DCABC0A624BDFCFB00C0D754 /* WDFS.ROM */,
+				DCABC0A724BDFCFB00C0D754 /* DNFS.ROM */,
+			);
+			path = BBC;
+			sourceTree = "<group>";
+		};
+		DCABC0A824BDFCFB00C0D754 /* BPLUS */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC0A924BDFCFB00C0D754 /* BASIC2.ROM */,
+				DCABC0AA24BDFCFB00C0D754 /* B+MOS.ROM */,
+				DCABC0AB24BDFCFB00C0D754 /* ADFS-1.30.ROM */,
+				DCABC0AC24BDFCFB00C0D754 /* WDFS.ROM */,
+				DCABC0AD24BDFCFB00C0D754 /* DFS-2.26.ROM */,
+			);
+			path = BPLUS;
+			sourceTree = "<group>";
+		};
+		DCABC0B124BDFCFB00C0D754 /* M128 */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC0B224BDFCFB00C0D754 /* ANFS-4.25-2201351.rom */,
+				DCABC0B324BDFCFB00C0D754 /* BASIC4.ROM */,
+				DCABC0B424BDFCFB00C0D754 /* EDIT.ROM */,
+				DCABC0B524BDFCFB00C0D754 /* DFS.ROM */,
+				DCABC0B624BDFCFB00C0D754 /* VIEW.ROM */,
+				DCABC0B724BDFCFB00C0D754 /* ATS-3.0-1.ROM */,
+				DCABC0B824BDFCFB00C0D754 /* TFS-2.50.ROM */,
+				DCABC0B924BDFCFB00C0D754 /* MOS.ROM */,
+				DCABC0BA24BDFCFB00C0D754 /* ZCODE.ROM */,
+				DCABC0BB24BDFCFB00C0D754 /* ADFS.ROM */,
+				DCABC0BC24BDFCFB00C0D754 /* MCP122.ABM */,
+				DCABC0BD24BDFCFB00C0D754 /* TERMINAL.ROM */,
+				DCABC0BE24BDFCFB00C0D754 /* VIEWSHT.ROM */,
+			);
+			path = M128;
+			sourceTree = "<group>";
+		};
+		DCABC0BF24BDFCFB00C0D754 /* BBCINT */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC0C024BDFCFB00C0D754 /* BASIC2.ROM */,
+				DCABC0C124BDFCFB00C0D754 /* OS12.ROM */,
+				DCABC0C224BDFCFB00C0D754 /* IBOS.rom */,
+				DCABC0C324BDFCFB00C0D754 /* WDFS.ROM */,
+				DCABC0C424BDFCFB00C0D754 /* DNFS.ROM */,
+			);
+			path = BBCINT;
+			sourceTree = "<group>";
+		};
+		DCABC0C724BDFCFB00C0D754 /* Tapes */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC0C824BDFCFB00C0D754 /* Test.uef */,
+			);
+			path = Tapes;
+			sourceTree = "<group>";
+		};
+		DCABC0CC24BDFCFB00C0D754 /* pics */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = pics;
+			sourceTree = "<group>";
+		};
+		DCABC0CD24BDFCFB00C0D754 /* Phroms */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC0CE24BDFCFB00C0D754 /* VM61003.BIN */,
+				DCABC0CF24BDFCFB00C0D754 /* PHROMUS */,
+				DCABC0D024BDFCFB00C0D754 /* VM61002.BIN */,
+				DCABC0D124BDFCFB00C0D754 /* phromsus.txt */,
+				DCABC0D224BDFCFB00C0D754 /* VM71003A.BIN */,
+				DCABC0D324BDFCFB00C0D754 /* VM61005.BIN */,
+				DCABC0D424BDFCFB00C0D754 /* PHROMA */,
+				DCABC0D524BDFCFB00C0D754 /* VM61004.BIN */,
+			);
+			path = Phroms;
+			sourceTree = "<group>";
+		};
+		DCABC0E024BDFCFB00C0D754 /* beebstate */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC0E124BDFCFB00C0D754 /* cmos.ram */,
+			);
+			path = beebstate;
+			sourceTree = "<group>";
+		};
+		DCABC0E424BDFCFB00C0D754 /* diskimg */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC0E524BDFCFB00C0D754 /* scsi1.dat */,
+				DCABC0E624BDFCFB00C0D754 /* scsi0.dat */,
+				DCABC0E724BDFCFB00C0D754 /* scsi2.dat */,
+				DCABC0E824BDFCFB00C0D754 /* scsi3.dat */,
+				DCABC0E924BDFCFB00C0D754 /* econet_level_1_utils.ssd */,
+				DCABC0EA24BDFCFB00C0D754 /* Games.ssd */,
+				DCABC0EB24BDFCFB00C0D754 /* sasi0.dat */,
+				DCABC0EC24BDFCFB00C0D754 /* BBCMaster512-Disc1-DosPlusBoot.adl */,
+				DCABC0ED24BDFCFB00C0D754 /* CPM_Utilities_Disc.dsd */,
+				DCABC0EE24BDFCFB00C0D754 /* l3server.adl */,
+				DCABC0EF24BDFCFB00C0D754 /* L3FS-ISW.adl */,
+				DCABC0F024BDFCFB00C0D754 /* Welcome.ssd */,
+				DCABC0F124BDFCFB00C0D754 /* scsi0.dsc */,
+				DCABC0F224BDFCFB00C0D754 /* scsi1.dsc */,
+				DCABC0F324BDFCFB00C0D754 /* scsi3.dsc */,
+				DCABC0F424BDFCFB00C0D754 /* MasterWelcome.adl */,
+				DCABC0F524BDFCFB00C0D754 /* scsi2.dsc */,
+				DCABC0F624BDFCFB00C0D754 /* L3-Utils.dsd */,
+				DCABC0F724BDFCFB00C0D754 /* econet_level_2_utils.ssd */,
+				DCABC0F824BDFCFB00C0D754 /* armdisc3.adl */,
+				DCABC0F924BDFCFB00C0D754 /* Test.ssd */,
+			);
+			path = diskimg;
+			sourceTree = "<group>";
+		};
+		DCABC15E24BDFF1100C0D754 /* OtherSources */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC16124BDFF5C00C0D754 /* debug_org.cc */,
+				DCABC15F24BDFF5B00C0D754 /* i86time.c */,
+				DCABC16024BDFF5B00C0D754 /* instr86.c */,
+			);
+			name = OtherSources;
+			sourceTree = "<group>";
+		};
 		DCCCC29224A338ED00840082 = {
 			isa = PBXGroup;
 			children = (
+				DCABC15E24BDFF1100C0D754 /* OtherSources */,
+				DCABC08F24BDFCFB00C0D754 /* Install */,
 				DC85C5E924AB1BC300CCD72E /* ini */,
 				DCD4ADE624A4D54A0000C40A /* Headers */,
 				DCCCC30324A33D4400840082 /* Bridging */,
@@ -254,6 +625,8 @@
 		DCCCC2B024A338FB00840082 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				DCABC15C24BDFEE800C0D754 /* beebem.icns */,
+				DCABC15924BDFE8600C0D754 /* beebem.png */,
 				DCCCC2B224A3395F00840082 /* DFS image.icns */,
 				DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */,
 			);
@@ -424,18 +797,100 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCABC15424BDFCFB00C0D754 /* econet_level_2_utils.ssd in Resources */,
+				DCABC10A24BDFCFB00C0D754 /* ZCODE.ROM in Resources */,
+				DCABC10824BDFCFB00C0D754 /* ATS-3.0-1.rom in Resources */,
+				DCABC10D24BDFCFB00C0D754 /* BASIC2.ROM in Resources */,
+				DCABC11724BDFCFB00C0D754 /* EDIT.ROM in Resources */,
+				DCABC14624BDFCFB00C0D754 /* econet_level_1_utils.ssd in Resources */,
+				DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */,
+				DCABC13524BDFCFB00C0D754 /* Econet.cfg in Resources */,
+				DCABC11C24BDFCFB00C0D754 /* MOS.ROM in Resources */,
+				DCABC10924BDFCFB00C0D754 /* DDFS-1.54.ROM in Resources */,
+				DCABC14F24BDFCFB00C0D754 /* scsi1.dsc in Resources */,
+				DCABC14824BDFCFB00C0D754 /* sasi0.dat in Resources */,
+				DCABC13B24BDFCFB00C0D754 /* Phroms.cfg in Resources */,
+				DCABC12224BDFCFB00C0D754 /* BASIC2.ROM in Resources */,
+				DCABC11A24BDFCFB00C0D754 /* ATS-3.0-1.ROM in Resources */,
+				DCABC11924BDFCFB00C0D754 /* VIEW.ROM in Resources */,
+				DCABC13924BDFCFB00C0D754 /* DriveMotor.snd in Resources */,
+				DCABC14424BDFCFB00C0D754 /* scsi2.dat in Resources */,
+				DCABC11624BDFCFB00C0D754 /* BASIC4.ROM in Resources */,
+				DCABC12E24BDFCFB00C0D754 /* PHROMUS in Resources */,
+				DCABC12324BDFCFB00C0D754 /* OS12.ROM in Resources */,
+				DCABC13424BDFCFB00C0D754 /* VM61004.BIN in Resources */,
+				DCABC14E24BDFCFB00C0D754 /* scsi0.dsc in Resources */,
+				DCABC11B24BDFCFB00C0D754 /* TFS-2.50.ROM in Resources */,
+				DCABC12A24BDFCFB00C0D754 /* LICENSE in Resources */,
+				DCABC0FD24BDFCFB00C0D754 /* make_distribution.sh in Resources */,
+				DCABC15724BDFCFB00C0D754 /* teletext.fnt in Resources */,
+				DCABC12824BDFCFB00C0D754 /* COPYRIGHT.txt in Resources */,
+				DCABC15524BDFCFB00C0D754 /* armdisc3.adl in Resources */,
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
-				DC85C5F324AB1BE300CCD72E /* Phroms.cfg in Resources */,
-				DC85C5F724AB1BE300CCD72E /* README_MAC.txt in Resources */,
-				DC85C5F224AB1BE300CCD72E /* Roms.cfg in Resources */,
-				DC85C5F824AB1BE300CCD72E /* Roms_Torch.cfg in Resources */,
-				DCCCC2B424A3395F00840082 /* DFS image.icns in Resources */,
-				DC85C5F924AB1BE300CCD72E /* Econet.cfg in Resources */,
-				DC85C5F424AB1BE300CCD72E /* beebem.ini in Resources */,
+				DCABC14D24BDFCFB00C0D754 /* Welcome.ssd in Resources */,
+				DCABC15324BDFCFB00C0D754 /* L3-Utils.dsd in Resources */,
+				DCABC13024BDFCFB00C0D754 /* phromsus.txt in Resources */,
+				DCABC14024BDFCFB00C0D754 /* beebem.ini in Resources */,
+				DCABC10724BDFCFB00C0D754 /* OS12.ROM in Resources */,
+				DCABC12B24BDFCFB00C0D754 /* RelayOn.snd in Resources */,
+				DCABC11D24BDFCFB00C0D754 /* ZCODE.ROM in Resources */,
+				DCABC12424BDFCFB00C0D754 /* IBOS.rom in Resources */,
+				DCABC10F24BDFCFB00C0D754 /* ADFS-1.30.ROM in Resources */,
 				DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */,
+				DCABC10E24BDFCFB00C0D754 /* B+MOS.ROM in Resources */,
+				DCABC15224BDFCFB00C0D754 /* scsi2.dsc in Resources */,
+				DCABC15D24BDFEE800C0D754 /* beebem.icns in Resources */,
+				DCABC10624BDFCFB00C0D754 /* ADFS-1.30.ROM in Resources */,
+				DCABC13324BDFCFB00C0D754 /* PHROMA in Resources */,
+				DCABC11224BDFCFB00C0D754 /* Z80.ROM in Resources */,
+				DCABC14A24BDFCFB00C0D754 /* CPM_Utilities_Disc.dsd in Resources */,
+				DCABC11024BDFCFB00C0D754 /* WDFS.ROM in Resources */,
+				DCABC10C24BDFCFB00C0D754 /* DNFS.ROM in Resources */,
+				DCABC13224BDFCFB00C0D754 /* VM61005.BIN in Resources */,
+				DCABC11124BDFCFB00C0D754 /* DFS-2.26.ROM in Resources */,
+				DCABC12F24BDFCFB00C0D754 /* VM61002.BIN in Resources */,
+				DCABC12024BDFCFB00C0D754 /* TERMINAL.ROM in Resources */,
+				DCABC10424BDFCFB00C0D754 /* BASIC2.ROM in Resources */,
+				DCABC13724BDFCFB00C0D754 /* HeadSeek.snd in Resources */,
+				DCABC14224BDFCFB00C0D754 /* scsi1.dat in Resources */,
+				DCABC11424BDFCFB00C0D754 /* ARMeval_100.rom in Resources */,
+				DCABC14724BDFCFB00C0D754 /* Games.ssd in Resources */,
+				DCABC12C24BDFCFB00C0D754 /* Roms.cfg in Resources */,
+				DCABC14C24BDFCFB00C0D754 /* L3FS-ISW.adl in Resources */,
+				DCABC15124BDFCFB00C0D754 /* MasterWelcome.adl in Resources */,
+				DCABC11824BDFCFB00C0D754 /* DFS.ROM in Resources */,
+				DCABC10224BDFCFB00C0D754 /* BIOS.ROM in Resources */,
+				DCABC12624BDFCFB00C0D754 /* DNFS.ROM in Resources */,
+				DCABC13F24BDFCFB00C0D754 /* cmos.ram in Resources */,
+				DCABC13E24BDFCFB00C0D754 /* Roms_Torch.cfg in Resources */,
+				DCABC14B24BDFCFB00C0D754 /* l3server.adl in Resources */,
+				DCABC10324BDFCFB00C0D754 /* 6502TUBE.ROM in Resources */,
+				DCABC15624BDFCFB00C0D754 /* Test.ssd in Resources */,
 				DCCCC2A824A338EE00840082 /* Main.storyboard in Resources */,
+				DCABC14324BDFCFB00C0D754 /* scsi0.dat in Resources */,
+				DCABC14124BDFCFB00C0D754 /* HeadLoad.snd in Resources */,
+				DCABC13D24BDFCFB00C0D754 /* HeadUnload.snd in Resources */,
+				DCABC13A24BDFCFB00C0D754 /* README.txt in Resources */,
+				DCABC12724BDFCFB00C0D754 /* HIBASIC3.ROM in Resources */,
+				DCABC11F24BDFCFB00C0D754 /* MCP122.ABM in Resources */,
+				DCABC14924BDFCFB00C0D754 /* BBCMaster512-Disc1-DosPlusBoot.adl in Resources */,
+				DCABC10524BDFCFB00C0D754 /* MCP120.CBL in Resources */,
+				DCABC15024BDFCFB00C0D754 /* scsi3.dsc in Resources */,
+				DCABC13824BDFCFB00C0D754 /* HeadStep.snd in Resources */,
+				DCABC11524BDFCFB00C0D754 /* ANFS-4.25-2201351.rom in Resources */,
+				DCABC12524BDFCFB00C0D754 /* WDFS.ROM in Resources */,
+				DCABC14524BDFCFB00C0D754 /* scsi3.dat in Resources */,
+				DCABC13124BDFCFB00C0D754 /* VM71003A.BIN in Resources */,
+				DCABC12D24BDFCFB00C0D754 /* VM61003.BIN in Resources */,
+				DCABC10B24BDFCFB00C0D754 /* WDFS.ROM in Resources */,
+				DCABC11324BDFCFB00C0D754 /* CCPN102.ROM in Resources */,
+				DCABC12924BDFCFB00C0D754 /* Test.uef in Resources */,
 				DC85C5F524AB1BE300CCD72E /* README.txt in Resources */,
-				DCCCC30624A33E2E00840082 /* Z Random BBC file.icns in Resources */,
+				DCABC11E24BDFCFB00C0D754 /* ADFS.ROM in Resources */,
+				DCABC12124BDFCFB00C0D754 /* VIEWSHT.ROM in Resources */,
+				DCABC15B24BDFE8600C0D754 /* beebem.png in Resources */,
+				DCABC10124BDFCFB00C0D754 /* README_MAC.txt in Resources */,
+				DCABC10024BDFCFB00C0D754 /* RelayOff.snd in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -458,6 +913,7 @@
 				DCD4AE2F24A4D6970000C40A /* uef.cc in Sources */,
 				DCD4AE3424A4D6970000C40A /* video.cc in Sources */,
 				DCD4AE2B24A4D6970000C40A /* speech.cc in Sources */,
+				DCABC16324BDFF5C00C0D754 /* instr86.c in Sources */,
 				DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */,
 				DCD4AE2024A4D6970000C40A /* econet.cc in Sources */,
 				DCD4AE3324A4D6970000C40A /* via.cc in Sources */,
@@ -475,6 +931,7 @@
 				DCD4AE3724A4D6970000C40A /* z80dis.cc in Sources */,
 				DCD4AE2D24A4D6970000C40A /* teletext.cc in Sources */,
 				DCD4AE2324A4D6970000C40A /* i386dasm.cc in Sources */,
+				DCABC16424BDFF5C00C0D754 /* debug_org.cc in Sources */,
 				DCD4AE1D24A4D6970000C40A /* disc1770.cc in Sources */,
 				DC6A476524A54160007E4276 /* Arm.cc in Sources */,
 				DCD4AE3124A4D6970000C40A /* userkybd.cc in Sources */,
@@ -484,6 +941,7 @@
 				DCD4AE2724A4D6970000C40A /* sasi.cc in Sources */,
 				DCD4AE2C24A4D6970000C40A /* sysvia.cc in Sources */,
 				DCD4AE3024A4D6970000C40A /* uefstate.cc in Sources */,
+				DCABC16224BDFF5C00C0D754 /* i86time.c in Sources */,
 				DCD4AE3624A4D6970000C40A /* z80.cc in Sources */,
 				DCD4AE2824A4D6970000C40A /* scsi.cc in Sources */,
 				DCCCC30D24A3D79B00840082 /* beebview.cpp in Sources */,
