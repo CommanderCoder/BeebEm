@@ -64,6 +64,24 @@
 
 // #include "keytable_2"
 
+#include<thread>
+#include<chrono>
+#include<iostream>
+
+long beeb_now() // milliseconds
+{
+    auto since_epoch = std::chrono::steady_clock::now().time_since_epoch();
+    auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch);
+    auto millis = milli.count();
+    return millis;
+}
+void beeb_usleep(long nseconds) // nanoseconds
+{
+//    long b = beeb_now();
+    std::this_thread::sleep_for(std::chrono::nanoseconds(nseconds));
+//    std::cout << nseconds << " slept for " << beeb_now()-b << " ms\n";
+}
+
 void i86_main(void);
 void PrintScreen(void);
 void CopyToClipBoardAsPDF(int starty, int nlines);
@@ -1876,9 +1894,7 @@ void BeebWin::Initialise(char *home)
 		m_MenuIdKeyMapping = 1;
 		TranslateKeyMapping();
 	}
-#if 0 //ACH
 	TouchScreenOpen();
-#endif
 	IgnoreIllegalInstructions = 1;
 
 	m_WriteProtectDisc[0] = !IsDiscWritable(0);
@@ -3096,18 +3112,23 @@ bool BeebWin::UpdateTiming(void)
 	// Now we work out if BeebEm is running too fast or not
 	if (m_RealTimeTarget > 0.0)
 	{
+        // TICKS is realworld time (in milliseconds - 1000ms per second)
+        // Cycles is the emulator time (2000000 cycles per second)
+        
 		Ticks = TickCount - m_TickBase;
 		Cycles = (int)((double)(TotalCycles - m_CycleBase) / m_RealTimeTarget);
 
+        // if real time is less than cycles(in milliseconds) then emulator is running too fast
 		if (Ticks <= (unsigned long)(Cycles / 2000))
 		{
 			// Need to slow down, show frame (max 50fps though) 
 			// and sleep a bit
 
-			if (TickCount >= m_LastFPSCount + 20)
+            // if real time > 50th second (1 frame) then update screen
+            if (TickCount >= m_LastFPSCount + 20)
 			{
 				UpdateScreen = TRUE;
-				m_LastFPSCount += 20;
+				m_LastFPSCount += 20;  // 1000/50 = 50 FPS
 			}
 			else
 			{
@@ -3116,12 +3137,14 @@ bool BeebWin::UpdateTiming(void)
 
 			SpareTicks = ((unsigned long)(Cycles / 2000) - Ticks) * 1000;
 	
-			usleep( SpareTicks + 500);
+            // hold up the emulator for nanoseconds
+			beeb_usleep( SpareTicks + 500);
 
 			m_MinFrameCount = 0;
 		}
 		else
 		{
+            // running too slow  (unlikely to be exactly same speed as a Beeb!)
 
 			// Need to speed up, skip a frame
 			UpdateScreen = FALSE;
@@ -3146,6 +3169,7 @@ bool BeebWin::UpdateTiming(void)
 	}
 	else
 	{
+        // not running in real time - so fpstarget will be 50,25,10,5 FPS or similar
 		/* Fast as possible with a certain frame rate */
 		if (TickCount >= m_LastFPSCount + (1000 / m_FPSTarget))
 		{
@@ -3193,6 +3217,7 @@ CFStringRef pTitle;
 /****************************************************************************/
 unsigned long BeebWin::GetTickCount(void)
 {
+#if 0//ACH
   struct timeval now;
   struct timezone tpz;
   long milli;
@@ -3204,6 +3229,9 @@ unsigned long BeebWin::GetTickCount(void)
   milli = (now.tv_sec % (60 * 60 * 24)) * 1000L + now.tv_usec / 1000L;
 
   return milli;
+#else
+    return beeb_now();
+#endif
 }
 
 /****************************************************************************/
