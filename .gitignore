@@ -2,6 +2,9 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+## BEEBEM5 Settings
+Install/beebem5-distribution/BeebEm5.app
+
 ## User settings
 xcuserdata/
 
