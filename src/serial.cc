@@ -579,7 +579,7 @@ void CloseUEF(void) {
 		RxD=0;
 		if (TapeControlEnabled)
 		{
-#if 0 //ACH - tape close
+#if 0 //ACH - tape close (DONE)
 			const ControlID dbControlID = { 'SLST', 0 };
 			ControlRef dbControl;
 			
@@ -804,7 +804,7 @@ bool map_file(char *file_name)
 	
 	return(true);
 }
-#if 0 //ACH - tape control
+#if 0 //ACH - tape control (DONE)
 
 //*******************************************************************
 
@@ -875,7 +875,7 @@ OSStatus TCWindowCommandHandler(UInt32 cmdID)
 				if (UEFOpen)
 				{
 
-#if 0 //ACH
+#if 0 //ACH - append alertbox (DONE)
 					CopyCStringToPascal("Append to current tape file :", S1);
 					CopyCStringToPascal(UEFTapeName, S2);
 					
@@ -914,7 +914,7 @@ OSStatus TCWindowCommandHandler(UInt32 cmdID)
 						{
 							fclose(fd);
 
-#if 0 //ACH
+#if 0 //ACH - fileexist alertbox (DONE)
 							CopyCStringToPascal("File already exists", S1);
 							CopyCStringToPascal("Overwrite file ?", S2);
 							StandardAlert( kAlertNoteAlert, S1, S2, &alertParameters, &r);
@@ -932,8 +932,7 @@ OSStatus TCWindowCommandHandler(UInt32 cmdID)
 							}
 							else
 							{
-#if 0 //ACH
-
+#if 0 //ACH - error alertbox (DONE)
 								CopyCStringToPascal("Error creating tape file:", S1);
 								CopyCStringToPascal(UEFTapeName, S2);
 								alertParameters.cancelButton	= 0;
@@ -967,7 +966,8 @@ CantGetParameter:
 		return err;
 }
 
-#if 0 //ACH -- catch window close, see beeb_TapeControlCloseDialog
+#if 0 //ACH -- catch window close (DONE)
+    // see beeb_TapeControlCloseDialog
 static OSStatus TCWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus err = noErr;
@@ -1057,14 +1057,21 @@ CFStringRef pTitle;
 
 	return status;
 }
+#endif
 
+extern "C" void beeb_TapeControlOpenDialog()
+{
+    TapeControlOpenDialog();
+}
 	
 void TapeControlOpenDialog()
 {
 	int Clock;
-
 	TapeControlEnabled = TRUE;
 
+    if (true) // mTCWindow
+    {
+#if 0 // tapecontrol (DONE)
 	IBNibRef 		nibRef;
 	EventTypeSpec TCcommands[] = {
 	{ kEventClassCommand, kEventCommandProcess }
@@ -1104,16 +1111,6 @@ void TapeControlOpenDialog()
 			NewDataBrowserItemDataUPP( (DataBrowserItemDataProcPtr) TCWindowCallback);
 		SetDataBrowserCallbacks(dbControl, &dbCallbacks);
 		SetAutomaticControlDragTrackingEnabledForWindow(mTCWindow, true);
-#else
-
-extern "C" void beeb_TapeControlOpenDialog()
-{
-    int Clock;
-
-    TapeControlEnabled = TRUE;
-
-    if (true)
-    {
 #endif
 
 		if (UEFOpen)
@@ -1135,19 +1132,21 @@ extern "C" void beeb_TapeControlOpenDialog()
 		
 	}
 }
+    
+extern "C" void beeb_TapeControlCloseDialog()
+{
+    TapeControlCloseDialog();
+}
 
-#if 0 //ACH
 void TapeControlCloseDialog()
 {
+#if 0 //ACH - tape close (DONE)
 	if (mTCWindow)
 	{
 		HideWindow(mTCWindow);
 		DisposeWindow(mTCWindow);
 	}
 	mTCWindow = NULL;
-#else
-extern "C" void beeb_TapeControlCloseDialog()
-{
 #endif
 	TapeControlEnabled = FALSE;
 	map_lines = 0;
@@ -1168,7 +1167,7 @@ void TapeControlOpenFile(char *UEFName)
 				return;
 			}
 		}
-#if 0 //ACH - tape openfile
+#if 0 //ACH - tape openfile (DONE)
 		const ControlID dbControlID = { 'SLST', 0 };
 		ControlRef dbControl;
 			
@@ -1198,7 +1197,7 @@ void TapeControlUpdateCounter(int tape_time)
 			i--;
 
 		//		SendMessage(hwndMap, LB_SETCURSEL, (WPARAM)i, 0);
-#if 0 //ACH - tape updatecounter
+#if 0 //ACH - tape updatecounter (DONE)
 
 		const ControlID dbControlID = { 'SLST', 0 };
 		ControlRef dbControl;

@@ -80,7 +80,7 @@ bool mStartAgain = false;
 
 void DeactControl(OSType box)
 {
-#if 0//ACH
+#if 0//ACH - Deactivate Control
 	const ControlID dbControlID = { box, 0 };
 	ControlRef dbControl;
 	
@@ -91,7 +91,7 @@ void DeactControl(OSType box)
 
 void ActControl(OSType box)
 {
-#if 0//ACH
+#if 0//ACH - ActivateControl
 	const ControlID dbControlID = { box, 0 };
 	ControlRef dbControl;
 	
@@ -102,7 +102,7 @@ void ActControl(OSType box)
 
 void SetEPText(OSType box, char *text)
 {
-#if 0//ACH
+#if 0//ACH - EPText
 	CFStringRef pTitle;
 	
 	const ControlID dbControlID = { box, 0 };
@@ -120,7 +120,7 @@ void SetEPText(OSType box, char *text)
 
 void GetEPText(OSType box, char *text)
 {
-#if 0//ACH
+#if 0//ACH - EPText
     ControlID kCmd = { box, 0 };
     ControlRef Cmd;
     CFStringRef cmd_text;
@@ -139,12 +139,12 @@ int GetEPValue(OSType box)
 
 {
 	int ret;
-#if 0//ACH
     ControlID dbControlID;
     ControlRef dbControl;
 
 	dbControlID.signature = box;
 	dbControlID.id = 0;
+#if 0//ACH - EPvalue
 	GetControlByID (mEthernetPortWindow, &dbControlID, &dbControl);
 	ret = GetControlValue(dbControl);
 #endif
@@ -153,18 +153,18 @@ int GetEPValue(OSType box)
 
 void SetEPValue(OSType box, int State)
 {
-#if 0//ACH
 	ControlID dbControlID;
 	ControlRef dbControl;
 	
 	dbControlID.signature = box;
 	dbControlID.id = 0;
+#if 0//ACH - EP Value
 	GetControlByID (mEthernetPortWindow, &dbControlID, &dbControl);
 	SetControlValue(dbControl, State);
 #endif
 }
 
-#if 0//ACH
+#if 0//ACH - ethernet commandhandler
 
 //*******************************************************************
 
@@ -349,7 +349,7 @@ void RaiseDCD(void)
 	UserVIAWrite(0x0c, 0x00);
 }
 
-#if 0//ACH
+#if 0//ACH - ethernet status thread
 
 OSStatus MyEthernetPortStatusThread(void *parameter)
 {
@@ -527,7 +527,7 @@ top: ;
 
 void EthernetPortOpen(void)
 {
-#if 0//ACH -- ethernet
+#if 0//ACH - ethernetopen
 	int i;
 	
 	if (mEthernetHandle > 0)
@@ -700,7 +700,7 @@ void EthernetPortStore(unsigned char data)
 
 void EthernetPortClose(void)
 {
-#if 0 //ACH
+#if 0 //ACH - ethernetclose
 
 	if (mEthernetHandle > 0)
 	{
@@ -931,7 +931,7 @@ int RXHead = 0;
 int RXTail = 0;
 int RXLen = 0;
 
-#if 0//ACH
+#if 0 //ACH - serialportcommandhandler
 //*******************************************************************
 
 OSStatus SerialPortWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)

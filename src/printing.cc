@@ -7,6 +7,7 @@
 #include "main.h"
 #include "printing.h"
 
+#if 0//ACH - printing
 //-----------------------------------------------------------------------------------------------------------------------
 static OSStatus MyCreatePageFormat(PMPrintSession printSession, PMPageFormat *pageFormat)
 {
@@ -264,10 +265,12 @@ void ProcessPrintCommand(int starty, int nlines)
 		fprintf(stderr, "PMCreateSession FAILED\n");
     }
 }   // ProcessPrintCommand
+#endif
 
 //-----------------------------------------------------------------------------------------------------------------------
 void DoPageSetup(void)
 {
+#if 0 //ACH - print page setup
     PMPrintSession  printSession = NULL;
     
     if ( PMCreateSession(&printSession) == noErr )
@@ -279,6 +282,7 @@ void DoPageSetup(void)
     {
 		fprintf(stderr, "PMCreateSession FAILED\n");
     }
+#endif
 }   // ProcessPrintCommand
 
 
