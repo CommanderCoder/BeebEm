@@ -792,7 +792,7 @@ void BreakOutOpenDialog()
 
 	if (mBreakOutWindow == NULL)
 	{
-#if 0//ACH - open dioblo
+#if 0//ACH - open breakout
 		// Create a Nib reference passing the name of the nib file (without the .nib extension)
 		// CreateNibReference only searches into the application bundle.
 		CreateNibReference(CFSTR("main"), &nibRef);

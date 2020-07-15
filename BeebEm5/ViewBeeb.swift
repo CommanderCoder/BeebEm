@@ -76,9 +76,6 @@ class ViewBeeb: NSView {
 
         init_audio()
         init_cpu()
-        
-        // run cpu on a thread so it's not tied to the view redraw
-        run_cpu_on_thread()
     }
     
     deinit {
@@ -106,6 +103,8 @@ class ViewBeeb: NSView {
         
         context?.draw(image, in: dirtyRect)
         
+        beeb_MainCpuLoop()
+
         tcViewControllerInstance?.update()
     }
         
@@ -209,19 +208,5 @@ extension ViewBeeb{
         }
     }
 
-//    var lasttime = 0
-    func run_cpu_on_thread()
-    {
-        DispatchQueue.global(qos: .utility).async {
-            // run the cpu on a separate concurrent thread (global) - quality of service only needs to be utility
-            
-            while true {
-//                let ct = CACurrentMediaTime()//.truncatingRemainder(dividingBy: 1)
-//                print("cpu = \(ct-self.lasttime) ms")
-//                self.lasttime=ct
-                  beeb_MainCpuLoop()
-            }
-        }
-    }
            
 }
