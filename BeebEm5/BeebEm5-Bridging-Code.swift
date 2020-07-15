@@ -127,25 +127,28 @@ func conv(_ value: UInt32) -> String
     return s
 }
 
-
-func itemByIdentifier(id: String) -> NSMenuItem? {
-
-  func recurse(menu: NSMenu) -> NSMenuItem? {
-    for item in menu.items {
-        if item.identifier?.rawValue == id {
+func recurse(find id: String, menu: NSMenu) -> NSMenuItem? {
+  for item in menu.items {
+      if item.identifier?.rawValue == id {
+      return item
+    } else if let submenu = item.submenu {
+        if let item = recurse(find: id, menu: submenu) {
         return item
-      } else if let submenu = item.submenu {
-        if let item = recurse(menu: submenu) {
-          return item
-        }
       }
     }
-    return nil
   }
+  return nil
+}
+
+func textFieldByIdentifier(id: String) -> NSTextField? {
+    return nil
+}
+
+
+func menuItemByIdentifier(id: String) -> NSMenuItem? {
     guard let mainmenu = NSApplication.shared.mainMenu else { return nil }
 
-    return recurse(menu: mainmenu)
-
+    return recurse(find: id, menu: mainmenu)
 }
 
 // set the tick on the menu with a 4 character identifier
@@ -153,7 +156,7 @@ func itemByIdentifier(id: String) -> NSMenuItem? {
 public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 {
     let cmdSTR =  conv(cmd)
-    if let n = itemByIdentifier(id:cmdSTR)
+    if let n = menuItemByIdentifier(id:cmdSTR)
     {
         n.state = check ? .on : .off
     }
@@ -164,7 +167,7 @@ public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 public func swift_SetMenuItemTextWithCString(_ cmd: UInt32, _ text: UnsafePointer<CChar>) -> Int
 {
     let cmdSTR =  conv(cmd)
-    if let n = itemByIdentifier(id:cmdSTR)
+    if let n = menuItemByIdentifier(id:cmdSTR)
     {
         n.title = String(cString: text)
         return 0
@@ -221,4 +224,51 @@ public func swift_Alert(_ text: UnsafePointer<CChar>, _ text2: UnsafePointer<CCh
     print(String(cString:text)+" "+String(cString:text2)+" "+String(hasCancel))
     tcViewControllerInstance?.reloadFileList()
     return val
+}
+
+
+@_cdecl("swift_SetControlValue")
+public func swift_SetControlValue(_ cmd: UInt32, _ state: Int)
+{
+    let cmdSTR = conv(cmd)
+    if let n = menuItemByIdentifier(id:cmdSTR)
+    {
+        n.state = (state==1) ? .on : .off
+    }
+}
+
+@_cdecl("swift_GetControlValue")
+public func swift_GetControlValue(_ cmd: UInt32) -> Int
+{
+    var val: Int = 0
+    let cmdSTR =  conv(cmd)
+    if let n = menuItemByIdentifier(id:cmdSTR)
+    {
+        val = (n.state == .on) ? 1 : 0
+    }
+    return val
+}
+
+@_cdecl("swift_SetControlEditText")
+public func swift_SetControlEditText(_ cmd: UInt32, _ text: NSString)
+{
+    let cmdSTR =  conv(cmd)
+    if let n = textFieldByIdentifier(id:cmdSTR)
+    {
+        n.stringValue = text as String
+    }
+}
+
+@_cdecl("swift_GetControlEditText")
+public func swift_GetControlEditText(_ cmd: UInt32, _ text: NSMutableString, _ length:Int)
+{
+    let cmdSTR =  conv(cmd)
+    if let n = textFieldByIdentifier(id:cmdSTR)
+    {
+        // set the text back in the C code - fill with zeros first
+//        text.assign(repeating: 0, count: length)
+//        text.assign(from: n.stringValue, count: length)
+        text.setString(n.stringValue)
+    }
+    
 }

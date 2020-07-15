@@ -27,8 +27,9 @@
 
 #include "viastate.h"
 #include "via.h"
+#include <MacTypes.h>
 
-#if 0 //ACH
+#if 0 //ACH - breakout
 extern WindowRef mBreakOutWindow; 
 #endif
 extern VIAState UserVIAState;
@@ -43,10 +44,8 @@ void BreakOutOpenDialog(void);
 void BreakOutCloseDialog(void);
 void ShowInputs(unsigned char data);
 void ShowOutputs(unsigned char data);
-#if 0 //ACH
 int GetValue(OSType box);
 void SetValue(OSType box, int State);
-#endif
 
 void uservia_dumpstate(void);
 

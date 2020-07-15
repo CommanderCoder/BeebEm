@@ -256,7 +256,7 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
     }
 }
 
-#if 0//ach - eventhandler
+#if 0//ach - eventhandlers / keys&mouse, quit, main loop
 
 static OSStatus EventHandler (
     EventHandlerCallRef handler, EventRef event, void *data)

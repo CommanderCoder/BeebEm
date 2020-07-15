@@ -56,6 +56,7 @@
 		DCD4AE3524A4D6970000C40A /* z80_support.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D624A33D3700840082 /* z80_support.cc */; };
 		DCD4AE3624A4D6970000C40A /* z80.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C924A33D3700840082 /* z80.cc */; };
 		DCD4AE3724A4D6970000C40A /* z80dis.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BF24A33D3700840082 /* z80dis.cc */; };
+		DCE0DCFD24BE589900F9AEF0 /* printing.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C724A33D3700840082 /* printing.cc */; };
 		DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */; };
 /* End PBXBuildFile section */
 
@@ -475,6 +476,7 @@
 				DCD4AE1C24A4D6970000C40A /* debug.cc in Sources */,
 				DCD4AE2924A4D6970000C40A /* serial.cc in Sources */,
 				DCD4AE1624A4D6970000C40A /* atodconv.cc in Sources */,
+				DCE0DCFD24BE589900F9AEF0 /* printing.cc in Sources */,
 				DCD4AE2F24A4D6970000C40A /* uef.cc in Sources */,
 				DCD4AE3424A4D6970000C40A /* video.cc in Sources */,
 				DCD4AE2B24A4D6970000C40A /* speech.cc in Sources */,

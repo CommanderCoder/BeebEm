@@ -520,7 +520,7 @@ void SetRowCol( int ctrlID )
 
 bool LoadUserKeyboard( const char *path )
 {
-    #if 0 //ACH
+#if 0 //ACH - loaduserkeyboard
 	CFStringRef keyboardFile = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingASCII);
 	CFURLRef	keyboardFileUrl = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,    
 																keyboardFile,			// file path name
@@ -553,14 +553,14 @@ bool LoadUserKeyboard( const char *path )
 		UserKeymap[i][1] = GetDictNum(dict, keyRef, transTable1[i][1]);
 		CFRelease(keyRef);
 	}
-    #endif
+#endif
 
 	return true;
 }
 
 void SaveUserKeyboard( char *path )
 {
-    #if 0 //ACH
+#if 0 //ACH - saveuserkeyboard
 
 	// Create a dictionary for the keyboard mappings.
 	CFMutableDictionaryRef dict = CFDictionaryCreateMutable(kCFAllocatorDefault,

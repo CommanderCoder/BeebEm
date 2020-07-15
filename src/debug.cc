@@ -28,10 +28,16 @@ static bool LastAddrInROM = false;
 static bool DebugHost = false;
 static bool DebugParasite = false;
 
-#if 0 //ACH
+extern "C" void swift_SetControlValue(unsigned int cmd, int state);
+extern "C" int swift_GetControlValue(unsigned int cmd);
+extern "C" void swift_SetControlEditText(unsigned int cmd, CFStringRef text);
+extern "C" void swift_GetControlEditText(unsigned int cmd, const char* text, int length);
+
+
 //*******************************************************************
 // Data structs
 
+#if 0 //ACH - (DONE) PSRFlags here and in 6502
 enum PSRFlags {
 	FlagC=1,
 	FlagZ=2,
@@ -623,7 +629,6 @@ void DebugCloseDialog()
 void DebugDisplayInfo(const char *info)
 {
 static int max = 0;
-    #if 0 //ACH - display info
 
 //	fprintf(stderr, "%s\n", info);
 
@@ -635,6 +640,7 @@ static int max = 0;
 	
 	fprintf(stderr, "%s\n", info);
 
+#if 0 //ACH - display info
 	const ControlID dbControlID = { 'HDIS', 0 };
 	ControlRef dbControl;
 	
@@ -656,26 +662,48 @@ static int max = 0;
 	
 	SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &debug_lines, kDataBrowserItemsAssign);
 	RevealDataBrowserItem(dbControl, debug_lines, kDataBrowserNoItem, kDataBrowserRevealOnly);
+
+
+
+
+//#else //ACH - lot more work
+    
+    if (debug_lines == MAC_LINES)
+    {
+        memmove(debug_log[0], debug_log[1], (MAX_LINES - 1) * 101);
+        strcpy(debug_log[debug_lines - 1], info);
+        swift_ClearItems("HDIS");
+        swift_UpdateItems("HDIS", debug_lines);
+    }
+    else
+    {
+        strcpy(debug_log[debug_lines++], info);
+        swift_UpdateItems("HDIS", debug_lines);
+    }
+    swift_SelectItem("HDIS", 1, NULL);
 #endif
 }
 
-#if 0 //ACH - set/get box values
 int GetCheckBoxValue(OSType box)
-
 {
-ControlID dbControlID;
-ControlRef dbControl;
 int ret;
 
+#if 0 //ACH - set/get box values (DONE)
+    ControlID dbControlID;
+    ControlRef dbControl;
 	dbControlID.signature = box;
 	dbControlID.id = 0;
 	GetControlByID (mDebugWindow, &dbControlID, &dbControl);
 	ret = GetControlValue(dbControl);
-	return ret;
+#else
+    ret = swift_GetControlValue(box);
+#endif
+    return ret;
 }
 
 void SetCheckBoxValue(OSType box, int State)
 {
+#if 0 //ACH - set/get box values (DONE)
 	ControlID dbControlID;
 	ControlRef dbControl;
 	
@@ -683,12 +711,13 @@ void SetCheckBoxValue(OSType box, int State)
 	dbControlID.id = 0;
 	GetControlByID (mDebugWindow, &dbControlID, &dbControl);
 	SetControlValue(dbControl, State);
-}
+#else
+    swift_SetControlValue(box, State);
 #endif
+}
 
 void DebugDisplayTrace(DebugType type, bool host, const char *info)
 {
-    #if 0 //ACH - debug trace
 
 	if (DebugEnabled)
 	{
@@ -765,12 +794,10 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 				break;
 		}
 	}
-#endif
 }
 
 bool DebugDisassembler(int addr, int Accumulator, int XReg, int YReg, int PSR, bool host)
 {
-#if 0 //ACH - disassembler
 	char str[150];
 	int i;
 	
@@ -896,12 +923,10 @@ bool DebugDisassembler(int addr, int Accumulator, int XReg, int YReg, int PSR, b
 	if ((DebugHost && host) || !DebugHost)
 		if (InstCount > 0)
 			InstCount--;
-#endif
 	return(TRUE);
 }
 
 //*******************************************************************
-#if 0 //ACH - debug commands
 
 void DebugExecuteCommand()
 {
@@ -912,16 +937,21 @@ void DebugExecuteCommand()
 	bool ok = false;
 	bool host = true;
 	
-    ControlID kCmd = { 'dcmd', 0 };
-    ControlRef Cmd;
     CFStringRef cmd_text;
+#if 0 //ACH - debug commands
+    ControlRef Cmd;
+    ControlID kCmd = { 'dcmd', 0 };
     GetControlByID(mDebugWindow, &kCmd, &Cmd);
     GetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text, NULL);
 
 	CFStringGetCString (cmd_text, command, MAX_COMMAND_LEN + 1, kCFStringEncodingASCII);
 	
 	CFRelease (cmd_text);
-	
+#else
+    unsigned int Cmd = 'dcmd';
+    swift_GetControlEditText(Cmd, command, MAX_COMMAND_LEN + 1);
+#endif
+
 	if (strlen(command) == 0)
 		return;
 	
@@ -956,9 +986,13 @@ void DebugExecuteCommand()
 			if (DumpAddress > 0xffff)
 				DumpAddress = 0;
 			cmd_text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s"), host ? "m" : "mp");
+#if 0 //ACH - debug commands
 			SetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text);
-			CFRelease (cmd_text);
-			break;
+            CFRelease (cmd_text);
+#else
+            swift_SetControlEditText(Cmd, cmd_text);
+#endif
+            break;
 			
 		case 'e': // edit memory, params: [p] [addr] [byte]
 			ok = true;
@@ -973,9 +1007,13 @@ void DebugExecuteCommand()
 			sscanf(&command[i], "%x %x", &addr, &data);
 			DebugWriteMem(addr, data, host);
 			cmd_text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s"), host ? "e" : "ep");
+            #if 0 //ACH - debug commands
 			SetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text);
 			CFRelease (cmd_text);
-			break;
+#else
+            swift_SetControlEditText(Cmd, cmd_text);
+#endif
+            break;
 			
 		
 		case 'd': // Disassemble, params: [p] [start] [count]
@@ -996,9 +1034,13 @@ void DebugExecuteCommand()
 			if (DisAddress > 0xffff)
 				DisAddress = 0;
 			cmd_text = CFStringCreateWithFormat(NULL, NULL, CFSTR("%s"), host ? "d" : "dp");
+#if 0 //ACH - debug commands
 			SetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text);
 			CFRelease (cmd_text);
-			break;
+#else
+            swift_SetControlEditText(Cmd, cmd_text);
+#endif
+            break;
 			
 		case 'b': // Breakpoint set/reset, params: start [end]
 			if (BPCount < MAX_BPS)
@@ -1035,9 +1077,13 @@ void DebugExecuteCommand()
 								const ControlID dbControlID = { 'BLST', 0 };
 								ControlRef dbControl;
 								
+#if 0 //ACH - debug commands
 								GetControlByID (mDebugWindow, &dbControlID, &dbControl);
 								RemoveDataBrowserItems(dbControl, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
 								if (BPCount != 0) AddDataBrowserItems(dbControl, kDataBrowserNoItem, BPCount, NULL, kDataBrowserItemNoProperty);
+#else
+#endif
+                                
 							}
 						}
 					}
@@ -1058,17 +1104,24 @@ void DebugExecuteCommand()
 
 						const ControlID dbControlID = { 'BLST', 0 };
 						ControlRef dbControl;
-						
+			
+#if 0 //ACH - debug commands
+
 						GetControlByID (mDebugWindow, &dbControlID, &dbControl);
 						AddDataBrowserItems(dbControl, kDataBrowserNoItem, 1, (DataBrowserItemID *) &BPCount, kDataBrowserItemNoProperty);
 						SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &BPCount, kDataBrowserItemsAssign);
 						RevealDataBrowserItem(dbControl, BPCount, kDataBrowserNoItem, kDataBrowserRevealOnly);
-					}
+#endif
+                        
+                    }
 					
 					cmd_text = CFStringCreateWithFormat(NULL, NULL, CFSTR(""));
+#if 0 //ACH - debug commands
 					SetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text);
 					CFRelease (cmd_text);
-				}
+#else
+#endif
+                }
 			}
 			break;
 			
@@ -1102,7 +1155,6 @@ void DebugExecuteCommand()
 		DebugDisplayInfo(info);
 	}
 }
-#endif
 
 int DebugReadMem(int addr, bool host)
 {
