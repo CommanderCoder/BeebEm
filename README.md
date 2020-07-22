@@ -2,8 +2,13 @@
 Port of BeebEm4 for Mac Catalina and beyond
 
 Zip File of work in progress
-https://github.com/CommanderCoder/BeebEm/raw/distribution/Install/beebem5-distribution.zip
+https://github.com/CommanderCoder/BeebEm/raw/master/Install/beebem5-distribution.zip
 
+Some people have reported that it doesn't work out of the 'zip' because of attributes associated with the files.  I will fix this and produce an installation DMG at some point.  For the time being if you double click on the BeebEm and nothing seems to happen, open a terminal window to run this command on the beebem5-distribution folder.
+
+```zsh
+$ xattr -crv beebem5-distribution
+```
 
 ## Building
 
