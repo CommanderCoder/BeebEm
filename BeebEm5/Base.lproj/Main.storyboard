@@ -2549,37 +2549,43 @@ DQ
         <!--BeebEm View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="5gI-5U-AMq" userLabel="BeebEm View Controller" customClass="ViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="5gI-5U-AMq" userLabel="BeebEm View Controller" customClass="BeebViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="ERx-hH-rdd">
-                        <rect key="frame" x="0.0" y="0.0" width="640" height="512"/>
-                        <autoresizingMask key="autoresizingMask"/>
+                        <rect key="frame" x="0.0" y="0.0" width="650" height="490"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="cxM-jz-icq" customClass="ViewBeeb" customModule="BeebEm5" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="640" height="512"/>
-                                <subviews>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vdk-YZ-d4J">
-                                        <rect key="frame" x="525" y="490" width="107" height="16"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="Work in Progress" id="bDh-My-ubA">
-                                            <font key="font" usesAppearanceFont="YES"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                </subviews>
+                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YzP-hI-f4u" customClass="BeebImageView" customModule="BeebEm5" customModuleProvider="target">
+                                <rect key="frame" x="26" y="5" width="598" height="480"/>
                                 <constraints>
-                                    <constraint firstItem="vdk-YZ-d4J" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="cxM-jz-icq" secondAttribute="leading" constant="20" symbolic="YES" id="AZ2-ya-82R"/>
-                                    <constraint firstAttribute="trailing" secondItem="vdk-YZ-d4J" secondAttribute="trailing" constant="10" id="Rxs-bx-td7"/>
-                                    <constraint firstItem="vdk-YZ-d4J" firstAttribute="top" secondItem="cxM-jz-icq" secondAttribute="top" constant="6" id="cWK-Gp-UEi"/>
+                                    <constraint firstAttribute="width" secondItem="YzP-hI-f4u" secondAttribute="height" multiplier="5:4" id="IGF-bO-hwk"/>
                                 </constraints>
-                            </customView>
+                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" imageFrameStyle="grayBezel" id="uaH-1o-jh5"/>
+                            </imageView>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KAZ-Fy-G48">
+                                <rect key="frame" x="255" y="0.0" width="140" height="28"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="140" id="Qzo-ae-Ukh"/>
+                                    <constraint firstAttribute="height" constant="28" id="giH-xP-cGw"/>
+                                </constraints>
+                                <textFieldCell key="cell" lineBreakMode="clipping" refusesFirstResponder="YES" allowsUndo="NO" borderStyle="border" alignment="center" title="Work In Progress" drawsBackground="YES" usesSingleLineMode="YES" id="hzH-UM-YpH">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="cxM-jz-icq" secondAttribute="bottom" id="BlL-q0-LCs"/>
-                            <constraint firstItem="cxM-jz-icq" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" id="eDi-dj-Pro"/>
-                            <constraint firstAttribute="trailing" secondItem="cxM-jz-icq" secondAttribute="trailing" id="vsg-Kn-Z3i"/>
-                            <constraint firstItem="cxM-jz-icq" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" id="yye-as-f4x"/>
+                            <constraint firstItem="YzP-hI-f4u" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="8" id="4nG-IS-GNz"/>
+                            <constraint firstItem="YzP-hI-f4u" firstAttribute="centerY" secondItem="ERx-hH-rdd" secondAttribute="centerY" id="EH9-uV-QYc"/>
+                            <constraint firstItem="YzP-hI-f4u" firstAttribute="centerX" secondItem="ERx-hH-rdd" secondAttribute="centerX" id="Vta-67-fwQ"/>
+                            <constraint firstItem="KAZ-Fy-G48" firstAttribute="centerX" secondItem="YzP-hI-f4u" secondAttribute="centerX" id="l9h-R8-8A9"/>
+                            <constraint firstAttribute="bottom" secondItem="KAZ-Fy-G48" secondAttribute="bottom" id="qjo-aI-7gA"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="WIPlabel" destination="KAZ-Fy-G48" id="0z2-gB-k0T"/>
+                        <outlet property="imageView" destination="YzP-hI-f4u" id="6Ow-nD-3hv"/>
+                    </connections>
                 </viewController>
                 <customObject id="2Tp-Fl-jBw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

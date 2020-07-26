@@ -651,6 +651,12 @@ struct PixelData {
     unsigned char g;
     unsigned char b;
 };
+struct CColour {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+};
 
 
 int y = 0;
@@ -661,6 +667,31 @@ PixelData greenPixel =  {255, 0, 255, 0};
 
 const int bpp = 4; // 4 bytes or 32 bits
 unsigned char videobuffer[bpp * width * height]; // 200x200 by 4 bytes
+
+extern "C" void beeb_video2(int height, int width, struct CColour buffer[])
+{
+    for (int i = 0; i < width*height; i++)
+    {
+        buffer[i].b = videobuffer[0+(i*bpp)];
+        buffer[i].g = videobuffer[1+(i*bpp)];
+        buffer[i].r = videobuffer[2+(i*bpp)];
+        buffer[i].a = videobuffer[3+(i*bpp)];
+    }
+    // move a green line everytime this is updated (50fps)
+    y += 1;
+    y %= height-2;
+
+    //purple line
+    int X = y*width;
+    for (int i = 0; i < width; i++)
+    {
+        buffer[X+i].a = greenPixel.a;
+        buffer[X+i].r = greenPixel.r;
+        buffer[X+i].g = greenPixel.g;
+        buffer[X+i].b = greenPixel.b;
+    }
+
+}
 
 extern "C" void beeb_video(int count,  struct PixelData buffer[])
 {

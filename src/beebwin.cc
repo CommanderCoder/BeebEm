@@ -75,11 +75,26 @@ long beeb_now() // milliseconds
     auto millis = milli.count();
     return millis;
 }
-void beeb_usleep(long nseconds) // nanoseconds
+
+extern "C" void swift_sleepCPU(unsigned long microseconds);
+
+// direct usleep replacement - however calling this on the main thread will
+// cause the UI to freeze up so best to not do this and use
+// DispatchQueue on the main thread
+void beeb_usleep(long microseconds)
 {
+    
 //    long b = beeb_now();
-    std::this_thread::sleep_for(std::chrono::nanoseconds(nseconds));
-//    std::cout << nseconds << " slept for " << beeb_now()-b << " ms\n";
+    std::this_thread::sleep_for(std::chrono::microseconds(microseconds));
+//    std::cout << microseconds/1000 << "ms, slept for " << beeb_now()-b << "ms\n";
+    
+}
+
+// delay the next update of the cpu (i.e. Exec6502Instruction) by this accumulation of
+// this time
+void beeb_nextupdate(long microseconds)
+{
+    swift_sleepCPU(microseconds);
 }
 
 void i86_main(void);
@@ -124,7 +139,6 @@ extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFil
 extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
 extern "C" void swift_SetWindowTitleWithCString(const char* title);
 extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
-
 
 
 // Row,Col - Physical mapping
@@ -1382,7 +1396,7 @@ void BeebWin::updateLines(int starty, int nlines)
         memcpy(m_screen, m_screen_blur, 800 * 512);
     }
     
-    //    fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
+//        fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
 
     Rect destR;
     Rect srcR;
@@ -1876,7 +1890,9 @@ void BeebWin::Initialise(char *home)
 	if (p) p[1] = 0; 
 
 //	strcpy(RomPath, "/users/jonwelch/myprojects/beebem/beebem4/");
-	
+
+    strcpy(RomPath, "./");
+
 #endif
 
 	strcpy(EconetCfgPath, RomPath);
@@ -3064,7 +3080,8 @@ bool BeebWin::UpdateTiming(void)
 	bool UpdateScreen = FALSE;
 	static int firsttime = 0;
 
-	TickCount = GetTickCount();
+
+	TickCount = GetTickCount(); // milliseconds
 
 	/* Don't do anything if this is the first call or there has
 	   been a long pause due to menu commands, or when something
@@ -3093,6 +3110,7 @@ bool BeebWin::UpdateTiming(void)
 		m_LastStatsTotalCycles = TotalCycles;
 		m_LastStatsTickCount += 1000;
 		DisplayTiming();
+
 		
 	}
 
@@ -3101,6 +3119,7 @@ bool BeebWin::UpdateTiming(void)
 	{
         // TICKS is realworld time (in milliseconds - 1000ms per second)
         // Cycles is the emulator time (2000000 cycles per second)
+        // BOTH - since last time this screen update was checked
         
 		Ticks = TickCount - m_TickBase;
 		Cycles = (int)((double)(TotalCycles - m_CycleBase) / m_RealTimeTarget);
@@ -3108,7 +3127,7 @@ bool BeebWin::UpdateTiming(void)
         // if real time is less than cycles(in milliseconds) then emulator is running too fast
 		if (Ticks <= (unsigned long)(Cycles / 2000))
 		{
-			// Need to slow down, show frame (max 50fps though) 
+			// Need to slow down, show frame (max 50fps though)
 			// and sleep a bit
 
             // if real time > 50th second (1 frame) then update screen
@@ -3123,9 +3142,12 @@ bool BeebWin::UpdateTiming(void)
 			}
 
 			SpareTicks = ((unsigned long)(Cycles / 2000) - Ticks) * 1000;
-	
-            // hold up the emulator for nanoseconds
-			beeb_usleep( SpareTicks + 500);
+            
+//            printf("sleeping for %lums (bbc %dms, mac %ldms) \n", (SpareTicks + 500)/1000, Cycles/2000, Ticks);
+
+            // hold up the emulator for microseconds (us)
+//			beeb_usleep( SpareTicks + 500);
+            beeb_nextupdate( SpareTicks + 500);
 
 			m_MinFrameCount = 0;
 		}
@@ -5763,6 +5785,7 @@ static int filesSelected[DFS_MAX_CAT_SIZE];
 static int numSelected;
 static char szExportFolder[MAX_PATH];
 
+//ACH - File export seems to have been removed in BeebEm4
 // File export
 
 /*
