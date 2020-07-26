@@ -15,11 +15,17 @@
 		DC6A476B24A54DA3007E4276 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */; };
 		DC85C5F524AB1BE300CCD72E /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5ED24AB1BE300CCD72E /* README.txt */; };
 		DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */; };
+		DC8716A224CC3A5900FA27DF /* BeebImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8716A124CC3A5900FA27DF /* BeebImageView.swift */; };
+		DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8716A324CC3A6800FA27DF /* BeebViewController.swift */; };
+		DC8716A524CC3AB300FA27DF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A624A338EE00840082 /* Main.storyboard */; };
+		DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BE3AC24CC78A600D12E2B /* NSImage+Bitmap.swift */; };
+		DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BE3AE24CC790000D12E2B /* Bitmap.swift */; };
+		DC8BE3B124CC797600D12E2B /* Colour.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BE3B024CC797600D12E2B /* Colour.swift */; };
+		DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BE3B224CC7ADD00D12E2B /* Renderer.swift */; };
 		DC907FDD24B52C8200B99036 /* TapeControlViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */; };
 		DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */; };
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
-		DCCCC2A824A338EE00840082 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A624A338EE00840082 /* Main.storyboard */; };
 		DCCCC30A24A33FDB00840082 /* ViewBeeb.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30924A33FDB00840082 /* ViewBeeb.swift */; };
 		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
 		DCCCC30D24A3D79B00840082 /* beebview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30C24A3D79B00840082 /* beebview.cpp */; };
@@ -73,6 +79,12 @@
 		DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README_MAC.txt; sourceTree = "<group>"; };
 		DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms_Torch.cfg; sourceTree = "<group>"; };
 		DC85C5F124AB1BE300CCD72E /* Econet.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Econet.cfg; sourceTree = "<group>"; };
+		DC8716A124CC3A5900FA27DF /* BeebImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebImageView.swift; sourceTree = "<group>"; };
+		DC8716A324CC3A6800FA27DF /* BeebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebViewController.swift; sourceTree = "<group>"; };
+		DC8BE3AC24CC78A600D12E2B /* NSImage+Bitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+Bitmap.swift"; sourceTree = "<group>"; };
+		DC8BE3AE24CC790000D12E2B /* Bitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bitmap.swift; sourceTree = "<group>"; };
+		DC8BE3B024CC797600D12E2B /* Colour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colour.swift; sourceTree = "<group>"; };
+		DC8BE3B224CC7ADD00D12E2B /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapeControlViewController.swift; sourceTree = "<group>"; };
 		DCABC09424BDFCFB00C0D754 /* make_distribution.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = make_distribution.sh; sourceTree = "<group>"; };
 		DCABC15924BDFE8600C0D754 /* beebem.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = beebem.png; path = src/beebem.png; sourceTree = "<group>"; };
@@ -235,6 +247,15 @@
 			name = OtherSources;
 			sourceTree = "<group>";
 		};
+		DCB0BD8E24CC8CAC009FEA9E /* WIP */ = {
+			isa = PBXGroup;
+			children = (
+				DCCCC2A224A338ED00840082 /* Document.swift */,
+				DCCCC30E24A3DCC200840082 /* BeebAudio.swift */,
+			);
+			path = WIP;
+			sourceTree = "<group>";
+		};
 		DCCCC29224A338ED00840082 = {
 			isa = PBXGroup;
 			children = (
@@ -262,16 +283,21 @@
 		DCCCC29D24A338ED00840082 /* BeebEm5 */ = {
 			isa = PBXGroup;
 			children = (
-				DCCCC30E24A3DCC200840082 /* BeebAudio.swift */,
+				DCB0BD8E24CC8CAC009FEA9E /* WIP */,
 				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
 				DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */,
 				DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */,
 				DCCCC30924A33FDB00840082 /* ViewBeeb.swift */,
-				DCCCC2A224A338ED00840082 /* Document.swift */,
+				DC8BE3AE24CC790000D12E2B /* Bitmap.swift */,
+				DC8BE3B024CC797600D12E2B /* Colour.swift */,
+				DC8BE3AC24CC78A600D12E2B /* NSImage+Bitmap.swift */,
+				DC8BE3B224CC7ADD00D12E2B /* Renderer.swift */,
 				DCCCC2A424A338EE00840082 /* Assets.xcassets */,
 				DCCCC2A624A338EE00840082 /* Main.storyboard */,
 				DCCCC2A924A338EE00840082 /* Info.plist */,
 				DCCCC2AA24A338EE00840082 /* BeebEm5.entitlements */,
+				DC8716A124CC3A5900FA27DF /* BeebImageView.swift */,
+				DC8716A324CC3A6800FA27DF /* BeebViewController.swift */,
 			);
 			path = BeebEm5;
 			sourceTree = "<group>";
@@ -454,8 +480,8 @@
 				DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */,
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
 				DC04C64924BE059900D46EAC /* beebem5-distribution.zip in Resources */,
+				DC8716A524CC3AB300FA27DF /* Main.storyboard in Resources */,
 				DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */,
-				DCCCC2A824A338EE00840082 /* Main.storyboard in Resources */,
 				DC85C5F524AB1BE300CCD72E /* README.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -469,14 +495,17 @@
 			files = (
 				DCD4AE2424A4D6970000C40A /* main.cc in Sources */,
 				DCD4AE1B24A4D6970000C40A /* csw.cc in Sources */,
+				DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */,
 				DCD4AE1F24A4D6970000C40A /* discedit.cc in Sources */,
 				DCD4AE1324A4D6970000C40A /* 6502core.cc in Sources */,
 				DC907FDD24B52C8200B99036 /* TapeControlViewController.swift in Sources */,
 				DCD4AE1924A4D6970000C40A /* beebsound.cc in Sources */,
+				DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */,
 				DCD4AE1C24A4D6970000C40A /* debug.cc in Sources */,
 				DCD4AE2924A4D6970000C40A /* serial.cc in Sources */,
 				DCD4AE1624A4D6970000C40A /* atodconv.cc in Sources */,
 				DCE0DCFD24BE589900F9AEF0 /* printing.cc in Sources */,
+				DC8716A224CC3A5900FA27DF /* BeebImageView.swift in Sources */,
 				DCD4AE2F24A4D6970000C40A /* uef.cc in Sources */,
 				DCD4AE3424A4D6970000C40A /* video.cc in Sources */,
 				DCD4AE2B24A4D6970000C40A /* speech.cc in Sources */,
@@ -492,6 +521,7 @@
 				DC43595124B62F4F002624FE /* serialdevices.cc in Sources */,
 				DCD4AE3524A4D6970000C40A /* z80_support.cc in Sources */,
 				DC6A476624A541F1007E4276 /* ArmDisassembler.cc in Sources */,
+				DC8BE3B124CC797600D12E2B /* Colour.swift in Sources */,
 				DCD4AE1724A4D6970000C40A /* audev-macosx.cc in Sources */,
 				DCD4AE2E24A4D6970000C40A /* tube.cc in Sources */,
 				DCD4AE3724A4D6970000C40A /* z80dis.cc in Sources */,
@@ -502,6 +532,8 @@
 				DCD4AE3124A4D6970000C40A /* userkybd.cc in Sources */,
 				DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */,
 				DCD4AE1E24A4D6970000C40A /* disc8271.cc in Sources */,
+				DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */,
+				DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */,
 				DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */,
 				DCD4AE2724A4D6970000C40A /* sasi.cc in Sources */,
 				DCD4AE2C24A4D6970000C40A /* sysvia.cc in Sources */,

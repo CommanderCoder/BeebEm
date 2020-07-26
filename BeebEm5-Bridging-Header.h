@@ -10,11 +10,18 @@ struct PixelData{
     unsigned char g;
     unsigned char b;
 };
+struct CColour{
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+};
 
 int beeb_main(int argc, char *argv[]);
 int beeb_end();
-void beeb_MainCpuLoop();
+void beeb_MainCpuLoop(double timestep);
 void beeb_video(int argc, struct PixelData buffer[]);
+void beeb_video2(long height, long width, struct CColour buffer[]);
 void beeb_handlekeys(long eventkind, unsigned long keycode, char charCode);
 
 int beeb_HandleCommand(unsigned int cmdID);
