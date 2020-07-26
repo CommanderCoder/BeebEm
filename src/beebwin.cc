@@ -75,11 +75,26 @@ long beeb_now() // milliseconds
     auto millis = milli.count();
     return millis;
 }
+
+extern "C" void swift_sleepCPU(unsigned long microseconds);
+
+// direct usleep replacement - however calling this on the main thread will
+// cause the UI to freeze up so best to not do this and use
+// DispatchQueue on the main thread
 void beeb_usleep(long microseconds)
 {
+    
 //    long b = beeb_now();
     std::this_thread::sleep_for(std::chrono::microseconds(microseconds));
 //    std::cout << microseconds/1000 << "ms, slept for " << beeb_now()-b << "ms\n";
+    
+}
+
+// delay the next update of the cpu (i.e. Exec6502Instruction) by this accumulation of
+// this time
+void beeb_nextupdate(long microseconds)
+{
+    swift_sleepCPU(microseconds);
 }
 
 void i86_main(void);
@@ -124,7 +139,6 @@ extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFil
 extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
 extern "C" void swift_SetWindowTitleWithCString(const char* title);
 extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
-
 
 
 // Row,Col - Physical mapping
@@ -3132,7 +3146,8 @@ bool BeebWin::UpdateTiming(void)
 //            printf("sleeping for %lums (bbc %dms, mac %ldms) \n", (SpareTicks + 500)/1000, Cycles/2000, Ticks);
 
             // hold up the emulator for microseconds (us)
-			beeb_usleep( SpareTicks + 500);
+//			beeb_usleep( SpareTicks + 500);
+            beeb_nextupdate( SpareTicks + 500);
 
 			m_MinFrameCount = 0;
 		}
@@ -3191,8 +3206,8 @@ CFStringRef pTitle;
 
 	if (m_ShowSpeedAndFPS && !m_isFullScreen)
 	{
-		sprintf(m_szTitle, "%s  Speed: %2.2f  fps: %2d  tc: %ld",
-				WindowTitle, m_RelativeSpeed, (int)m_FramesPerSecond, GetTickCount());
+		sprintf(m_szTitle, "%s  Speed: %2.2f  fps: %2d",
+				WindowTitle, m_RelativeSpeed, (int)m_FramesPerSecond);
 
 #if 0 //ACH - title (DONE)
 		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, m_szTitle, kCFStringEncodingASCII);

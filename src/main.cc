@@ -620,9 +620,8 @@ static void RunApplicationEventLoopWithCooperativeThreadSupport(void)
 
 #endif
 
-extern "C" void beeb_MainCpuLoop(double timestep)
+extern "C" void beeb_MainCpuLoop()
 {
-   // printf("t:%.5lfs fps:%lf\n",timestep, 1/timestep);
 #if 0 //ACH- iswindowcollapsed
     if ( (mainWin->m_FreezeWhenInactive) && (IsWindowCollapsed(mainWin->mWindow)) )
     {

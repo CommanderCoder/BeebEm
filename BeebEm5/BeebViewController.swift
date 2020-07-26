@@ -52,14 +52,14 @@ class BeebViewController: NSViewController {
 
     }
     
-    private var lastFrameTime = CACurrentMediaTime()
-
-    
     func update(_ displayLink: CVDisplayLink) {
         var renderer = Renderer(width: 640, height: 512)
         renderer.draw()
-
+        
         imageView.image = NSImage(bitmap: renderer.bitmap)
+
+        // update the CPU
+        update_cpu()
     }
 
 
@@ -75,9 +75,9 @@ class BeebViewController: NSViewController {
 
     
     
-    private var cpuTimer: Timer!
     private var cpuUpdateSpeed: Double = 200.0
-    
+    private var cpuDelaying = false
+
     private var width : Int = 0
     private var height : Int = 0
     
@@ -88,18 +88,11 @@ class BeebViewController: NSViewController {
     {
         width = 640
         height = 512
-
-        cpuTimer = Timer.scheduledTimer(timeInterval: 1.0/cpuUpdateSpeed,
-                        target: self,
-                        selector: #selector(update_cpu),
-                        userInfo: nil,
-                        repeats: true)
-
-
+        
         //init_audio()
         init_cpu()
-
     }
+
 }
 
 
@@ -129,20 +122,29 @@ extension BeebViewController{
         }
     }
     
-    @objc
     func update_cpu()  // game update
     {
-        let timeStep = CACurrentMediaTime() - lastFrameTime
-        WIPlabel?.stringValue = String(format:"%5.8ffps", 1/timeStep)
-        beeb_MainCpuLoop(timeStep)
-        lastFrameTime = CACurrentMediaTime()
-
+        
         tcViewControllerInstance?.update()
 
         if let mainwindow = NSApplication.shared.mainWindow {
-            mainwindow.title = windowTitle
+            mainwindow.title = CBridge.windowTitle
         }
-        //        WIPlabel?.stringValue = windowTitle
+        WIPlabel?.stringValue = CBridge.windowTitle
+
+        
+        if !cpuDelaying {
+        
+            cpuDelaying = true
+            
+            // update the CPU after any calculated delay that came from the previous CPU update
+            DispatchQueue.main.asyncAfter(deadline: .now() + .microseconds(CBridge.nextCPU), execute: {
+                CBridge.nextCPU = 0
+                beeb_MainCpuLoop()
+                self.cpuDelaying = false
+            })
+            
+        }
     }
 
     

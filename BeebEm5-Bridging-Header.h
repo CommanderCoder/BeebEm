@@ -19,7 +19,7 @@ struct CColour{
 
 int beeb_main(int argc, char *argv[]);
 int beeb_end();
-void beeb_MainCpuLoop(double timestep);
+void beeb_MainCpuLoop();
 void beeb_video(int argc, struct PixelData buffer[]);
 void beeb_video2(long height, long width, struct CColour buffer[]);
 void beeb_handlekeys(long eventkind, unsigned long keycode, char charCode);

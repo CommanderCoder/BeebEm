@@ -3,6 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "GLOBAL">
+         <PersistentStrings>
+            <PersistentString
+               value = "CBridge.nextCPU">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "BeebWin::UpdateTiming():beebwin.cc">
       </ContextState>
       <ContextState
@@ -65,6 +73,9 @@
                value = "event.modifierFlags">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "BeebViewController.update_cpu():BeebViewController.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

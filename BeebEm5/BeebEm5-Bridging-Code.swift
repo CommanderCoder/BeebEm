@@ -18,9 +18,10 @@ import Cocoa
     case KEYBOARD
 }
 
-
-var windowTitle = "-"
-
+enum CBridge {
+    static var windowTitle = "-"
+    static var nextCPU = 0
+}
 
 // allow access to this in C
 @_cdecl("swift_GetOneFileWithPreview")
@@ -94,9 +95,16 @@ public func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int)
 @_cdecl("swift_SetWindowTitleWithCString")
 public func swift_SetWindowTitleWithCString( title: UnsafePointer<CChar> )
 {
-    windowTitle = String(cString: title)
+    CBridge.windowTitle = String(cString: title)
 }
 
+@_cdecl("swift_sleepCPU")
+public func swift_sleepCPU( microseconds: Int)
+{
+    // increment the nextCPU time - but if this gets larger than a slow frame
+    // clamp it to that
+    CBridge.nextCPU = min(CBridge.nextCPU + microseconds, 1000000/25)
+}
 
 // convert a string of 4 characters to a UInt32
 func conv(_ str: String) -> UInt32
