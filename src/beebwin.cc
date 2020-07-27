@@ -1891,8 +1891,6 @@ void BeebWin::Initialise(char *home)
 
 //	strcpy(RomPath, "/users/jonwelch/myprojects/beebem/beebem4/");
 
-    strcpy(RomPath, "./");
-
 #endif
 
 	strcpy(EconetCfgPath, RomPath);

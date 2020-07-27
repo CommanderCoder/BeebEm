@@ -2551,18 +2551,18 @@ DQ
             <objects>
                 <viewController id="5gI-5U-AMq" userLabel="BeebEm View Controller" customClass="BeebViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="ERx-hH-rdd">
-                        <rect key="frame" x="0.0" y="0.0" width="650" height="490"/>
+                        <rect key="frame" x="0.0" y="0.0" width="650" height="520"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YzP-hI-f4u" customClass="BeebImageView" customModule="BeebEm5" customModuleProvider="target">
-                                <rect key="frame" x="26" y="5" width="598" height="480"/>
+                                <rect key="frame" x="22" y="29" width="606" height="486"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="YzP-hI-f4u" secondAttribute="height" multiplier="5:4" id="IGF-bO-hwk"/>
                                 </constraints>
                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyUpOrDown" imageFrameStyle="grayBezel" id="uaH-1o-jh5"/>
                             </imageView>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KAZ-Fy-G48">
-                                <rect key="frame" x="255" y="0.0" width="140" height="28"/>
+                                <rect key="frame" x="255" y="2" width="140" height="28"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="140" id="Qzo-ae-Ukh"/>
                                     <constraint firstAttribute="height" constant="28" id="giH-xP-cGw"/>
@@ -2575,11 +2575,11 @@ DQ
                             </textField>
                         </subviews>
                         <constraints>
+                            <constraint firstAttribute="bottom" secondItem="KAZ-Fy-G48" secondAttribute="bottom" constant="2" id="3mi-Cq-ZPU"/>
                             <constraint firstItem="YzP-hI-f4u" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="8" id="4nG-IS-GNz"/>
-                            <constraint firstItem="YzP-hI-f4u" firstAttribute="centerY" secondItem="ERx-hH-rdd" secondAttribute="centerY" id="EH9-uV-QYc"/>
                             <constraint firstItem="YzP-hI-f4u" firstAttribute="centerX" secondItem="ERx-hH-rdd" secondAttribute="centerX" id="Vta-67-fwQ"/>
+                            <constraint firstItem="KAZ-Fy-G48" firstAttribute="top" secondItem="YzP-hI-f4u" secondAttribute="bottom" constant="2" id="dyb-yE-bMq"/>
                             <constraint firstItem="KAZ-Fy-G48" firstAttribute="centerX" secondItem="YzP-hI-f4u" secondAttribute="centerX" id="l9h-R8-8A9"/>
-                            <constraint firstAttribute="bottom" secondItem="KAZ-Fy-G48" secondAttribute="bottom" id="qjo-aI-7gA"/>
                         </constraints>
                     </view>
                     <connections>

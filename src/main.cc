@@ -41,6 +41,13 @@
 #include "speech.h"
 #include "main.h"
 
+struct CColour{
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+};
+
 #if 0 //ACH  -push/pop symbolic hotkey
 
 extern void * PushSymbolicHotKeyMode(OptionBits inOptions) __attribute__((weak_import));
@@ -644,31 +651,15 @@ extern "C" void beeb_MainCpuLoop()
             Exec6502Instruction();
     }
 }
-// testing - this should be in a 'header'
-struct PixelData {
-    unsigned char a;
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-};
-struct CColour {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    unsigned char a;
-};
-
-
 int y = 0;
 const int width = 640;
 const int height = 512;
-PixelData greenPixel =  {255, 0, 255, 0};
 
 
 const int bpp = 4; // 4 bytes or 32 bits
 unsigned char videobuffer[bpp * width * height]; // 200x200 by 4 bytes
 
-extern "C" void beeb_video2(int height, int width, struct CColour buffer[])
+extern "C" void beeb_video(int height, int width, struct CColour buffer[])
 {
     for (int i = 0; i < width*height; i++)
     {
@@ -680,45 +671,6 @@ extern "C" void beeb_video2(int height, int width, struct CColour buffer[])
     // move a green line everytime this is updated (50fps)
     y += 1;
     y %= height-2;
-
-    //purple line
-    int X = y*width;
-    for (int i = 0; i < width; i++)
-    {
-        buffer[X+i].a = greenPixel.a;
-        buffer[X+i].r = greenPixel.r;
-        buffer[X+i].g = greenPixel.g;
-        buffer[X+i].b = greenPixel.b;
-    }
-
-}
-
-extern "C" void beeb_video(int count,  struct PixelData buffer[])
-{
-    assert(count==width*height);
-    // fill in contents of video buffer
-    for (int i = 0; i < width*height; i++)
-    {
-        buffer[i].b = videobuffer[0+(i*bpp)];
-        buffer[i].g = videobuffer[1+(i*bpp)];
-        buffer[i].r = videobuffer[2+(i*bpp)];
-        buffer[i].a = videobuffer[3+(i*bpp)];
-    }
-    
-    // move a green line everytime this is updated (50fps)
-    y += 1;
-    y %= height-2;
-
-    //purple line
-    int X = y*width;
-    for (int i = 0; i < width; i++)
-    {
-        buffer[X+i].a = greenPixel.a;
-        buffer[X+i].r = greenPixel.r;
-        buffer[X+i].g = greenPixel.g;
-        buffer[X+i].b = greenPixel.b;
-    }
-    
 }
 
 extern "C" int beeb_main(int argc,char *argv[])

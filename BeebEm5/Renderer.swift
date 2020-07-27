@@ -25,7 +25,7 @@ public extension Renderer {
         let vis = true
 
         if vis {
-            bitmap.withPixels (beeb_video2)
+            bitmap.withPixels (beeb_video)
         }
     }
 }
