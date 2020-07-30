@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DC04C64924BE059900D46EAC /* beebem5-distribution.zip in Resources */ = {isa = PBXBuildFile; fileRef = DC04C64824BE059900D46EAC /* beebem5-distribution.zip */; };
 		DC43595124B62F4F002624FE /* serialdevices.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2DA24A33D3700840082 /* serialdevices.cc */; };
 		DC6A476524A54160007E4276 /* Arm.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C824A33D3700840082 /* Arm.cc */; };
 		DC6A476624A541F1007E4276 /* ArmDisassembler.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */; };
@@ -473,7 +472,6 @@
 			files = (
 				DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */,
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
-				DC04C64924BE059900D46EAC /* beebem5-distribution.zip in Resources */,
 				DC8716A524CC3AB300FA27DF /* Main.storyboard in Resources */,
 				DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */,
 				DC85C5F524AB1BE300CCD72E /* README.txt in Resources */,
