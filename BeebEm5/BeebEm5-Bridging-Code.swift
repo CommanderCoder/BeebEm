@@ -137,7 +137,8 @@ func conv(_ value: UInt32) -> String
 
 func recurse(find id: String, menu: NSMenu) -> NSMenuItem? {
   for item in menu.items {
-      if item.identifier?.rawValue == id {
+      if item.identifier?.rawValue == id && item.isEnabled
+      {
       return item
     } else if let submenu = item.submenu {
         if let item = recurse(find: id, menu: submenu) {
@@ -166,6 +167,7 @@ public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
     let cmdSTR =  conv(cmd)
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
+        print("smc",cmdSTR)
         n.state = check ? .on : .off
     }
 }
@@ -241,6 +243,7 @@ public func swift_SetControlValue(_ cmd: UInt32, _ state: Int)
     let cmdSTR = conv(cmd)
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
+        print("scv",cmdSTR)
         n.state = (state==1) ? .on : .off
     }
 }
@@ -252,6 +255,7 @@ public func swift_GetControlValue(_ cmd: UInt32) -> Int
     let cmdSTR =  conv(cmd)
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
+        print("gcv",cmdSTR)
         val = (n.state == .on) ? 1 : 0
     }
     return val

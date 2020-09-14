@@ -21,7 +21,7 @@
 /* The window which the beeb emulator displays stuff in */
 /* David Alan Gilbert 6/11/94 */
 
-#include <Carbon/Carbon.h> 
+#include <Carbon/Carbon.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -215,8 +215,13 @@ long WindowPos[4];
 
 void BeebWin::SetupClipboard(void)
 {
+    // temporarily change what 'OSRDCH' does
+    // and set it back in ResetClipboard
 	m_OSRDCH = BeebReadMem(0x210) + (BeebReadMem(0x211) << 8);
 
+    // FC50 (CopyKey - writemem) and FC51 (PasteKey - readmem) are ready to
+    // receive the accumulator data in BeebWriteMem and BeebReadMem respectively
+    
 	BeebWriteMem(0x100, 0x38);	// SEC
 	BeebWriteMem(0x101, 0xad);	// LDA &FC51
 	BeebWriteMem(0x102, 0x51);
@@ -232,12 +237,34 @@ void BeebWin::SetupClipboard(void)
 	BeebWriteMem(0x210, 0x00);
 	BeebWriteMem(0x211, 0x01);
 
-	KeyDown(36);		// Just to kick off keyboard input, 36 = return key
-
+    
+    // needs to be something in the clipboard (at least)
+    // and space to add another character
+    if (m_clipboardlen > 0 && m_clipboardlen<32765)
+    {
+        // Just to kick off keyboard input
+        
+        // insert a BS to the clipboard, which will
+        // cause the key that is pressed to kick
+        // off the PASTE to be deleted
+        memcpy(m_clipboard+1, m_clipboard, m_clipboardlen);
+        m_clipboard[0]=0x7F;  // BBC DELETE
+        m_clipboardlen+=1;
+        KeyDown(50); // ` key
+    }
+    else
+    {
+        ResetClipboard();
+    }
 }
 
 void BeebWin::ResetClipboard(void)
 {
+    if (m_clipboardptr>0)
+    {
+        KeyUp(50); // ` key
+    }
+
 	BeebWriteMem(0x210, m_OSRDCH & 255);
 	BeebWriteMem(0x211, m_OSRDCH >> 8);
 }
@@ -248,8 +275,7 @@ int data = 0x00;
 	
 	switch (addr)
 	{
-		case 0 :
-			KeyUp(36);
+		case 0 : // readme 0xfc50 : get the next item from the clipboard (i.e. what was printed)
 			if (m_clipboardlen > 0)
 			{
 				data = m_clipboard[m_clipboardptr++];
@@ -260,10 +286,11 @@ int data = 0x00;
 				}
 			}
 			break;
-		case 1 :
+		case 1 : // readmem 0xfc51 ; 0 means character available, -1 (255) means not
 			data = (m_clipboardlen == 0) ? 255 : 0;
 			break;
 	}
+//    printf("pastekey %d %d [%d]\n", addr,data,m_clipboardlen);
 	return data;
 }
 
@@ -299,7 +326,9 @@ void BeebWin::CopyKey(int Value)
 			returnBytes[i] = m_printerbuffer[i + 3];
 		
 		PasteboardPutItemFlavor( outPasteboard, (PasteboardItemID)1,
-							   CFSTR("com.apple.traditional-mac-plain-text"), returnData, 0 );
+//							   CFSTR("com.apple.traditional-mac-plain-text"),
+                             CFSTR("public.utf8-plain-text"),
+                                      returnData, 0 );
 
 		CFRelease(returnData);
 	}
@@ -2892,7 +2921,7 @@ void BeebWin::doLED(int sx,bool on) {
 extern "C" int beeb_HandleCommand(unsigned int cmdID)
 {
     char* cmdCHR = (char*)&cmdID;
-    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+    printf("HANDLECMD %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
     return mainWin->HandleCommand(cmdID);
 }
 
@@ -3351,12 +3380,12 @@ void BeebWin::InitMenu(void)
 	SetMenuCommandIDCheck('vmar', (m_maintainAspectRatio) ? true : false);
 
 	char Title[256];
-
-	MenuRef			menu = nil;
-	MenuItemIndex	j;
-	OSStatus		err;
+    OSStatus        err;
 
 #if 0 //ACH - menu setup
+	MenuRef			menu = nil;
+	MenuItemIndex	j;
+
 	err = GetIndMenuItemWithCommandID(nil, 'pfle', 1, &menu, &j);
 	if (!err)
 	{
@@ -3367,6 +3396,13 @@ void BeebWin::InitMenu(void)
 		if (err) fprintf(stderr, "SetMenuTitle returned err code %d\n", (int) err);
 		CFRelease(pTitle);
 	}
+#else
+    sprintf(Title, "File: %s", m_PrinterFileName);
+    err = swift_SetMenuItemTextWithCString('pfle', Title);
+    if (err)
+    {
+        fprintf(stderr, "SetMenuTitle returned err code %d\n", (int) err);
+    }
 #endif
 
 	if (MachineType != 3)
@@ -4195,7 +4231,6 @@ OSStatus err = noErr;
 				m_printerbufferlen = 0;
 			}
 				
-#if 0//ACH -printerfile
 			if (PrinterFile())
 			{
 				/* If printer is enabled then need to disable it before changing file */
@@ -4203,10 +4238,11 @@ OSStatus err = noErr;
 					TogglePrinter();
 					
 				char Title[256];
+                OSStatus        err;
 
+#if 0//ACH -printerfile
 				MenuRef			menu = nil;
 				MenuItemIndex	j;
-				OSStatus		err;
 
 				err = GetIndMenuItemWithCommandID(nil, 'pfle', 1, &menu, &j);
 				if (!err)
@@ -4218,13 +4254,19 @@ OSStatus err = noErr;
 					if (err) fprintf(stderr, "SetMenuTitle returned err code %ld\n", err);
 					CFRelease(pTitle);
 				}
-
+#else
+                sprintf(Title, "File: %s", m_PrinterFileName);
+                err = swift_SetMenuItemTextWithCString('pfle', Title);
+                if (err)
+                {
+                    fprintf(stderr, "SetMenuTitle returned err code %ld\n", err);
+                }
+#endif
 				m_MenuIdPrinterPort = IDM_PRINTER_FILE;
 				SetMenuCommandIDCheck('pfle', true);
 				TranslatePrinterPort();
 				TogglePrinter();		// Turn printer back on
 			}
-#endif
             break;
 
 		case 'pclp':
@@ -4266,12 +4308,12 @@ OSStatus err = noErr;
 
 		case 'copy':
             fprintf(stderr, "Copy selected\n");
-//			doCopy();
+			doCopy();
 			break;
 			
 		case 'past':
             fprintf(stderr, "Paste selected\n");
-//			doPaste();
+			doPaste();
 			break;
 			
 // AMX Mouse
@@ -4875,7 +4917,7 @@ OSStatus err = noErr;
             fprintf(stderr, "Invert Background selected\n");
 			m_Invert = 1 - m_Invert;
 			SetMenuCommandIDCheck('invb', (m_Invert) ? true : false);
-		
+            break;
 		case 'swtd':
             fprintf(stderr, "Save Window To Disc ... selected\n");
 			m_PrintScreen = true;
@@ -5507,11 +5549,11 @@ void BeebWin::doCopy()
         
     m_printerbufferlen = 0;
         
-    m_clipboard[0] = 2;
+    m_clipboard[0] = 2; // turn printer on CTRL-B
     m_clipboard[1] = 'L';
     m_clipboard[2] = '.';
     m_clipboard[3] = 13;
-    m_clipboard[4] = 3;
+    m_clipboard[4] = 3; // turn printer off CTRL-C
     m_clipboardlen = 5;
     m_clipboardptr = 0;
     m_printerbufferlen = 0;

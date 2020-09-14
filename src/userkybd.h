@@ -38,4 +38,6 @@ const char *KeyName( int Key );
 void GetKeysUsed( char *Keys );
 void SetBBCKeyForVKEY( int Key );
 
+int keyCodeForKeyString(char * keyString);
+
 #endif
