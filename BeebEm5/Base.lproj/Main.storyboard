@@ -2551,11 +2551,11 @@ DQ
             <objects>
                 <viewController id="5gI-5U-AMq" userLabel="BeebEm View Controller" customClass="BeebViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="ERx-hH-rdd">
-                        <rect key="frame" x="0.0" y="0.0" width="650" height="550"/>
+                        <rect key="frame" x="0.0" y="0.0" width="688" height="560"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KAZ-Fy-G48">
-                                <rect key="frame" x="267" y="2" width="116" height="28"/>
+                                <rect key="frame" x="286" y="2" width="116" height="28"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="28" id="giH-xP-cGw"/>
                                 </constraints>
@@ -2565,8 +2565,8 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <imageView focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YzP-hI-f4u" customClass="BeebImageView" customModule="BeebEm5" customModuleProvider="target">
-                                <rect key="frame" x="6" y="34" width="638" height="512"/>
+                            <imageView focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YzP-hI-f4u" customClass="BeebImageView" customModule="BeebEm5" customModuleProvider="target">
+                                <rect key="frame" x="21" y="35" width="646" height="518"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="YzP-hI-f4u" secondAttribute="height" multiplier="5:4" id="IGF-bO-hwk"/>
                                 </constraints>
