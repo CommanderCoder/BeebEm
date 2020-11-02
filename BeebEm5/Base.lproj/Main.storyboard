@@ -674,6 +674,13 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="9ce-ry-6eC"/>
+                                        <menuItem title="Full Screen" keyEquivalent="f" id="Noi-AP-7BR">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="KDP-uH-E2t"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>

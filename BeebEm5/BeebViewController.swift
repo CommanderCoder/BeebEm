@@ -9,6 +9,17 @@
 import Cocoa
 import Carbon
 
+//10 T% = TIME
+//20 REPEAT
+//30 REPEAT UNTIL TIME > T%
+//45 T%=T%+100
+//40 PRINT TIME
+//50 UNTIL FALSE
+
+// in VirtualC64 - a thread is created that calls the cpu_update very quickly
+// and in the cpu_update it has a WAIT using ..
+//
+
 
 // MODIFIED FOR MacOS FROM
 // https://github.com/nicklockwood/RetroRampage
@@ -32,6 +43,7 @@ class BeebViewController: NSViewController {
             // need to typecast the context from pointer to self.
             let view = unsafeBitCast(displayLinkContext, to: BeebViewController.self)
 
+            // Make an asynchronous call to the cpu update
             DispatchQueue.main.async {
               // the use of 'imageView' variable must occur on the main thread
               view.update(displayLink)
@@ -53,6 +65,9 @@ class BeebViewController: NSViewController {
     }
     
     func update(_ displayLink: CVDisplayLink) {
+        
+        // draw to the renderer bitmap and then put that image
+        // onto the imageview
         var renderer = Renderer(width: 640, height: 512)
         renderer.draw()
         
@@ -124,15 +139,20 @@ extension BeebViewController{
     
     func update_cpu()  // game update
     {
+        // GAME UPDATE is called from the DisplayLinkOutputCallback
+        // and it is called on the main thread
         
+        
+        // update the tape controller
         tcViewControllerInstance?.update()
 
+        // update the window label
         if let mainwindow = NSApplication.shared.mainWindow {
             mainwindow.title = CBridge.windowTitle
         }
         WIPlabel?.stringValue = CBridge.windowTitle
 
-        
+        // update the CPU - not now - but after the delay requested by the previous cpu cycle
         if !cpuDelaying {
         
             cpuDelaying = true
@@ -144,6 +164,10 @@ extension BeebViewController{
                 self.cpuDelaying = false
             })
             
+        }
+        else
+        {
+            print("asked to update while delaying the CPU")
         }
     }
 

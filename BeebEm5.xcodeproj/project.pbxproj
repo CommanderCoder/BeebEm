@@ -95,7 +95,6 @@
 		DCCCC2A424A338EE00840082 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DCCCC2A724A338EE00840082 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		DCCCC2A924A338EE00840082 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DCCCC2AA24A338EE00840082 /* BeebEm5.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeebEm5.entitlements; sourceTree = "<group>"; };
 		DCCCC2B224A3395F00840082 /* DFS image.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "DFS image.icns"; path = "src/DFS image.icns"; sourceTree = "<group>"; };
 		DCCCC2B624A33D3600840082 /* BeebEm5-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BeebEm5-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCCCC2B724A33D3600840082 /* discedit.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = discedit.cc; path = src/discedit.cc; sourceTree = "<group>"; };
@@ -289,7 +288,6 @@
 				DCCCC2A424A338EE00840082 /* Assets.xcassets */,
 				DCCCC2A624A338EE00840082 /* Main.storyboard */,
 				DCCCC2A924A338EE00840082 /* Info.plist */,
-				DCCCC2AA24A338EE00840082 /* BeebEm5.entitlements */,
 				DC8716A124CC3A5900FA27DF /* BeebImageView.swift */,
 				DC8716A324CC3A6800FA27DF /* BeebViewController.swift */,
 			);
