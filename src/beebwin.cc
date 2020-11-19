@@ -1901,26 +1901,23 @@ void BeebWin::Initialise(char *home)
 
 #ifdef DEBUG
 
-//	strcpy(RomPath, "/users/jonwelch/myprojects/beebem3/");
-
-    strcpy(RomPath, "./");
-
-
     fprintf(stderr, "DEBUG\n");
 	
 #else
 
 	fprintf(stderr, "RELEASE\n");
 
-	strcpy(RomPath, home);
-	char *p = strstr(RomPath, ".app");		// Find name of bundle
-	if (p) *p = 0;
-	p = strrchr(RomPath, '/');		// then come back to parent directory
-	if (p) p[1] = 0; 
-
-//	strcpy(RomPath, "/users/jonwelch/myprojects/beebem/beebem4/");
-
 #endif
+
+	strcpy(RomPath, home);
+//	char *p = strstr(RomPath, ".app");		// Find name of bundle
+//	if (p) *p = 0;
+//	p = strrchr(RomPath, '/');		// then come back to parent directory
+//	if (p) p[1] = 0;
+    char *p = strstr(RomPath, "MacOS");        // Find MacOS folder
+    if (p) *p = 0;
+
+    strcat(RomPath, "Resources/");
 
 	strcpy(EconetCfgPath, RomPath);
 

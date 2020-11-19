@@ -7,45 +7,22 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>uef</string>
-				<string>csw</string>
-				<string>ssd</string>
-				<string>dsd</string>
-				<string>wdd</string>
-				<string>adf</string>
-				<string>adl</string>
-				<string>img</string>
-				<string>dos</string>
-				<string>UEF</string>
-				<string>CSW</string>
-				<string>SSD</string>
-				<string>WDD</string>
-				<string>DSD</string>
-				<string>ADF</string>
-				<string>ADL</string>
-				<string>IMG</string>
-				<string>DOS</string>
-			</array>
 			<key>CFBundleTypeIconFile</key>
-			<string>DFS image.icns</string>
+			<string></string>
+			<key>CFBundleTypeIconSystemGenerated</key>
+			<integer>1</integer>
 			<key>CFBundleTypeName</key>
-			<string>DocumentType</string>
-			<key>CFBundleTypeOSTypes</key>
-			<array>
-				<string>????</string>
-			</array>
+			<string>BeebEm doc</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>public.beebem5</string>
+				<string>com.commandercoder.beebem</string>
 			</array>
 			<key>NSDocumentClass</key>
-            <string>$(PRODUCT_MODULE_NAME).Document</string>
+			<string>$(PRODUCT_MODULE_NAME).Document</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
@@ -78,5 +55,31 @@
 	<true/>
 	<key>NSSupportsSuddenTermination</key>
 	<true/>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>BeebEm ETI</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string>Icon</string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.commandercoder.beebem</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>dsd</string>
+					<string>DSD</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

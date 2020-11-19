@@ -59,6 +59,23 @@
 		DCD4AE3524A4D6970000C40A /* z80_support.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D624A33D3700840082 /* z80_support.cc */; };
 		DCD4AE3624A4D6970000C40A /* z80.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C924A33D3700840082 /* z80.cc */; };
 		DCD4AE3724A4D6970000C40A /* z80dis.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BF24A33D3700840082 /* z80dis.cc */; };
+		DCD5DC182565E7CC00FB151D /* BeebFile in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC172565E7CC00FB151D /* BeebFile */; };
+		DCD5DC1B2565E7EF00FB151D /* beebstate in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC1A2565E7EF00FB151D /* beebstate */; };
+		DCD5DC2E2565E86F00FB151D /* RelayOn.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC2C2565E86F00FB151D /* RelayOn.snd */; };
+		DCD5DC2F2565E86F00FB151D /* RelayOff.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC2D2565E86F00FB151D /* RelayOff.snd */; };
+		DCD5DC322565E88600FB151D /* Phroms in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC312565E88600FB151D /* Phroms */; };
+		DCD5DC342565E8E000FB151D /* Econet.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F124AB1BE300CCD72E /* Econet.cfg */; };
+		DCD5DC352565E8E000FB151D /* Phroms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */; };
+		DCD5DC362565E8E000FB151D /* Roms_Torch.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */; };
+		DCD5DC372565E8E000FB151D /* Roms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EA24AB1BE300CCD72E /* Roms.cfg */; };
+		DCD5DC382565E8E000FB151D /* beebem.ini in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EC24AB1BE300CCD72E /* beebem.ini */; };
+		DCD5DC392565E8E000FB151D /* DriveMotor.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC202565E83400FB151D /* DriveMotor.snd */; };
+		DCD5DC3A2565E8E000FB151D /* HeadLoad.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC1E2565E83400FB151D /* HeadLoad.snd */; };
+		DCD5DC3B2565E8E000FB151D /* HeadSeek.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC1F2565E83400FB151D /* HeadSeek.snd */; };
+		DCD5DC3C2565E8E000FB151D /* HeadStep.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC212565E83400FB151D /* HeadStep.snd */; };
+		DCD5DC3D2565E8E000FB151D /* HeadUnload.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC222565E83400FB151D /* HeadUnload.snd */; };
+		DCD5DC3E2565E8E000FB151D /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC1D2565E83300FB151D /* LICENSE */; };
+		DCD5DC432565EE9700FB151D /* teletext.fnt in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC412565EE7600FB151D /* teletext.fnt */; };
 		DCE0DCFD24BE589900F9AEF0 /* printing.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C724A33D3700840082 /* printing.cc */; };
 		DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */; };
 /* End PBXBuildFile section */
@@ -181,6 +198,18 @@
 		DCD4AE1024A4D5700000C40A /* z80mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = z80mem.h; path = src/z80mem.h; sourceTree = "<group>"; };
 		DCD4AE1124A4D5700000C40A /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debug.h; path = src/debug.h; sourceTree = "<group>"; };
 		DCD4AE1224A4D5700000C40A /* mode7font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mode7font.h; path = src/mode7font.h; sourceTree = "<group>"; };
+		DCD5DC172565E7CC00FB151D /* BeebFile */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BeebFile; sourceTree = "<group>"; };
+		DCD5DC1A2565E7EF00FB151D /* beebstate */ = {isa = PBXFileReference; lastKnownFileType = folder; path = beebstate; sourceTree = "<group>"; };
+		DCD5DC1D2565E83300FB151D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		DCD5DC1E2565E83400FB151D /* HeadLoad.snd */ = {isa = PBXFileReference; lastKnownFileType = text; path = HeadLoad.snd; sourceTree = "<group>"; };
+		DCD5DC1F2565E83400FB151D /* HeadSeek.snd */ = {isa = PBXFileReference; lastKnownFileType = text; path = HeadSeek.snd; sourceTree = "<group>"; };
+		DCD5DC202565E83400FB151D /* DriveMotor.snd */ = {isa = PBXFileReference; lastKnownFileType = text; path = DriveMotor.snd; sourceTree = "<group>"; };
+		DCD5DC212565E83400FB151D /* HeadStep.snd */ = {isa = PBXFileReference; lastKnownFileType = text; path = HeadStep.snd; sourceTree = "<group>"; };
+		DCD5DC222565E83400FB151D /* HeadUnload.snd */ = {isa = PBXFileReference; lastKnownFileType = file; path = HeadUnload.snd; sourceTree = "<group>"; };
+		DCD5DC2C2565E86F00FB151D /* RelayOn.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RelayOn.snd; sourceTree = "<group>"; };
+		DCD5DC2D2565E86F00FB151D /* RelayOff.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RelayOff.snd; sourceTree = "<group>"; };
+		DCD5DC312565E88600FB151D /* Phroms */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Phroms; sourceTree = "<group>"; };
+		DCD5DC412565EE7600FB151D /* teletext.fnt */ = {isa = PBXFileReference; lastKnownFileType = file; path = teletext.fnt; sourceTree = "<group>"; };
 		DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeebEm5-Bridging-Code.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -204,21 +233,6 @@
 				DC6A476824A54541007E4276 /* libz.tbd */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		DC85C5E924AB1BC300CCD72E /* ini */ = {
-			isa = PBXGroup;
-			children = (
-				DC85C5EC24AB1BE300CCD72E /* beebem.ini */,
-				DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */,
-				DC85C5F124AB1BE300CCD72E /* Econet.cfg */,
-				DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */,
-				DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */,
-				DC85C5ED24AB1BE300CCD72E /* README.txt */,
-				DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */,
-				DC85C5EA24AB1BE300CCD72E /* Roms.cfg */,
-			);
-			name = ini;
 			sourceTree = "<group>";
 		};
 		DCABC08F24BDFCFB00C0D754 /* Install */ = {
@@ -253,9 +267,9 @@
 		DCCCC29224A338ED00840082 = {
 			isa = PBXGroup;
 			children = (
+				DCD5DC162565E6D500FB151D /* res1 */,
 				DCABC15E24BDFF1100C0D754 /* OtherSources */,
 				DCABC08F24BDFCFB00C0D754 /* Install */,
-				DC85C5E924AB1BC300CCD72E /* ini */,
 				DCD4ADE624A4D54A0000C40A /* Headers */,
 				DCCCC30324A33D4400840082 /* Bridging */,
 				DCCCC2B524A33A3000840082 /* Sources */,
@@ -297,10 +311,26 @@
 		DCCCC2B024A338FB00840082 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				DCABC15C24BDFEE800C0D754 /* beebem.icns */,
-				DCABC15924BDFE8600C0D754 /* beebem.png */,
-				DCCCC2B224A3395F00840082 /* DFS image.icns */,
-				DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */,
+				DCD5DC1A2565E7EF00FB151D /* beebstate */,
+				DCD5DC172565E7CC00FB151D /* BeebFile */,
+				DC85C5F124AB1BE300CCD72E /* Econet.cfg */,
+				DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */,
+				DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */,
+				DC85C5EA24AB1BE300CCD72E /* Roms.cfg */,
+				DCD5DC2D2565E86F00FB151D /* RelayOff.snd */,
+				DCD5DC2C2565E86F00FB151D /* RelayOn.snd */,
+				DCD5DC312565E88600FB151D /* Phroms */,
+				DC85C5EC24AB1BE300CCD72E /* beebem.ini */,
+				DCD5DC202565E83400FB151D /* DriveMotor.snd */,
+				DCD5DC1E2565E83400FB151D /* HeadLoad.snd */,
+				DCD5DC1F2565E83400FB151D /* HeadSeek.snd */,
+				DCD5DC212565E83400FB151D /* HeadStep.snd */,
+				DCD5DC222565E83400FB151D /* HeadUnload.snd */,
+				DCD5DC412565EE7600FB151D /* teletext.fnt */,
+				DCD5DC1D2565E83300FB151D /* LICENSE */,
+				DC85C5ED24AB1BE300CCD72E /* README.txt */,
+				DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */,
+				DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -409,6 +439,17 @@
 			name = Headers;
 			sourceTree = "<group>";
 		};
+		DCD5DC162565E6D500FB151D /* res1 */ = {
+			isa = PBXGroup;
+			children = (
+				DCABC15C24BDFEE800C0D754 /* beebem.icns */,
+				DCABC15924BDFE8600C0D754 /* beebem.png */,
+				DCCCC2B224A3395F00840082 /* DFS image.icns */,
+				DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */,
+			);
+			name = res1;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -436,7 +477,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1140;
-				LastUpgradeCheck = 1140;
+				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = "Andrew Hague";
 				TargetAttributes = {
 					DCCCC29A24A338ED00840082 = {
@@ -468,10 +509,27 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCD5DC432565EE9700FB151D /* teletext.fnt in Resources */,
+				DCD5DC342565E8E000FB151D /* Econet.cfg in Resources */,
+				DCD5DC352565E8E000FB151D /* Phroms.cfg in Resources */,
+				DCD5DC362565E8E000FB151D /* Roms_Torch.cfg in Resources */,
+				DCD5DC372565E8E000FB151D /* Roms.cfg in Resources */,
+				DCD5DC382565E8E000FB151D /* beebem.ini in Resources */,
+				DCD5DC392565E8E000FB151D /* DriveMotor.snd in Resources */,
+				DCD5DC3A2565E8E000FB151D /* HeadLoad.snd in Resources */,
+				DCD5DC3B2565E8E000FB151D /* HeadSeek.snd in Resources */,
+				DCD5DC3C2565E8E000FB151D /* HeadStep.snd in Resources */,
+				DCD5DC3D2565E8E000FB151D /* HeadUnload.snd in Resources */,
+				DCD5DC3E2565E8E000FB151D /* LICENSE in Resources */,
+				DCD5DC2E2565E86F00FB151D /* RelayOn.snd in Resources */,
 				DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */,
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
 				DC8716A524CC3AB300FA27DF /* Main.storyboard in Resources */,
 				DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */,
+				DCD5DC322565E88600FB151D /* Phroms in Resources */,
+				DCD5DC1B2565E7EF00FB151D /* beebstate in Resources */,
+				DCD5DC2F2565E86F00FB151D /* RelayOff.snd in Resources */,
+				DCD5DC182565E7CC00FB151D /* BeebFile in Resources */,
 				DC85C5F524AB1BE300CCD72E /* README.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -573,6 +631,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -634,6 +693,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;

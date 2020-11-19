@@ -167,7 +167,7 @@ public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
     let cmdSTR =  conv(cmd)
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
-        print("smc",cmdSTR)
+//        print("smc",cmdSTR)
         n.state = check ? .on : .off
     }
 }

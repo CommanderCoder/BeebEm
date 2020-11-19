@@ -36,6 +36,10 @@ class BeebViewController: NSViewController {
         super.viewDidLoad()
         // Do view setup here.
         
+        
+        handleOpenDocumentOperation()
+
+        
         // create a callback for the DisplayLink to the update() method of this class
         let displayLinkOutputCallback: CVDisplayLinkOutputCallback = {
             (displayLink: CVDisplayLink, inNow: UnsafePointer<CVTimeStamp>, inOutputTime: UnsafePointer<CVTimeStamp>, flagsIn: CVOptionFlags, flagsOut: UnsafeMutablePointer<CVOptionFlags>, displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
@@ -63,6 +67,22 @@ class BeebViewController: NSViewController {
         setupBeeb()
 
     }
+    
+    func handleOpenDocumentOperation() {
+        if let document = self.view.window?.windowController?.document as? Document {
+            if document.didReadData {
+                populateDocumentContent()
+                document.didReadData = false
+            }
+        }
+    }
+    
+    
+       func populateDocumentContent() {
+//           guard let content = representedObject as? TinyNote else { return }
+        // use the content
+       }
+       
     
     func update(_ displayLink: CVDisplayLink) {
         
@@ -143,18 +163,18 @@ extension BeebViewController{
         // and it is called on the main thread
         
         
-        // update the tape controller
-        tcViewControllerInstance?.update()
-
-        // update the window label
-        if let mainwindow = NSApplication.shared.mainWindow {
-            mainwindow.title = CBridge.windowTitle
-        }
-        WIPlabel?.stringValue = CBridge.windowTitle
 
         // update the CPU - not now - but after the delay requested by the previous cpu cycle
         if !cpuDelaying {
-        
+            // update the tape controller
+            tcViewControllerInstance?.update()
+
+            // update the window label
+            if let mainwindow = NSApplication.shared.mainWindow {
+                mainwindow.title = CBridge.windowTitle
+            }
+            WIPlabel?.stringValue = CBridge.windowTitle
+
             cpuDelaying = true
             
             // update the CPU after any calculated delay that came from the previous CPU update
@@ -165,10 +185,10 @@ extension BeebViewController{
             })
             
         }
-        else
-        {
-            print("asked to update while delaying the CPU")
-        }
+//        else
+//        {
+//            print("asked to update while delaying the CPU \(DispatchTime.now() )" )
+//        }
     }
 
     
