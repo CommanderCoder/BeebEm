@@ -30,11 +30,11 @@ APPBUNDLE="$1/BeebEm5.app"
 
 
 
-TEMPLATE=Template.dmg.gz
-OUTPATH=./BeebEmMac_BUILD
+TEMPLATE=Template5.dmg.gz
+OUTPATH=./BeebEm5_DMG
 OUTPUT=Temp.dmg
-FINAL=BeebEmMac.dmg
-VOLNAME=BeebEmMac
+FINAL=BeebEm5.dmg
+VOLNAME=BeebEm5
 
 echo "Creating install DMG from template"
 
@@ -49,16 +49,16 @@ echo "Mounting DMG"
 hdiutil attach $OUTPATH/$OUTPUT
 
 echo "Copying support files"
-cp -R beebem5-distribution/* "/Volumes/$VOLNAME/BeebEmMac/"
+cp -R beebem5-distribution/* "/Volumes/$VOLNAME/BeebEm5/"
 
 echo "Copying signed application"
 #already copied
-#cp -R "$APPBUNDLE" "/Volumes/$VOLNAME/BeebEmMac/"
+#cp -R "$APPBUNDLE" "/Volumes/$VOLNAME/BeebEm5/"
 
 #echo "Copying current source"
-#cp -R "$SRC_PATH" "/Volumes/$VOLNAME/BeebEmMac/"
+#cp -R "$SRC_PATH" "/Volumes/$VOLNAME/BeebEm5/"
 
-xattr -cr "/Volumes/$VOLNAME/BeebEmMac"
+xattr -cr "/Volumes/$VOLNAME/BeebEm5"
 
 # Now detach (unmount) the DMG ready for signing
 hdiutil detach "/Volumes/$VOLNAME"
