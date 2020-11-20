@@ -27,3 +27,4 @@ void beeb_TapeControlCloseDialog();
 long beeb_getTableRowsCount(const char* tablename);
 const char* beeb_getTableCellData(unsigned int property, long itemID);
 
+int beeb_autorun(char *path);

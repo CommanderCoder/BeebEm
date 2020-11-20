@@ -1,5 +1,5 @@
 #/bin/zsh
-# default shell on MacOD
+# default shell on MacOS
 
 # -- make_distribution.sh --
 
@@ -8,6 +8,7 @@ if [[ $# == 0 ]]; then
 	exit
 fi
 
+# $DIST_FOLDER contains all the files to go along with the APP, i.e. example disks and tapes
 DIST_FOLDER=./beebem5-distribution
 
 APP_BUNDLE="$1"
@@ -30,3 +31,7 @@ xattr -cr "$DIST_FOLDER"
 rm beebem5-distribution.zip
 zip beebem5-distribution -r "$DIST_FOLDER" -x "*.DS_Store" -x "__MACOSX"
 
+
+# DMG has links to the Application folder, and the READMEs, COPYRIGHT and LICENCE
+# create the DMG
+./create_dmg.sh "$APP_BUNDLE"

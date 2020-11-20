@@ -82,6 +82,7 @@
 
 /* Begin PBXFileReference section */
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
+		DC10ACE22567BA1300DA8E32 /* create_dmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_dmg.sh; sourceTree = "<group>"; };
 		DC59F1A224BE01D000687D2A /* beebem5-distribution */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "beebem5-distribution"; sourceTree = "<group>"; };
 		DC6A476824A54541007E4276 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -241,6 +242,7 @@
 				DC04C64824BE059900D46EAC /* beebem5-distribution.zip */,
 				DC59F1A224BE01D000687D2A /* beebem5-distribution */,
 				DCABC09424BDFCFB00C0D754 /* make_distribution.sh */,
+				DC10ACE22567BA1300DA8E32 /* create_dmg.sh */,
 			);
 			path = Install;
 			sourceTree = "<group>";
@@ -267,7 +269,7 @@
 		DCCCC29224A338ED00840082 = {
 			isa = PBXGroup;
 			children = (
-				DCD5DC162565E6D500FB151D /* res1 */,
+				DCD5DC162565E6D500FB151D /* Icons */,
 				DCABC15E24BDFF1100C0D754 /* OtherSources */,
 				DCABC08F24BDFCFB00C0D754 /* Install */,
 				DCD4ADE624A4D54A0000C40A /* Headers */,
@@ -439,7 +441,7 @@
 			name = Headers;
 			sourceTree = "<group>";
 		};
-		DCD5DC162565E6D500FB151D /* res1 */ = {
+		DCD5DC162565E6D500FB151D /* Icons */ = {
 			isa = PBXGroup;
 			children = (
 				DCABC15C24BDFEE800C0D754 /* beebem.icns */,
@@ -447,7 +449,7 @@
 				DCCCC2B224A3395F00840082 /* DFS image.icns */,
 				DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */,
 			);
-			name = res1;
+			name = Icons;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

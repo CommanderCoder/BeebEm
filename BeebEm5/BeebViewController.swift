@@ -16,8 +16,8 @@ import Carbon
 //40 PRINT TIME
 //50 UNTIL FALSE
 
-// in VirtualC64 - a thread is created that calls the cpu_update very quickly
-// and in the cpu_update it has a WAIT using ..
+// Alternative method in VirtualC64 - a thread is created that calls the cpu_update very quickly
+// and in the cpu_update it WAITS
 //
 
 
@@ -36,10 +36,7 @@ class BeebViewController: NSViewController {
         super.viewDidLoad()
         // Do view setup here.
         
-        
-        handleOpenDocumentOperation()
-
-        
+ 
         // create a callback for the DisplayLink to the update() method of this class
         let displayLinkOutputCallback: CVDisplayLinkOutputCallback = {
             (displayLink: CVDisplayLink, inNow: UnsafePointer<CVTimeStamp>, inOutputTime: UnsafePointer<CVTimeStamp>, flagsIn: CVOptionFlags, flagsOut: UnsafeMutablePointer<CVOptionFlags>, displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
@@ -67,22 +64,7 @@ class BeebViewController: NSViewController {
         setupBeeb()
 
     }
-    
-    func handleOpenDocumentOperation() {
-        if let document = self.view.window?.windowController?.document as? Document {
-            if document.didReadData {
-                populateDocumentContent()
-                document.didReadData = false
-            }
-        }
-    }
-    
-    
-       func populateDocumentContent() {
-//           guard let content = representedObject as? TinyNote else { return }
-        // use the content
-       }
-       
+
     
     func update(_ displayLink: CVDisplayLink) {
         

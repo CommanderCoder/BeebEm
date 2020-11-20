@@ -75,8 +75,24 @@
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>dsd</string>
-					<string>DSD</string>
+                    <string>uef</string>
+                    <string>csw</string>
+                    <string>ssd</string>
+                    <string>dsd</string>
+                    <string>wdd</string>
+                    <string>adf</string>
+                    <string>adl</string>
+                    <string>img</string>
+                    <string>dos</string>
+                    <string>UEF</string>
+                    <string>CSW</string>
+                    <string>SSD</string>
+                    <string>WDD</string>
+                    <string>DSD</string>
+                    <string>ADF</string>
+                    <string>ADL</string>
+                    <string>IMG</string>
+                    <string>DOS</string>
 				</array>
 			</dict>
 		</dict>

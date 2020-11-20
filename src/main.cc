@@ -67,7 +67,7 @@ Boolean quitNow;
 const char *Version="5.0a";
 const char *VersionDate="25th June 2020";
 
-#if 0 //ACH - window handlers and event loops
+#if 0 //ACH - auto run
 
 void AtExitHandler(void) {
   delete mainWin;
@@ -128,6 +128,42 @@ static pascal OSErr AEodoc(const AppleEvent *theEvent, AppleEvent *theReply, lon
 
 	return err;
 }
+
+#else
+
+char AutoRunPath[512]="";
+
+extern "C" void beeb_autorun(char* path)
+{
+    strcpy(AutoRunPath, path);
+}
+
+void AutoRunFromPath()
+{
+    char* path = AutoRunPath;
+    if (mainWin && path[0] != 0)
+    {
+        if (strstr(path, ".uef")) mainWin->LoadTapeFromPath(path);
+        else if (strstr(path, ".UEF")) mainWin->LoadTapeFromPath(path);
+        else if (strstr(path, ".csw")) mainWin->LoadTapeFromPath(path);
+        else if (strstr(path, ".CSW")) mainWin->LoadTapeFromPath(path);
+        else {
+            mainWin->LoadDisc(0, path);
+            mainWin->m_ShiftBooted = true;
+            mainWin->ResetBeebSystem(MachineType, TubeEnabled, 0);
+            BeebKeyDown(0, 0);
+            
+        }
+        // remove the path, ready for the next autorun
+        path[0] = 0;
+    }
+
+}
+
+
+#endif
+
+#if 0 // ACH - Event Handler and Main Loop
 
 static OSStatus MainWindowEventHandler(
    EventHandlerCallRef nextHandler, EventRef event, void *userData)
@@ -770,6 +806,9 @@ int i;
   // Call the event loop
   RunApplicationEventLoopWithCooperativeThreadSupport();
 #endif
+    
+    // autorun if a filepath was set
+    AutoRunFromPath();
 
     return(0);
 }
