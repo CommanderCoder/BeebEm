@@ -1,10 +1,13 @@
 # BeebEm
-Port of BeebEm4 for Mac Catalina and beyond
+Port of BeebEm4 by Jon Welch (https://www.g7jjf.com/download.htm) to make it will work on Mac Catalina and beyond.  I took the liberty of wrapping the emulator in a Swift harness (not painful at all!) so it will appear a little different to normal and some features are still unavailable.  Let me know if you want a specific feature reimplimenting.
 
-Zip File of work in progress
+Apple DMG (installer) of the emulator 
+https://github.com/CommanderCoder/BeebEm/blob/master/Install/BeebEm5_DMG/BeebEm5.dmg
+
+Zip File of the DMG contents
 https://github.com/CommanderCoder/BeebEm/raw/master/Install/beebem5-distribution.zip
 
-Some people have reported that it doesn't work out of the 'zip' because of attributes associated with the files.  I will fix this and produce an installation DMG at some point.  For the time being if you double click on the BeebEm and nothing seems to happen, open a terminal window to run this command on the beebem5-distribution folder.
+Some people have reported that it doesn't work out of the 'zip' because of attributes associated with the files. This doesn't (shouldn't) happen with the  installation DMG.  If you double click on the BeebEm and nothing seems to happen, open a terminal window to run this command on the beebem5-distribution folder.
 
 ```zsh
 $ xattr -crv beebem5-distribution
