@@ -1058,11 +1058,6 @@ CFStringRef pTitle;
 	return status;
 }
 #endif
-
-extern "C" void beeb_TapeControlOpenDialog()
-{
-    TapeControlOpenDialog();
-}
 	
 void TapeControlOpenDialog()
 {
@@ -1131,11 +1126,6 @@ void TapeControlOpenDialog()
 		
 		
 	}
-}
-    
-extern "C" void beeb_TapeControlCloseDialog()
-{
-    TapeControlCloseDialog();
 }
 
 void TapeControlCloseDialog()
@@ -1318,69 +1308,3 @@ void LoadSerialUEF(FILE *SUEF)
 		}
 	}
 }
-
-extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
-{
-    char* cmdCHR = (char*)&cmdID;
-    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
-    return TCWindowCommandHandler(cmdID);
-}
-    
-extern "C" long beeb_getTableRowsCount(const char* tablename)
-{
-    if (UEFOpen)
-        return map_lines;
-    return 0;
-}
-
-char temp[256];
-
-extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
-{
-    char* propertyCHR = (char*)&property;
-
-//    printf("%c%c%c%c data %ld", propertyCHR[3], propertyCHR[2], propertyCHR[1], propertyCHR[0], itemID);
-    
-    switch(property)
-    {
-        case 'NAME' :
-            
-            strcpy(temp, map_desc[itemID - 1]);
-            temp[12] = 0;
-            
-            break;
-
-        case 'BLCK' :
-            
-            strcpy(temp, map_desc[itemID - 1] + 13);
-            temp[2] = 0;
-            
-            break;
-
-        case 'LENG' :
-            
-            strcpy(temp, map_desc[itemID - 1] + 16);
-            
-            break;
-            
-        case 3 :
-            long s;
-            s = itemID - 1;
-            if (s >= 0 && s < map_lines)
-            {
-                if (CSWOpen)
-                {
-                    csw_ptr = map_time[s];
-                }
-                else
-                {
-                    TapeClock=map_time[s];
-                }
-                OldClock=0;
-                TapeTrigger=TotalCycles+TAPECYCLES;
-            }
-            break;
-    }
-    return temp;
-}
-
