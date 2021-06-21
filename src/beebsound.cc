@@ -462,7 +462,7 @@ static void SetFreq(int Channel, int freqval) {
   //fprintf(sndlog,"Channel %d - Value %d\n",Channel,freqval);
   double t;
 
-  if (freqval==0) freqval=1;
+  if (freqval==0) freqval=1024;
   if (freqval<5) Speech[Channel]=1; else Speech[Channel]=0;
   freq=4000000/(32*freqval);
 
