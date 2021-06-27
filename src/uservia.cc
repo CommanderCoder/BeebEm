@@ -42,7 +42,7 @@ int RTC_cmd = 0;
 int RTC_data = 0;        // Mon    Yr   Day         Hour        Min
 unsigned char RTC_ram[8] = {0x12, 0x01, 0x05, 0x00, 0x05, 0x00, 0x07, 0x00};
 
-int RTC_Enabled = 0;
+bool RTC_Enabled = 0;
 
 WindowRef mBreakOutWindow = NULL; 
 
@@ -51,8 +51,8 @@ int BitKeys[8] = {29, 18, 19, 20, 21, 23, 22, 26};
 int LastBitButton = 0;
 
 /* AMX mouse (see uservia.h) */
-int AMXMouseEnabled = 0;
-int AMXLRForMiddle = 0;
+bool AMXMouseEnabled = 0;
+bool AMXLRForMiddle = 0;
 int AMXTrigger = 0;
 int AMXButtons = 0;
 int AMXTargetX = 0;
@@ -61,7 +61,7 @@ int AMXCurrentX = 0;
 int AMXCurrentY = 0;
 
 /* Printer Port */
-int PrinterEnabled = 0;
+bool PrinterEnabled = 0;
 int PrinterTrigger = 0;
 static char PrinterFileName[256];
 FILE *PrinterFileHandle = NULL;
@@ -281,7 +281,7 @@ static int last_Value = 0xff;
 
 /*--------------------------------------------------------------------------*/
 /* Address is in the range 0-f - with the fe60 stripped out */
-int UserVIARead(int Address) {
+unsigned char UserVIARead(int Address) {
   int tmp = 0xff;
   /* cerr << "UserVIARead: Address=0x" << hex << Address << dec << " at " << TotalCycles << "\n";
   DumpRegs(); */
