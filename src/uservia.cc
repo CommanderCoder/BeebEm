@@ -32,17 +32,13 @@
 #include "main.h"
 #include "tube.h"
 
-#ifdef WIN32
-#include <windows.h>
-#include "main.h"
-#endif
-
+/* Real Time Clock */
 int RTC_bit = 0;
 int RTC_cmd = 0;
 int RTC_data = 0;        // Mon    Yr   Day         Hour        Min
 unsigned char RTC_ram[8] = {0x12, 0x01, 0x05, 0x00, 0x05, 0x00, 0x07, 0x00};
-
-bool RTC_Enabled = 0;
+bool RTC_Enabled = false;
+static void RTCWrite(int Value, int lastValue);
 
 WindowRef mBreakOutWindow = NULL; 
 
@@ -51,8 +47,8 @@ int BitKeys[8] = {29, 18, 19, 20, 21, 23, 22, 26};
 int LastBitButton = 0;
 
 /* AMX mouse (see uservia.h) */
-bool AMXMouseEnabled = 0;
-bool AMXLRForMiddle = 0;
+bool AMXMouseEnabled = false;
+bool AMXLRForMiddle = false;
 int AMXTrigger = 0;
 int AMXButtons = 0;
 int AMXTargetX = 0;
@@ -61,10 +57,18 @@ int AMXCurrentX = 0;
 int AMXCurrentY = 0;
 
 /* Printer Port */
-bool PrinterEnabled = 0;
+bool PrinterEnabled = false;
 int PrinterTrigger = 0;
 static char PrinterFileName[256];
 FILE *PrinterFileHandle = NULL;
+
+// Shift Register
+static int SRTrigger = 0;
+static void SRPoll();
+static void UpdateSRState(bool SRrw);
+
+// SW RAM board 
+bool SWRAMBoardEnabled = false;
 
 extern int DumpAfterEach;
 /* My raw VIA state */
