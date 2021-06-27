@@ -5188,10 +5188,11 @@ void BeebWin::SetAMXPosition(unsigned int x, unsigned int y)
 
 void BeebWin::SetMousestickButton(int button)
 {
-	if (m_MenuIdSticks)
-	{
-		JoystickButton = button;
-	}
+// TODO - FIX THIS
+//	if (m_MenuIdSticks)
+//	{
+//		JoystickButton[2] = button;
+//	}
 }
 
 void BeebWin::ScaleMousestick(unsigned int x, unsigned int y)

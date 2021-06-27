@@ -56,6 +56,6 @@ void DoKbdIntCheck();
 
 unsigned char BCD(unsigned char nonBCD);
 
-extern bool JoystickButton;
+extern bool JoystickButton[2];
 
 #endif
