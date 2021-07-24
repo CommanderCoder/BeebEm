@@ -634,7 +634,7 @@ static int max = 0;
 
 	if (strlen(info) > max)
 	{
-		max = strlen(info);
+		max = (int)strlen(info);
 		fprintf(stderr, "New max = %d, '%s'\n", max, info);
 	}
 	

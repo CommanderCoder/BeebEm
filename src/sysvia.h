@@ -32,7 +32,7 @@ extern VIAState SysVIAState;
 extern unsigned char IC32State;
 
 void SysVIAWrite(int Address, int Value);
-int SysVIARead(int Address);
+unsigned char SysVIARead(int Address);
 void SysVIAReset(void);
 
 void SysVIA_poll_real(void);
@@ -46,6 +46,7 @@ void BeebReleaseAllKeys(void);
 void SysVIATriggerCA1Int(int value);
 extern unsigned char IC32State;
 
+void RTCInit(void);
 void CMOSWrite(unsigned char CMOSAddr,unsigned char CMOSData);
 unsigned char CMOSRead(unsigned char CMOSAddr);
 
@@ -55,6 +56,6 @@ void DoKbdIntCheck();
 
 unsigned char BCD(unsigned char nonBCD);
 
-extern int JoystickButton;
+extern bool JoystickButton[2];
 
 #endif
