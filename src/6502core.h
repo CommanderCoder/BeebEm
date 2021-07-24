@@ -66,7 +66,7 @@ extern unsigned int Cycles;
 extern int ProgramCounter;
 extern int PrePC;
 extern CycleCountT TotalCycles;
-extern unsigned int NMILock;
+extern bool NMILock;
 extern int DisplayCycles;
 
 extern int CyclesToInt;
