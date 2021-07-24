@@ -2177,21 +2177,40 @@ void Exec6502Instruction(void) {
                   BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(),Accumulator); /* STA */
                   break;
               case 0x86:
+                  // STX zp
                   AdvanceCyclesForMemWrite();
                   BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(),XReg);
                   break;
+              case 0x87:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: SAX zp
+                      // This one does not seem to change the processor flags
+                      AdvanceCyclesForMemWrite();
+                      WholeRam[ZeroPgAddrModeHandler_Address()] = Accumulator & XReg;
+                  }
+                  break;
               case 0x88:
-                  YReg=(YReg-1) & 255; /* DEY */
-                  PSR&=~(FlagZ | FlagN);
-                  PSR|=((YReg==0)<<1) | (YReg & 128);
+                  // DEY
+                  YReg=(YReg - 1) & 255; /* DEY */
+                  SetPSRZN(YReg);
                   break;
               case 0x89: /* BIT Immediate */
-                  if (MachineType==3) BITImmedInstrHandler(ReadPaged(ProgramCounter++));
+                  if (MachineType==3) {
+                      // BIT imm
+                      BITImmedInstrHandler(ReadPaged(ProgramCounter++));
+                  }
+                  else {
+                      // Undocumented instruction: NOP imm
+                      ReadPaged(ProgramCounter++);
+                  }
                   break;
               case 0x8a:
-                  Accumulator=XReg; /* TXA */
-                  PSR&=~(FlagZ | FlagN);
-                  PSR|=((Accumulator==0)<<1) | (Accumulator & 128);
+                  // TXA
+                  Accumulator=XReg;
+                  SetPSRZN(Accumulator);
                   break;
               case 0x8c:
                   AdvanceCyclesForMemWrite();
