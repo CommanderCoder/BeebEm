@@ -55,6 +55,9 @@ int AMXTargetX = 0;
 int AMXTargetY = 0;
 int AMXCurrentX = 0;
 int AMXCurrentY = 0;
+int AMXDeltaX = 0;
+int AMXDeltaY = 0;
+
 
 /* Printer Port */
 bool PrinterEnabled = false;
@@ -223,7 +226,7 @@ static int last_Value = 0xff;
         UserVIAState.irb&=0x7f;
       };
       UpdateIFRTopBit();
-      UserVIAState.timer1hasshot=0; //Added by K.Lowe 24/08/03
+      UserVIAState.timer1hasshot=false; //Added by K.Lowe 24/08/03
       break;
 
     case 7:
@@ -248,14 +251,17 @@ static int last_Value = 0xff;
       UserVIAState.timer2c=UserVIAState.timer2l * 2 + 1;
       UserVIAState.ifr &=0xdf; /* clear timer 2 ifr */
       UpdateIFRTopBit();
-      UserVIAState.timer2hasshot=0; //Added by K.Lowe 24/08/03
+      UserVIAState.timer2hasshot=false; //Added by K.Lowe 24/08/03
       break;
 
     case 10:
+      UserVIAState.sr=Value * 0xff;
+      UpdateSRState(true);
       break;
 
     case 11:
       UserVIAState.acr=Value & 0xff;
+      UpdateSRState(true);
       break;
 
     case 12:
@@ -286,7 +292,9 @@ static int last_Value = 0xff;
 /*--------------------------------------------------------------------------*/
 /* Address is in the range 0-f - with the fe60 stripped out */
 unsigned char UserVIARead(int Address) {
-  int tmp = 0xff;
+  unsigned char tmp = 0xff;
+  // Local copy for processing middle button
+  int amxButtons = AMXButtons;
   /* cerr << "UserVIARead: Address=0x" << hex << Address << dec << " at " << TotalCycles << "\n";
   DumpRegs(); */
 
@@ -307,30 +315,28 @@ unsigned char UserVIARead(int Address) {
 
 	  if (mBreakOutWindow) ShowInputs(tmp);
 
-	  if (AMXMouseEnabled) {
-        if (AMXLRForMiddle) {
-          if ((AMXButtons & AMX_LEFT_BUTTON) && (AMXButtons & AMX_RIGHT_BUTTON))
-            AMXButtons = AMX_MIDDLE_BUTTON;
-          else
-            AMXButtons &= ~AMX_MIDDLE_BUTTON;
-        }
+      if (AMXMouseEnabled) {
+          if (AMXLRForMiddle) {
+              if ((amxButtons & AMX_LEFT_BUTTON) && (amxButtons & AMX_RIGHT_BUTTON))
+                  amxButtons = AMX_MIDDLE_BUTTON;
+          }
 
 		if (Tube186Enabled)
 		{
 			tmp &= 0xf8;
-			tmp |= (AMXButtons ^ 7);
+			tmp |= (amxButtons ^ 7);
 		}
 		else
 		{
 			tmp &= 0x1f;
-			tmp	|= (AMXButtons ^ 7) << 5;
+			tmp	|= (amxButtons ^ 7) << 5;
 			UserVIAState.ifr&=0xe7;
 		}
 		  
 	  UpdateIFRTopBit();
 
 		  /* Set up another interrupt if not at target */
-        if ( (AMXTargetX != AMXCurrentX) || (AMXTargetY != AMXCurrentY) ) {
+        if ( (AMXTargetX != AMXCurrentX) || (AMXTargetY != AMXCurrentY) || AMXDeltaX || AMXDeltaY) {
           SetTrigger(AMX_TRIGGER, AMXTrigger);
         }
         else {
@@ -382,6 +388,11 @@ unsigned char UserVIARead(int Address) {
       tmp=(UserVIAState.timer2c>>9) & 0xff;
       break;
 
+    case 10:
+      tmp=UserVIAState.sr;
+      UpdateSRState(true);
+      break;
+
     case 11:
       tmp = UserVIAState.acr;
       break;
@@ -429,7 +440,7 @@ void UserVIA_poll_real(void) {
 	
   if (UserVIAState.timer1c<-2 && !t1int) {
     t1int = true;
-    if ((UserVIAState.timer1hasshot==0) || (UserVIAState.acr & 0x40)) {
+    if (!UserVIAState.timer1hasshot || (UserVIAState.acr & 0x40)) {
       /*cerr << "UserVIA timer1c - int at " << TotalCycles << "\n"; */
       UserVIAState.ifr|=0x40; /* Timer 1 interrupt */
       UpdateIFRTopBit();
@@ -440,7 +451,7 @@ void UserVIA_poll_real(void) {
    	  if ((UserVIAState.ier & 0x40) && CyclesToInt == NO_TIMER_INT_DUE) {
 		  CyclesToInt = 3 + UserVIAState.timer1c;
 	  }
-	  UserVIAState.timer1hasshot=1;
+	  UserVIAState.timer1hasshot=true;
     }
   }
 	
@@ -457,7 +468,7 @@ void UserVIA_poll_real(void) {
    	  if ((UserVIAState.ier & 0x20) && CyclesToInt == NO_TIMER_INT_DUE) {
 		  CyclesToInt = 3 + UserVIAState.timer2c;
 	  }
-	  UserVIAState.timer2hasshot=1; // Added by K.Lowe 24/08/03
+	  UserVIAState.timer2hasshot = true; // Added by K.Lowe 24/08/03
     }
   } /* timer2c underflow */
 
@@ -475,11 +486,7 @@ void UserVIA_poll(unsigned int ncycles) {
   if ((UserVIAState.timer1c<0) || (UserVIAState.timer2c<0)) UserVIA_poll_real();
   if (AMXMouseEnabled && AMXTrigger<=TotalCycles) AMXMouseMovement();
   if (PrinterEnabled && PrinterTrigger <= TotalCycles) PrinterPoll();
-  // Do Shift register stuff
-//  if (SRMode==2) {
-	  // Shift IN under control of Clock 2
-//	  SRCount=8-(ncycles%8);
-//  }
+  if (SRTrigger<=TotalCycles) SRPoll();
 }
 
 
@@ -488,6 +495,7 @@ void UserVIAReset(void) {
   VIAReset(&UserVIAState);
   ClearTrigger(AMXTrigger);
   ClearTrigger(PrinterTrigger);
+  SRTrigger=0;
 } /* UserVIAReset */
 
 int sgn(int number)
@@ -497,89 +505,118 @@ int sgn(int number)
 	return 0;
 }
 
+/*--------------------------------------------------------------------------*/
+static int SRMode = 0;
+static void SRPoll()
+{
+    if (SRTrigger == 0)
+    {
+        ClearTrigger(SRTrigger);
+        UpdateSRState(false);
+    }
+    else if (SRMode == 6)
+    {
+        if (!(UserVIAState.ifr & 0x04))
+        {
+            // Shift complete
+            UserVIAState.ifr|=0x04;
+            UpdateIFRTopBit();
+        }
+        ClearTrigger(SRTrigger);
+    }
+}
+
+static void UpdateSRState(bool SRrw)
+{
+    SRMode = ((UserVIAState.acr >> 2) & 7);
+    if (SRMode == 6 && SRTrigger == CycleCountTMax)
+    {
+        SetTrigger(16, SRTrigger);
+    }
+
+    if (SRrw)
+    {
+        if (UserVIAState.ifr & 0x04)
+        {
+            UserVIAState.ifr &= 0xfb;
+            UpdateIFRTopBit();
+        }
+    }
+}
+
 /*-------------------------------------------------------------------------*/
 void AMXMouseMovement() {
-static int xdir = 0;
-static int ydir = 0;
-static int xpulse = 0x08;
-static int ypulse = 0x10;
-static int lastxdir = 0;
-static int lastydir = 0;
-static bool first = true;
 
 	ClearTrigger(AMXTrigger);
 
-	/* Check if there is a outstanding interrupt */
+	// Check if there is an outstanding interrupt //
 	if (AMXMouseEnabled && (UserVIAState.ifr & 0x18) == 0)
 	{
+        int deltaX = AMXDeltaX == 0 ? AMXTargetX - AMXCurrentX : AMXDeltaX;
+        int deltaY = AMXDeltaY == 0 ? AMXTargetY - AMXCurrentY : AMXDeltaY;
 		
-    	if ( (AMXTargetX != AMXCurrentX) || (AMXTargetY != AMXCurrentY) )
+    	if (deltaX != 0 || deltaY != 0) 
 		{
-			
+		    int xdir = sgn(deltaX);
+            int ydir = sgn(deltaY);
+
+            int xpulse, ypulse;
+            	
             if (Tube186Enabled)
             {
-				
-		    	xdir = sgn(AMXTargetX - AMXCurrentX);
-				
-			    if (xdir != 0)
-    			{
-	    			UserVIAState.ifr |= 0x10;
-		    		if (lastxdir == xdir) UserVIAState.irb ^= xpulse;
-			    	lastxdir = xdir;
-				    AMXCurrentX += xdir;
-    			}
-				
-	    		ydir = sgn(AMXTargetY - AMXCurrentY);
-				
-    			if (ydir != 0)
-	    		{
-		    		UserVIAState.ifr |= 0x08;
-					
-	    			if (first)
-    				{
-	    				UserVIAState.irb &= ~ypulse;
-		    			first = false;
-				    }
-					
-    				if (lastydir == ydir) UserVIAState.irb ^= ypulse;
-	    			lastydir = ydir;
-		    		AMXCurrentY += ydir;
-					
-			    }
+                xpulse = 0x08;
+                ypulse = 0x10;
             }
             else
             {
-				
-		    	if (AMXTargetX != AMXCurrentX)
-			    {
-    				UserVIAState.ifr |= 0x10;
-	    			if (AMXTargetX < AMXCurrentX)
-		    		{
-			    		UserVIAState.irb &= ~0x01;
-				    	AMXCurrentX--;
-    				}
-	    			else
-		    		{
-			    		UserVIAState.irb |= 0x01;
-				    	AMXCurrentX++;
-    				}
-	    		}
-		    	if (AMXTargetY != AMXCurrentY)
-			    {
-    				UserVIAState.ifr |= 0x08;
-	    			if (AMXTargetY > AMXCurrentY)
-		    		{
-			    		UserVIAState.irb &= ~0x04;
-				    	AMXCurrentY++;
-    				}
-	    			else
-		    		{
-			    		UserVIAState.irb |= 0x04;
-    					AMXCurrentY--;
-	    			}
-		    	}
+                xpulse = 0x01;
+                ypulse = 0x04;
             }
-		    UpdateIFRTopBit();
+
+            if (xdir)
+            {
+                if (xdir > 0)
+                    UserVIAState.irb &= ~xpulse;
+                else
+                     UserVIAState.irb |= xpulse;
+
+                if(!(UserVIAState.pcr & 0x10)) // Interupt on falling CB1 edge
+                {
+                    // Warp time to the falling edge, invert the input
+                    UserVIAState.irb ^= xpulse;
+                }
+
+                // Trigger the interrupt
+                UserVIAState.ifr |= 0x10;
+            }
+
+            if (ydir)
+            {
+                if (ydir > 0)
+                    UserVIAState.irb |=ypulse;
+                else
+                     UserVIAState.irb &= ~ypulse;
+                if (!(UserVIAState.pcr & 0x40)) // Interrupt on falling CB2 edge
+                 {
+                     // Warp Time to the falling edge, invert the input
+                     UserVIAState.irb ^= ypulse;
+                 }
+
+                 // Trigger the Interrupt
+                 UserVIAState.ifr |= 0x08;
+            }
+
+            if (AMXDeltaX != 0)
+                AMXDeltaX -= xdir;
+            else
+                 AMXCurrentX += xdir;
+            
+            if (AMXDeltaY != 0)
+                AMXDeltaY -= ydir;
+            else
+                 AMXCurrentY += ydir;;    
+
+            UpdateIFRTopBit();
         }
 	}
 	
@@ -607,7 +644,7 @@ void PrinterEnable(char *FileName) {
 			return;
 		}
 	}
-	PrinterEnabled = 1;
+	PrinterEnabled = true;
 	SetTrigger(PRINTER_TRIGGER, PrinterTrigger);
 }
 
@@ -619,7 +656,7 @@ void PrinterDisable() {
 		PrinterFileHandle = NULL;
 	}
 
-	PrinterEnabled = 0;
+	PrinterEnabled = false;
 	ClearTrigger(PrinterTrigger);
 }
 /*-------------------------------------------------------------------------*/
@@ -632,6 +669,69 @@ void PrinterPoll() {
 	SetTrigger(100000, PrinterTrigger);
 }
 
+void RTCWrite(int Value, int lastValue)
+{
+    if ( ((lastValue & 0x02) == 0x02) && ((Value & 0x02) == 0x00) )        // falling clock edge
+    {
+        if ((Value & 0x04) == 0x04)
+        {
+            RTC_cmd = (RTC_cmd >> 1) | ((Value & 0x01) << 15);
+            RTC_bit++;
+
+            WriteLog("RTC Shift cmd : 0x%03x, bit : %d\n", RTC_cmd, RTC_bit);
+        }
+        else
+        {
+            if (RTC_bit == 11) // Write data
+            {
+                RTC_cmd >>= 5;
+
+                WriteLog("RTC Write cmd : 0x%03x, reg : 0x%02x, data = 0x%02x\n", RTC_cmd, (RTC_cmd & 0x0f) >> 1, RTC_cmd >> 4);
+
+                RTC_ram[(RTC_cmd & 0x0f) >> 1] = (unsigned char)(RTC_cmd >> 4);
+            }
+            else
+            {
+                RTC_cmd >>= 12;
+
+                time_t SysTime;
+                time(&SysTime);
+
+                struct tm* CurTime = localtime(&SysTime);
+
+                switch ((RTC_cmd & 0x0f) >> 1)
+                {
+                    case 0 :
+                        RTC_data = BCD((unsigned char)(CurTime->tm_mon + 1));
+                        break;
+                    case 1 :
+                        RTC_data = BCD((CurTime->tm_year % 100) - 1);
+                        break;
+                    case 2 :
+                        RTC_data = BCD((unsigned char)CurTime->tm_mday);
+                        break;
+                    case 3 :
+                        RTC_data = RTC_ram[3];
+                        break;
+                    case 4 :
+                        RTC_data = BCD((unsigned char)CurTime->tm_hour);
+                        break;
+                    case 5 :
+                        RTC_data = RTC_ram[5];
+                        break;
+                    case 6 :
+                        RTC_data = BCD((unsigned char)CurTime->tm_min);
+                        break;
+                    case 7 :
+                        RTC_data = RTC_ram[7];
+                        break;
+                }
+
+                WriteLog("RTC Read cmd : 0x%03x, reg : 0x%02x, data : 0x%02x\n", RTC_cmd, (RTC_cmd & 0x0f) >> 1, RTC_data);
+            }
+        }
+    }
+}
 /*--------------------------------------------------------------------------*/
 void uservia_dumpstate(void) {
   fprintf(stderr, "Uservia:\n");
