@@ -1449,12 +1449,6 @@ void Exec6502Instruction(void) {
                   // BMI rel
                   BMIInstrHandler();
                   break;
-              case 0x70:
-                  BVSInstrHandler();
-                  break;
-              case 0x80:
-                  BRAInstrHandler();
-                  break;
               case 0x90:
                   BCCInstrHandler();
                   break;
@@ -1951,7 +1945,7 @@ void Exec6502Instruction(void) {
               case 0x64:
                   if (MachineType==3) {
                       // STZ zp
-                      BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(),0); /* STZ Zero Page */
+                      BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(),0);
                   }
                   else {
                       // Undocumented instruction: NOP zp 
@@ -2023,54 +2017,162 @@ void Exec6502Instruction(void) {
                       ADCInstrHandler(WholeRam[zpaddr]);
                   }
                   break;
+              case 0x70:
+                  // BVS rel
+                  BVSInstrHandler();
+                  break;
               case 0x71:
+                  // ADC (zp),Y
                   ADCInstrHandler(IndYAddrModeHandler_Data());
                   break;
               case 0x72:
-                  if (MachineType==3) ADCInstrHandler(ZPIndAddrModeHandler_Data());
+                  if (MachineType==3) {
+                      // ADC zp
+                      ADCInstrHandler(ZPIndAddrModeHandler_Data());
+                  }
+                  else {
+                      // Undocumented instruction: KIL 
+                      KILInstrHandler();
+                  }
+                  break;
+              case 0x73:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: RRA (zp),Y
+                      int16 zpaddr = IndYAddrModeHandler_Address();
+                      RORInstrHandler(zpaddr);
+                      ADCInstrHandler(WholeRam[zpaddr]);
+                  }
                   break;
               case 0x74:
-                  if (MachineType==3) { BEEBWRITEMEM_DIRECT(ZeroPgXAddrModeHandler_Address(),0); } else ProgramCounter+=1; /* STZ Zpg,X */
+                  // STZ zp,X
+                  if (MachineType==3) {
+                      BEEBWRITEMEM_DIRECT(ZeroPgXAddrModeHandler_Address(),0);
+                  }
+                  else {
+                      // Undocumented instruction: NOP zp,X
+                      ZeroPgXAddrModeHandler_Address();
+                  }
                   break;
               case 0x75:
+                  // ADC zp,X
                   ADCInstrHandler(ZeroPgXAddrModeHandler_Data());
                   break;
               case 0x76:
+                  // ROR zp,X
                   RORInstrHandler(ZeroPgXAddrModeHandler_Address());
                   break;
+              case 0x77:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: RRA zp,X
+                      int16 zpaddr = ZeroPgXAddrModeHandler_Address();
+                      RORInstrHandler(zpaddr);
+                      ADCInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0x78:
-                  if (!(PSR & FlagI))
+                  // SEI
+                  if (!(PSR & FlagI)) {
                       iFlagJustSet = true;
-                  PSR|=FlagI; /* SEI */
+                  }
+                  PSR |= FlagI;
                   break;
               case 0x79:
+                  // ADC abs,Y
                   ADCInstrHandler(AbsYAddrModeHandler_Data());
                   break;
               case 0x7a:
                   if (MachineType==3) {
-                      YReg=Pop(); /* PLY */
-                      PSR&=~(FlagZ | FlagN);
-                      PSR|=((YReg==0)<<1) | (YReg & 128);
+                      // PLY
+                      YReg = Pop();
+                      SetPSRZN(YReg);
+                  }
+                  else {
+                      // Undocumented instruction: NOP
+                  }
+                  break;
+              case 0x7b:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: RRA abs,Y
+                      int16 zpaddr = AbsYAddrModeHandler_Address();
+                      RORInstrHandler(zpaddr);
+                      ADCInstrHandler(WholeRam[zpaddr]);
                   }
                   break;
               case 0x7c:
-                  if (MachineType==3) ProgramCounter=IndAddrXModeHandler_Address(); /* JMP abs,X*/ else ProgramCounter+=2;
+                  if (MachineType==3) {
+                      // JMP abs,X
+                      ProgramCounter=IndAddrXModeHandler_Address();
+                  }
+                  else {
+                      // Undocumented instruction: NOP abs,X
+                      AbsXAddrModeHandler_Data();
+                  }
                   break;
               case 0x7d:
+                  // ADC abs,X
                   ADCInstrHandler(AbsXAddrModeHandler_Data());
                   break;
               case 0x7e:
+                  // ROR abs,X
                   RORInstrHandler(AbsXAddrModeHandler_Address());
                   break;
+              case 0x7f:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: RRA abs,X
+                      int16 zpaddr = AbsXAddrModeHandler_Address();
+                      RORInstrHandler(zpaddr);
+                      ADCInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
+              case 0x80:
+                  if (MachineType == 3) {
+                      // BRA rel
+                      BRAInstrHandler();
+                  }
+                  else {
+                      // Undocumented instruction: NOP imm
+                      ReadPaged(ProgramCounter++);
+                  }
+                  break;
               case 0x81:
+                  // STA (zp,X)
                   AdvanceCyclesForMemWrite();
-                  WritePaged(IndXAddrModeHandler_Address(),Accumulator); /* STA */
+                  WritePaged(IndXAddrModeHandler_Address(), Accumulator);
+                  break;
+              case 0x82:
+              case 0xc2:
+              case 0xe2:
+                  // Undocumented instruction: NOP imm
+                  ReadPaged(ProgramCounter++);
+                  break;
+              case 0x83:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: SAX (zp,x)
+                      WholeRam[IndXAddrModeHandler_Address()] = Accumulator & XReg;
+                  }
                   break;
               case 0x84:
+                  // STY zp
                   AdvanceCyclesForMemWrite();
                   BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(),YReg);
                   break;
               case 0x85:
+                  // STA zp
                   AdvanceCyclesForMemWrite();
                   BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(),Accumulator); /* STA */
                   break;
