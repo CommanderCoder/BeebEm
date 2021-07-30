@@ -1445,13 +1445,6 @@ void Exec6502Instruction(void) {
                       ORAInstrHandler(WholeRam[zpaddr]);
                   }
                   break;
-              case 0x30:
-                  // BMI rel
-                  BMIInstrHandler();
-                  break;
-              case 0x90:
-                  BCCInstrHandler();
-                  break;
               case 0xb0:
                   BCSInstrHandler();
                   break;
@@ -1619,8 +1612,23 @@ void Exec6502Instruction(void) {
                   // ROL abs
                   ROLInstrHandler(AbsAddrModeHandler_Address());
                   break;
+              case 0x2f:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // undocumented instruction: RLA abs 
+                      int16 zpaddr = AbsAddrModeHandler_Address();
+                      ROLInstrHandler(zpaddr);
+                      ANDInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
+              case 0x30:
+                  // BMI rel
+                  BMIInstrHandler();
+                  break;
               case 0x31:
-                  // And (zp),Y
+                  // AND (zp),Y
                   ANDInstrHandler(IndYAddrModeHandler_Data());
                   break;
               case 0x32:
@@ -1633,14 +1641,24 @@ void Exec6502Instruction(void) {
                       KILInstrHandler();
                   }
                   break;
-                  // TODO: move the OpCodes > 3 stuff into here
+              case 0x33:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction RLA (zp),Y
+                      int16 zpaddr = IndYAddrModeHandler_Address();
+                      ROLInstrHandler(zpaddr);
+                      ANDInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0x34: 
                   if (MachineType==3) {
                       // BIT abs,X
                       BITInstrHandler(ZeroPgXAddrModeHandler_Data());
                   }
                   else {
-                      // Undocumented instruction: NOP zp,x
+                      // Undocumented instruction: NOP zp,X
                       ZeroPgXAddrModeHandler_Address();
                   }
                   break;
@@ -2027,7 +2045,7 @@ void Exec6502Instruction(void) {
                   break;
               case 0x72:
                   if (MachineType==3) {
-                      // ADC zp
+                      // ADC (zp)
                       ADCInstrHandler(ZPIndAddrModeHandler_Data());
                   }
                   else {
@@ -2212,11 +2230,24 @@ void Exec6502Instruction(void) {
                   Accumulator=XReg;
                   SetPSRZN(Accumulator);
                   break;
+              case 0x8b:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: XAA imm
+                      // See http://visual6502.org/wiki/index.php?title=6502_Opcodes_8B_(XAA,_ANE)_explained
+                      Accumulator &= XReg & ReadPaged(ProgramCounter++);
+                      SetPSRZN(Accumulator);
+                  }
+                  break;
               case 0x8c:
+                  // STY abs
                   AdvanceCyclesForMemWrite();
                   STYInstrHandler(AbsAddrModeHandler_Address());
                   break;
               case 0x8d:
+                  // STA abs
                   AdvanceCyclesForMemWrite();
                   WritePaged(AbsAddrModeHandler_Address(),Accumulator); /* STA */
                   break;
@@ -2224,67 +2255,163 @@ void Exec6502Instruction(void) {
                   AdvanceCyclesForMemWrite();
                   STXInstrHandler(AbsAddrModeHandler_Address());
                   break;
+              case 0x8f:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: SAX abs
+                      WholeRam[AbsAddrModeHandler_Address()] = Accumulator & XReg;
+                  }
+                  break;
+              case 0x90:
+                  // BCC rel
+                  BCCInstrHandler();
+                  break;
               case 0x91:
                   AdvanceCyclesForMemWrite();
                   WritePaged(IndYAddrModeHandler_Address(),Accumulator); /* STA */
                   break;
               case 0x92:
-                  AdvanceCyclesForMemWrite();
-                  if (MachineType==3) WritePaged(ZPIndAddrModeHandler_Address(),Accumulator); /* STA */
+                  if (MachineType == 3) {
+                      // STA (zp)
+                      AdvanceCyclesForMemWrite();
+                      WritePaged(ZPIndAddrModeHandler_Address(), Accumulator);
+                  }
+                  else {
+                      // Undocumented instruction: KIL
+                      KILInstrHandler();
+                  }
+                  break;
+              case 0x93:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: AHX (zp),X
+                      AdvanceCyclesForMemWrite();
+                      int Address = IndYAddrModeHandler_Address();
+                      WholeRam[Address] = Accumulator & XReg & ((Address >> 8) + 1);
+                  }
                   break;
               case 0x94:
+                  // STY zp,X
                   AdvanceCyclesForMemWrite();
                   STYInstrHandler(ZeroPgXAddrModeHandler_Address());
                   break;
               case 0x95:
+                  // STA zp,X
                   AdvanceCyclesForMemWrite();
-                  WritePaged(ZeroPgXAddrModeHandler_Address(),Accumulator); /* STA */
+                  WritePaged(ZeroPgXAddrModeHandler_Address(), Accumulator); /* STA */
                   break;
               case 0x96:
+                  // STX zp,X
                   AdvanceCyclesForMemWrite();
                   STXInstrHandler(ZeroPgYAddrModeHandler_Address());
                   break;
+              case 0x97:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: SAX zp,Y
+                      AdvanceCyclesForMemWrite();
+                      WholeRam[ZeroPgYAddrModeHandler_Address()] = Accumulator & XReg;
+                  }
+                  break;
               case 0x98:
-                  Accumulator=YReg; /* TYA */
-                  PSR&=~(FlagZ | FlagN);
-                  PSR|=((Accumulator==0)<<1) | (Accumulator & 128);
+                  // TYA
+                  Accumulator=YReg;
+                  SetPSRZN(Accumulator);
                   break;
               case 0x99:
                   AdvanceCyclesForMemWrite();
-                  WritePaged(AbsYAddrModeHandler_Address(),Accumulator); /* STA */
+                  WritePaged(AbsYAddrModeHandler_Address(), Accumulator);
                   break;
               case 0x9a:
-                  StackReg=XReg; /* TXS */
+                  // TXS
+                  StackReg=XReg;
+                  break;
+              case 0x9b:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: TAS abs,Y
+                      WholeRam[AbsYAddrModeHandler_Address()] = Accumulator & XReg;
+                  }
                   break;
               case 0x9c:
-                  WritePaged(AbsAddrModeHandler_Address(),0); /* STZ Absolute */
-                  /* here's a curiosity, STZ Absolute IS on the 6502 UNOFFICIALLY
-                     and on the 65C12 OFFICIALLY. Something we should know? - Richard Gellman */
+                  if (MachineType == 3) {
+                      // STZ abs
+                      WritePaged(AbsAddrModeHandler_Address(), 0);
+                  }
+                  else {
+                      // Undocumented instruction: SHY abs,X 
+                      int Address = AbsXAddrModeHandler_Address();
+                      WritePaged(Address, YReg & (unsigned char)((Address >> 8) +1));
+                  }
                   break;
               case 0x9d:
+                  // STA abs,X
                   AdvanceCyclesForMemWrite();
-                  WritePaged(AbsXAddrModeHandler_Address(),Accumulator); /* STA */
+                  WritePaged(AbsXAddrModeHandler_Address(), Accumulator);
                   break;
               case 0x9e:
-                  if (MachineType==3) { WritePaged(AbsXAddrModeHandler_Address(),0); } /* STZ Abs,X */ 
-                  else WritePaged(AbsXAddrModeHandler_Address(),Accumulator & XReg);
+                  if (MachineType == 3) {
+                      // STZ abs,x 
+                      AdvanceCyclesForMemWrite();
+                      WritePaged(AbsXAddrModeHandler_Address(), 0);
+                  }
+                  else {
+                      // Undocumented instruction: SHX abs,Y
+                      AdvanceCyclesForMemWrite();
+                      WritePaged(AbsXAddrModeHandler_Address(), Accumulator & XReg);
+                  }
+                  break;
+              case 0x9f:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: AHX abs,X 
+                      AdvanceCyclesForMemWrite();
+                      int Address = AbsYAddrModeHandler_Address();
+                      WritePaged(Address, Accumulator & XReg & ((Address >> 8) +1));
+                  }
                   break;
               case 0xa0:
+                  // LDY imm
                   LDYInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
                   break;
               case 0xa1:
+                  // LDA (zp,X)
                   LDAInstrHandler(IndXAddrModeHandler_Data());
                   break;
               case 0xa2:
+                  // LDX imm 
                   LDXInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
                   break;
+              case 0xa3: 
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: LAX (zp,X)
+                      LDAInstrHandler(IndXAddrModeHandler_Data());
+                      XReg = Accumulator;
+                  }
+                  break;
               case 0xa4:
+                  // LDY zp
                   LDYInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                   break;
               case 0xa5:
+                  // LDA zp
                   LDAInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                   break;
               case 0xa6:
+                  // LDX zp
                   LDXInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                   break;
               case 0xa8:
@@ -2546,17 +2673,6 @@ void Exec6502Instruction(void) {
 		ROLInstrHandler(zpaddr);
 		ANDInstrHandler(WholeRam[zpaddr]);
 		}
-		break;
-	case 0x33: /* Undocumented Instruction: ROL-AND (zp),Y */
-        if (MachineType == 3) {
-            // NOP
-        }
-        else {
-            // Undocumented instruction: RLA (zp),Y
-            int16 zpaddr=IndYAddrModeHandler_Address();
-            ROLInstrHandler(zpaddr);
-            ANDInstrHandler(WholeRam[zpaddr]);
-        }
 		break;
 	case 0x37: /* Undocumented Instruction: ROL-AND zp,X */
 		{
@@ -2912,7 +3028,7 @@ void Exec6502Instruction(void) {
 	PollVIAs(Cycles - ViaCycles);
 	PollHardware(Cycles);
 
-	DoKbdIntCheck();
+	//DoKbdIntCheck();
 	
 	// Check for IRQ
 	DoIntCheck();
