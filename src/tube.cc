@@ -24,6 +24,8 @@
 
 // #include <iostream>
 // #include <fstream>
+#include <_types/_uint16_t.h>
+#include <_types/_uint8_t.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -773,13 +775,12 @@ INLINE static int16 PopWord() {
 
 /*-------------------------------------------------------------------------*/
 /* Relative addressing mode handler                                        */
-INLINE static int16 RelAddrModeHandler_Data(void) {
-  int EffectiveAddress;
 
-  /* For branches - is this correct - i.e. is the program counter incremented
-     at the correct time? */
-  EffectiveAddress=tSignExtendByte((signed char)TubeRam[TubeProgramCounter++]);
-  EffectiveAddress+=TubeProgramCounter;
+INLINE static int16 RelAddrModeHandler_Data(void) {
+  // For branches - is this correct - i.e. is the program counter incremented
+  // at the correct time?
+  int EffectiveAddress=(signed char)TubeRam[TubeProgramCounter++];
+  EffectiveAddress += TubeProgramCounter;
 
   return(EffectiveAddress);
 } /* RelAddrModeHandler */
@@ -787,40 +788,46 @@ INLINE static int16 RelAddrModeHandler_Data(void) {
 /*----------------------------------------------------------------------------*/
 INLINE static void ADCInstrHandler(int16 operand) {
   /* NOTE! Not sure about C and V flags */
-  int TmpResultV,TmpResultC;
   if (!GETDFLAG) {
-    TmpResultC=Accumulator+operand+GETCFLAG;
-    TmpResultV=(signed char)Accumulator+(signed char)operand+GETCFLAG;
-    Accumulator=TmpResultC & 255;
-    SetPSR(FlagC | FlagZ | FlagV | FlagN, (TmpResultC & 256)>0,Accumulator==0,0,0,0,((Accumulator & 128)>0) ^ (TmpResultV<0),(Accumulator & 128));
+    int TmpResultC = Accumulator + operand+GETCFLAG;
+    int TmpResultV = (signed char)Accumulator + (signed char)operand + GETCFLAG;
+    Accumulator = TmpResultC & 255;
+    SetPSR(FlagC | FlagZ | FlagV | FlagN, (TmpResultC & 256)>0,
+      Accumulator == 0, 0, 0, 0,((Accumulator & 128)>0) ^ (TmpResultV < 0),
+      (Accumulator & 128));
   } else {
-    int ZFlag=0,NFlag=0,CFlag=0,VFlag=0;
-    int TmpResult,TmpCarry=0;
-    int ln,hn;
 
     /* Z flag determined from 2's compl result, not BCD result! */
-    TmpResult=Accumulator+operand+GETCFLAG;
-    ZFlag=((TmpResult & 0xff)==0);
+    int TmpResult=Accumulator + operand + GETCFLAG;
+    int ZFlag=((TmpResult & 0xff) == 0);
 
-    ln=(Accumulator & 0xf)+(operand & 0xf)+GETCFLAG;
+    int ln = (Accumulator & 0xf) + (operand & 0xf) + GETCFLAG;
+
+    int TmpCarry = 0;
+
     if (ln>9) {
       ln += 6;
       ln &= 0xf;
       TmpCarry=0x10;
     }
-    hn=(Accumulator & 0xf0)+(operand & 0xf0)+TmpCarry;
+    int hn = (Accumulator & 0xf0) + (operand & 0xf0) + TmpCarry;
     /* N and V flags are determined before high nibble is adjusted.
        NOTE: V is not always correct */
-    NFlag=hn & 128;
-    VFlag=(hn ^ Accumulator) & 128 && !((Accumulator ^ operand) & 128);
-    if (hn>0x90) {
+    int NFlag = hn & 128;
+    int VFlag = (hn ^ Accumulator) & 128 && !((Accumulator ^ operand) & 128);
+
+    int CFlag = 0;
+
+    if (hn > 0x90) {
       hn += 0x60;
       hn &= 0xf0;
-      CFlag=1;
+      CFlag = 1;
     }
-    Accumulator=hn|ln;
-	ZFlag=(Accumulator==0);
-	NFlag=(Accumulator&128);
+    
+    Accumulator=hn | ln;
+    
+	ZFlag = (Accumulator==0);
+	NFlag = (Accumulator & 128);
     SetPSR(FlagC | FlagZ | FlagV | FlagN,CFlag,ZFlag,0,0,0,VFlag,NFlag);
   }
 } /* ADCInstrHandler */
@@ -1098,49 +1105,39 @@ INLINE static void RORInstrHandler_Acc(void) {
 
 INLINE static void SBCInstrHandler(int16 operand) {
   /* NOTE! Not sure about C and V flags */
-  int TmpResultV,TmpResultC;
-  unsigned char nhn,nln;
   if (!GETDFLAG) {
-    TmpResultV=(signed char)Accumulator-(signed char)operand-(1-GETCFLAG);
-    TmpResultC=Accumulator-operand-(1-GETCFLAG);
-    Accumulator=TmpResultC & 255;
-    SetPSR(FlagC | FlagZ | FlagV | FlagN, TmpResultC>=0,Accumulator==0,0,0,0,
-      ((Accumulator & 128)>0) ^ ((TmpResultV & 256)!=0),(Accumulator & 128));
+    int TmpResultV=(signed char)Accumulator - (signed char)operand - (1 - GETCFLAG);
+    int TmpResultC=Accumulator - operand - (1 - GETCFLAG);
+    Accumulator = TmpResultC & 255;
+    SetPSR(FlagC | FlagZ | FlagV | FlagN, TmpResultC>=0,
+      Accumulator == 0, 0, 0, 0,
+      ((Accumulator & 128) > 0) ^ ((TmpResultV & 256) != 0),
+      (Accumulator & 128));
   } else {
-    int ZFlag=0,NFlag=0,CFlag=1,VFlag=0;
-    int TmpResult,TmpCarry=0;
-    int ln,hn,oln,ohn;
-	nhn=(Accumulator>>4)&15; nln=Accumulator & 15;
+      int ohn = operand & 0xf0;
+      int oln = operand & 0x0f;
 
-    /* Z flag determined from 2's compl result, not BCD result! */
-    TmpResult=Accumulator-operand-(1-GETCFLAG);
-    ZFlag=((TmpResult & 0xff)==0);
+      int ln = (Accumulator & 0xf) - oln - (1 - GETCFLAG);
+      int TmpResult = Accumulator - operand - (1 - GETCFLAG);
+    
+      int TmpResultV = (signed char)Accumulator - (signed char)operand - (1 - GETCFLAG);
+      int VFlag = ((TmpResultV < -128) || (TmpResultV > 127));
 
-	ohn=operand & 0xf0; oln = operand & 0xf;
-	if ((oln>9) && ((Accumulator&15)<10)) { oln-=10; ohn+=0x10; } 
-	// promote the lower nibble to the next ten, and increase the higher nibble
-    ln=(Accumulator & 0xf)-oln-(1-GETCFLAG);
-    if (ln<0) {
-	  if ((Accumulator & 15)<10) ln-=6;
-      ln&=0xf;
-      TmpCarry=0x10;
-    }
-    hn=(Accumulator & 0xf0)-ohn-TmpCarry;
-    /* N and V flags are determined before high nibble is adjusted.
-       NOTE: V is not always correct */
-    NFlag=hn & 128;
-	TmpResultV=(signed char)Accumulator-(signed char)operand-(1-GETCFLAG);
-	if ((TmpResultV<-128)||(TmpResultV>127)) VFlag=1; else VFlag=0;
-    if (hn<0) {
-      hn-=0x60;
-      hn&=0xf0;
-      CFlag=0;
-    }
-    Accumulator=hn|ln;
-	if (Accumulator==0) ZFlag=1;
-	NFlag=(hn &128);
-	CFlag=(TmpResult&256)==0;
-    SetPSR(FlagC | FlagZ | FlagV | FlagN,CFlag,ZFlag,0,0,0,VFlag,NFlag);
+      int CFlag = (TmpResult & 256) == 0;
+
+      if (TmpResult < 0) {
+          TmpResult -= 0x60;
+      }
+
+      if (ln < 0) {
+          TmpResult -= 0x06;
+      }
+
+      int NFlag = TmpResult & 128;
+      Accumulator = TmpResult & 0xFF;
+      int ZFlag = (Accumulator == 0);
+
+    SetPSR(FlagC | FlagZ | FlagV | FlagN,CFlag, ZFlag,0,0,0,VFlag,NFlag);
   }
 } /* SBCInstrHandler */
 
@@ -1151,6 +1148,46 @@ INLINE static void STXInstrHandler(int16 address) {
 INLINE static void STYInstrHandler(int16 address) {
   TUBEWRITEMEM_FAST(address,YReg);
 } /* STYInstrHandler */
+
+/*-------------------------------------------------------------------------*/
+
+// The RMB, SMB, BBR, and BBS instructions are specific to the 65C02,
+// used in the Acorn 6502 co-processor. They are not implemented in the
+// 65SC02, used in the Master 128.
+
+static void ResetMemoryBit(int bit)
+{
+	const int EffectiveAddress = TubeRam[TubeProgramCounter++];
+
+	TUBEWRITEMEM_DIRECT(EffectiveAddress, TubeRam[EffectiveAddress] & ~(1 << bit));
+}
+
+static void SetMemoryBit(int bit)
+{
+	const int EffectiveAddress = TubeRam[TubeProgramCounter++];
+
+	TUBEWRITEMEM_DIRECT(EffectiveAddress, TubeRam[EffectiveAddress] | (1 << bit));
+}
+
+static void BranchOnBitReset(int bit)
+{
+	const int EffectiveAddress = TubeRam[TubeProgramCounter++];
+	const int Offset = TubeRam[TubeProgramCounter++];
+
+	if ((TubeRam[EffectiveAddress] & (1 << bit)) == 0) {
+		TubeProgramCounter += Offset;
+	}
+}
+
+static void BranchOnBitSet(int bit)
+{
+	const int EffectiveAddress = TubeRam[TubeProgramCounter++];
+	const int Offset = TubeRam[TubeProgramCounter++];
+
+	if (TubeRam[EffectiveAddress] & (1 << bit)) {
+		TubeProgramCounter += Offset;
+	}
+}
 
 INLINE static void BadInstrHandler(int opcode) {
 	if (!IgnoreIllegalInstructions)
@@ -1257,11 +1294,10 @@ INLINE static int16 IndXAddrModeHandler_Address(void) {
 /*-------------------------------------------------------------------------*/
 /* Indexed with Y postinc addressing mode handler                          */
 INLINE static int16 IndYAddrModeHandler_Data(void) {
-  int EffectiveAddress;
-  unsigned char ZPAddr=TubeRam[TubeProgramCounter++];
-  EffectiveAddress=TubeRam[ZPAddr]+YReg;
+  uint8_t ZPAddr=TubeRam[TubeProgramCounter++];
+  uint16_t EffectiveAddress=TubeRam[ZPAddr]+YReg;
   if (EffectiveAddress>0xff) Carried();
-  EffectiveAddress+=(TubeRam[ZPAddr+1]<<8);
+  EffectiveAddress+=(TubeRam[(uint8_t)(ZPAddr+1)]<<8);
 
   return(TUBEREADMEM_FAST(EffectiveAddress));
 } /* IndYAddrModeHandler */
@@ -1269,11 +1305,10 @@ INLINE static int16 IndYAddrModeHandler_Data(void) {
 /*-------------------------------------------------------------------------*/
 /* Indexed with Y postinc addressing mode handler                          */
 INLINE static int16 IndYAddrModeHandler_Address(void) {
-  int EffectiveAddress;
-  unsigned char ZPAddr=TubeRam[TubeProgramCounter++];
-  EffectiveAddress=TubeRam[ZPAddr]+YReg;
+  uint8_t ZPAddr=TubeRam[TubeProgramCounter++];
+  uint16_t EffectiveAddress=TubeRam[ZPAddr]+YReg;
   if (EffectiveAddress>0xff) Carried();
-  EffectiveAddress+=(TubeRam[ZPAddr+1]<<8);
+  EffectiveAddress+=(TubeRam[(uint8_t)(ZPAddr+1)]<<8);
 
   return(EffectiveAddress);
 } /* IndYAddrModeHandler */
@@ -1343,25 +1378,16 @@ INLINE static int16 AbsYAddrModeHandler_Address(void) {
 } /* AbsYAddrModeHandler */
 
 /*-------------------------------------------------------------------------*/
-/* Indirect addressing mode handler                                        */
+// Indirect addressing mode handler (for JMP indirect only)
 INLINE static int16 IndAddrModeHandler_Address(void) {
-  /* For jump indirect only */
   int VectorLocation;
-  int EffectiveAddress;
+  GETTWOBYTEFROMPC(VectorLocation);
 
-  GETTWOBYTEFROMPC(VectorLocation)
+  // The 65C02 fixed the bug in the 6502 concerning this addressing mode
+  // and VectorLocation == xxFF
+  int EffectiveAddress = TUBEREADMEM_FAST(VectorLocation) |
+                         (TUBEREADMEM_FAST(VectorLocation + 1) << 8);
 
-  /* Ok kiddies, deliberate bug time.
-  According to my BBC Master Reference Manual Part 2
-  the 6502 has a bug concerning this addressing mode and VectorLocation==xxFF
-  so, we're going to emulate that bug -- Richard Gellman */
-  if ((VectorLocation & 0xff)!=0xff || TubeMachineType==3) {
-   EffectiveAddress=TUBEREADMEM_FAST(VectorLocation);
-   EffectiveAddress|=TUBEREADMEM_FAST(VectorLocation+1) << 8; }
-  else {
-   EffectiveAddress=TUBEREADMEM_FAST(VectorLocation);
-   EffectiveAddress|=TUBEREADMEM_FAST(VectorLocation-255) << 8;
-  }
   return(EffectiveAddress);
 } /* IndAddrModeHandler */
 
@@ -1424,7 +1450,7 @@ INLINE static int16 ZeroPgYAddrModeHandler_Address(void) {
 
 /*-------------------------------------------------------------------------*/
 /* Reset processor */
-void Reset65C02(void) {
+static void Reset65C02(void) {
   FILE *TubeRom;
   char TRN[256];
   char *TubeRomName=TRN;
@@ -1439,7 +1465,7 @@ void Reset65C02(void) {
   //The fun part, the tube OS is copied from ROM to tube RAM before the processor starts processing
   //This makes the OS "ROM" writable in effect, but must be restored on each reset.
   strcpy(TubeRomName,RomPath);
-  strcat(TubeRomName,"/BeebFile/6502TUBE.ROM");
+  strcat(TubeRomName,"/BeebFile/6502Tube.rom");
   TubeRom=fopen(TubeRomName,"rb");
   if (TubeRom!=NULL) {
 	  fread(TubeRam+0xf800,1,2048,TubeRom);
@@ -1452,7 +1478,7 @@ void Reset65C02(void) {
 
 /* Reset Tube */
 void ResetTube(void) {
-  memset(R1PHData,0,sizeof(R1PHData));
+  memset(R1PHData,0,TubeBufferLength * 2);
   R1PHPtr=0;
   R1HStatus=TubeNotFull;
   R1HPData=0;
@@ -1510,12 +1536,12 @@ void DoTubeNMI(void) {
 } /* DoNMI */
 
 /*-------------------------------------------------------------------------*/
-/* Execute one 6502 instruction, move program counter on                   */
+
+// Execute one 6502 instruction, move program counter on                   */
+
 void Exec65C02Instruction(void) {
-  static int CurrentInstruction;
   static int tmpaddr;
-  static int OldTubeNMIStatus;
-  int OldPC;
+  static unsigned char OldTubeNMIStatus;
 
 // Output debug info
   if (DebugEnabled)
@@ -1523,53 +1549,173 @@ void Exec65C02Instruction(void) {
   
   // For the Master, check Shadow Ram Presence
   // Note, this has to be done BEFORE reading an instruction due to Bit E and the PC
-  /* Read an instruction and post inc program couter */
-  OldPC=TubeProgramCounter;
+  int OldPC = TubeProgramCounter;
+  PreTPC = TubeProgramCounter;
+
+  // Read an instruction and post inc program counter
   CurrentInstruction=TubeRam[TubeProgramCounter++];
   // cout << "Fetch at " << hex << (TubeProgramCounter-1) << " giving 0x" << CurrentInstruction << dec << "\n"; 
   TubeCycles=TubeCyclesTable[CurrentInstruction]; 
-  /*Stats[CurrentInstruction]++; */
+  // Stats[CurrentInstruction]++; */
   Branched = false;
   switch (CurrentInstruction) {
     case 0x00:
-      BRKInstrHandler();
-      break;
+        // BRK
+        BRKInstrHandler();
+        break;
     case 0x01:
-      ORAInstrHandler(IndXAddrModeHandler_Data());
-      break;
-	case 0x04:
-	  if (TubeMachineType==3) TSBInstrHandler(ZeroPgAddrModeHandler_Address()); else TubeProgramCounter+=1;
-	  break;
-    case 0x05:
-      ORAInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]/*zp */);
-      break;
-    case 0x06:
-      ASLInstrHandler(ZeroPgAddrModeHandler_Address());
-      break;
-    case 0x08:
-      Push(PSR|48); /* PHP */
-      break;
-    case 0x09:
-      ORAInstrHandler(TubeRam[TubeProgramCounter++]); /* immediate */
-      break;
-    case 0x0a:
-      ASLInstrHandler_Acc();
-      break;
-	case 0x0c:
-	  if (TubeMachineType==3) TSBInstrHandler(AbsAddrModeHandler_Address()); else TubeProgramCounter+=2;
-	  break;
-    case 0x0d:
-      ORAInstrHandler(AbsAddrModeHandler_Data());
-      break;
-    case 0x0e:
-      ASLInstrHandler(AbsAddrModeHandler_Address());
-      break;
-    case 0x10:
-      BPLInstrHandler();
-      break;
-    case 0x30:
-      BMIInstrHandler();
-      break;
+        // ORA (zp,X)
+        ORAInstrHandler(IndXAddrModeHandler_Data());
+        break;
+        case 0x02:
+        case 0x22:
+        case 0x42:
+        case 0x62:
+        case 0x82:
+        case 0xc2:
+        case 0xe2:
+            // NOP imm
+            TubeProgramCounter++;
+            break;
+        case 0x03:
+        case 0x13:
+        case 0x23:
+        case 0x33:
+        case 0x43:
+        case 0x53:
+        case 0x63:
+        case 0x73:
+        case 0x83:
+        case 0x93:
+        case 0xa3:
+        case 0xb3:
+        case 0xc3:
+        case 0xd3:
+        case 0xe3:
+        case 0xf3:
+            // NOP
+            break;
+        case 0x04:
+            // TSB zp
+            TSBInstrHandler(ZeroPgAddrModeHandler_Address()); 
+            break;
+        case 0x05:
+            // ORA zp
+            ORAInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0x06:
+            // ASL zp
+            ASLInstrHandler(ZeroPgAddrModeHandler_Address());
+            break;
+        case 0x07:
+            // RMB0
+            ResetMemoryBit(0);
+            break;
+        case 0x08:
+            // PHP
+            Push(PSR | 48);
+            break;
+        case 0x09:
+            // ORA imm 
+            ORAInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0x0a:
+            // ASL A
+            ASLInstrHandler_Acc();
+            break;
+        case 0x0b:
+        case 0x1b:
+        case 0x2b:
+        case 0x3b:
+        case 0x4b:
+        case 0x5b:
+        case 0x6b:
+        case 0x7b:
+        case 0x8b:
+        case 0x9b:
+        case 0xab:
+        case 0xbb:
+        case 0xcb:
+        case 0xdb:
+        case 0xeb:
+        case 0xfb:
+            // NOP
+            break;
+        case 0x0c:
+            // TSB abs
+            TSBInstrHandler(AbsAddrModeHandler_Address());
+            break;
+        case 0x0d:
+            // ORA abs
+            ORAInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0x0e:
+            // ASL abs
+            ASLInstrHandler(AbsAddrModeHandler_Address());
+            break;
+        case 0x0f:
+            // BBR0
+            BranchOnBitReset(0);
+            break;
+        case 0x10:
+            // BPL rel 
+            BPLInstrHandler();
+            break;
+        case 0x11:
+            // ORA (zp),Y
+            ORAInstrHandler(IndYAddrModeHandler_Data());
+            break;
+        case 0x12:
+            // ORA (zp)
+            ORAInstrHandler(ZPIndAddrModeHandler_Data());
+            break;
+        case 0x14:
+            // TRB zp 
+            TRBInstrHandler(ZeroPgAddrModeHandler_Address());
+            break;
+        case 0x15:
+            // ORA zp,X
+            ORAInstrHandler(ZeroPgXAddrModeHandler_Data());
+            break;
+        case 0x16:
+            // ASL zp,X 
+            ASLInstrHandler(ZeroPgXAddrModeHandler_Address());
+            break;
+        case 0x17:
+            // RMB1
+            ResetMemoryBit(1);
+            break;
+        case 0x18:
+            // CLC
+            PSR &= 255 - FlagC;
+            break;
+        case 0x19:
+            // ORA abs,Y
+            ORAInstrHandler(AbsYAddrModeHandler_Data());
+            break;
+        case 0x1a:
+            // INC A 
+            INAInstrHandler();
+            break;
+        case 0x1c:
+            // TRB abs
+            TRBInstrHandler(AbsXAddrModeHandler_Address());
+            break;
+        case 0x1d:
+            // ORA abs,X 
+            ORAInstrHandler(AbsXAddrModeHandler_Data());
+            break;
+        case 0x1e:
+            // ASL abs,X 
+            ASLInstrHandler(AbsXAddrModeHandler_Address());
+            break;
+        case 0x1f:
+            // BBR1
+            BranchOnBitReset(1);
+            break;
+        case 0x30:
+            BMIInstrHandler();
+            break;
     case 0x50:
       BVCInstrHandler();
       break;
