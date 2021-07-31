@@ -55,6 +55,8 @@ extern int trace_z80;
 
 static int CurrentInstruction;
 unsigned char TubeRam[65536];
+Tube TubeType;
+
 extern int DumpAfterEach;
 unsigned char TubeEnabled,Tube186Enabled,AcornZ80,EnableTube;
 unsigned char TubeMachineType=3;
@@ -68,6 +70,9 @@ unsigned char old_readPIOAddr = 0;
 unsigned char old_readPTmpData = 0;
 
 unsigned char old_writeHIOAddr = 0;
+unsigned char old_writeHTmpData = 0;
+
+unsigned char old_writePIOAddr = 0;
 unsigned char old_writePTmpData = 0;
 
 int TubeProgramCounter;
@@ -148,7 +153,7 @@ enum TubeFlags {
 // Tube registers
 unsigned char R1Status; // Q,I,J,M,V,P flags
 
-unsigned char R1PHData[24];
+unsigned char R1PHData[TubeBufferLength * 2];
 unsigned char R1PHPtr;
 unsigned char R1HStatus;
 unsigned char R1HPData;
@@ -209,16 +214,24 @@ void UpdateHostR4Interrupt(void) {
 /*-------------------------------------------------------------------*/
 // Torch tube memory/io handling functions
 
-int TorchTubeActive = 0;
+static bool TorchTubeActive = false;
+
+void UpdateInterrupts()
+{
+    UpdateR1Interrupt();
+    UpdateR3Interrupt();
+    UpdateR4Interrupt();
+    UpdateHostR4Interrupt();
+}
 
 unsigned char ReadTorchTubeFromHostSide(unsigned char IOAddr) 
 {
-unsigned char TmpData;
+unsigned char TmpData = 0xff;;
 
 	TmpData = 0xff;
 	
 	if (!TorchTubeActive) 
-		return(MachineType==3 ? 0xff : 0xfe); // return ff for master else return fe
+		return(MachineType==3 ? 0xff : 0xfe); 
 
 	switch (IOAddr) {
 	case 0:
@@ -272,7 +285,7 @@ void WriteTorchTubeFromHostSide(unsigned char IOAddr,unsigned char IOData)
 		DebugDisplayTrace(DEBUG_TUBE, true, info);
 	}
 
-	if ( (IOAddr == 0x02) && (IOData == 0xff) ) TorchTubeActive = 1;
+	if ( (IOAddr == 0x02) && (IOData == 0xff) ) TorchTubeActive = true;
 
 	switch (IOAddr) {
 	case 1:
@@ -311,7 +324,8 @@ void WriteTorchTubeFromHostSide(unsigned char IOAddr,unsigned char IOData)
 		if (IOData == 0xaa)
 		{
 			init_z80();
-			Enable_Z80 = 1;
+            // TODO: Remove the line below
+            //	Enable_Z80 = 1;
 		}
 		break;
 		
@@ -373,6 +387,10 @@ void WriteTorchTubeFromParasiteSide(unsigned char IOAddr,unsigned char IOData)
 unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
 	unsigned char TmpData,TmpCntr;
 
+    //TODO replace below when complete
+    // if (TubeType == Tube::None)
+    // return MachineType == 3 ? 0xff : 0xfe;
+
 	if (! (EnableTube || Tube186Enabled || AcornZ80 || ArmTube) ) 
 		return(MachineType==3 ? 0xff : 0xfe); // return ff for master else return fe
 
@@ -383,7 +401,7 @@ unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
 	case 1:
 		TmpData=R1PHData[0];
 		if (R1PHPtr>0) {
-			for (TmpCntr=1;TmpCntr<24;TmpCntr++)
+			for (TmpCntr=1;TmpCntr<TubeBufferLength;TmpCntr++)
 				R1PHData[TmpCntr-1]=R1PHData[TmpCntr]; // Shift FIFO Buffer
 			R1PHPtr--; // Shift FIFO Pointer
 			if (R1PHPtr == 0)
@@ -439,6 +457,10 @@ unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
 }
 
 void WriteTubeFromHostSide(unsigned char IOAddr,unsigned char IOData) {
+
+    // TODO change lines below when avail
+    //    if (TubeType == Tube::None)
+    //    return;
 
 	if (! (EnableTube || Tube186Enabled || AcornZ80 || ArmTube) ) 
 		return;
@@ -511,6 +533,10 @@ void WriteTubeFromHostSide(unsigned char IOAddr,unsigned char IOData) {
 unsigned char ReadTubeFromParasiteSide(unsigned char IOAddr) {
 	unsigned char TmpData;
 
+    // TODO replace when able 
+    // if (TubeType == Tube::TorchZ80)
+    // return ReadTorchTubeFromHostSide(IOAddr);
+
 	if (TorchTube) 
 		return ReadTorchTubeFromHostSide(IOAddr);
 
@@ -582,11 +608,17 @@ unsigned char ReadTubeFromParasiteSide(unsigned char IOAddr) {
 		DebugDisplayTrace(DEBUG_TUBE, false, info);
 	}
 
+    old_readPTmpData = TmpData;
+    old_readPIOAddr = IOAddr;
+
 	return TmpData;
 }
 
 void WriteTubeFromParasiteSide(unsigned char IOAddr,unsigned char IOData) 
 {
+    // TODO remove below when able 
+    // if (TubeType == Tube::TorchZ80)
+
 	if (TorchTube) 
 	{
 		WriteTorchTubeFromParasiteSide(IOAddr, IOData);
@@ -606,10 +638,10 @@ void WriteTubeFromParasiteSide(unsigned char IOAddr,unsigned char IOData)
 		// Cannot write status flags from parasite
 		break;
 	case 1:
-		if (R1PHPtr<24) {
+		if (R1PHPtr<TubeBufferLength) {
 			R1PHData[R1PHPtr++]=IOData;
 			R1HStatus|=TubeDataAv;
-			if (R1PHPtr==24)
+			if (R1PHPtr==TubeBufferLength)
 				R1PStatus&=~TubeNotFull;
 		}
 		break;
@@ -659,11 +691,10 @@ unsigned char TubeReadMem(unsigned int IOAddr) {
 		return(ReadTubeFromParasiteSide(IOAddr-0xfef8));
 }
 
-/* Get a two byte address from the program counter, and then post inc the program counter */
+// Get a two byte address from the program counter, and then post inc the program counter
 #define GETTWOBYTEFROMPC(var) \
-  var=TubeRam[TubeProgramCounter]; \
-  var|=(TubeRam[TubeProgramCounter+1]<<8); \
-  TubeProgramCounter+=2;
+  var=TubeRam[TubeProgramCounter++]; \
+  var|=(TubeRam[TubeProgramCounter++] << 8);
 
 
 /*----------------------------------------------------------------------------*/
@@ -863,6 +894,14 @@ INLINE static void BITInstrHandler(int16 operand) {
   /* z if result 0, and NV to top bits of operand */
   PSR|=(((Accumulator & operand)==0)<<1) | (operand & 192);
 } /* BITInstrHandler */
+
+INLINE static void BITImmedInstrHandler(int16 operand)
+{
+    PSR &= ~FlagZ;
+    // Z if result 0, and NC to top bits of operand
+    PSR |= (((Accumulator & operand) == 0)<<1);
+}
+
 
 INLINE static void BMIInstrHandler(void) {
   if (GETNFLAG) {
