@@ -154,7 +154,7 @@ enum TubeFlags {
 unsigned char R1Status; // Q,I,J,M,V,P flags
 
 unsigned char R1PHData[TubeBufferLength * 2];
-unsigned char R1PHPtr;
+int R1PHPtr;
 unsigned char R1HStatus;
 unsigned char R1HPData;
 unsigned char R1PStatus;
@@ -226,10 +226,8 @@ void UpdateInterrupts()
 
 unsigned char ReadTorchTubeFromHostSide(unsigned char IOAddr) 
 {
-unsigned char TmpData = 0xff;;
+unsigned char TmpData = 0xff;
 
-	TmpData = 0xff;
-	
 	if (!TorchTubeActive) 
 		return(MachineType==3 ? 0xff : 0xfe); 
 
@@ -898,10 +896,9 @@ INLINE static void BITInstrHandler(int16 operand) {
 INLINE static void BITImmedInstrHandler(int16 operand)
 {
     PSR &= ~FlagZ;
-    // Z if result 0, and NC to top bits of operand
+    // Z if result 0, and NV to top bits of operand
     PSR |= (((Accumulator & operand) == 0)<<1);
 }
-
 
 INLINE static void BMIInstrHandler(void) {
   if (GETNFLAG) {
