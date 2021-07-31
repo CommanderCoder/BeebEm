@@ -155,6 +155,7 @@ void BeebKeyDown(int row,int col) {
   if ((!SysViaKbdState[col][row]) && (row!=0)) KeysDown++;
 
   SysViaKbdState[col][row]=true;
+    fprintf(stderr, "Setting row %d, col %d\n", row, col);
 
   DoKbdIntCheck();
 #ifdef KBDDEBUG
@@ -194,7 +195,7 @@ static void IC32Write(unsigned char Value) {
   /* hmm, CMOS RAM? */
   // Monday 5th February 2001 - Scrapped my CMOS code, and restarted as according to the bible of the god Tom Lees
   CMOS.Op=(IC32State & 2) !=0;
-  tmpCMOSState=(IC32State & 4) !=0;;
+  tmpCMOSState=(IC32State & 4) !=0;
   CMOS.DataStrobe=(tmpCMOSState==OldCMOSState) ? false : true;
   OldCMOSState=tmpCMOSState;
   if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType==3) {
@@ -219,13 +220,11 @@ static void IC32Write(unsigned char Value) {
   }
 #endif
   
-//  if ( (bit == 1) && ( (Value & 8) == 0) && (MachineType != 3) )		- Read Command
-//	  fprintf(stderr, "Shouldn't happen - Speech SlowDataBusWriteValue 0x%02x, 0x%04x\n", SlowDataBusWriteValue, ProgramCounter);
-    if (!(IC32State & 8) && (oldval & 8)) {
-        KBDRow=(SlowDataBusWriteValue>>4) & 7;
-        KBDCol=(SlowDataBusWriteValue & 0xf);  
-        DoKbdIntCheck(); /* Should really only if write enable on KBD changes */
-    }
+  if (!(IC32State & 8) && (oldval & 8)) {
+      KBDRow=(SlowDataBusWriteValue>>4) & 7;
+      KBDCol=(SlowDataBusWriteValue & 0xf);  
+      DoKbdIntCheck(); /* Should really only if write enable on KBD changes */
+  }
 } /* IC32Write */
 
 
@@ -413,6 +412,7 @@ void SysVIAWrite(int Address, int Value) {
         {
             // Light pen strobe on CB2 low -> high transition
          //   VideoLightPenStrobe();
+         /* TODO: Implement this function */
         }
 
         SysVIAState.cb2 = true;
@@ -640,7 +640,6 @@ void SysVIA_poll(unsigned int ncycles) {
 
 /*--------------------------------------------------------------------------*/
 void SysVIAReset(void) {
-  int row,col;
   VIAReset(&SysVIAState);
   //vialog=fopen("/via.log","wt");
 
@@ -675,7 +674,7 @@ time_t CMOSConvertClock(void) {
     Base.tm_wday = -1;
     Base.tm_yday = -1;
     Base.tm_isdst = -1;
-    tim - mktime(&Base);
+    tim = mktime(&Base);
     return tim;
 }
 /*-------------------------------------------------------------------------*/

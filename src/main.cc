@@ -213,7 +213,7 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
         case kEventRawKeyDown:
 
 
-        //      fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+              fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
                 if ( (NewCmd) && (keycode == 6) )
                 {
                     fprintf(stderr, "cmd-Z pressed, NewCmd = %d\n", NewCmd);
@@ -246,7 +246,6 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
                 }
             break;
           case kEventRawKeyUp:
-    //        fprintf(stderr, "Key released: code = %d, '%c'\n", keycode, charCode);
             mainWin->KeyUp(keycode);
             break;
           case kEventRawKeyModifiersChanged:

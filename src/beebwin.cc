@@ -59,7 +59,7 @@
 #include "csw.h"
 #include "serialdevices.h"
 #include "Arm.h"
-#include "printing.h"
+#include "Printing.h"
 #include "discedit.h"
 
 // #include "keytable_2"
@@ -409,6 +409,7 @@ bool bit = false;
 	
 	if(TranslateKey(vkey, true, row, col) < 0)
 	{
+        fprintf(stderr, "beebkey %d, %d, %d\n", vkey, row, col);
 		if(row==-2)
 		{ // Must do a reset!
 			Init6502core();
@@ -459,6 +460,7 @@ int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
 
 	if (keyUp)
 	{
+        fprintf(stderr, "Keyup %d\n", vkey);
 		// Key released, lookup beeb row + col that this vkey 
 		// mapped to when it was pressed.  Need to release
 		// both shifted and non-shifted presses.
@@ -482,6 +484,7 @@ int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
 
 		row = transTable[vkey][0];
 		col = transTable[vkey][1];
+        fprintf(stderr, "new vkey %d\n",vkey);
 
 		if (m_KeyMapAS)
 		{
@@ -1387,7 +1390,7 @@ extern char videobuffer[];
 // NEW updateLines based on bufferblit
 void BeebWin::updateLines(int starty, int nlines)
 {
-    register int i, j;
+    int i, j;
     char *p;
     int width, height;
 
@@ -4256,7 +4259,7 @@ OSStatus err = noErr;
                 err = swift_SetMenuItemTextWithCString('pfle', Title);
                 if (err)
                 {
-                    fprintf(stderr, "SetMenuTitle returned err code %ld\n", err);
+                    fprintf(stderr, "SetMenuTitle returned err code %d\n", (int)err);
                 }
 #endif
 				m_MenuIdPrinterPort = IDM_PRINTER_FILE;
