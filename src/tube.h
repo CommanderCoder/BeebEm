@@ -25,9 +25,23 @@
 
 #include "port.h"
 
+enum class Tube: unsigned char {
+    None,
+    Acorn65C02,
+    Master512CoPro,
+    AcornZ80,
+    TorchZ80,
+    AcornArm,
+    SprowArm
+};
+
+extern Tube TubeType;
+
 extern unsigned char R1Status;
 void ResetTube(void);
 
+extern int TubeProgramCounter;
+const int TubeBufferLength = 24;
 extern unsigned char EnableTube,TubeEnabled,Tube186Enabled,AcornZ80;
 extern int TorchTubeActive;
 
@@ -37,14 +51,14 @@ extern unsigned char TubeNMIStatus; /* bit set (nums in NMI_Nums) if NMI being c
 // EnableTube - Should the tube be enabled on next start - 1=yes
 // TubeEnabled - Is the tube enabled by default - 1=yes
 
-typedef enum {
+enum TubeIRQ {
 	R1,
-	R4,
-} TubeIRQ;
+	R4
+};
 
-typedef enum {
-	R3,
-} TubeNMI;
+enum TubeNMI {
+	R3
+};
 
 
 /*-------------------------------------------------------------------------*/
@@ -78,4 +92,8 @@ void Save65C02MemUEF(FILE *SUEF);
 void LoadTubeUEF(FILE *SUEF);
 void Load65C02UEF(FILE *SUEF);
 void Load65C02MemUEF(FILE *SUEF);
+
+void UpdateR1Interrupt(void);
+void UpdateR3Interrupt(void);
+void UpdateR4Interrupt(void);
 #endif
