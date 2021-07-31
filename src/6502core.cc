@@ -242,8 +242,8 @@ bool IntDue=false;
 to it (usually -ve) */
 int CyclesToInt = NO_TIMER_INT_DUE;
 
-static unsigned char Branched;
-// Branched - 1 if the instruction branched
+static bool Branched;
+// Branched - true if the instruction branched
 int OpCodes=2; // 1 = documented only, 2 = commonoly used undocumenteds, 3 = full set
 int BHardware=0; // 0 = all hardware, 1 = basic hardware only
 // 1 if first cycle happened
@@ -544,21 +544,21 @@ INLINE static void ASLInstrHandler_Acc(void) {
 INLINE static void BCCInstrHandler(void) {
   if (!GETCFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 } /* BCCInstrHandler */
 
 INLINE static void BCSInstrHandler(void) {
   if (GETCFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 } /* BCSInstrHandler */
 
 INLINE static void BEQInstrHandler(void) {
   if (GETZFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 } /* BEQInstrHandler */
 
@@ -577,21 +577,21 @@ INLINE static void BITImmedInstrHandler(int16 operand) {
 INLINE static void BMIInstrHandler(void) {
   if (GETNFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 } /* BMIInstrHandler */
 
 INLINE static void BNEInstrHandler(void) {
   if (!GETZFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 } /* BNEInstrHandler */
 
 INLINE static void BPLInstrHandler(void) {
   if (!GETNFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 }; /* BPLInstrHandler */
 
@@ -611,20 +611,20 @@ INLINE static void BRKInstrHandler(void) {
 INLINE static void BVCInstrHandler(void) {
   if (!GETVFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 } /* BVCInstrHandler */
 
 INLINE static void BVSInstrHandler(void) {
   if (GETVFLAG) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else ProgramCounter++;
 } /* BVSInstrHandler */
 
 INLINE static void BRAInstrHandler(void) {
     ProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
 } /* BRAnstrHandler */
 
 INLINE static void CMPInstrHandler(int16 operand) {
@@ -1283,7 +1283,7 @@ void Exec6502Instruction(void) {
       }
   
 	  
-      Branched=0;
+      Branched = false;
       iFlagJustCleared=false;
       iFlagJustSet=false;
       Cycles = 0;

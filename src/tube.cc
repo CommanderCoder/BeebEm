@@ -103,8 +103,8 @@ static int TubeCyclesTable[]={
    allow fernangling by memory subsystem */
 unsigned int TubeCycles;
 
-static unsigned char Branched;
-// Branched - 1 if the instruction branched
+static bool Branched;
+// Branched - true if the instruction branched
 
 /* A macro to speed up writes - uses a local variable called 'tmpaddr' */
 #define TUBEREADMEM_FAST(a) ((a<0xfef8)?TubeRam[a]:TubeReadMem(a))
@@ -825,21 +825,21 @@ INLINE static void ASLInstrHandler_Acc(void) {
 INLINE static void BCCInstrHandler(void) {
   if (!GETCFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 } /* BCCInstrHandler */
 
 INLINE static void BCSInstrHandler(void) {
   if (GETCFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 } /* BCSInstrHandler */
 
 INLINE static void BEQInstrHandler(void) {
   if (GETZFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 } /* BEQInstrHandler */
 
@@ -852,21 +852,21 @@ INLINE static void BITInstrHandler(int16 operand) {
 INLINE static void BMIInstrHandler(void) {
   if (GETNFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 } /* BMIInstrHandler */
 
 INLINE static void BNEInstrHandler(void) {
   if (!GETZFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 } /* BNEInstrHandler */
 
 INLINE static void BPLInstrHandler(void) {
   if (!GETNFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 }; /* BPLInstrHandler */
 
@@ -881,20 +881,20 @@ INLINE static void BRKInstrHandler(void) {
 INLINE static void BVCInstrHandler(void) {
   if (!GETVFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 } /* BVCInstrHandler */
 
 INLINE static void BVSInstrHandler(void) {
   if (GETVFLAG) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
   } else TubeProgramCounter++;
 } /* BVSInstrHandler */
 
 INLINE static void BRAInstrHandler(void) {
     TubeProgramCounter=RelAddrModeHandler_Data();
-    Branched=1;
+    Branched = true;
 } /* BRAnstrHandler */
 
 INLINE static void CMPInstrHandler(int16 operand) {
@@ -1478,7 +1478,7 @@ void Exec65C02Instruction(void) {
   // cout << "Fetch at " << hex << (TubeProgramCounter-1) << " giving 0x" << CurrentInstruction << dec << "\n"; 
   TubeCycles=TubeCyclesTable[CurrentInstruction]; 
   /*Stats[CurrentInstruction]++; */
-  Branched=0;
+  Branched = false;
   switch (CurrentInstruction) {
     case 0x00:
       BRKInstrHandler();
