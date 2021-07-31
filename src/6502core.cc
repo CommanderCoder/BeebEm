@@ -792,87 +792,7 @@ INLINE static void RORInstrHandler_Acc(void) {
   SetPSRCZN(oldVal & 1,newVal==0,newVal & 128);
 } /* RORInstrHandler_Acc */
 
-INLINE static void SBCInstrHandler(int16 operand) {
-  /* NOTE! Not sure about C and V flags */
-  int TmpResultV,TmpResultC;
-  unsigned char nhn,nln;
-  if (!GETDFLAG) {
-    TmpResultV = (signed char)Accumulator - (signed char)operand - (1-GETCFLAG);
-    TmpResultC = Accumulator - operand - (1 - GETCFLAG);
-    Accumulator=TmpResultC & 255;
-    SetPSR(FlagC | FlagZ | FlagV | FlagN, TmpResultC >= 0,
-      Accumulator == 0,0,0,0,
-      ((Accumulator & 128)>0) ^ ((TmpResultV & 256)!=0),
-      (Accumulator & 128));
-  } else {
-    int ZFlag=0,NFlag=0,CFlag=1,VFlag=0;
-    int TmpResult,TmpCarry=0;
-    int ln,hn,oln,ohn;
-    if (MachineType == 3) {
-        int ohn = operand & 0xf0;
-        int oln = operand & 0x0f;
-
-        int ln = (Accumulator & 0xf) - oln - (1 - GETCFLAG);
-        int TmpResult = Accumulator - operand - (1 - GETCFLAG);
-
-        int TmpResultV = (signed char)Accumulator - (signed char)operand - (1 - GETCFLAG);
-        int VFlag = ((TmpResultV < -128) || (TmpResultV > 127));
-
-        int CFlag = (TmpResult & 256) == 0;
-
-        if (TmpResult < 0) {
-            TmpResult -= 0x60;
-        }
-
-        if (ln < 0) {
-            TmpResult -= 0x06;
-        }
-
-        int NFlag = TmpResult & 128;
-        Accumulator = TmpResult & 0xFF;
-        int ZFlag = (Accumulator == 0);
-
-        SetPSR(FlagC | FlagZ | FlagV | FlagN, CFlag, ZFlag, 0, 0, 0, VFlag, NFlag);
-        } else {
-            /* Z flag determined from 2's compl result, not BCD result! */
-            TmpResult=Accumulator - operand - (1 - GETCFLAG);
-            ZFlag=((TmpResult & 0xff)==0);
-
-            ohn = operand & 0xf0;
-            oln = operand & 0x0f;
-
-            int ln = (Accumulator & 0x0f) - oln - (1 - GETCFLAG);
-            if (ln & 0x10) {
-                ln -= 6;
-            }
-
-            int TmpCarry = 0;
-            if (ln & 0x20) {
-                TmpCarry = 0x10;
-            }
-
-            ln &= 0x0f;
-            int hn=(Accumulator & 0xf0) - ohn - TmpCarry;
-            /* N and V flags are determined before high nibble is adjusted.
-            NOTE: V is not always correct */
-            int NFlag=hn & 128;
-            TmpResultV = (signed char)Accumulator - (signed char)operand - (1 - GETCFLAG);
-            int VFlag = ((TmpResultV < -128) || (TmpResultV > 127));
-
-            int CFlag = 1;
-            
-            if (hn & 0x100) {
-                hn -= 0x60;
-                hn &= 0xf0;
-                CFlag = 0;
-            }
-
-            Accumulator=hn | ln;
-    
-            SetPSR(FlagC | FlagZ | FlagV | FlagN,CFlag,ZFlag,0,0,0,VFlag,NFlag);
-        }
-  }
-} /* SBCInstrHandler */
+INLINE static void SBCInstrHandler(int16 operand); /* SBCInstrHandler */
 
 INLINE static void STXInstrHandler(int16 address) {
   WritePaged(address,XReg);
@@ -1306,7 +1226,6 @@ void Exec6502Instruction(void) {
       ViaCycles=0;
       AdvanceCyclesForMemRead();
 
-          if (OpCodes >= 1) { // Documented opcodes
           switch (CurrentInstruction) {
               case 0x00:
                   BRKInstrHandler();
@@ -1444,15 +1363,6 @@ void Exec6502Instruction(void) {
                       ASLInstrHandler(zpaddr);
                       ORAInstrHandler(WholeRam[zpaddr]);
                   }
-                  break;
-              case 0xb0:
-                  BCSInstrHandler();
-                  break;
-              case 0xd0:
-                  BNEInstrHandler();
-                  break;
-              case 0xf0:
-                  BEQInstrHandler();
                   break;
               case 0x14:
                   if (MachineType==3) {
@@ -2236,7 +2146,7 @@ void Exec6502Instruction(void) {
                   }
                   else {
                       // Undocumented instruction: XAA imm
-                      // See http://visual6502.org/wiki/index.php?title=6502_Opcodes_8B_(XAA,_ANE)_explained
+                      // See http://visual6502.org/wiki/index.php?title=6502_Opcode_8B_(XAA,_ANE)_explained
                       Accumulator &= XReg & ReadPaged(ProgramCounter++);
                       SetPSRZN(Accumulator);
                   }
@@ -2414,601 +2324,540 @@ void Exec6502Instruction(void) {
                   // LDX zp
                   LDXInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                   break;
+              case 0xa7:
+                  if (MachineType == 3) {
+                    // NOP
+                  }
+                  else {
+                      // Undocumented instruction: LAX zp
+                      LDAInstrHandler(WholeRam[WholeRam[ProgramCounter++]]);
+                      XReg = Accumulator;
+                  }
+                  break;
               case 0xa8:
-                  YReg=Accumulator; /* TAY */
-                  PSR&=~(FlagZ | FlagN);
-                  PSR|=((Accumulator==0)<<1) | (Accumulator & 128);
+                  // TAY
+                  YReg=Accumulator;
+                  SetPSRZN(Accumulator);
                   break;
               case 0xa9:
+                  // LDA imm
                   LDAInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
                   break;
               case 0xaa:
-                  XReg=Accumulator; /* TXA */
-                  PSR&=~(FlagZ | FlagN);
-                  PSR|=((Accumulator==0)<<1) | (Accumulator & 128);
+                  // TXA
+                  XReg = Accumulator; /* TXA */
+                  SetPSRZN(Accumulator);
+                  break;
+              case 0xab:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: LAX imm
+                      LDAInstrHandler(Accumulator & ReadPaged(ProgramCounter++));
+                      XReg = Accumulator;
+                  }
                   break;
               case 0xac:
+                  // LDY abs
                   LDYInstrHandler(AbsAddrModeHandler_Data());
                   break;
               case 0xad:
+                  // LDA abs
                   LDAInstrHandler(AbsAddrModeHandler_Data());
                   break;
               case 0xae:
+                  // LDX abs
                   LDXInstrHandler(AbsAddrModeHandler_Data());
+                  break;
+              case 0xaf:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: LAX abs
+                      LDAInstrHandler(AbsAddrModeHandler_Data());
+                      XReg = Accumulator;
+                  }
+                  break;
+              case 0xb0:
+                  // BCS rel
+                  BCSInstrHandler();
                   break;
               case 0xb1:
                   LDAInstrHandler(IndYAddrModeHandler_Data());
                   break;
               case 0xb2:
-                  if (MachineType==3) LDAInstrHandler(ZPIndAddrModeHandler_Data());
+                  if (MachineType == 3) {
+                      // LDA (zp)
+                      LDAInstrHandler(ZPIndAddrModeHandler_Data());
+                  }
+                  else {
+                      // Undocumented instruction: KIL
+                      KILInstrHandler();
+                  }
+                  break;
+              case 0xb3:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: LAX (zp),Y
+                      LDAInstrHandler(IndYAddrModeHandler_Data());
+                      XReg = Accumulator;
+                  }
                   break;
              case 0xb4:
+                 // LDY zp,X 
                   LDYInstrHandler(ZeroPgXAddrModeHandler_Data());
                   break;
               case 0xb5:
+                  // LDA zp,X
                   LDAInstrHandler(ZeroPgXAddrModeHandler_Data());
                   break;
               case 0xb6:
+                  // LDX zp,Y
                   LDXInstrHandler(ZeroPgYAddrModeHandler_Data());
                   break;
+              case 0xb7:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: LAX zp,Y 
+                      LDXInstrHandler(ZeroPgYAddrModeHandler_Data());
+                      Accumulator = XReg;
+                  }
+                  break;
               case 0xb8:
-                  PSR&=255-FlagV; /* CLV */
+                  // CLV
+                  PSR&=255-FlagV;
                   break;
               case 0xb9:
+                  // LDA abs,Y
                   LDAInstrHandler(AbsYAddrModeHandler_Data());
                   break;
               case 0xba:
-                  XReg=StackReg; /* TSX */
-                  PSR&=~(FlagZ | FlagN);
-                  PSR|=((XReg==0)<<1) | (XReg & 128);
+                  // TSX
+                  XReg=StackReg;
+                  SetPSRZN(XReg);
+                  break;
+              case 0xbb:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: LAS abs,Y
+                      LDAInstrHandler(StackReg & AbsYAddrModeHandler_Data());
+                      XReg = Accumulator;
+                      StackReg = Accumulator;
+                  }
                   break;
               case 0xbc:
+                  // LDY abs,X
                   LDYInstrHandler(AbsXAddrModeHandler_Data());
                   break;
               case 0xbd:
+                  // LDA abs,Y 
                   LDAInstrHandler(AbsXAddrModeHandler_Data());
                   break;
               case 0xbe:
+                  // LDX abs,Y
                   LDXInstrHandler(AbsYAddrModeHandler_Data());
                   break;
+              case 0xbf:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction LAX abs,Y
+                      LDAInstrHandler(AbsYAddrModeHandler_Data());
+                      XReg = Accumulator;
+                  }
+                  break;
               case 0xc0:
+                  // CPY imm
                   CPYInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
                   break;
               case 0xc1:
+                  // CMP (zp,X)
                   CMPInstrHandler(IndXAddrModeHandler_Data());
                   break;
+              case 0xc3:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction DCP (zp,X)
+                      int16 zpaddr = IndXAddrModeHandler_Address();
+                      DECInstrHandler(zpaddr);
+                      CMPInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0xc4:
+                  // CPY zp
                   CPYInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                   break;
               case 0xc5:
+                  // CMP zp
                   CMPInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                   break;
               case 0xc6:
+                  // DEC zp
                   DECInstrHandler(ZeroPgAddrModeHandler_Address());
                   break;
+              case 0xc7:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: DCP zp 
+                      int16 zpaddr = ZeroPgAddrModeHandler_Address();
+                      DECInstrHandler(zpaddr);
+                      CMPInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0xc8:
-                  YReg+=1; /* INY */
+                  // INY
+                  YReg+=1;
                   YReg&=255;
-                  PSR&=~(FlagZ | FlagN);
-                  PSR|=((YReg==0)<<1) | (YReg & 128);
+                  SetPSRZN(YReg);
                   break;
               case 0xc9:
+                  // CMP imm
                   CMPInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
                   break;
               case 0xca:
+                  // DEX
                   DEXInstrHandler();
                   break;
+              case 0xcb:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: ASX imm
+                      // I dont know if this uses the carry or not, I'm assuming it's
+                      // Subtract #n from X with carry.
+                      unsigned char TmpAcc = Accumulator;
+                      Accumulator = XReg;
+                      SBCInstrHandler(WholeRam[ProgramCounter++]);
+                      XReg = Accumulator;
+                      Accumulator = TmpAcc;  // Fudge to that I dont ahve to do the whole SBC code again
+                  }
+                  break;
               case 0xcc:
+                  // CPY abs
                   CPYInstrHandler(AbsAddrModeHandler_Data());
                   break;
               case 0xcd:
+                  // CMP abs
                   CMPInstrHandler(AbsAddrModeHandler_Data());
                   break;
               case 0xce:
+                  // DEC abs
                   DECInstrHandler(AbsAddrModeHandler_Address());
                   break;
+              case 0xcf:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: DCP abs
+                      int16 zpaddr = AbsAddrModeHandler_Address();
+                      DECInstrHandler(zpaddr);
+                      CMPInstrHandler(WholeRam[zpaddr]);
+                  }
+              case 0xd0:
+              // BNE rel
+              BNEInstrHandler();
+              break;
               case 0xd1:
+                  // CMP (zp),Y
                   CMPInstrHandler(IndYAddrModeHandler_Data());
                   break;
               case 0xd2:
-                  if (MachineType==3) CMPInstrHandler(ZPIndAddrModeHandler_Data());
+                  if (MachineType == 3) {
+                      // CMP (zp)
+                      CMPInstrHandler(ZPIndAddrModeHandler_Data());
+                  }
+                  else {
+                      // Undocumented instruction: KIL
+                      KILInstrHandler();
+                  }
                   break;
+              case 0xd3:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: DCP (zp),Y 
+                      int16 zpaddr = IndYAddrModeHandler_Address();
+                      DECInstrHandler(zpaddr);
+                      CMPInstrHandler(WholeRam[zpaddr]);
+                  }
               case 0xd5:
+                  // CMP zp,X
                   CMPInstrHandler(ZeroPgXAddrModeHandler_Data());
                   break;
               case 0xd6:
+                  // DEC zp,X
                   DECInstrHandler(ZeroPgXAddrModeHandler_Address());
                   break;
+              case 0xd7:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: DCP zp,X 
+                      int16 zpaddr = ZeroPgXAddrModeHandler_Address();
+                      DECInstrHandler(zpaddr);
+                      CMPInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0xd8:
-                  PSR&=255-FlagD; /* CLD */
+                  // CLD
+                  PSR&=255-FlagD;
                   break;
               case 0xd9:
+                  // CMP abs,Y
                   CMPInstrHandler(AbsYAddrModeHandler_Data());
                   break;
               case 0xda:
-                  if (MachineType==3) Push(XReg); /* PHX */
+                  if (MachineType==3) {
+                      // PHX
+                      Push(XReg);
+                  }
+                  else {
+                      // Undocumented instruction: NOP
+                  }
+                  break;
+              case 0xdb:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction DCP abs,Y 
+                      int16 zpaddr = AbsYAddrModeHandler_Address();
+                      DECInstrHandler(zpaddr);
+                      CMPInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
+              case 0xdc:
+              case 0xfc:
+                  if (MachineType == 3) {
+                      // NOP abs
+                      AbsAddrModeHandler_Address();
+                  }
+                  else {
+                      // Undocumented instruction: NOP abs,X
+                      AbsXAddrModeHandler_Data();
+                  }
                   break;
               case 0xdd:
+                  // CMP abs,X
                   CMPInstrHandler(AbsXAddrModeHandler_Data());
                   break;
               case 0xde:
+                  // DEC abs,X 
                   DECInstrHandler(AbsXAddrModeHandler_Address());
                   break;
+              case 0xdf:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: DCP abs,X
+                      int16 zpaddr = AbsXAddrModeHandler_Address();
+                      DECInstrHandler(zpaddr);
+                      CMPInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0xe0:
-                  CPXInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
+                  // CPX imm
+                  CPXInstrHandler(ReadPaged(ProgramCounter++));
                   break;
               case 0xe1:
+                  // SBC (zp,X)
                   SBCInstrHandler(IndXAddrModeHandler_Data());
                   break;
+              case 0xe3:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: ISC (zp,X)
+                      int16 zpaddr = IndXAddrModeHandler_Address();
+                      INCInstrHandler(zpaddr);
+                      SBCInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0xe4:
-                  CPXInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
+                  // CPX zp
+                  CPXInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]);
                   break;
               case 0xe5:
+                  // SBC zp
                   SBCInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                   break;
               case 0xe6:
+                  // INC zp
                   INCInstrHandler(ZeroPgAddrModeHandler_Address());
                   break;
+              case 0xe7:
+                  if (MachineType == 3) {
+                      // Undocumented instruction: ISC zp 
+                      int16 zpaddr = ZeroPgAddrModeHandler_Address();
+                      INCInstrHandler(zpaddr);
+                      SBCInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0xe8:
+                  // INX
                   INXInstrHandler();
                   break;
               case 0xe9:
-                  SBCInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
+                  // SBC imm 
+                  SBCInstrHandler(ReadPaged(ProgramCounter++));
                   break;
               case 0xea:
-                  /* NOP */
+                  // NOP
+                  break;
+              case 0xeb:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // TODO: SBC imm
+                  }
                   break;
               case 0xec:
+                  // CPX abs
                   CPXInstrHandler(AbsAddrModeHandler_Data());
                   break;
               case 0xed:
+                  // SBC abs
                   SBCInstrHandler(AbsAddrModeHandler_Data());
                   break;
               case 0xee:
+                  // INC abs
                   INCInstrHandler(AbsAddrModeHandler_Address());
                   break;
+              case 0xef:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: ISC abs
+                      int16 zpaddr = AbsAddrModeHandler_Address();
+                      INCInstrHandler(zpaddr);
+                      SBCInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
+              case 0xf0:
+                  // BEQ rel
+                  BEQInstrHandler();
+                  break;
               case 0xf1:
+                  // SBC (zp),Y
                   SBCInstrHandler(IndYAddrModeHandler_Data());
                   break;
               case 0xf2:
-                  if (MachineType==3) SBCInstrHandler(ZPIndAddrModeHandler_Data());
+                  if (MachineType == 3) {
+                      // SBC (zp)
+                      SBCInstrHandler(ZPIndAddrModeHandler_Data());
+                  }
+                  else {
+                      // Undocumented instruction: KIL
+                      KILInstrHandler();
+                  }
+                  break;
+              case 0xf3:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: ISC (zp),Y 
+                      int16 zpaddr = IndYAddrModeHandler_Data();
+                      INCInstrHandler(zpaddr);
+                      SBCInstrHandler(WholeRam[zpaddr]);
+                  }
                   break;
               case 0xf5:
+                  // SBC zp,X
                   SBCInstrHandler(ZeroPgXAddrModeHandler_Data());
                   break;
               case 0xf6:
+                  // INC zp,X
                   INCInstrHandler(ZeroPgXAddrModeHandler_Address());
                   break;
+              case 0xf7:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: ISC zp,X 
+                      int16 zpaddr = ZeroPgXAddrModeHandler_Address();
+                      INCInstrHandler(zpaddr);
+                      SBCInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
               case 0xf8:
-                  PSR|=FlagD; /* SED */
+                  // SED
+                  PSR |= FlagD;
                   break;
               case 0xf9:
+                  // SBC abs,Y
                   SBCInstrHandler(AbsYAddrModeHandler_Data());
                   break;
               case 0xfa:
                   if (MachineType==3) {
-                      XReg=Pop(); /* PLX */
-                      PSR&=~(FlagZ | FlagN);
-                      PSR|=((XReg==0)<<1) | (XReg & 128);
+                      // PLX
+                      XReg = Pop();
+                      SetPSRZN(XReg);
+                  }
+                  else {
+                      // Undocumented instruction: NOP
+                  }
+                  break;
+              case 0xfb:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: ISC abs,Y
+                      int16 zpaddr = AbsYAddrModeHandler_Address();
+                      INCInstrHandler(zpaddr);
+                      SBCInstrHandler(WholeRam[zpaddr]);
                   }
                   break;
               case 0xfd:
+                  // SBC abs,X
                   SBCInstrHandler(AbsXAddrModeHandler_Data());
                   break;
               case 0xfe:
+                  // INC abs,X
                   INCInstrHandler(AbsXAddrModeHandler_Address());
                   break;
-              default:
-                  BadCount++;
-          }
+              case 0xff:
+                  if (MachineType == 3) {
+                      // NOP
+                  }
+                  else {
+                      // Undocumented instruction: ISC abs,X
+                      int16 zpaddr = AbsXAddrModeHandler_Address();
+                      INCInstrHandler(zpaddr);
+                      SBCInstrHandler(WholeRam[zpaddr]);
+                  }
+                  break;
       }
-      if (OpCodes==3) {
-  switch (CurrentInstruction) {
-    case 0x07: /* Undocumented Instruction: ASL zp and ORA zp */
-      {
-        int16 zpaddr = ZeroPgAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(WholeRam[zpaddr]);
-      }
-      break;
-    case 0x03: /* Undocumented Instruction: ASL-ORA (zp,X) */
-      {
-        int16 zpaddr = IndXAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(WholeRam[zpaddr]);
-      }
-      break;
-    case 0x13: /* Undocumented Instruction: ASL-ORA (zp),Y */
-      {
-        int16 zpaddr = IndYAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(WholeRam[zpaddr]);
-      }
-      break;
-    case 0x0f: /* Undocumented Instruction: ASL-ORA abs */
-      {
-        int16 zpaddr = AbsAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(WholeRam[zpaddr]);
-      }
-      break;
-    case 0x17: /* Undocumented Instruction: ASL-ORA zp,X */
-      {
-        int16 zpaddr = ZeroPgXAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(WholeRam[zpaddr]);
-      }
-      break;
-    case 0x1b: /* Undocumented Instruction: ASL-ORA abs,Y */
-      {
-        int16 zpaddr = AbsYAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(WholeRam[zpaddr]);
-      }
-      break;
-    case 0x1f: /* Undocumented Instruction: ASL-ORA abs,X */
-      {
-        int16 zpaddr = AbsXAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(WholeRam[zpaddr]);
-      }
-      break;
-	case 0x23: /* Undocumented Instruction: ROL-AND (zp,X) */
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x27: /* Undocumented Instruction: ROL-AND zp */
-		{
-		int16 zpaddr=ZeroPgAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x2f: /* Undocumented Instruction: ROL-AND abs */
-		{
-		int16 zpaddr=AbsAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x37: /* Undocumented Instruction: ROL-AND zp,X */
-		{
-		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x3b: /* Undocumented Instruction: ROL-AND abs.Y */
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x3f: /* Undocumented Instruction: ROL-AND abs.X */
-		{
-		int16 zpaddr=AbsXAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x43: /* Undocumented Instruction: LSR-EOR (zp,X) */
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x47: /* Undocumented Instruction: LSR-EOR zp */
-		{
-		int16 zpaddr=ZeroPgAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x4f: /* Undocumented Instruction: LSR-EOR abs */
-		{
-		int16 zpaddr=AbsAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x53: /* Undocumented Instruction: LSR-EOR (zp),Y */
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x57: /* Undocumented Instruction: LSR-EOR zp,X */
-		{
-		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x5b: /* Undocumented Instruction: LSR-EOR abs,Y */
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x5f: /* Undocumented Instruction: LSR-EOR abs,X */
-		{
-		int16 zpaddr=AbsXAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x44:
-	case 0x54:
-		ProgramCounter+=1;
-		break;
-	case 0x5c:
-		ProgramCounter+=2;
-		break;
-	case 0x63: /* Undocumented Instruction: ROR-ADC (zp,X) */
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x67: /* Undocumented Instruction: ROR-ADC zp */
-		{
-		int16 zpaddr=ZeroPgAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x6f: /* Undocumented Instruction: ROR-ADC abs */
-		{
-		int16 zpaddr=AbsAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x73: /* Undocumented Instruction: ROR-ADC (zp),Y */
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x77: /* Undocumented Instruction: ROR-ADC zp,X */
-		{
-		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x7b: /* Undocumented Instruction: ROR-ADC abs,Y */
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0x7f: /* Undocumented Instruction: ROR-ADC abs,X */
-		{
-		int16 zpaddr=AbsXAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	// Undocumented DEC-CMP and INC-SBC Instructions
-	case 0xc3: // DEC-CMP (zp,X)
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xc7: // DEC-CMP zp
-		{
-		int16 zpaddr=ZeroPgAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xcf: // DEC-CMP abs
-		{
-		int16 zpaddr=AbsAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xd3: // DEC-CMP (zp),Y
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xd7: // DEC-CMP zp,X
-		{
-		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xdb: // DEC-CMP abs,Y
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xdf: // DEC-CMP abs,X
-		{
-		int16 zpaddr=AbsXAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xd4:
-	case 0xf4:
-		ProgramCounter+=1;
-		break;
-	case 0xdc:
-	case 0xfc:
-		ProgramCounter+=2;
-		break;
-	case 0xe3: // INC-SBC (zp,X)
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xe7: // INC-SBC zp
-		{
-		int16 zpaddr=ZeroPgAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xef: // INC-SBC abs
-		{
-		int16 zpaddr=AbsAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xf3: // INC-SBC (zp).Y
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xf7: // INC-SBC zp,X
-		{
-		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xfb: // INC-SBC abs,Y
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	case 0xff: // INC-SBC abs,X
-		{
-		int16 zpaddr=AbsXAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(WholeRam[zpaddr]);
-		}
-		break;
-	// REALLY Undocumented instructions 6B, 8B and CB
-    case 0x6b:
-		ANDInstrHandler(WholeRam[ProgramCounter++]);
-		RORInstrHandler_Acc();
-		break;
-	case 0x8b:
-		Accumulator=XReg; /* TXA */
-		PSR&=~(FlagZ | FlagN);
-		PSR|=((Accumulator==0)<<1) | (Accumulator & 128);
-		ANDInstrHandler(WholeRam[ProgramCounter++]);
-		break;
-	case 0xcb:
-		// SBX #n - I dont know if this uses the carry or not, i'm assuming its
-		// Subtract #n from X with carry.
-		{
-			unsigned char TmpAcc=Accumulator;
-			Accumulator=XReg;
-			SBCInstrHandler(WholeRam[ProgramCounter++]);
-			XReg=Accumulator;
-			Accumulator=TmpAcc; // Fudge so that I dont have to do the whole SBC code again
-		}
-		break;
-    default:
-      BadCount++;
-      break;
-  }
- }
- if (OpCodes>=2) {
-  switch (CurrentInstruction) {
-	      case 0x0b:
-	case 0x2b:
-      ANDInstrHandler(WholeRam[ProgramCounter++]); /* AND-MVC #n,b7 */
-	  PSR|=((Accumulator & 128)>>7);
-      break;
-    case 0x4b: /* Undocumented Instruction: AND imm and LSR A */
-      ANDInstrHandler(WholeRam[ProgramCounter++]);
-      LSRInstrHandler_Acc();
-      break;
-    case 0x87: /* Undocumented Instruction: SAX zp (i.e. (zp) = A & X) */
-      /* This one does not seem to change the processor flags */
-      WholeRam[ZeroPgAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0x83: /* Undocumented Instruction: SAX (zp,X) */
-      WholeRam[IndXAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0x8f: /* Undocumented Instruction: SAX abs */
-      WholeRam[AbsAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0x93: /* Undocumented Instruction: SAX (zp),Y */
-      WholeRam[IndYAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0x97: /* Undocumented Instruction: SAX zp,Y */
-      WholeRam[ZeroPgYAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0x9b: /* Undocumented Instruction: SAX abs,Y */
-      WholeRam[AbsYAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0x9f: /* Undocumented Instruction: SAX abs,X */
-      WholeRam[AbsXAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0xab: /* Undocumented Instruction: LAX #n */
-      LDAInstrHandler(WholeRam[ProgramCounter++]);
-      XReg = Accumulator;
-      break;
-    case 0xa3: /* Undocumented Instruction: LAX (zp,X) */
-      LDAInstrHandler(IndXAddrModeHandler_Data());
-      XReg = Accumulator;
-      break;
-    case 0xa7: /* Undocumented Instruction: LAX zp */
-      LDAInstrHandler(WholeRam[WholeRam[ProgramCounter++]]);
-      XReg = Accumulator;
-      break;
-    case 0xaf: /* Undocumented Instruction: LAX abs */
-      LDAInstrHandler(AbsAddrModeHandler_Data());
-      XReg = Accumulator;
-      break;
-    case 0xb3: /* Undocumented Instruction: LAX (zp),Y */
-      LDAInstrHandler(IndYAddrModeHandler_Data());
-      XReg = Accumulator;
-      break;
-    case 0xb7: /* Undocumented Instruction: LAX zp,Y */
-      LDXInstrHandler(ZeroPgYAddrModeHandler_Data());
-      Accumulator = XReg;
-      break;
-	case 0xbb:
-    case 0xbf: /* Undocumented Instruction: LAX abs,Y */
-      LDAInstrHandler(AbsYAddrModeHandler_Data());
-      XReg = Accumulator;
-      break;
-	default:
-		BadCount++;
-  }
- }
- if (BadCount==OpCodes) 
-	 BadInstrHandler(CurrentInstruction);
 	  
 	// This block corrects the cycle count for the branch instructions
 	if ((CurrentInstruction==0x10) ||
 		(CurrentInstruction==0x30) ||
 		(CurrentInstruction==0x50) ||
 		(CurrentInstruction==0x70) ||
-		(CurrentInstruction==0x80) ||
+		(CurrentInstruction==0x80)  && MachineType == 3 ||
 		(CurrentInstruction==0x90) ||
 		(CurrentInstruction==0xb0) ||
 		(CurrentInstruction==0xd0) ||
@@ -3018,7 +2867,7 @@ void Exec6502Instruction(void) {
 		{
 			Cycles++;
 			if ((ProgramCounter & 0xff00) != ((OldPC+2) & 0xff00))
-				Cycles+=1;
+				Cycles++;
 		}
 	}
 	
