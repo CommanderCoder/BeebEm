@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -1066,6 +1066,12 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Ve5-Sm-Djx"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="SprowCoPro" identifier="tspr" id="R7Z-Hk-lJB">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="BOA-ZG-gbh"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="0Oe-qe-SWJ"/>
                                         <menuItem title="Allow ROM writes" id="yIh-5j-UMX">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -1734,11 +1740,11 @@
             <objects>
                 <viewController id="K2M-6c-8B5" userLabel="KeyboardMapping View Controller" sceneMemberID="viewController">
                     <view key="view" id="sq3-bi-3ml">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="222"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <stackView distribution="fillEqually" orientation="vertical" alignment="centerX" spacing="4" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qLV-Ji-3mE">
-                                <rect key="frame" x="20" y="98" width="550" height="164"/>
+                                <rect key="frame" x="20" y="20" width="550" height="164"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hb8-TX-XaB" userLabel="row1">
                                         <rect key="frame" x="99" y="140" width="352" height="24"/>
@@ -2480,7 +2486,7 @@
                                 </customSpacing>
                             </stackView>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXq-t9-maU">
-                                <rect key="frame" x="366" y="15" width="140" height="32"/>
+                                <rect key="frame" x="366" y="-63" width="140" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="Reset To Default" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sh0-Ua-RgR">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2488,7 +2494,7 @@
                                 </buttonCell>
                             </button>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FwW-EB-MoF">
-                                <rect key="frame" x="506" y="15" width="74" height="32"/>
+                                <rect key="frame" x="506" y="-63" width="74" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="OK" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qGC-Tq-O3T">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2499,7 +2505,7 @@ DQ
                                 </buttonCell>
                             </button>
                             <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c65-vV-vh3">
-                                <rect key="frame" x="154" y="22" width="210" height="21"/>
+                                <rect key="frame" x="154" y="-56" width="210" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="kwg-HF-gjZ">
                                     <font key="font" metaFont="system"/>
@@ -2508,7 +2514,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fie-Kz-7Cy">
-                                <rect key="frame" x="25" y="25" width="123" height="16"/>
+                                <rect key="frame" x="25" y="-53" width="123" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Assigned to keys(s)" id="7hz-DC-Trg">
                                     <font key="font" metaFont="system"/>
@@ -2517,7 +2523,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gNH-rX-bHK">
-                                <rect key="frame" x="108" y="58" width="385" height="16"/>
+                                <rect key="frame" x="108" y="-20" width="385" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Click a key then press the corresponding key on your keyboard" id="Hix-HY-099">
                                     <font key="font" metaFont="system"/>
@@ -2530,7 +2536,7 @@ DQ
                 </viewController>
                 <customObject id="b4z-AZ-7Oz" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1522" y="751"/>
+            <point key="canvasLocation" x="1522" y="790"/>
         </scene>
         <!--BeebEm Window Controller-->
         <scene sceneID="R2V-B0-nI4">

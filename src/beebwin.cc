@@ -3788,6 +3788,9 @@ OSStatus err = noErr;
 			SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
 			SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
             break;
+        case 'tspr':
+            printf("Sprow processor selected\n");
+            break;
 			
         case 'sRT ':
             fprintf(stderr, "Real Time selected\n");
