@@ -1,4 +1,4 @@
-/****************************************************************************/
+****************************************************************************/
 /*              Beebem - (c) David Alan Gilbert 1994                        */
 /*              ------------------------------------                        */
 /* This program may be distributed freely within the following restrictions:*/
@@ -22,10 +22,14 @@
 /* Mike Wyatt 7/6/97 - Added undocumented instructions */
 /* Copied for 65C02 Tube core - 13/04/01 */
 
+// #include <iostream>
+// #include <fstream>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "6502core.h"
+// #include "log.h"
 #include "main.h"
 #include "beebmem.h"
 #include "tube.h"
@@ -34,6 +38,7 @@
 #include "z80mem.h"
 #include "z80.h"
 #include "Arm.h"
+// #include "SprowCoPro.h"
 
 /* Define some known types and values					*/
 #define int8 unsigned char
@@ -56,14 +61,24 @@ unsigned char TubeMachineType=3;
 
 CycleCountT TotalTubeCycles=0;  
 
+unsigned char old_readHIOAddr = 0;
+unsigned char old_readHTmpData = 0;
+
+unsigned char old_readPIOAddr = 0;
+unsigned char old_readPTmpData = 0;
+
+unsigned char old_writeHIOAddr = 0;
+unsigned char old_writePTmpData = 0;
+
 int TubeProgramCounter;
+static int PreTPC; // Previous Tube Program Counter;
 static int Accumulator,XReg,YReg;
 static unsigned char StackReg,PSR;
 static unsigned char IRQCycles;
 
-unsigned char TubeintStatus=0; /* bit set (nums in IRQ_Nums) if interrupt being caused */
-unsigned char TubeNMIStatus=0; /* bit set (nums in NMI_Nums) if NMI being caused */
-static unsigned int tNMILock=0; /* Well I think NMI's are maskable - to stop repeated NMI's - the lock is released when an RTI is done */
+unsigned char TubeintStatus=0; // bit set (nums in IRQ_Nums) if interrupt being caused */
+unsigned char TubeNMIStatus=0; // bit set (nums in NMI_Nums) if NMI being caused */
+static bool TubeNMILock = false; // Well I think NMI's are maskable - to stop repeated NMI's - the lock is released when an RTI is done 
 
 // typedef int int16;
 
@@ -1383,7 +1398,7 @@ void Reset65C02(void) {
 
   TubeintStatus=0;
   TubeNMIStatus=0;
-  tNMILock=0;
+  TubeNMILock = false;
 
   //The fun part, the tube OS is copied from ROM to tube RAM before the processor starts processing
   //This makes the OS "ROM" writable in effect, but must be restored on each reset.
@@ -1450,7 +1465,7 @@ void DoTubeInterrupt(void) {
 
 /*-------------------------------------------------------------------------*/
 void DoTubeNMI(void) {
-  tNMILock=1;
+  TubeNMILock = true;
   PushWord(TubeProgramCounter);
   Push(PSR);
   TubeProgramCounter=TubeReadMem(0xfffa) | (TubeReadMem(0xfffb)<<8);
@@ -1642,7 +1657,7 @@ void Exec65C02Instruction(void) {
     case 0x40:
       PSR=Pop(); /* RTI */
       TubeProgramCounter=PopWord();
-      tNMILock=0;
+      TubeNMILock = false;
       break;
     case 0x41:
       EORInstrHandler(IndXAddrModeHandler_Data());
