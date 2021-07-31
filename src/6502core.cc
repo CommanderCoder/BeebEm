@@ -792,7 +792,84 @@ INLINE static void RORInstrHandler_Acc(void) {
   SetPSRCZN(oldVal & 1,newVal==0,newVal & 128);
 } /* RORInstrHandler_Acc */
 
-INLINE static void SBCInstrHandler(int16 operand); /* SBCInstrHandler */
+INLINE static void SBCInstrHandler(int16 operand) {
+  /* NOTE! Not sure about C and V flags */
+  if (!GETDFLAG) {
+    int TmpResultV = (signed char)Accumulator - (signed char)operand - (1 - GETCFLAG);
+    int TmpResultC = Accumulator - operand - (1 - GETCFLAG);
+    Accumulator = TmpResultC & 255;
+    SetPSR(FlagC | FlagZ | FlagV | FlagN, TmpResultC >= 0,
+      Accumulator == 0, 0, 0, 0,
+      ((Accumulator & 128) > 0) ^ ((TmpResultV & 256) != 0),
+      Accumulator & 128);
+  } else {
+    if (MachineType == 3 ) {
+      int ohn = operand & 0xf0;
+      int oln = operand & 0x0f;
+
+      int ln = (Accumulator & 0xf) - oln - (1 - GETCFLAG);
+      int TmpResult = Accumulator - operand - (1 - GETCFLAG);
+
+      int TmpResultV = (signed char)Accumulator - (signed char)operand - (1 - GETCFLAG);
+      int VFlag = ((TmpResultV < -128) || (TmpResultV > 127));
+
+      int CFlag = (TmpResult & 256) == 0;
+
+      if (TmpResult < 0) {
+        TmpResult -= 0x60;
+      }
+
+      if (ln < 0) {
+        TmpResult -= 0x06;
+      }
+
+      int NFlag = TmpResult & 128;
+      Accumulator = TmpResult & 0xFF;
+      int ZFlag = (Accumulator == 0);
+
+      SetPSR(FlagC | FlagZ | FlagV | FlagN, CFlag, ZFlag, 0, 0, 0, VFlag, NFlag);
+    } else {
+      /* Z flag determined from 2's compl result, not BCD result! */
+      int TmpResult = Accumulator - operand - (1 - GETCFLAG);
+      int ZFlag = ((TmpResult & 0xff) == 0);
+
+      int ohn = operand & 0xf0;
+      int oln = operand & 0xf;
+
+      int ln = (Accumulator & 0xf) - oln - (1 - GETCFLAG);
+      if (ln & 0x10) {
+        ln -= 6;
+      }
+
+      int TmpCarry = 0;
+
+      if (ln & 0x20) {
+        TmpCarry = 0x10;
+      }
+
+      ln &= 0xf;
+      int hn = (Accumulator & 0xf0) - ohn - TmpCarry;
+      /* N and V flags are determined before high nibble is adjusted.
+         NOTE: V is not always correct */
+      int NFlag = hn & 128;
+
+      int TmpResultV = (signed char)Accumulator - (signed char)operand - (1 - GETCFLAG);
+      int VFlag = ((TmpResultV < -128) || (TmpResultV > 127));
+
+      int CFlag = 1;
+
+      if (hn & 0x100) {
+        hn -= 0x60;
+        hn &= 0xf0;
+        CFlag = 0;
+      }
+
+      Accumulator = hn | ln;
+
+      SetPSR(FlagC | FlagZ | FlagV | FlagN, CFlag, ZFlag, 0, 0, 0, VFlag, NFlag);
+    }
+  }
+} /* SBCInstrHandler */
 
 INLINE static void STXInstrHandler(int16 address) {
   WritePaged(address,XReg);
