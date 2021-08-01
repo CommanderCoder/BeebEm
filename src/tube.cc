@@ -1545,7 +1545,10 @@ void Exec65C02Instruction(void) {
 
 // Output debug info
   if (DebugEnabled)
-	  DebugDisassembler(TubeProgramCounter,Accumulator,XReg,YReg,PSR,false);
+	  DebugDisassembler(TubeProgramCounter,Accumulator, XReg,YReg,PSR,false);
+      // TODO replace above 
+      // DebugDisassembler(TubeProgramCounter,Accumulator, XReg,YReg,PSR,false);
+      // And all the stuff in debug.h and debug.cc
   
   // For the Master, check Shadow Ram Presence
   // Note, this has to be done BEFORE reading an instruction due to Bit E and the PC
@@ -1699,7 +1702,7 @@ void Exec65C02Instruction(void) {
             break;
         case 0x1c:
             // TRB abs
-            TRBInstrHandler(AbsXAddrModeHandler_Address());
+            TRBInstrHandler(AbsAddrModeHandler_Address());
             break;
         case 0x1d:
             // ORA abs,X 
@@ -1713,7 +1716,60 @@ void Exec65C02Instruction(void) {
             // BBR1
             BranchOnBitReset(1);
             break;
+        case 0x20:
+            // JSR abs
+            JSRInstrHandler(AbsAddrModeHandler_Address());
+            break;
+        case 0x21:
+            // AND (zp,X)
+            ANDInstrHandler(IndXAddrModeHandler_Data());
+            break;
+        case 0x24:
+            // BIT zp 
+            BITInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0x25:
+            // AND zp
+            ANDInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0x26:
+            // ROL zp
+            ROLInstrHandler(ZeroPgAddrModeHandler_Address());
+            break;
+        case 0x27:
+            // RMB2
+            ResetMemoryBit(2);
+            break;
+        case 0x28:
+            // PLP
+            PSR = Pop();
+            break;
+        case 0x29:
+            // AND imm
+            ANDInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0x2a:
+            // ROL A
+            ROLInstrHandler_Acc();
+            break;
+        case 0x2c:
+            // BIT abs
+            BITInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0x2d:
+            // AND abs
+            ANDInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0x2e:
+            // ROL abs
+            ROLInstrHandler(AbsAddrModeHandler_Address());
+            break;
+        case 0x2f:
+            // BBR2
+            BranchOnBitReset(2);
+            break;
         case 0x30:
+            // BMI rel
             BMIInstrHandler();
             break;
     case 0x50:
@@ -2750,7 +2806,7 @@ void Save65C02UEF(FILE *SUEF) {
 	fput32(TotalTubeCycles,SUEF);
 	fputc(TubeintStatus,SUEF);
 	fputc(TubeNMIStatus,SUEF);
-	fputc(NMILock,SUEF);
+	fputc(TubeNMILock,SUEF);
 	fput16(0,SUEF);
 }
 
@@ -2761,43 +2817,42 @@ void Save65C02MemUEF(FILE *SUEF) {
 }
 
 void LoadTubeUEF(FILE *SUEF) {
-	R1Status=fgetc(SUEF);
-	fread(R1PHData,1,24,SUEF);
-	R1PHPtr=fgetc(SUEF);
-	R1HStatus=fgetc(SUEF);
-	R1HPData=fgetc(SUEF);
-	R1PStatus=fgetc(SUEF);
-	R2PHData=fgetc(SUEF);
-	R2HStatus=fgetc(SUEF);
-	R2HPData=fgetc(SUEF);
-	R2PStatus=fgetc(SUEF);
-	R3PHData[0]=fgetc(SUEF);
-	R3PHData[1]=fgetc(SUEF);
-	R3PHPtr=fgetc(SUEF);
-	R3HStatus=fgetc(SUEF);
-	R3HPData[0]=fgetc(SUEF);
-	R3HPData[1]=fgetc(SUEF);
-	R3HPPtr=fgetc(SUEF);
-	R3PStatus=fgetc(SUEF);
-	R4PHData=fgetc(SUEF);
-	R4HStatus=fgetc(SUEF);
-	R4HPData=fgetc(SUEF);
-	R4PStatus=fgetc(SUEF);
+	R1Status=fget8(SUEF);
+	fread(R1PHData,1,TubeBufferLength,SUEF);
+	R1PHPtr=fget8(SUEF);
+	R1HStatus=fget8(SUEF);
+	R1HPData=fget8(SUEF);
+	R1PStatus=fget8(SUEF);
+	R2PHData=fget8(SUEF);
+	R2HStatus=fget8(SUEF);
+	R2HPData=fget8(SUEF);
+	R2PStatus=fget8(SUEF);
+	R3PHData[0]=fget8(SUEF);
+	R3PHData[1]=fget8(SUEF);
+	R3PHPtr=fget8(SUEF);
+	R3HStatus=fget8(SUEF);
+	R3HPData[0]=fget8(SUEF);
+	R3HPData[1]=fget8(SUEF);
+	R3HPPtr=fget8(SUEF);
+	R3PStatus=fget8(SUEF);
+	R4PHData=fget8(SUEF);
+	R4HStatus=fget8(SUEF);
+	R4HPData=fget8(SUEF);
+	R4PStatus=fget8(SUEF);
 }
 
 void Load65C02UEF(FILE *SUEF) {
-	int Dlong;
 	TubeProgramCounter=fget16(SUEF);
-	Accumulator=fgetc(SUEF);
-	XReg=fgetc(SUEF);
-	YReg=fgetc(SUEF);
-	StackReg=fgetc(SUEF);
-	PSR=fgetc(SUEF);
+	Accumulator=fget8(SUEF);
+	XReg=fget8(SUEF);
+	YReg=fget8(SUEF);
+	StackReg=fget8(SUEF);
+	PSR=fget8(SUEF);
 	//TotalTubeCycles=fget32(SUEF);
-	Dlong=fget32(SUEF);
-	TubeintStatus=fgetc(SUEF);
-	TubeNMIStatus=fgetc(SUEF);
-	NMILock=fgetc(SUEF);
+	int Dlong=fget32(SUEF);
+	TubeintStatus=fget8(SUEF);
+	TubeNMIStatus=fget8(SUEF);
+	TubeNMILock=fgetbool(SUEF);
 }
 
 void Load65C02MemUEF(FILE *SUEF) {
