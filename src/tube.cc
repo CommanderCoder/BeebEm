@@ -1772,9 +1772,114 @@ void Exec65C02Instruction(void) {
             // BMI rel
             BMIInstrHandler();
             break;
-    case 0x50:
-      BVCInstrHandler();
-      break;
+        case 0x31:
+            // AND (zp),Y
+            ANDInstrHandler(IndYAddrModeHandler_Data());
+            break;
+        case 0x32:
+            // AND (zp)
+            ANDInstrHandler(ZPIndAddrModeHandler_Data());
+            break;
+        case 0x34:
+            // BIT abs,X
+            BITInstrHandler(ZeroPgXAddrModeHandler_Data());
+            break;
+        case 0x35:
+            // AND zp,X 
+            ANDInstrHandler(ZeroPgXAddrModeHandler_Data());
+            break;
+        case 0x36:
+            // ROL zp,X
+            ROLInstrHandler(ZeroPgXAddrModeHandler_Address());
+            break;
+        case 0x37:
+            // RMB3
+            ResetMemoryBit(3);
+            break;
+        case 0x38:
+            // SEC
+            PSR |= FlagC;
+            break;
+        case 0x39:
+            ANDInstrHandler(AbsYAddrModeHandler_Data());
+            break;
+        case 0x3a:
+            // DEC A
+            DEAInstrHandler();
+            break;
+        case 0x3c:
+            // BIT abs,X
+            BITInstrHandler(AbsXAddrModeHandler_Data());
+            break;
+        case 0x3d:
+            // AND abs,X
+            ANDInstrHandler(AbsXAddrModeHandler_Data());
+            break;
+        case 0x3e:
+            // ROL abs,X
+            ROLInstrHandler(AbsXAddrModeHandler_Address());
+            break;
+        case 0x3f:
+            // BBR3
+            BranchOnBitReset(3);
+            break;
+        case 0x40:
+            // RTI
+            PSR = Pop();
+            TubeProgramCounter = PopWord();
+            TubeNMILock = false;
+            break;
+        case 0x41:
+            // EOR (zp,X)
+            EORInstrHandler(IndXAddrModeHandler_Data());
+            break;
+        case 0x44:
+            // NOP zp
+            TubeProgramCounter += 1;
+            break;
+        case 0x45:
+            // EOR zp
+            EORInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0x46:
+            // LSR zp
+            LSRInstrHandler(ZeroPgAddrModeHandler_Address());
+            break;
+        case 0x47:
+            // RMB4
+            ResetMemoryBit(4);
+            break;
+        case 0x48:
+            // PHA
+            Push(Accumulator);
+            break;
+        case 0x49:
+            // EOR imm
+            EORInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0x4a:
+            // LSR A
+            LSRInstrHandler_Acc();
+            break;
+        case 0x4c:
+            // JMP 
+            TubeProgramCounter = AbsAddrModeHandler_Address();
+            break;
+        case 0x4d:
+            // EOR abs
+            EORInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0x4e:
+            // LSR abs
+            LSRInstrHandler(AbsAddrModeHandler_Address());
+            break;
+        case 0x4f:
+            // BBR4
+            BranchOnBitReset(4);
+            break;
+        case 0x50:
+            BVCInstrHandler();
+            break;
     case 0x70:
       BVSInstrHandler();
       break;
@@ -1792,72 +1897,6 @@ void Exec65C02Instruction(void) {
       break;
     case 0xf0:
       BEQInstrHandler();
-      break;
-    case 0x11:
-      ORAInstrHandler(IndYAddrModeHandler_Data());
-      break;
-    case 0x12:
-      if (TubeMachineType==3) ORAInstrHandler(ZPIndAddrModeHandler_Data());
-      break;
-	case 0x14:
-	  if (TubeMachineType==3) TRBInstrHandler(ZeroPgAddrModeHandler_Address()); else TubeProgramCounter+=1;
-	  break;
-    case 0x15:
-      ORAInstrHandler(ZeroPgXAddrModeHandler_Data());
-      break;
-    case 0x16:
-      ASLInstrHandler(ZeroPgXAddrModeHandler_Address());
-      break;
-    case 0x18:
-      PSR&=255-FlagC; /* CLC */
-      break;
-    case 0x19:
-      ORAInstrHandler(AbsYAddrModeHandler_Data());
-      break;
-    case 0x1a:
-      if (TubeMachineType==3) INAInstrHandler();
-      break;
-	case 0x1c:
-	  if (TubeMachineType==3) TRBInstrHandler(AbsAddrModeHandler_Address()); else TubeProgramCounter+=2;
-	  break;
-    case 0x1d:
-      ORAInstrHandler(AbsXAddrModeHandler_Data());
-      break;
-    case 0x1e:
-      ASLInstrHandler(AbsXAddrModeHandler_Address());
-      break;
-    case 0x20:
-      JSRInstrHandler(AbsAddrModeHandler_Address());
-      break;
-    case 0x21:
-      ANDInstrHandler(IndXAddrModeHandler_Data());
-      break;
-    case 0x24:
-      BITInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]/*zp */);
-      break;
-    case 0x25:
-      ANDInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]/*zp */);
-      break;
-    case 0x26:
-      ROLInstrHandler(ZeroPgAddrModeHandler_Address());
-      break;
-    case 0x28:
-      PSR=Pop(); /* PLP */
-      break;
-    case 0x29:
-      ANDInstrHandler(TubeRam[TubeProgramCounter++]); /* immediate */
-      break;
-    case 0x2a:
-      ROLInstrHandler_Acc();
-      break;
-    case 0x2c:
-      BITInstrHandler(AbsAddrModeHandler_Data());
-      break;
-    case 0x2d:
-      ANDInstrHandler(AbsAddrModeHandler_Data());
-      break;
-    case 0x2e:
-      ROLInstrHandler(AbsAddrModeHandler_Address());
       break;
     case 0x31:
       ANDInstrHandler(IndYAddrModeHandler_Data());
@@ -2297,83 +2336,7 @@ void Exec65C02Instruction(void) {
     case 0xfe:
       INCInstrHandler(AbsXAddrModeHandler_Address());
       break;
-    case 0x07: /* Undocumented Instruction: ASL zp and ORA zp */
-      {
-        int16 zpaddr = ZeroPgAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(TubeRam[zpaddr]);
-      }
-      break;
-    case 0x03: /* Undocumented Instruction: ASL-ORA (zp,X) */
-      {
-        int16 zpaddr = IndXAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(TubeRam[zpaddr]);
-      }
-      break;
-    case 0x13: /* Undocumented Instruction: ASL-ORA (zp),Y */
-      {
-        int16 zpaddr = IndYAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(TubeRam[zpaddr]);
-      }
-      break;
-    case 0x0f: /* Undocumented Instruction: ASL-ORA abs */
-      {
-        int16 zpaddr = AbsAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(TubeRam[zpaddr]);
-      }
-      break;
-    case 0x17: /* Undocumented Instruction: ASL-ORA zp,X */
-      {
-        int16 zpaddr = ZeroPgXAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(TubeRam[zpaddr]);
-      }
-      break;
-    case 0x1b: /* Undocumented Instruction: ASL-ORA abs,Y */
-      {
-        int16 zpaddr = AbsYAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(TubeRam[zpaddr]);
-      }
-      break;
-    case 0x1f: /* Undocumented Instruction: ASL-ORA abs,X */
-      {
-        int16 zpaddr = AbsXAddrModeHandler_Address();
-        ASLInstrHandler(zpaddr);
-        ORAInstrHandler(TubeRam[zpaddr]);
-      }
-      break;
-	case 0x23: /* Undocumented Instruction: ROL-AND (zp,X) */
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
-	case 0x27: /* Undocumented Instruction: ROL-AND zp */
-		{
-		int16 zpaddr=ZeroPgAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
-	case 0x2f: /* Undocumented Instruction: ROL-AND abs */
-		{
-		int16 zpaddr=AbsAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
-	case 0x33: /* Undocumented Instruction: ROL-AND (zp),Y */
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+
 	case 0x37: /* Undocumented Instruction: ROL-AND zp,X */
 		{
 		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
@@ -2381,13 +2344,7 @@ void Exec65C02Instruction(void) {
 		ANDInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0x3b: /* Undocumented Instruction: ROL-AND abs.Y */
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		ROLInstrHandler(zpaddr);
-		ANDInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+
 	case 0x3f: /* Undocumented Instruction: ROL-AND abs.X */
 		{
 		int16 zpaddr=AbsXAddrModeHandler_Address();
@@ -2395,13 +2352,7 @@ void Exec65C02Instruction(void) {
 		ANDInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0x43: /* Undocumented Instruction: LSR-EOR (zp,X) */
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+	
 	case 0x47: /* Undocumented Instruction: LSR-EOR zp */
 		{
 		int16 zpaddr=ZeroPgAddrModeHandler_Address();
@@ -2416,13 +2367,7 @@ void Exec65C02Instruction(void) {
 		EORInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0x53: /* Undocumented Instruction: LSR-EOR (zp),Y */
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+	
 	case 0x57: /* Undocumented Instruction: LSR-EOR zp,X */
 		{
 		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
@@ -2430,13 +2375,7 @@ void Exec65C02Instruction(void) {
 		EORInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0x5b: /* Undocumented Instruction: LSR-EOR abs,Y */
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		LSRInstrHandler(zpaddr);
-		EORInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+	
 	case 0x5f: /* Undocumented Instruction: LSR-EOR abs,X */
 		{
 		int16 zpaddr=AbsXAddrModeHandler_Address();
@@ -2451,13 +2390,7 @@ void Exec65C02Instruction(void) {
 	case 0x5c:
 		TubeProgramCounter+=2;
 		break;
-	case 0x63: /* Undocumented Instruction: ROR-ADC (zp,X) */
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+	
 	case 0x67: /* Undocumented Instruction: ROR-ADC zp */
 		{
 		int16 zpaddr=ZeroPgAddrModeHandler_Address();
@@ -2472,13 +2405,7 @@ void Exec65C02Instruction(void) {
 		ADCInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0x73: /* Undocumented Instruction: ROR-ADC (zp),Y */
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+	
 	case 0x77: /* Undocumented Instruction: ROR-ADC zp,X */
 		{
 		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
@@ -2486,13 +2413,7 @@ void Exec65C02Instruction(void) {
 		ADCInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0x7b: /* Undocumented Instruction: ROR-ADC abs,Y */
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		RORInstrHandler(zpaddr);
-		ADCInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+	
 	case 0x7f: /* Undocumented Instruction: ROR-ADC abs,X */
 		{
 		int16 zpaddr=AbsXAddrModeHandler_Address();
@@ -2500,46 +2421,22 @@ void Exec65C02Instruction(void) {
 		ADCInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-    case 0x0b:
-	case 0x2b:
-      ANDInstrHandler(TubeRam[TubeProgramCounter++]); /* AND-MVC #n,b7 */
-	  PSR|=((Accumulator & 128)>>7);
-      break;
-    case 0x4b: /* Undocumented Instruction: AND imm and LSR A */
-      ANDInstrHandler(TubeRam[TubeProgramCounter++]);
-      LSRInstrHandler_Acc();
-      break;
+	
     case 0x87: /* Undocumented Instruction: SAX zp (i.e. (zp) = A & X) */
       /* This one does not seem to change the processor flags */
       TubeRam[ZeroPgAddrModeHandler_Address()] = Accumulator & XReg;
       break;
-    case 0x83: /* Undocumented Instruction: SAX (zp,X) */
-      TubeRam[IndXAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
+    
     case 0x8f: /* Undocumented Instruction: SAX abs */
       TubeRam[AbsAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
-    case 0x93: /* Undocumented Instruction: SAX (zp),Y */
-      TubeRam[IndYAddrModeHandler_Address()] = Accumulator & XReg;
       break;
     case 0x97: /* Undocumented Instruction: SAX zp,Y */
       TubeRam[ZeroPgYAddrModeHandler_Address()] = Accumulator & XReg;
       break;
-    case 0x9b: /* Undocumented Instruction: SAX abs,Y */
-      TubeRam[AbsYAddrModeHandler_Address()] = Accumulator & XReg;
-      break;
     case 0x9f: /* Undocumented Instruction: SAX abs,X */
       TubeRam[AbsXAddrModeHandler_Address()] = Accumulator & XReg;
       break;
-    case 0xab: /* Undocumented Instruction: LAX #n */
-      LDAInstrHandler(TubeRam[TubeProgramCounter++]);
-      XReg = Accumulator;
-      break;
-    case 0xa3: /* Undocumented Instruction: LAX (zp,X) */
-      LDAInstrHandler(IndXAddrModeHandler_Data());
-      XReg = Accumulator;
-      break;
-    case 0xa7: /* Undocumented Instruction: LAX zp */
+   case 0xa7: /* Undocumented Instruction: LAX zp */
       LDAInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
       XReg = Accumulator;
       break;
@@ -2547,27 +2444,15 @@ void Exec65C02Instruction(void) {
       LDAInstrHandler(AbsAddrModeHandler_Data());
       XReg = Accumulator;
       break;
-    case 0xb3: /* Undocumented Instruction: LAX (zp),Y */
-      LDAInstrHandler(IndYAddrModeHandler_Data());
-      XReg = Accumulator;
-      break;
+
     case 0xb7: /* Undocumented Instruction: LAX zp,Y */
       LDXInstrHandler(ZeroPgYAddrModeHandler_Data());
       Accumulator = XReg;
       break;
-	case 0xbb:
     case 0xbf: /* Undocumented Instruction: LAX abs,Y */
       LDAInstrHandler(AbsYAddrModeHandler_Data());
       XReg = Accumulator;
       break;
-	// Undocumented DEC-CMP and INC-SBC Instructions
-	case 0xc3: // DEC-CMP (zp,X)
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
 	case 0xc7: // DEC-CMP zp
 		{
 		int16 zpaddr=ZeroPgAddrModeHandler_Address();
@@ -2582,23 +2467,9 @@ void Exec65C02Instruction(void) {
 		CMPInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0xd3: // DEC-CMP (zp),Y
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
 	case 0xd7: // DEC-CMP zp,X
 		{
 		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
-		DECInstrHandler(zpaddr);
-		CMPInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
-	case 0xdb: // DEC-CMP abs,Y
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
 		DECInstrHandler(zpaddr);
 		CMPInstrHandler(TubeRam[zpaddr]);
 		}
@@ -2618,13 +2489,6 @@ void Exec65C02Instruction(void) {
 	case 0xfc:
 		TubeProgramCounter+=2;
 		break;
-	case 0xe3: // INC-SBC (zp,X)
-		{
-		int16 zpaddr=IndXAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
 	case 0xe7: // INC-SBC zp
 		{
 		int16 zpaddr=ZeroPgAddrModeHandler_Address();
@@ -2639,13 +2503,7 @@ void Exec65C02Instruction(void) {
 		SBCInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0xf3: // INC-SBC (zp).Y
-		{
-		int16 zpaddr=IndYAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+
 	case 0xf7: // INC-SBC zp,X
 		{
 		int16 zpaddr=ZeroPgXAddrModeHandler_Address();
@@ -2653,13 +2511,7 @@ void Exec65C02Instruction(void) {
 		SBCInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	case 0xfb: // INC-SBC abs,Y
-		{
-		int16 zpaddr=AbsYAddrModeHandler_Address();
-		INCInstrHandler(zpaddr);
-		SBCInstrHandler(TubeRam[zpaddr]);
-		}
-		break;
+
 	case 0xff: // INC-SBC abs,X
 		{
 		int16 zpaddr=AbsXAddrModeHandler_Address();
@@ -2667,31 +2519,7 @@ void Exec65C02Instruction(void) {
 		SBCInstrHandler(TubeRam[zpaddr]);
 		}
 		break;
-	// REALLY Undocumented instructions 6B, 8B and CB
-    case 0x6b:
-		ANDInstrHandler(TubeRam[TubeProgramCounter++]);
-		RORInstrHandler_Acc();
-		break;
-	case 0x8b:
-		Accumulator=XReg; /* TXA */
-		PSR&=~(FlagZ | FlagN);
-		PSR|=((Accumulator==0)<<1) | (Accumulator & 128);
-		ANDInstrHandler(TubeRam[TubeProgramCounter++]);
-		break;
-	case 0xcb:
-		// SBX #n - I dont know if this uses the carry or not, i'm assuming its
-		// Subtract #n from X with carry.
-		{
-			unsigned char TmpAcc=Accumulator;
-			Accumulator=XReg;
-			SBCInstrHandler(TubeRam[TubeProgramCounter++]);
-			XReg=Accumulator;
-			Accumulator=TmpAcc; // Fudge so that I dont have to do the whole SBC code again
-		}
-		break;
-    default:
-      BadInstrHandler(CurrentInstruction);
-      break;
+
 	break;
 
   }; /* OpCode switch */
