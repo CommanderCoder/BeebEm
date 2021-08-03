@@ -1943,7 +1943,7 @@ void Exec65C02Instruction(void) {
             break;
         case 0x64:
             // STZ zp
-            TUBEWRITEMEM_DIRECT(ZeroPgXAddrModeHandler_Address(), 0);
+            TUBEWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(), 0);
             break;
         case 0x65:
             // ADC zp
@@ -2044,11 +2044,62 @@ void Exec65C02Instruction(void) {
             BranchOnBitReset(7);
             break;
         case 0x80:
+            // BRA rel
             BRAInstrHandler();
             break;
-    case 0x90:
-      BCCInstrHandler();
-      break;
+        case 0x81:
+            // STA (zp,X)
+            TUBEFASTWRITE(IndXAddrModeHandler_Address(), Accumulator);
+            break;
+        case 0x84:
+            // STY zp
+            TUBEWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(), YReg);
+            break;
+        case 0x85:
+            // STA zp
+            TUBEWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(), Accumulator);
+            break;
+        case 0x86:
+            // STX zp
+            TUBEWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(), XReg);
+            break;
+        case 0x87:
+            // SMB0
+            SetMemoryBit(0);
+            break;
+        case 0x88:
+            // DEY
+            YReg = (YReg - 1) & 0xff;
+            SetPSRZN(YReg);
+            break;
+        case 0x89:
+            // BIT imm
+            BITImmedInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0x8a:
+            // TXA
+            Accumulator = XReg;
+            SetPSRZN(Accumulator);
+            break;
+        case 0x8c:
+            // STY abs
+            STYInstrHandler(AbsXAddrModeHandler_Address());
+            break;
+        case 0x8d:
+            // STA abs
+            TUBEFASTWRITE(AbsAddrModeHandler_Address(), Accumulator);
+            break;
+        case 0x8e:
+            // STX abs
+            STXInstrHandler(AbsAddrModeHandler_Address());
+            break;
+        case 0x8f:
+            // BBS0
+            BranchOnBitSet(0);
+            break;
+        case 0x90:
+            BCCInstrHandler();
+            break;
     case 0xb0:
       BCSInstrHandler();
       break;
