@@ -1878,14 +1878,174 @@ void Exec65C02Instruction(void) {
             BranchOnBitReset(4);
             break;
         case 0x50:
+            // BVC rel
             BVCInstrHandler();
             break;
-    case 0x70:
-      BVSInstrHandler();
-      break;
-    case 0x80:
-      BRAInstrHandler();
-      break;
+        case 0x51:
+            // EOR (zp),Y
+            EORInstrHandler(IndYAddrModeHandler_Data());
+            break;
+        case 0x52:
+            // EOR (zp)
+            EORInstrHandler(ZPIndAddrModeHandler_Data());
+            break;
+        case 0x54:
+            // NOP zp,X
+            TubeProgramCounter += 1;
+            break;
+        case 0x55:
+            // EOR zp,X
+            EORInstrHandler(ZeroPgXAddrModeHandler_Data());
+            break;
+        case 0x56:
+            // LSR zp,X
+            LSRInstrHandler(ZeroPgXAddrModeHandler_Address());
+            break;
+        case 0x57:
+            // RMB5
+            ResetMemoryBit(5);
+            break;
+        case 0x58:
+            // CLI
+            PSR &= 255 - FlagI;
+            break;
+        case 0x59:
+            // EOR abs,Y
+            EORInstrHandler(AbsYAddrModeHandler_Data());
+            break;
+        case 0x5a:
+            // PHY
+            Push(YReg);
+            break;
+        case 0x5c:
+            // NOP abs
+            TubeProgramCounter += 2;
+            break;
+        case 0x5d:
+            // EOR abs,X
+            EORInstrHandler(AbsXAddrModeHandler_Data());
+            break;
+        case 0x5e:
+            // LSR abs,X
+            LSRInstrHandler(AbsXAddrModeHandler_Address());
+            break;
+        case 0x5f:
+            // BBR5
+            BranchOnBitReset(5);
+            break;
+        case 0x60:
+            // RTS
+            TubeProgramCounter = PopWord() + 1;
+            break;
+        case 0x61:
+            // ADC (zp,X)
+            ADCInstrHandler(IndXAddrModeHandler_Data());
+            break;
+        case 0x64:
+            // STZ zp
+            TUBEWRITEMEM_DIRECT(ZeroPgXAddrModeHandler_Address(), 0);
+            break;
+        case 0x65:
+            // ADC zp
+            ADCInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0x66:
+            // ROR zp
+            RORInstrHandler(ZeroPgAddrModeHandler_Address());
+            break;
+        case 0x67:
+            // RMB6
+            ResetMemoryBit(6);
+            break;
+        case 0x68:
+            // PLA
+            Accumulator = Pop();
+            SetPSRZN(Accumulator);
+            break;
+        case 0x69:
+            // ADC imm
+            ADCInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0x6a:
+            // ROR A
+            RORInstrHandler_Acc();
+            break;
+        case 0x6c:
+            // JMP (abs)
+            TubeProgramCounter = IndAddrModeHandler_Address();
+            break;
+        case 0x6d:
+            // ADC abs
+            ADCInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0x6e:
+            // ROR abs
+            RORInstrHandler(AbsAddrModeHandler_Address());
+            break;
+        case 0x6f:
+            // BBR6
+            BranchOnBitReset(6);
+            break;
+        case 0x70:
+            // BVS rel
+            BVSInstrHandler();
+            break;
+        case 0x71:
+            // ADC (zp),Y
+            ADCInstrHandler(IndYAddrModeHandler_Data());
+            break;
+        case 0x72:
+            // ADC (zp)
+            ADCInstrHandler(ZPIndAddrModeHandler_Data());
+            break;
+        case 0x74:
+            // STZ zp,x
+            TUBEFASTWRITE(ZeroPgXAddrModeHandler_Address(), 0);
+            break;
+        case 0x75:
+            // ADC zp,X
+            ADCInstrHandler(ZeroPgXAddrModeHandler_Data());
+            break;
+        case 0x76:
+            // ROR zp,X
+            RORInstrHandler(ZeroPgXAddrModeHandler_Address());
+            break;
+        case 0x77:
+            // RMB7
+            ResetMemoryBit(7);
+            break;
+        case 0x78:
+            // SEI
+            PSR |= FlagI;
+            break;
+        case 0x79:
+            // ADC abs,Y
+            ADCInstrHandler(AbsYAddrModeHandler_Data());
+            break;
+        case 0x7a:
+            // PLY
+            YReg = Pop();
+            SetPSRZN(YReg);
+            break;
+        case 0x7c:
+            // JMP abs,X
+            TubeProgramCounter = IndAddrXModeHandler_Address();
+            break;
+        case 0x7d:
+            // ADC abs,X
+            ADCInstrHandler(AbsXAddrModeHandler_Data());
+            break;
+        case 0x7e:
+            // ROR abs,X
+            RORInstrHandler(AbsXAddrModeHandler_Address());
+            break;
+        case 0x7f:
+            // BBR7
+            BranchOnBitReset(7);
+            break;
+        case 0x80:
+            BRAInstrHandler();
+            break;
     case 0x90:
       BCCInstrHandler();
       break;
