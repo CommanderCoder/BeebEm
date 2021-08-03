@@ -2083,7 +2083,7 @@ void Exec65C02Instruction(void) {
             break;
         case 0x8c:
             // STY abs
-            STYInstrHandler(AbsXAddrModeHandler_Address());
+            STYInstrHandler(AbsAddrModeHandler_Address());
             break;
         case 0x8d:
             // STA abs
@@ -2100,6 +2100,42 @@ void Exec65C02Instruction(void) {
         case 0x90:
             BCCInstrHandler();
             break;
+        case 0x91:
+            // STA (zp),Y
+            TUBEFASTWRITE(IndYAddrModeHandler_Address(), Accumulator);
+            break;
+        case 0x92:
+            // STA (zp)
+            TUBEFASTWRITE(ZPIndAddrModeHandler_Address(), Accumulator);
+            break;
+        case 0x94:
+            // STY zp,X
+            STYInstrHandler(ZeroPgXAddrModeHandler_Address());
+            break;
+        case 0x95:
+            // STA zp,X
+            TUBEFASTWRITE(ZeroPgXAddrModeHandler_Address(), Accumulator);
+            break;
+        case 0x96:
+            // STX zp,X
+            STXInstrHandler(ZeroPgYAddrModeHandler_Address());
+            break;
+        case 0x97:
+            // SMB1
+            SetMemoryBit(1);
+            break;
+        case 0x98:
+            // TYA
+            Accumulator = YReg;
+            SetPSRZN(Accumulator);
+            break;
+        case 0x99:
+            // STA abs,Y
+            TUBEFASTWRITE(AbsYAddrModeHandler_Address(), Accumulator);
+            break;
+
+
+
     case 0xb0:
       BCSInstrHandler();
       break;
