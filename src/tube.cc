@@ -2098,6 +2098,7 @@ void Exec65C02Instruction(void) {
             BranchOnBitSet(0);
             break;
         case 0x90:
+            // BCC rel
             BCCInstrHandler();
             break;
         case 0x91:
@@ -2133,13 +2134,149 @@ void Exec65C02Instruction(void) {
             // STA abs,Y
             TUBEFASTWRITE(AbsYAddrModeHandler_Address(), Accumulator);
             break;
+        case 0x9a:
+            // TXS
+            StackReg = XReg;
+            break;
+        case 0x9c:
+            // STZ abs
+            TUBEFASTWRITE(AbsAddrModeHandler_Address(), 0);
+            break;
+        case 0x9d:
+            // STA abs,X
+            TUBEFASTWRITE(AbsXAddrModeHandler_Address(), Accumulator);
+            break;
+        case 0x9e:
+            // STZ abs,X
+            TUBEFASTWRITE(AbsXAddrModeHandler_Address(), 0);
+            break;
+        case 0x9f:
+            // BBS1
+            BranchOnBitSet(1);
+            break;
+        case 0xa0:
+            // LDY imm
+            LDYInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0xa1:
+            // LDA (zp,X)
+            LDAInstrHandler(IndXAddrModeHandler_Data());
+            break;
+        case 0xa2:
+            // LDX imm
+            LDXInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0xa4:
+            // LDY zp
+            LDYInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0xa5:
+            // LDA zp
+            LDAInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0xa6:
+            // LDX zp
+            LDXInstrHandler(TubeRam[TubeRam[TubeProgramCounter++]]);
+            break;
+        case 0xa7:
+            // SMB2
+            SetMemoryBit(2);
+            break;
+        case 0xa8:
+            // TAY
+            YReg = Accumulator;
+            SetPSRZN(Accumulator);
+            break;
+        case 0xa9:
+            // LDA imm
+            LDAInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
+        case 0xaa:
+            // TXA
+            XReg = Accumulator;
+            SetPSRZN(Accumulator);
+            break;
+        case 0xaf:
+            // BBS2
+            BranchOnBitSet(2);
+            break;
+        case 0xac:
+            // LDY abs
+            LDYInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0xad:
+            // LDA abs
+            LDAInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0xae:
+            // LDX abs
+            LDXInstrHandler(AbsAddrModeHandler_Data());
+            break;
+        case 0xb0:
+            // BCS rel
+            BCSInstrHandler();
+            break;
+        case 0xb1:
+            // LDA (zp),Y
+            LDAInstrHandler(IndYAddrModeHandler_Data());
+            break;
+        case 0xb2:
+            // LDA (zp)
+            LDAInstrHandler(ZPIndAddrModeHandler_Data());
+            break;
+        case 0xb4:
+            // LDY zp,X
+            LDYInstrHandler(ZeroPgXAddrModeHandler_Data());
+            break;
+        case 0xb5:
+            // LDA zp,X
+            LDAInstrHandler(ZeroPgXAddrModeHandler_Data());
+            break;
+        case 0xb6:
+            // LDX zp,Y
+            LDXInstrHandler(ZeroPgYAddrModeHandler_Data());
+            // MDFS.net says this should be LDX zp,Y not LDX zp,X
+            break;
+        case 0xb7:
+            // SMB3
+            SetMemoryBit(3);
+            break;
+        case 0xb8:
+            // CLV
+            PSR &= 255 - FlagV;
+            break;
+        case 0xb9:
+            // LDA abs,Y
+            LDAInstrHandler(AbsYAddrModeHandler_Data());
+            break;
+        case 0xba:
+            // TSX
+            XReg = StackReg;
+            SetPSRZN(XReg);
+            break;
+        case 0xbc:
+            // LDY abs,X
+            LDYInstrHandler(AbsXAddrModeHandler_Data());
+            break;
+        case 0xbd:
+            // LDA abs,X
+            LDAInstrHandler(AbsXAddrModeHandler_Data());
+            break;
+        case 0xbe:
+            // LDX abs,X
+            LDXInstrHandler(AbsYAddrModeHandler_Data());
+            break;
+        case 0xbf:
+            // BBS3
+            BranchOnBitSet(3);
+            break;
+        case 0xc0:
+            // CPY imm
+            CPYInstrHandler(TubeRam[TubeProgramCounter++]);
+            break;
 
 
-
-    case 0xb0:
-      BCSInstrHandler();
-      break;
-    case 0xd0:
+        case 0xd0:
       BNEInstrHandler();
       break;
     case 0xf0:
@@ -2413,6 +2550,7 @@ void Exec65C02Instruction(void) {
       PSR|=((Accumulator==0)<<1) | (Accumulator & 128);
       break;
     case 0xac:
+      // LDY abs
       LDYInstrHandler(AbsAddrModeHandler_Data());
       break;
     case 0xad:
