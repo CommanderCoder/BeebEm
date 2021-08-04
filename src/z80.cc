@@ -2319,23 +2319,31 @@ FASTWORK simz80(FASTREG PC)
 				AF &= ~8;
 			break;
 		case 0xAA:			/* IND */
-			PutBYTE(HL, Input(lreg(BC))); --HL;
-			SETFLAG(N, 1);
-			Sethreg(BC, lreg(BC) - 1);
-			SETFLAG(Z, lreg(BC) == 0);
+			PutBYTE(HL, Input(BC)); --HL;
+            Sethreg(BC, hreg(BC) -1);
+//			SETFLAG(N, 1);
+//			SETFLAG(Z, lreg(BC) == 0);
+            temp = hreg(BC);
+            AF = (AF & ~0xff) | (temp & 0xbb) |
+                (((temp & 0xff) == 0) << 6) | 
+                ((temp == 0x7f) << 2);  // Not exact, but close
 			break;
 		case 0xAB:			/* OUTD */
-			Output(lreg(BC), GetBYTE(HL)); --HL;
-			SETFLAG(N, 1);
-			Sethreg(BC, lreg(BC) - 1);
-			SETFLAG(Z, lreg(BC) == 0);
+			Output(BC, GetBYTE(HL)); --HL;
+			Sethreg(BC, hreg(BC) - 1);
+//			SETFLAG(N, 1);
+//			SETFLAG(Z, lreg(BC) == 0);
+            temp = hreg(BC);
+            AF = (AF & ~0xff) | (temp & 0xbb) |
+                (((temp & 0xff) == 0) << 6) | 
+                ((temp == 0x7f) << 2);  // Not exact, but close
 			break;
 		case 0xB0:			/* LDIR */
-			acu = hreg(AF);
 			BC &= 0xffff;
+            if (BC == 0) BC |= 0x10000;
 			do {
 				acu = GetBYTE_pp(HL);
-				PutBYTE_pp(DE, acu);
+				PutBYTE_pp(DE, (BYTE)acu);
 			} while (--BC);
 			acu += hreg(AF);
 			AF = (AF & ~0x3e) | (acu & 8) | ((acu & 2) << 4);
@@ -2343,6 +2351,7 @@ FASTWORK simz80(FASTREG PC)
 		case 0xB1:			/* CPIR */
 			acu = hreg(AF);
 			BC &= 0xffff;
+            if (BC == 0) BC |= 0x10000;
 			do {
 				temp = GetBYTE_pp(HL);
 				op = --BC != 0;
@@ -2358,27 +2367,32 @@ FASTWORK simz80(FASTREG PC)
 			break;
 		case 0xB2:			/* INIR */
 			temp = hreg(BC);
+            if (temp == 0) temp |= 0x100;
 			do {
-				PutBYTE(HL, Input(lreg(BC))); ++HL;
+				PutBYTE(HL, Input(BC)); ++HL; BC -= 0x100;
 			} while (--temp);
-			Sethreg(BC, 0);
-			SETFLAG(N, 1);
-			SETFLAG(Z, 1);
+//			Sethreg(BC, 0);
+//			SETFLAG(N, 1);
+//			SETFLAG(Z, 1);
+            AF = (AF & ~0xff) | 0x42;   // Not exact, but close
 			break;
 		case 0xB3:			/* OTIR */
 			temp = hreg(BC);
+            if (temp == 0) temp |= 0x100;
 			do {
-				Output(lreg(BC), GetBYTE(HL)); ++HL;
+				Output(BC, GetBYTE(HL)); ++HL; BC-=0x100;
 			} while (--temp);
-			Sethreg(BC, 0);
-			SETFLAG(N, 1);
-			SETFLAG(Z, 1);
+//			Sethreg(BC, 0);
+//			SETFLAG(N, 1);
+//			SETFLAG(Z, 1);
+            AF = (AF & ~0xff) | 0x42;   // Not exact, but close
 			break;
 		case 0xB8:			/* LDDR */
 			BC &= 0xffff;
+            if (BC == 0) BC |= 0x10000;
 			do {
 				acu = GetBYTE_mm(HL);
-				PutBYTE_mm(DE, acu);
+				PutBYTE_mm(DE, (BYTE)acu);
 			} while (--BC);
 			acu += hreg(AF);
 			AF = (AF & ~0x3e) | (acu & 8) | ((acu & 2) << 4);
@@ -2386,6 +2400,7 @@ FASTWORK simz80(FASTREG PC)
 		case 0xB9:			/* CPDR */
 			acu = hreg(AF);
 			BC &= 0xffff;
+            if (BC == 0) BC |= 0x10000;
 			do {
 				temp = GetBYTE_mm(HL);
 				op = --BC != 0;
@@ -2401,21 +2416,25 @@ FASTWORK simz80(FASTREG PC)
 			break;
 		case 0xBA:			/* INDR */
 			temp = hreg(BC);
+            if (temp == 0) temp |= 0x100;
 			do {
-				PutBYTE(HL, Input(lreg(BC))); --HL;
+				PutBYTE(HL, Input(BC)); --HL; BC-=0x100;
 			} while (--temp);
-			Sethreg(BC, 0);
-			SETFLAG(N, 1);
-			SETFLAG(Z, 1);
+//			Sethreg(BC, 0);
+//			SETFLAG(N, 1);
+//			SETFLAG(Z, 1);
+            AF = (AF & ~0xff) | 0x42;   // Not exact, but close
 			break;
 		case 0xBB:			/* OTDR */
 			temp = hreg(BC);
+            if (temp == 0) temp |= 0x100;
 			do {
-				Output(lreg(BC), GetBYTE(HL)); --HL;
+				Output(BC, GetBYTE(HL)); --HL; BC-=0x100;
 			} while (--temp);
-			Sethreg(BC, 0);
-			SETFLAG(N, 1);
-			SETFLAG(Z, 1);
+//			Sethreg(BC, 0);
+//			SETFLAG(N, 1);
+//			SETFLAG(Z, 1);
+            AF = (AF & ~0xff) | 0x42;   // Not exact, but close
 			break;
 		default: if (0x40 <= op && op <= 0x7f) PC--;		/* ignore ED */
 		}
@@ -2558,7 +2577,7 @@ FASTWORK simz80(FASTREG PC)
 		case 0x34:			/* INC (IY+dd) */
 			adr = IY + (signed char) GetBYTE_pp(PC);
 			temp = GetBYTE(adr)+1;
-			PutBYTE(adr, temp);
+			PutBYTE(adr, (BYTE)temp);
 			AF = (AF & ~0xfe) | (temp & 0xa8) |
 				(((temp & 0xff) == 0) << 6) |
 				(((temp & 0xf) == 0) << 4) |
@@ -2567,7 +2586,7 @@ FASTWORK simz80(FASTREG PC)
 		case 0x35:			/* DEC (IY+dd) */
 			adr = IY + (signed char) GetBYTE_pp(PC);
 			temp = GetBYTE(adr)-1;
-			PutBYTE(adr, temp);
+			PutBYTE(adr, (BYTE)temp);
 			AF = (AF & ~0xfe) | (temp & 0xa8) |
 				(((temp & 0xff) == 0) << 6) |
 				(((temp & 0xf) == 0xf) << 4) |
@@ -2991,7 +3010,7 @@ FASTWORK simz80(FASTREG PC)
 			case 3: Setlreg(DE, temp); break;
 			case 4: Sethreg(HL, temp); break;
 			case 5: Setlreg(HL, temp); break;
-			case 6: PutBYTE(adr, temp);  break;
+			case 6: PutBYTE(adr, (BYTE)temp);  break;
 			case 7: Sethreg(AF, temp); break;
 			}
 			break;
@@ -3027,41 +3046,42 @@ FASTWORK simz80(FASTREG PC)
 	case 0xFF:			/* RST 38H */
 		PUSH(PC); PC = 0x38;
     }
+
 /* make registers visible for debugging if interrupted */
     SAVE_STATE();
+
     return (PC&0xffff)|0x10000;	/* flag non-bios stop */
 }
 
-extern int inROM;
+extern bool inROM;
 
 void z80_NMI_Interrupt(void)
 {
-	FASTREG SP = sp;
+	WORD SP = sp;
 	
     PUSH(pc);
     pc = 0x0066;
     sp = SP;
-    inROM = 1;
+    inROM = true;
 }
 
 void z80_IRQ_Interrupt(void)
 {
-	FASTREG SP = sp;
+	WORD SP = sp;
 	
     PUSH(pc);
     pc = GetWORD(0xfffe);		// Interrupt vector
     sp = SP;
 }
 
-void set_Z80_irq_line(int state)
+void set_Z80_irq_line(bool state)
 {
-static int irq_state = 0;
+static bool irq_state = false;
 	
     if (irq_state != state)
     {
-        
-        /* if the IF is set, signal an interrupt */
-	    if (state == 1)
+        // if the IF is set, signal an interrupt
+	    if (state)
         {
             if (IFF1)
             {
@@ -3072,27 +3092,25 @@ static int irq_state = 0;
         }
         else
         {
-            irq_state = 0;
+            irq_state = false;
         }
 	}
 }
 
-void set_Z80_nmi_line(int state)
+void set_Z80_nmi_line(bool state)
 {
-static int irq_state = 0;
+static bool irq_state = false;
 	
     if (irq_state != state)
     {
-        
-	    if (state == 1)
+	    if (state)
         {
             irq_state = state;
             z80_NMI_Interrupt();
         }
         else
         {
-            irq_state = 0;
+            irq_state = false;
         }
 	}
-	
 }
