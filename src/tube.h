@@ -25,7 +25,7 @@
 
 #include "port.h"
 
-enum class Tube: unsigned char {
+enum class Tube : unsigned char {
     None,
     Acorn65C02,
     Master512CoPro,

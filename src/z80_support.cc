@@ -141,7 +141,7 @@ WriteLog("%s\n", str);
 
 }
 
-int in(unsigned int addr)
+unsigned char in(unsigned int addr)
 
 {
 int value = 0xff;
