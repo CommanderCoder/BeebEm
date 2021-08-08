@@ -68,6 +68,8 @@
 #include<chrono>
 #include<iostream>
 
+extern unsigned char CMOSRAM[64]; // 50 Bytes CMOS RAM
+
 long beeb_now() // milliseconds
 {
     auto since_epoch = std::chrono::steady_clock::now().time_since_epoch();
@@ -2162,6 +2164,22 @@ char			Title[100];
 	
 }
 
+void BeebWin::SaveCMOS()
+{
+    char TmpPath[256];
+    FILE *CMDF3;
+    unsigned char CMA3;
+    
+    // Save the contents of the CMOS Ram
+    strcpy(TmpPath,RomPath); strcat(TmpPath,"/beebstate/cmos.ram");
+    if ((CMDF3 = fopen(TmpPath,"wb"))!=NULL) {
+        for(CMA3=0xe;CMA3<64;CMA3++) {
+            fputc(CMOSRAM[CMA3],CMDF3);
+        }
+        fclose(CMDF3);
+    }
+}
+
 /****************************************************************************/
 void BeebWin::SavePreferences()
 {
@@ -4196,6 +4214,7 @@ OSStatus err = noErr;
         case 'savp':
             fprintf(stderr, "Save Preferences\n");
 			SavePreferences();
+            SaveCMOS();
             break;
 
 // UEF State

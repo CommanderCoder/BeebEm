@@ -258,6 +258,7 @@ public:
 	void SaveUserKeyMap (void);
 	void ImportDiscFiles(int menuId);
 	void ExportDiscFiles(int menuId);
+    void SaveCMOS(void);
 
 #if 0 //ACH - capture video
 public:
