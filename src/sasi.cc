@@ -56,7 +56,7 @@ typedef struct {
 sasi_t sasi;
 FILE *SASIDisc[4] = {NULL, NULL, NULL, NULL};
 
-extern char HardDriveEnabled;
+extern char SCSIDriveEnabled;
 
 void SASIReset(void)
 {
@@ -74,7 +74,7 @@ char buff[256];
 			fclose(SASIDisc[i]);
 			SASIDisc[i] = NULL;
 		}
-		if (!HardDriveEnabled)
+        if (!SCSIDriveEnabled)
 			continue;
 
         SASIDisc[i] = fopen(buff, "rb+");
@@ -93,7 +93,7 @@ char buff[256];
 void SASIWrite(int Address, int Value) 
 {
 
-	if (!HardDriveEnabled)
+    if (!SCSIDriveEnabled)
 		return;
 
 //	fprintf(stderr, "SASIWrite Address = 0x%02x, Value = 0x%02x, Phase = %d, PC = 0x%04x\n", Address, Value, sasi.phase, ProgramCounter);
@@ -122,7 +122,7 @@ int SASIRead(int Address)
 {
 int data = 0xff;
 
-	if (!HardDriveEnabled)
+    if (!SCSIDriveEnabled)
 		return data;
 
     switch (Address)

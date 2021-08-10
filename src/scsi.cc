@@ -1,23 +1,70 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2006  Jon Welch
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 /* SCSI Support for Beebem */
 /* Based on code written by Y. Tanaka */
+/* 26/12/2011 JGH: Disk images at DiscsPath, not AppPath */
 
 /*
-
 Offset  Description                 Access  
 +00     data						R/W  
 +01     read status                 R  
 +02     write select                W  
 +03     write irq enable            W  
-
-
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "6502core.h"
+//#include "log.h"
 #include "main.h"
 #include "scsi.h"
 #include "beebmem.h"
+
+static int ReadData();
+static void WriteData(int data);
+static void BusFree();
+static void Selection(int data);
+static void Command();
+static void Execute();
+static void Status();
+static void Message();
+static bool DiscTestUnitReady(unsigned char *buf);
+static void TestUnitReady();
+static bool DiscStartStop(unsigned char *buf);
+static void StartStop();
+static void RequestSense();
+static int DiscRequestSense(unsigned char *cdb, unsigned char *buf);
+static void Read6();
+static int ReadSector(unsigned char *buf, int block);
+static bool WriteSector(unsigned char *buf, int block);
+static void Write6();
+static void ModeSense();
+static int DiscModeSense(unsigned char *cdb, unsigned char *buf);
+static void ModeSelect();
+static bool WriteGeometory(unsigned char *buf);
+static bool DiscFormat(unsigned char *buf);
+static void Format();
+static bool DiscVerify(unsigned char *buf);
+static void Verify();
+static void Translate();
 
 enum phase_t {
 	busfree,
@@ -30,7 +77,7 @@ enum phase_t {
 	message
 };
 
-typedef struct {
+struct scsi_t {
 	phase_t phase;
 	bool sel;
 	bool msg;
@@ -39,10 +86,10 @@ typedef struct {
 	bool bsy;
 	bool req;
 	bool irq;
-	char cmd[10];
+	unsigned char cmd[10];
 	int status;
 	int message;
-	char buffer[0x800];
+	unsigned char buffer[0x800];
 	int blocks;
 	int next;
 	int offset;
@@ -51,37 +98,35 @@ typedef struct {
 	int lun;
 	int code;
 	int sector;
-} scsi_t;
+};
 
 scsi_t scsi;
 FILE *SCSIDisc[4] = {NULL, NULL, NULL, NULL};
 int SCSISize[4];
 
-char HardDriveEnabled = 0;
+bool SCSIDriveEnabled = false;
 
 void SCSIReset(void)
 {
-FILE *f;
-int i;
-char buff[256];
+    char buff[256];
 
-	scsi.code = 0x00;
-	scsi.sector = 0x00;
-	
-	for (i = 0; i < 4; ++i)
+    scsi.code = 0x00;
+    scsi.sector = 0x00;
+
+    SCSIClose();
+
+    if (!SCSIDriveEnabled)
     {
+        return;
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        // TODO: Change RomPath for DiscPath?
         sprintf(buff, "%s/diskimg/scsi%d.dat", RomPath, i);
 
-        if (SCSIDisc[i] != NULL) {
-			fclose(SCSIDisc[i]);
-			SCSIDisc[i] = NULL;
-		}
-		
-		if (!HardDriveEnabled)
-			continue;
-
         SCSIDisc[i] = fopen(buff, "rb+");
-    
+
         if (SCSIDisc[i] == NULL)
         {
             SCSIDisc[i] = fopen(buff, "wb");
@@ -89,84 +134,85 @@ char buff[256];
             SCSIDisc[i] = fopen(buff, "rb+");
         }
 
-		SCSISize[i] = 0;
+        SCSISize[i] = 0;		
+
         if (SCSIDisc[i] != NULL)
-		{
-    
-			sprintf(buff, "%s/diskimg/scsi%d.dsc", RomPath, i);
-			
-			f = fopen(buff, "rb");
-			
-			if (f != NULL)
-			{
-				fread(buff, 1, 22, f);
-			
-				// heads = buf[15];
-				// cyl   = buf[13] * 256 + buf[14];
+        {
+            sprintf(buff, "%s/diskimg/scsi%d.dsc", RomPath, i);
 
-				SCSISize[i] = buff[15] * (buff[13] * 256 + buff[14]) * 33;		// Number of sectors on disk = heads * cyls * 33
-			
-				fclose(f);
-			}
-		}
-	}
+            FILE *f = fopen(buff, "rb");
 
-	BusFree();
+            if (f != NULL)
+            {
+                fread (buff, 1, 22, f);
+
+                // heads = buf[15];
+                // cyl   = buf[13] * 256 + buf[14];
+
+                SCSISize[i] = buff[15] * (buff[13] * 256 + buff[14]) * 33;    // Number of sectors on disk = heads * cyls * 33
+
+                fclose(f);
+            }
+        }
+    }
+
+    BusFree();
 }
 
 void SCSIWrite(int Address, int Value) 
 {
+    if (!SCSIDriveEnabled)
+        return;
 
-	if (!HardDriveEnabled)
-		return;
+    //	WriteLog("SCSIWrite Address = 0x%02x, Value = 0x%02x, Phase = %d, PC = 0x%04x\n", Address, Value, scsi.phase, ProgramCounter);
 
-//	WriteLog("SCSIWrite Address = 0x%02x, Value = 0x%02x, Phase = %d, PC = 0x%04x\n", Address, Value, scsi.phase, ProgramCounter);
-	
     switch (Address)
     {
-		case 0x00:
-			scsi.sel = true;
-			WriteData(Value);
-			break;
-		case 0x01:
-			scsi.sel = true;
-			break;
-		case 0x02:
-			scsi.sel = false;
-			WriteData(Value);
-			break;
-		case 0x03:
-			scsi.sel = true;
-			if (Value == 0xff)
-			{
-				scsi.irq = true;
-				intStatus |= (1<<hdc);
-				scsi.status = 0x00;
-//				WriteLog("Setting HDC Interrupt\n");
-			}
-			else
-			{
-				scsi.irq = false;
-				intStatus &= ~(1<<hdc);
-//				WriteLog("Clearing HDC Interrupt\n");
-			}
-				
-			break;
+        case 0x00:
+            scsi.sel = true;
+            WriteData(Value);
+            break;
+
+        case 0x01:
+            scsi.sel = true;
+            break;
+
+        case 0x02:
+            scsi.sel = false;
+            WriteData(Value);
+            break;
+
+        case 0x03:
+            scsi.sel = true;
+            if (Value == 0xff)
+            {
+                scsi.irq = true;
+                intStatus |= (1<<hdc);
+                scsi.status = 0x00;
+            }
+            else
+            {
+                scsi.irq = true;
+                intStatus &= ~(1 << hdc);
+            }
+
+            break;
     }
 }
 
-int SCSIRead(int Address)
+unsigned char SCSIRead(int Address)
 {
-int data = 0xff;
+    if (!SCSIDriveEnabled)
+        return  0xff;
 
-	if (!HardDriveEnabled)
-		return data;
+    unsigned char data = 0xff;
 
     switch (Address)
     {
     case 0x00 :         // Data Register
         data = ReadData();
         break;
+
     case 0x01:			// Status Register
 		data = 0x20;	// Hmmm.. don't know why req has to always be active ? If start at 0x00, ADFS lock up on entry
 		if (scsi.cd) data |= 0x80;
@@ -176,92 +222,103 @@ int data = 0xff;
 		if (scsi.bsy) data |= 0x02;
 		if (scsi.msg) data |= 0x01;
         break;
+
     case 0x02:
         break;
+
     case 0x03:
         break;
     }
 
-//	WriteLog("SCSIRead Address = 0x%02x, Value = 0x%02x, Phase = %d, PC = 0x%04x\n", Address, data, scsi.phase, ProgramCounter);
+    //	WriteLog("SCSIRead Address = 0x%02x, Value = 0x%02x, Phase = %d, PC = 0x%04x\n", Address, data, scsi.phase, ProgramCounter);
 	
     return data;
 }
 
-int ReadData(void)
+void SCSIClose(void)
 {
-	int data;
-	
-//	WriteLog("ReadData - Phase = %d, PC = 0x%04x\n", scsi.phase, ProgramCounter);
-
-	switch (scsi.phase)
-	{
-		case status :
-			data = scsi.status;
-			scsi.req = false;
-			Message();
-			return data;
-			
-		case message :
-			data = scsi.message;
-			scsi.req = false;
-			BusFree();
-			return data;
-			
-		case s_read :
-			data = scsi.buffer[scsi.offset];
-			scsi.offset++;
-			scsi.length--;
-			scsi.req = false;
-			
-			if (scsi.length == 0) {
-				scsi.blocks--;
-				if (scsi.blocks == 0) {
-					Status();
-					return data;
-				}
-				
-				scsi.length = ReadSector(scsi.buffer, scsi.next);
-				if (scsi.length <= 0) {
-					scsi.status = (scsi.lun << 5) | 0x02;
-					scsi.message = 0x00;
-					Status();
-					return data;
-				}
-				scsi.offset = 0;
-				scsi.next++;
-			}
-			return data;
-			break;
-	}
-
-	if (scsi.phase == busfree)
-		return scsi.lastwrite;
-
-	BusFree();
-	return scsi.lastwrite;
+    for (int i = 0; i < 4; ++i)
+    {
+        if (SCSIDisc[i] != NULL)
+        {
+            fclose(SCSIDisc[i]);
+            SCSIDisc[i] = NULL;
+        }
+    }
 }
 
-void WriteData(int data)
+static int ReadData(void)
 {
+    int data;
 
+    switch (scsi.phase)
+    {
+        case status:
+            data = scsi.status;
+            scsi.req = false;
+            Message();
+            return data;
+
+        case message:
+            data = scsi.message;
+            scsi.req = false;
+            BusFree();
+            return data;
+
+        case s_read:
+            data = scsi.buffer[scsi.offset];
+            scsi.offset++;
+            scsi.length--;
+            scsi.req = false;
+
+            if (scsi.length == 0) {
+                scsi.blocks--;
+                if (scsi.blocks == 0) {
+                    Status();
+                    return data;
+                }
+
+                scsi.length = ReadSector(scsi.buffer, scsi.next);
+                if (scsi.length <= 0) {
+                    scsi.status = (scsi.lun << 5) | 0x02;
+                    scsi.message = 0x00;
+                    Status();
+                    return data;
+                }
+                scsi.offset = 0;
+                scsi.next++;
+            }
+            return data;
+
+        case busfree:
+            return scsi.lastwrite;
+
+        default:
+            BusFree();
+            return scsi.lastwrite;
+    }
+}
+
+static void WriteData(int data)
+{
 	scsi.lastwrite = data;
 	
 	switch (scsi.phase)
 	{
-		case busfree :
+		case busfree:
 			if (scsi.sel) {
 				Selection(data);
 			}
 			return;
 
-		case selection :
+		case selection:
 			if (!scsi.sel) {
 				Command();
 				return;
 			}
 			break;
 			
-		case command :
+		case command:
 			scsi.cmd[scsi.offset] = data;
 			if (scsi.offset == 0) {
 				if ((data >= 0x20) && (data <= 0x3f)) {
@@ -278,10 +335,7 @@ void WriteData(int data)
 			}
 			return;
 			
-		case s_write :
-
-//			WriteLog("Adding %d to buffer at offset %d, length remaining %d\n", data, scsi.offset, scsi.length - 1);
-			
+		case s_write:
 			scsi.buffer[scsi.offset] = data;
 			scsi.offset++;
 			scsi.length--;
@@ -303,9 +357,6 @@ void WriteData(int data)
 
 			switch (scsi.cmd[0]) {
 				case 0x0a :
-
-//					WriteLog("Buffer now full, writing sector\n");
-
 					if (!WriteSector(scsi.buffer, scsi.next - 1)) {
 						scsi.status = (scsi.lun << 5) | 0x02;
 						scsi.message = 0;
@@ -325,8 +376,6 @@ void WriteData(int data)
 				
 			scsi.blocks--;
 			
-//			WriteLog("Blocks remaining %d\n", scsi.blocks);
-
 			if (scsi.blocks == 0) {
 				Status();
 				return;
@@ -340,7 +389,7 @@ void WriteData(int data)
 	BusFree();
 }
 
-void BusFree(void)
+static void BusFree(void)
 {
 	scsi.msg = false;
 	scsi.cd = false;
@@ -357,15 +406,13 @@ void BusFree(void)
 	LEDs.HDisc[3] = 0;
 }
 
-void Selection(int data)
+static void Selection(int data)
 {
 	scsi.bsy = true;
 	scsi.phase = selection;
 }
 
-
-void Command(void)
-
+static void Command(void)
 {
 	scsi.phase = command;
 	
@@ -377,7 +424,7 @@ void Command(void)
 	scsi.length = 6;
 }
 
-void Execute(void)
+static void Execute(void)
 {
 	scsi.phase = execute;
 	
@@ -431,7 +478,7 @@ void Execute(void)
 	Status();
 }
 
-void Status(void)
+static void Status(void)
 {
 	scsi.phase = status;
 	
@@ -440,7 +487,7 @@ void Status(void)
 	scsi.req = true;
 }
 
-void Message(void)
+static void Message(void)
 {
 	scsi.phase = message;
 	
@@ -448,8 +495,7 @@ void Message(void)
 	scsi.req = true;
 }
 
-bool DiscTestUnitReady(char *buf)
-
+static bool DiscTestUnitReady(unsigned char *buf)
 {
 	if (SCSIDisc[scsi.lun] == NULL) return false;
 	return true;
@@ -457,9 +503,8 @@ bool DiscTestUnitReady(char *buf)
 
 void TestUnitReady(void)
 {
-	bool status;
-	
-	status = DiscTestUnitReady(scsi.cmd);
+	bool status = DiscTestUnitReady(scsi.cmd);
+
 	if (status) {
 		scsi.status = (scsi.lun << 5) | 0x00;
 		scsi.message = 0x00;
@@ -470,22 +515,19 @@ void TestUnitReady(void)
 	Status();
 }
 
-bool DiscStartStop(char *buf)
-
+static bool DiscStartStop(unsigned char *buf)
 {
 	if (buf[4] & 0x02) {
-
-// Eject Disc
-		
+    // Eject Disc
 	}
+
 	return true;
 }
 
-void StartStop(void)
+static void StartStop(void)
 {
-	bool status;
-	
-	status = DiscStartStop(scsi.cmd);
+	bool status = DiscStartStop(scsi.cmd);
+    
 	if (status) {
 		scsi.status = (scsi.lun << 5) | 0x00;
 		scsi.message = 0x00;
@@ -493,10 +535,11 @@ void StartStop(void)
 		scsi.status = (scsi.lun << 5) | 0x02;
 		scsi.message = 0x00;
 	}
+
 	Status();
 }
 
-void RequestSense(void)
+static void RequestSense(void)
 {
 	scsi.length = DiscRequestSense(scsi.cmd, scsi.buffer);
 	
@@ -504,8 +547,8 @@ void RequestSense(void)
 		scsi.offset = 0;
 		scsi.blocks = 1;
 		scsi.phase = s_read;
-		scsi.io = TRUE;
-		scsi.cd = FALSE;
+		scsi.io = true;
+		scsi.cd = false;
 		
 		scsi.status = (scsi.lun << 5) | 0x00;
 		scsi.message = 0x00;
@@ -520,11 +563,10 @@ void RequestSense(void)
 	}
 }
 
-int DiscRequestSense(char *cdb, char *buf)
+static int DiscRequestSense(unsigned char *cdb, unsigned char *buf)
 {
-	int size;
-	
-	size = cdb[4];
+	int size = cdb[4];
+
 	if (size == 0)
 		size = 4;
 	
@@ -549,11 +591,10 @@ int DiscRequestSense(char *cdb, char *buf)
 	return size;
 }
 
-void Read6(void)
+static void Read6(void)
 {
-	int record;
 	
-	record = scsi.cmd[1] & 0x1f;
+	int record = scsi.cmd[1] & 0x1f;
 	record <<= 8;
 	record |= scsi.cmd[2];
 	record <<= 8;
@@ -583,8 +624,7 @@ void Read6(void)
 	scsi.req = true;
 }
 
-int ReadSector(char *buf, int block)
-
+static int ReadSector(unsigned char *buf, int block)
 {
 	if (SCSIDisc[scsi.lun] == NULL) return 0;
 	
@@ -595,8 +635,7 @@ int ReadSector(char *buf, int block)
 	return 256;
 }
 
-bool WriteSector(char *buf, int block)
-
+static bool WriteSector(unsigned char *buf, int block)
 {
 	if (SCSIDisc[scsi.lun] == NULL) return false;
 	
@@ -607,11 +646,9 @@ bool WriteSector(char *buf, int block)
 	return true;
 }
 
-void Write6(void)
+static void Write6(void)
 {
-	int record;
-	
-	record = scsi.cmd[1] & 0x1f;
+	int record = scsi.cmd[1] & 0x1f;
 	record <<= 8;
 	record |= scsi.cmd[2];
 	record <<= 8;
@@ -634,8 +671,7 @@ void Write6(void)
 	scsi.req = true;
 }
 
-void ModeSense(void)
-
+static void ModeSense(void)
 {
 	scsi.length = DiscModeSense(scsi.cmd, scsi.buffer);
 	
@@ -643,8 +679,8 @@ void ModeSense(void)
 		scsi.offset = 0;
 		scsi.blocks = 1;
 		scsi.phase = s_read;
-		scsi.io = TRUE;
-		scsi.cd = FALSE;
+		scsi.io = true;
+		scsi.cd = false;
 		
 		scsi.status = (scsi.lun << 5) | 0x00;
 		scsi.message = 0x00;
@@ -659,40 +695,36 @@ void ModeSense(void)
 	}
 }
 
-int DiscModeSense(char *cdb, char *buf)
+static int DiscModeSense(unsigned char *cdb, unsigned char *buf)
 {
-	FILE *f;
-	
-	int size;
-	
-	char buff[256];
-		
-	if (SCSIDisc[scsi.lun] == NULL) return 0;
+    if (SCSIDisc[scsi.lun] == NULL) return 0;
 
-	sprintf(buff, "%s/diskimg/scsi%d.dsc", RomPath, scsi.lun);
-			
-	f = fopen(buff, "rb");
+	char buff[256];
+    // sprintf(buff, "%s/discimg/scsi%d.dsc", mainWin->GetUserDataPath(), scsi.lun);
+    sprintf(buff, "%s/discimg/scsi%d.dsc", RomPath, scsi.lun);
+		
+	FILE *f = fopen(buff, "rb");
 			
 	if (f == NULL) return 0;
 
-	size = cdb[4];
+	int size = cdb[4];
 	if (size == 0)
 		size = 22;
 
-	size = fread(buf, 1, size, f);
-	
-// heads = buf[15];
-// cyl   = buf[13] * 256 + buf[14];
-// step  = buf[21];
-// rwcc  = buf[16] * 256 + buf[17];
-// lz    = buf[20];
-	
+	size = (int)fread(buf, 1, size, f);
+
+    // heads = buf[15];
+    // cyl   = buf[13] * 256 + buf[14];
+    // step  = buf[21];
+    // rwcc  = buf[16] * 256 + buf[17];
+    // lz    = buf[20];
+
 	fclose(f);
 
 	return size;
 }
 
-void ModeSelect(void)
+static void ModeSelect(void)
 {
 
 	scsi.length = scsi.cmd[4];
@@ -710,17 +742,14 @@ void ModeSelect(void)
 	scsi.req = true;
 }
 
-bool WriteGeometory(char *buf)
+bool WriteGeometory(unsigned char *buf)
 {
-	FILE *f;
-	
-	char buff[256];
-	
 	if (SCSIDisc[scsi.lun] == NULL) return false;
+
+	char buff[256];
+    sprintf(buff, "%s/discimg/scsi%d.dsc", RomPath, scsi.lun);	
 	
-	sprintf(buff, "%s/diskimg/scsi%d.dsc", RomPath, scsi.lun);
-	
-	f = fopen(buff, "wb");
+	FILE *f = fopen(buff, "wb");
 	
 	if (f == NULL) return false;
 	
@@ -732,20 +761,17 @@ bool WriteGeometory(char *buf)
 }
 
 
-bool DiscFormat(char *buf)
-
+static bool DiscFormat(unsigned char *buf)
 {
-// Ignore defect list
+    // Ignore defect list
 
-	FILE *f;
+    if (SCSIDisc[scsi.lun] != NULL) {
+        fclose(SCSIDisc[scsi.lun]);
+        SCSIDisc[scsi.lun] = NULL;
+    }
+
 	char buff[256];
-	
-	if (SCSIDisc[scsi.lun] != NULL) {
-		fclose(SCSIDisc[scsi.lun]);
-		SCSIDisc[scsi.lun] = NULL;
-	}
-	
-	sprintf(buff, "%s/diskimg/scsi%d.dat", RomPath, scsi.lun);
+    sprintf(buff, "%s/diskimg/scsi%d.dat", RomPath, scsi.lun);
 	
 	SCSIDisc[scsi.lun] = fopen(buff, "wb");
 	if (SCSIDisc[scsi.lun] != NULL) fclose(SCSIDisc[scsi.lun]);
@@ -755,7 +781,7 @@ bool DiscFormat(char *buf)
 
 	sprintf(buff, "%s/diskimg/scsi%d.dsc", RomPath, scsi.lun);
 	
-	f = fopen(buff, "rb");
+	FILE *f = fopen(buff, "rb");
 	
 	if (f != NULL)
 	{
@@ -764,6 +790,7 @@ bool DiscFormat(char *buf)
 		// heads = buf[15];
 		// cyl   = buf[13] * 256 + buf[14];
 		
+        // Number of sectors on disc = heads * cyls * 33
 		SCSISize[scsi.lun] = buff[15] * (buff[13] * 256 + buff[14]) * 33;		// Number of sectors on disk = heads * cyls * 33
 		
 		fclose(f);
@@ -773,11 +800,10 @@ bool DiscFormat(char *buf)
 	return true;
 }
 
-void Format(void)
+static void Format(void)
 {
-	bool status;
-	
-	status = DiscFormat(scsi.cmd);
+	bool status = DiscFormat(scsi.cmd);
+
 	if (status) {
 		scsi.status = (scsi.lun << 5) | 0x00;
 		scsi.message = 0x00;
@@ -785,15 +811,13 @@ void Format(void)
 		scsi.status = (scsi.lun << 5) | 0x02;
 		scsi.message = 0x00;
 	}
+
 	Status();
 }
 
-bool DiscVerify(char *buf)
-
+static bool DiscVerify(unsigned char *buf)
 {
-	int sector;
-	
-	sector = scsi.cmd[1] & 0x1f;
+	int sector = scsi.cmd[1] & 0x1f;
 	sector <<= 8;
 	sector |= scsi.cmd[2];
 	sector <<= 8;
@@ -809,11 +833,10 @@ bool DiscVerify(char *buf)
 	return true;
 }
 
-void Verify(void)
+static void Verify(void)
 {
-	bool status;
-	
-	status = DiscVerify(scsi.cmd);
+	bool status = DiscVerify(scsi.cmd);
+
 	if (status) {
 		scsi.status = (scsi.lun << 5) | 0x00;
 		scsi.message = 0x00;
@@ -821,14 +844,13 @@ void Verify(void)
 		scsi.status = (scsi.lun << 5) | 0x02;
 		scsi.message = 0x00;
 	}
+
 	Status();
 }
 
-void Translate(void)
+static void Translate(void)
 {
-	int record;
-	
-	record = scsi.cmd[1] & 0x1f;
+	int record = scsi.cmd[1] & 0x1f;
 	record <<= 8;
 	record |= scsi.cmd[2];
 	record <<= 8;
@@ -844,8 +866,8 @@ void Translate(void)
 	scsi.offset = 0;
 	scsi.blocks = 1;
 	scsi.phase = s_read;
-	scsi.io = TRUE;
-	scsi.cd = FALSE;
+	scsi.io = true;
+	scsi.cd = false;
 	
 	scsi.status = (scsi.lun << 5) | 0x00;
 	scsi.message = 0x00;
