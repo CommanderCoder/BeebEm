@@ -98,9 +98,9 @@ long ScreenAdjust=0; // Mode 7 Defaults.
 long VScreenAdjust=0;
 int VStart,HStart;
 unsigned char HSyncModifier=9;
-unsigned char TeletextEnabled;
+bool TeletextEnabled;
 char TeletextStyle=1; // Defines wether teletext will skip intermediate lines in order to speed up
-int THalfMode=0; // 1 if to use half-mode (TeletextStyle=1 all the time)
+bool THalfMode=0; // 1 if to use half-mode (TeletextStyle=1 all the time)
 int CurY=-1;
 FILE *crtclog;
 
