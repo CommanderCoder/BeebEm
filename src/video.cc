@@ -1,31 +1,26 @@
-/****************************************************************************/
-/*              Beebem - (c) David Alan Gilbert 1994                        */
-/*              ------------------------------------                        */
-/* This program may be distributed freely within the following restrictions:*/
-/*                                                                          */
-/* 1) You may not charge for this program or for any part of it.            */
-/* 2) This copyright message must be distributed with all copies.           */
-/* 3) This program must be distributed complete with source code.  Binary   */
-/*    only distribution is not permitted.                                   */
-/* 4) The author offers no warrenties, or guarentees etc. - you use it at   */
-/*    your own risk.  If it messes something up or destroys your computer   */
-/*    thats YOUR problem.                                                   */
-/* 5) You may use small sections of code from this program in your own      */
-/*    applications - but you must acknowledge its use.  If you plan to use  */
-/*    large sections then please ask the author.                            */
-/*                                                                          */
-/* If you do not agree with any of the above then please do not use this    */
-/* program.                                                                 */
-/* Please report any problems to the author at beebem@treblig.org           */
-/****************************************************************************/
-/* Video handling -          David Alan Gilbert */
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 1994  David Alan Gilbert
+Copyright (C) 1994  Nigel Magnay
+Copyright (C) 1997  Mike Wyatt
+Copyright (C) 2001  Richard Gellman
+Copyright (C) 2008  Rich Talbot-Watkins
 
-/* Version 2 - 24/12/94 - Designed to emulate start of frame interrupt
-   correctly */
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
-/* Mike Wyatt 7/6/97 - Added cursor display and Win32 port */
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-/* Richard Gellman 4/2/2001 AAAARGH SHADOW RAM! HELP! */
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -61,13 +56,15 @@
 */
 EightUChars FastTable[256];
 SixteenUChars FastTableDWidth[256]; /* For mode 4,5,6 */
-int FastTable_Valid=0;
+bool FastTable_Valid = false;
 
 typedef void (*LineRoutinePtr)(void);
 LineRoutinePtr LineRoutine;
 
 /* Translates middle bits of VideoULA_ControlReg to number of colours */
-static int NColsLookup[]={16, 4, 2, 0 /* Not supported 16? */, 0, 16, 4, 2}; /* Based on AUG 379 */
+static const int NColsLookup[] = {
+    16, 4, 2, 0 /* Not supported 16? */, 0, 16, 4, 2 // Based on AUG 379
+};
 
 unsigned char VideoULA_ControlReg=0x9c;
 unsigned char VideoULA_Palette[16];
@@ -93,14 +90,14 @@ unsigned char CRTC_LightPenHigh=0;          /* R16 */
 unsigned char CRTC_LightPenLow=0;           /* R17 */
 
 unsigned int ActualScreenWidth=640;
-int InitialOffset=0;
-long ScreenAdjust=0; // Mode 7 Defaults.
-long VScreenAdjust=0;
+//int InitialOffset = 0;
+long ScreenAdjust = 0; // Mode 7 Defaults.
+long VScreenAdjust = 0;
 int VStart,HStart;
 unsigned char HSyncModifier=9;
-bool TeletextEnabled;
-char TeletextStyle=1; // Defines wether teletext will skip intermediate lines in order to speed up
-bool THalfMode=0; // 1 if to use half-mode (TeletextStyle=1 all the time)
+bool TeletextEnabled = false;
+char TeletextStyle = 1; // Defines whether teletext will skip intermediate lines in order to speed up
+bool THalfMode = false; // set true to use half-mode (TeletextStyle=1 all the time)
 int CurY=-1;
 FILE *crtclog;
 
@@ -110,33 +107,39 @@ int ova,ovn; // mem ptr buffers
 the point of the sync. If it is -ve its actually in the adjust time */
 typedef struct {
   int Addr;       /* Address of start of next visible character line in beeb memory  - raw */
+  int StartAddr;  /* Address of start of first character line in beeb memory  - raw */
   int PixmapLine; /* Current line in the pixmap */
   int FirstPixmapLine; /* The first pixmap line where something is visible.  Used to eliminate the 
-                          blank virtical retrace lines at the top of the screen.  */
+                          blank vertical retrace lines at the top of the screen.  */
   int PreviousFirstPixmapLine; /* The first pixmap line on the previous frame */
   int LastPixmapLine; /* The last pixmap line where something is visible.  Used to eliminate the 
-                          blank virtical retrace lines at the bottom of the screen.  */
+                          blank vertical retrace lines at the bottom of the screen.  */
   int PreviousLastPixmapLine; /* The last pixmap line on the previous frame */
-  int IsTeletext; /* This frame is a teletext frame - do things differently */
-  char *DataPtr;  /* Pointer into host memory of video data */
+  bool IsTeletext; /* This frame is a teletext frame - do things differently */
+  const unsigned char *DataPtr;  /* Pointer into host memory of video data */
 
   int CharLine;   /* 6845 counts in characters vertically - 0 at the top , incs by 1 - -1 means we are in the bit before the actual display starts */
   int InCharLineUp; /* Scanline within a character line - counts up*/
   int VSyncState; // Cannot =0 in MSVC $NRM; /* When >0 VSync is high */
+  bool IsNewTVFrame;  // Specifies the start of a new TV frame, following VSync (used so we only calibrate speed once per frame)
+  bool InterlaceFrame;
+  bool DoCA1Int;
 } VideoStateT;
 
 static  VideoStateT VideoState;
 
 int VideoTriggerCount=9999; /* Number of cycles before next scanline service */
 
-/* first subscript is graphics flag (1 for graphics,2 for separated graphics), next is character, then scanline */
-/* character is (valu &127)-32 */
-static unsigned int EM7Font[3][96][20]; // 20 rows to account for "half pixels"
+// First subscript is graphics flag (1 for graphics,2 for separated graphics),
+// next is character, then scanline */
+// character is (value & 127) - 32 */
+// There are 20 rows to account for "half pixels"
+static unsigned int Mode7Font[3][96][20];
 
-static int Mode7FlashOn=1; /* True if a flashing character in mode 7 is on */
-static int Mode7DoubleHeightFlags[80]; /* Pessimistic size for this flags - if 1 then corresponding character on NEXT line is top half */
-static int CurrentLineBottom=0;
-static int NextLineBottom=0; // 1 if the next line of double height should be bottoms only
+static bool Mode7FlashOn = true; // true if a flashing character in mode 7 is on
+static bool Mode7DoubleHeightFlags[80]; // Pessimistic size for this flags - if 1 then corresponding character on NEXT line is top half
+static bool CurrentLineBottom = false;
+static bool NextLineBottom = false; // true if the next line of double height should be bottoms only
 
 /* Flash every half second(?) i.e. 25 x 50Hz fields */
 // No. On time is longer than off time. - according to my datasheet, its 0.75Hz with 3:1 ON:OFF ratio. - Richard Gellman
@@ -144,9 +147,9 @@ static int NextLineBottom=0; // 1 if the next line of double height should be bo
 #define MODE7FLASHFREQUENCY 25
 #define MODE7ONFIELDS 37
 #define MODE7OFFFIELDS 13
-unsigned char CursorOnFields,CursorOffFields;
+
 int CursorFieldCount=32;
-unsigned char CursorOnState=1;
+bool CursorOnState = true;
 int Mode7FlashTrigger=MODE7ONFIELDS;
 
 /* If 1 then refresh on every display, else refresh every n'th display */
@@ -161,205 +164,289 @@ static void LowLevelDoScanLineWideNot4Bytes();
 static void VideoAddCursor(void);
 void AdjustVideo();
 void VideoAddLEDs(void);
+
 /*-------------------------------------------------------------------------------------------------------------*/
-static void BuildMode7Font(void) {
-  FILE *m7File;
-  unsigned char m7cc,m7cy;
-  unsigned int m7cb;
-  unsigned int row1,row2,row3; // row builders for mode 7 graphics
-  char TxtFnt[256];
-  /* cout <<"Building mode 7 font data structures\n"; */
- // Build enhanced mode 7 font
-  strcpy(TxtFnt,RomPath);
-  strcat(TxtFnt,"teletext.fnt");
-  m7File=fopen(TxtFnt,"rb");
-  if (m7File == NULL)
-  {
-    fprintf(stderr, "Cannot open Teletext font file teletext.fnt\n");
-    exit(1);
-  }
-  for (m7cc=32;m7cc<=127;m7cc++) {
-	  for (m7cy=0;m7cy<=17;m7cy++) {
-		  m7cb=fgetc(m7File);
-		  m7cb|=fgetc(m7File)<<8;
-		  EM7Font[0][m7cc-32][m7cy+2]=m7cb<<2;
-		  EM7Font[1][m7cc-32][m7cy+2]=m7cb<<2;
-		  EM7Font[2][m7cc-32][m7cy+2]=m7cb<<2;
-	  }
-	  EM7Font[0][m7cc-32][0]=EM7Font[1][m7cc-32][0]=EM7Font[2][m7cc-32][0]=0;
-	  EM7Font[0][m7cc-32][1]=EM7Font[1][m7cc-32][1]=EM7Font[2][m7cc-32][1]=0;
-  }
-  fclose(m7File);
-  // Now fill in the graphics - this is built from an algorithm, but has certain lines/columns
-  // blanked for separated graphics.
-  for (m7cc=0;m7cc<96;m7cc++) {
-	  // here's how it works: top two blocks: 1 & 2
-	  // middle two blocks: 4 & 8
-	  // bottom two blocks: 16 & 64
-	  // its only a grpahics character if bit 5 (32) is clear.
-	  if (!(m7cc & 32)) {
-		  row1=0; row2=0; row3=0;
-		  // left block has a value of 4032, right 63 and both 4095
-		  if (m7cc & 1) row1|=4032;
-		  if (m7cc & 2) row1|=63;
-		  if (m7cc & 4) row2|=4032;
-		  if (m7cc & 8) row2|=63;
-		  if (m7cc & 16) row3|=4032;
-		  if (m7cc & 64) row3|=63;
-		  // now input these values into the array
-		  // top row of blocks - continuous
-		  EM7Font[1][m7cc][0]=EM7Font[1][m7cc][1]=EM7Font[1][m7cc][2]=row1;
-		  EM7Font[1][m7cc][3]=EM7Font[1][m7cc][4]=EM7Font[1][m7cc][5]=row1;
-		  // Separated
-		  row1&=975; // insert gaps
-		  EM7Font[2][m7cc][0]=EM7Font[2][m7cc][1]=EM7Font[2][m7cc][2]=row1;
-		  EM7Font[2][m7cc][3]=row1; EM7Font[2][m7cc][4]=EM7Font[2][m7cc][5]=0;
-		  // middle row of blocks - continuous
-		  EM7Font[1][m7cc][6]=EM7Font[1][m7cc][7]=EM7Font[1][m7cc][8]=row2;
-		  EM7Font[1][m7cc][9]=EM7Font[1][m7cc][10]=EM7Font[1][m7cc][11]=row2;
-		  EM7Font[1][m7cc][12]=EM7Font[1][m7cc][13]=row2;
-		  // Separated
-		  row2&=975; // insert gaps
-		  EM7Font[2][m7cc][6]=EM7Font[2][m7cc][7]=EM7Font[2][m7cc][8]=row2;
-		  EM7Font[2][m7cc][9]=EM7Font[2][m7cc][10]=EM7Font[2][m7cc][11]=row2;
-		  EM7Font[2][m7cc][12]=EM7Font[2][m7cc][13]=0;
-		  // Bottom row - continuous
-		  EM7Font[1][m7cc][14]=EM7Font[1][m7cc][15]=EM7Font[1][m7cc][16]=row3;
-		  EM7Font[1][m7cc][17]=EM7Font[1][m7cc][18]=EM7Font[1][m7cc][19]=row3;
-		  // Separated
-		  row3&=975; // insert gaps
-		  EM7Font[2][m7cc][14]=EM7Font[2][m7cc][15]=EM7Font[2][m7cc][16]=row3;
-		  EM7Font[2][m7cc][17]=row3; EM7Font[2][m7cc][18]=EM7Font[2][m7cc][19]=0;
-	  } // check for valid char to modify
-  } // character loop.
-}; /* BuildMode7Font */
+
+// Build enhanced mode 7 font
+
+bool BuildMode7Font(const char *filename) {
+    FILE *TeletextFontFile = fopen(filename, "rb");
+
+    if (TeletextFontFile == NULL)
+    {
+        return false;
+    }
+
+    for (int Character = 32; Character <= 127; Character++)
+    {
+        // The first two lines of each character are blank.
+        Mode7Font[0][Character-32][0] = 0;
+        Mode7Font[0][Character-32][1] = 0;
+        Mode7Font[1][Character-32][0] = 0;
+        Mode7Font[1][Character-32][1] = 0;
+        Mode7Font[2][Character-32][0] = 0;
+        Mode7Font[2][Character-32][1] = 0;
+
+        // Read 18 lines of 16 pixels each from the file.
+        for (int y = 2; y < 20; y++)
+        {
+            unsigned int Bitmap = fget16(TeletextFontFile);
+
+            Mode7Font[0][Character - 32][y] = Bitmap << 2; // Text  bank
+            Mode7Font[1][Character - 32][y] = Bitmap << 2; // Contiguous graphics bank
+            Mode7Font[2][Character - 32][y] = Bitmap << 2; // Separated graphics bank
+
+        }
+    }
+
+    fclose(TeletextFontFile);
+
+    // Now fill in the graphics - this is built from an algorithm, but has certain
+    // lines/columns blanked for separated graphics.
+
+    for (int Character = 0; Character < 96; Character++)
+    {
+        // Here's how it works:
+        // - top two blocks: 1 & 2
+        // - middle two blocks: 4 & 8
+        // - bottom two blocks: 16 & 64
+        // - its only a graphics character if bit 5 (32) is clear
+
+        if ((Character & 32) == 0)
+        {
+            // Row builders for mode 7 sixel graphics
+            int row1 = 0;
+            int row2 = 0;
+            int row3 = 0;
+
+            // Left sixel has a value of 0xfc0, right 0x03f and both 0xfff
+            if (Character & 0x01) row1 |= 0xfc0; // 1111 1100 0000
+            if (Character & 0x02) row1 |= 0x03f; // 0000 0011 1111   
+            if (Character & 0x04) row2 |= 0xfc0;
+            if (Character & 0x08) row2 |= 0x03f;
+            if (Character & 0x10) row3 |= 0xfc0;
+            if (Character & 0x40) row3 |= 0x03f;
+
+            // Now input these values into the array
+
+            // Top row of sixel - continuous
+            Mode7Font[1][Character][0]  = row1;
+            Mode7Font[1][Character][1]  = row1;
+            Mode7Font[1][Character][2]  = row1;
+            Mode7Font[1][Character][3]  = row1;
+            Mode7Font[1][Character][4]  = row1;
+            Mode7Font[1][Character][5]  = row1;
+
+            // Middle row of sixel - continuious
+            Mode7Font[1][Character][6]  = row2;
+            Mode7Font[1][Character][7]  = row2;
+            Mode7Font[1][Character][8]  = row2;
+            Mode7Font[1][Character][9]  = row2;
+            Mode7Font[1][Character][10]  = row2;
+            Mode7Font[1][Character][11]  = row2;
+            Mode7Font[1][Character][12]  = row2;
+            Mode7Font[1][Character][13]  = row2;
+
+            Mode7Font[1][Character][13]  = row3;
+            Mode7Font[1][Character][15]  = row3;
+            Mode7Font[1][Character][16]  = row3;
+            Mode7Font[1][Character][17]  = row3;
+            Mode7Font[1][Character][18]  = row3;
+            Mode7Font[1][Character][19]  = row3;
+
+            // Separated - insert gaps 0011 1100 1111
+            row1 &= 0x3cf;
+            row2 &= 0x3cf;
+            row3 &= 0x3cf;
+
+            // Top row of sixel - separated
+            Mode7Font[2][Character][0] = row1;
+            Mode7Font[2][Character][1] = row1;
+            Mode7Font[2][Character][2] = row1;
+            Mode7Font[2][Character][3] = row1;
+            Mode7Font[2][Character][4] = 0;
+            Mode7Font[2][Character][5] = 0;
+
+            // Middle row of sixel - separated
+            Mode7Font[2][Character][6]  = row2;
+            Mode7Font[2][Character][7]  = row2;
+            Mode7Font[2][Character][8]  = row2;
+            Mode7Font[2][Character][9]  = row2;
+            Mode7Font[2][Character][10] = row2;
+            Mode7Font[2][Character][11] = row2;
+            Mode7Font[2][Character][12] = 0;
+            Mode7Font[2][Character][13] = 0;
+
+            // Bottom row of sixel - separated
+            Mode7Font[2][Character][14] = row3;
+            Mode7Font[2][Character][15] = row3;
+            Mode7Font[2][Character][16] = row3;
+            Mode7Font[2][Character][17] = row3;
+            Mode7Font[2][Character][18] = 0;
+            Mode7Font[2][Character][19] = 0;
+        }
+    }
+
+    return true;
+}
+
 /*-------------------------------------------------------------------------------------------------------------*/
 static void DoFastTable16(void) {
-  unsigned int beebpixvl,beebpixvr;
-  unsigned int bplvopen,bplvtotal;
-  unsigned char tmp;
+  for(unsigned int beebpixvl = 0;beebpixvl < 16; beebpixvl++) {
+    unsigned int bplvopen=((beebpixvl & 8) ? 128:0) |
+             ((beebpixvl & 4) ? 32:0) |
+             ((beebpixvl & 2) ? 8:0) |
+             ((beebpixvl & 1) ? 2:0);
 
-  for(beebpixvl=0;beebpixvl<16;beebpixvl++) {
-    bplvopen=((beebpixvl & 8)?128:0) |
-             ((beebpixvl & 4)?32:0) |
-             ((beebpixvl & 2)?8:0) |
-             ((beebpixvl & 1)?2:0);
-    for(beebpixvr=0;beebpixvr<16;beebpixvr++) {
-      bplvtotal=bplvopen |
+    for(unsigned int beebpixvr = 0;beebpixvr < 16;beebpixvr++) {
+      unsigned int bplvtotal=bplvopen |
              ((beebpixvr & 8)?64:0) |
              ((beebpixvr & 4)?16:0) |
              ((beebpixvr & 2)?4:0) |
              ((beebpixvr & 1)?1:0);
-      tmp=VideoULA_Palette[beebpixvl];
+
+      unsigned char tmp=VideoULA_Palette[beebpixvl];
+      
       if (tmp>7) {
         tmp&=7;
         if (VideoULA_ControlReg & 1) tmp^=7;
-      };
-      FastTable[bplvtotal].data[0]=FastTable[bplvtotal].data[1]=
-        FastTable[bplvtotal].data[2]=FastTable[bplvtotal].data[3]=mainWin->cols[tmp];
+      }
+
+      FastTable[bplvtotal].data[0] = 
+        FastTable[bplvtotal].data[1] =
+        FastTable[bplvtotal].data[2] =
+        FastTable[bplvtotal].data[3] = mainWin->cols[tmp];
 
       tmp=VideoULA_Palette[beebpixvr];
       if (tmp>7) {
         tmp&=7;
-        if (VideoULA_ControlReg & 1) tmp^=7;
-      };
-      FastTable[bplvtotal].data[4]=FastTable[bplvtotal].data[5]=
-        FastTable[bplvtotal].data[6]=FastTable[bplvtotal].data[7]=mainWin->cols[tmp];
-    }; /* beebpixr */
-  }; /* beebpixl */
-}; /* DoFastTable16 */
+        if (VideoULA_ControlReg & 1) tmp ^= 7;
+      }
+
+      FastTable[bplvtotal].data[4] = 
+        FastTable[bplvtotal].data[5] =
+        FastTable[bplvtotal].data[6] =
+        FastTable[bplvtotal].data[7]=mainWin->cols[tmp];
+    }
+  }
+}
 
 /*-------------------------------------------------------------------------------------------------------------*/
 static void DoFastTable16XStep8(void) {
-  unsigned int beebpixvl,beebpixvr;
-  unsigned int bplvopen,bplvtotal;
-  unsigned char tmp;
+  for(unsigned int beebpixvl = 0;beebpixvl < 16;beebpixvl++) {
+    unsigned int bplvopen=((beebpixvl & 8) ? 128:0) |
+             ((beebpixvl & 4) ? 32:0) |
+             ((beebpixvl & 2) ? 8:0) |
+             ((beebpixvl & 1) ? 2:0);
 
-  for(beebpixvl=0;beebpixvl<16;beebpixvl++) {
-    bplvopen=((beebpixvl & 8)?128:0) |
-             ((beebpixvl & 4)?32:0) |
-             ((beebpixvl & 2)?8:0) |
-             ((beebpixvl & 1)?2:0);
-    for(beebpixvr=0;beebpixvr<16;beebpixvr++) {
-      bplvtotal=bplvopen |
+    for(unsigned int beebpixvr=0;beebpixvr<16;beebpixvr++) {
+      unsigned int bplvtotal=bplvopen |
              ((beebpixvr & 8)?64:0) |
              ((beebpixvr & 4)?16:0) |
              ((beebpixvr & 2)?4:0) |
              ((beebpixvr & 1)?1:0);
-      tmp=VideoULA_Palette[beebpixvl];
+
+      unsigned char tmp=VideoULA_Palette[beebpixvl];
+      
       if (tmp>7) {
         tmp&=7;
         if (VideoULA_ControlReg & 1) tmp^=7;
-      };
-      FastTableDWidth[bplvtotal].data[0]=FastTableDWidth[bplvtotal].data[1]=
-        FastTableDWidth[bplvtotal].data[2]=FastTableDWidth[bplvtotal].data[3]=
-      FastTableDWidth[bplvtotal].data[4]=FastTableDWidth[bplvtotal].data[5]=
-        FastTableDWidth[bplvtotal].data[6]=FastTableDWidth[bplvtotal].data[7]=mainWin->cols[tmp];
+      }
+
+      FastTableDWidth[bplvtotal].data[0] =
+        FastTableDWidth[bplvtotal].data[1] =
+        FastTableDWidth[bplvtotal].data[2] = 
+        FastTableDWidth[bplvtotal].data[3] =
+        FastTableDWidth[bplvtotal].data[4] = 
+        FastTableDWidth[bplvtotal].data[5] =
+        FastTableDWidth[bplvtotal].data[6] = 
+        FastTableDWidth[bplvtotal].data[7] = mainWin->cols[tmp];
 
       tmp=VideoULA_Palette[beebpixvr];
+
       if (tmp>7) {
         tmp&=7;
         if (VideoULA_ControlReg & 1) tmp^=7;
-      };
-      FastTableDWidth[bplvtotal].data[8]=FastTableDWidth[bplvtotal].data[9]=
-        FastTableDWidth[bplvtotal].data[10]=FastTableDWidth[bplvtotal].data[11]=
-      FastTableDWidth[bplvtotal].data[12]=FastTableDWidth[bplvtotal].data[13]=
-        FastTableDWidth[bplvtotal].data[14]=FastTableDWidth[bplvtotal].data[15]=mainWin->cols[tmp];
-    }; /* beebpixr */
-  }; /* beebpixl */
-}; /* DoFastTable16XStep8 */
+      }
+
+      FastTableDWidth[bplvtotal].data[8] = 
+        FastTableDWidth[bplvtotal].data[9] =
+        FastTableDWidth[bplvtotal].data[10] = 
+        FastTableDWidth[bplvtotal].data[11] =
+        FastTableDWidth[bplvtotal].data[12] = 
+        FastTableDWidth[bplvtotal].data[13] =
+        FastTableDWidth[bplvtotal].data[14] = 
+        FastTableDWidth[bplvtotal].data[15] = mainWin->cols[tmp];
+    }
+  }
+}
+
 /*-------------------------------------------------------------------------------------------------------------*/
 /* Some guess work and experimentation has determined that the left most pixel uses bits 7,5,3,1 for the       */
 /* palette address, the next uses 6,4,2,0, the next uses 5,3,1,H (H=High), then 5,2,0,H                        */
 static void DoFastTable4(void) {
-  unsigned char tmp;
-  unsigned long beebpixv,pentry;
+    for(unsigned long beebpixv = 0;beebpixv < 256; beebpixv++) {
+        unsigned long pentry = ((beebpixv & 128) ? 8 : 0) |
+            ((beebpixv & 32)  ? 4 : 0) |
+            ((beebpixv & 8)   ? 2 : 0) |
+            ((beebpixv & 2)   ? 1 : 0);
 
-  for(beebpixv=0;beebpixv<256;beebpixv++) {
-    pentry=((beebpixv & 128)?8:0)
-           | ((beebpixv & 32)?4:0)
-           | ((beebpixv & 8)?2:0)
-           | ((beebpixv & 2)?1:0);
-    tmp=VideoULA_Palette[pentry];
-    if (tmp>7) {
-      tmp&=7;
-      if (VideoULA_ControlReg & 1) tmp^=7;
-    };
-    FastTable[beebpixv].data[0]=FastTable[beebpixv].data[1]=mainWin->cols[tmp];
+        unsigned char tmp=VideoULA_Palette[pentry];
 
-    pentry=((beebpixv & 64)?8:0)
-           | ((beebpixv & 16)?4:0)
-           | ((beebpixv & 4)?2:0)
-           | ((beebpixv & 1)?1:0);
-    tmp=VideoULA_Palette[pentry];
-    if (tmp>7) {
-      tmp&=7;
-      if (VideoULA_ControlReg & 1) tmp^=7;
-    };
-    FastTable[beebpixv].data[2]=FastTable[beebpixv].data[3]=mainWin->cols[tmp];
+        if (tmp>7) {
+            tmp&=7;
+            if (VideoULA_ControlReg & 1) tmp^=7;
+        }
 
-    pentry=((beebpixv & 32)?8:0)
-           | ((beebpixv & 8)?4:0)
-           | ((beebpixv & 2)?2:0)
-           | 1;
-    tmp=VideoULA_Palette[pentry];
-    if (tmp>7) {
-      tmp&=7;
-      if (VideoULA_ControlReg & 1) tmp^=7;
-    };
-    FastTable[beebpixv].data[4]=FastTable[beebpixv].data[5]=mainWin->cols[tmp];
-    pentry=((beebpixv & 16)?8:0)
-           | ((beebpixv & 4)?4:0)
-           | ((beebpixv & 1)?2:0)
-           | 1;
-    tmp=VideoULA_Palette[pentry];
-    if (tmp>7) {
-      tmp&=7;
-      if (VideoULA_ControlReg & 1) tmp^=7;
-    };
-    FastTable[beebpixv].data[6]=FastTable[beebpixv].data[7]=mainWin->cols[tmp];
-  }; /* beebpixv */
-}; /* DoFastTable4 */
+        FastTable[beebpixv].data[0] = 
+            FastTable[beebpixv].data[1] = mainWin->cols[tmp];
+
+        pentry = ((beebpixv & 64) ? 8 : 0) |
+            ((beebpixv & 16) ? 4 : 0) |
+            ((beebpixv & 4)  ? 2 : 0) |
+            ((beebpixv & 1)  ? 1 : 0);
+
+        tmp=VideoULA_Palette[pentry];
+
+        if (tmp>7) {
+            tmp&=7;
+            if (VideoULA_ControlReg & 1) tmp^=7;
+        }
+
+        FastTable[beebpixv].data[2] = 
+            FastTable[beebpixv].data[3]=mainWin->cols[tmp];
+
+        pentry = ((beebpixv & 32)  ? 8 : 0) |
+            ((beebpixv & 8)   ? 4 : 0) |
+            ((beebpixv & 2)   ? 2 : 0) |
+            1;
+
+        tmp=VideoULA_Palette[pentry];
+
+        if (tmp>7) {
+            tmp&=7;
+            if (VideoULA_ControlReg & 1) tmp^=7;
+        }
+
+        FastTable[beebpixv].data[4] =
+            FastTable[beebpixv].data[5] = mainWin->cols[tmp];
+
+        pentry = ((beebpixv & 16)  ? 8 : 0) |
+            ((beebpixv & 4)   ? 4 : 0) |
+            ((beebpixv & 1)   ? 2 : 0) |
+            1;
+
+        tmp=VideoULA_Palette[pentry];
+
+        if (tmp>7) {
+            tmp&=7;
+            if (VideoULA_ControlReg & 1) tmp^=7;
+        }
+
+        FastTable[beebpixv].data[6] = 
+            FastTable[beebpixv].data[7] = mainWin->cols[tmp];
+    }
+}
 
 /*-------------------------------------------------------------------------------------------------------------*/
 /* Some guess work and experimentation has determined that the left most pixel uses bits 7,5,3,1 for the       */
