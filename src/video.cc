@@ -1793,3 +1793,75 @@ void VideoGetText(char *text, int line)
     text[x] = '\0';
 }
 
+static void altBuildMode7Font(void) {
+  FILE *m7File;
+  unsigned char m7cc,m7cy;
+  unsigned int m7cb;
+  unsigned int row1,row2,row3; // row builders for mode 7 graphics
+  char TxtFnt[256];
+  /* cout <<"Building mode 7 font data structures\n"; */
+// Build enhanced mode 7 font
+  strcpy(TxtFnt,RomPath);
+  strcat(TxtFnt,"teletext.fnt");
+  m7File=fopen(TxtFnt,"rb");
+  if (m7File == NULL)
+{
+    fprintf(stderr, "Cannot open Teletext font file teletext.fnt\n");
+    exit(1);
+	}
+  for (m7cc=32;m7cc<=127;m7cc++) {
+	  for (m7cy=0;m7cy<=17;m7cy++) {
+		  m7cb=fgetc(m7File);
+		  m7cb|=fgetc(m7File)<<8;
+		  EM7Font[0][m7cc-32][m7cy+2]=m7cb<<2;
+		  EM7Font[1][m7cc-32][m7cy+2]=m7cb<<2;
+		  EM7Font[2][m7cc-32][m7cy+2]=m7cb<<2;
+		}
+	  EM7Font[0][m7cc-32][0]=EM7Font[1][m7cc-32][0]=EM7Font[2][m7cc-32][0]=0;
+	  EM7Font[0][m7cc-32][1]=EM7Font[1][m7cc-32][1]=EM7Font[2][m7cc-32][1]=0;
+	}
+  fclose(m7File);
+  // Now fill in the graphics - this is built from an algorithm, but has certain lines/columns
+  // blanked for separated graphics.
+  for (m7cc=0;m7cc<96;m7cc++) {
+	  // here's how it works: top two blocks: 1 & 2
+	  // middle two blocks: 4 & 8
+	  // bottom two blocks: 16 & 64
+	  // its only a grpahics character if bit 5 (32) is clear.
+	  if (!(m7cc & 32)) {
+		  row1=0; row2=0; row3=0;
+		  // left block has a value of 4032, right 63 and both 4095
+		  if (m7cc & 1) row1|=4032;
+		  if (m7cc & 2) row1|=63;
+		  if (m7cc & 4) row2|=4032;
+		  if (m7cc & 8) row2|=63;
+		  if (m7cc & 16) row3|=4032;
+		  if (m7cc & 64) row3|=63;
+		  // now input these values into the array
+		  // top row of blocks - continuous
+		  EM7Font[1][m7cc][0]=EM7Font[1][m7cc][1]=EM7Font[1][m7cc][2]=row1;
+		  EM7Font[1][m7cc][3]=EM7Font[1][m7cc][4]=EM7Font[1][m7cc][5]=row1;
+		  // Separated
+		  row1&=975; // insert gaps
+		  EM7Font[2][m7cc][0]=EM7Font[2][m7cc][1]=EM7Font[2][m7cc][2]=row1;
+		  EM7Font[2][m7cc][3]=row1; EM7Font[2][m7cc][4]=EM7Font[2][m7cc][5]=0;
+		  // middle row of blocks - continuous
+		  EM7Font[1][m7cc][6]=EM7Font[1][m7cc][7]=EM7Font[1][m7cc][8]=row2;
+		  EM7Font[1][m7cc][9]=EM7Font[1][m7cc][10]=EM7Font[1][m7cc][11]=row2;
+		  EM7Font[1][m7cc][12]=EM7Font[1][m7cc][13]=row2;
+		  // Separated
+		  row2&=975; // insert gaps
+		  EM7Font[2][m7cc][6]=EM7Font[2][m7cc][7]=EM7Font[2][m7cc][8]=row2;
+		  EM7Font[2][m7cc][9]=EM7Font[2][m7cc][10]=EM7Font[2][m7cc][11]=row2;
+		  EM7Font[2][m7cc][12]=EM7Font[2][m7cc][13]=0;
+		  // Bottom row - continuous
+		  EM7Font[1][m7cc][14]=EM7Font[1][m7cc][15]=EM7Font[1][m7cc][16]=row3;
+		  EM7Font[1][m7cc][17]=EM7Font[1][m7cc][18]=EM7Font[1][m7cc][19]=row3;
+		  // Separated
+		  row3&=975; // insert gaps
+		  EM7Font[2][m7cc][14]=EM7Font[2][m7cc][15]=EM7Font[2][m7cc][16]=row3;
+		  EM7Font[2][m7cc][17]=row3; EM7Font[2][m7cc][18]=EM7Font[2][m7cc][19]=0;
+	  } // check for valid char to modify
+  } // character loop.
+}; /* BuildMode7Font */
+/*
