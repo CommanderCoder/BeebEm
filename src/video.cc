@@ -90,10 +90,8 @@ unsigned char CRTC_LightPenHigh=0;          /* R16 */
 unsigned char CRTC_LightPenLow=0;           /* R17 */
 
 unsigned int ActualScreenWidth=640;
-//int InitialOffset = 0;
 long ScreenAdjust = 0; // Mode 7 Defaults.
 long VScreenAdjust = 0;
-int VStart,HStart;
 unsigned char HSyncModifier=9;
 bool TeletextEnabled = false;
 char TeletextStyle = 1; // Defines whether teletext will skip intermediate lines in order to speed up
@@ -131,8 +129,8 @@ static  VideoStateT VideoState;
 int VideoTriggerCount=9999; /* Number of cycles before next scanline service */
 
 // First subscript is graphics flag (1 for graphics,2 for separated graphics),
-// next is character, then scanline */
-// character is (value & 127) - 32 */
+// next is character, then scanline
+// character is (value & 127) - 32
 // There are 20 rows to account for "half pixels"
 static unsigned int Mode7Font[3][96][20];
 
@@ -195,7 +193,6 @@ bool BuildMode7Font(const char *filename) {
             Mode7Font[0][Character - 32][y] = Bitmap << 2; // Text  bank
             Mode7Font[1][Character - 32][y] = Bitmap << 2; // Contiguous graphics bank
             Mode7Font[2][Character - 32][y] = Bitmap << 2; // Separated graphics bank
-
         }
     }
 
@@ -237,7 +234,7 @@ bool BuildMode7Font(const char *filename) {
             Mode7Font[1][Character][4]  = row1;
             Mode7Font[1][Character][5]  = row1;
 
-            // Middle row of sixel - continuious
+            // Middle row of sixel - continuous
             Mode7Font[1][Character][6]  = row2;
             Mode7Font[1][Character][7]  = row2;
             Mode7Font[1][Character][8]  = row2;
@@ -247,7 +244,8 @@ bool BuildMode7Font(const char *filename) {
             Mode7Font[1][Character][12]  = row2;
             Mode7Font[1][Character][13]  = row2;
 
-            Mode7Font[1][Character][13]  = row3;
+            // Bottom row of sixel - continuous
+            Mode7Font[1][Character][14]  = row3;
             Mode7Font[1][Character][15]  = row3;
             Mode7Font[1][Character][16]  = row3;
             Mode7Font[1][Character][17]  = row3;
@@ -315,7 +313,7 @@ static void DoFastTable16(void) {
       FastTable[bplvtotal].data[0] = 
         FastTable[bplvtotal].data[1] =
         FastTable[bplvtotal].data[2] =
-        FastTable[bplvtotal].data[3] = mainWin->cols[tmp];
+        FastTable[bplvtotal].data[3] = tmp;
 
       tmp=VideoULA_Palette[beebpixvr];
       if (tmp>7) {
@@ -326,7 +324,7 @@ static void DoFastTable16(void) {
       FastTable[bplvtotal].data[4] = 
         FastTable[bplvtotal].data[5] =
         FastTable[bplvtotal].data[6] =
-        FastTable[bplvtotal].data[7]=mainWin->cols[tmp];
+        FastTable[bplvtotal].data[7] = tmp;
     }
   }
 }
@@ -360,7 +358,7 @@ static void DoFastTable16XStep8(void) {
         FastTableDWidth[bplvtotal].data[4] = 
         FastTableDWidth[bplvtotal].data[5] =
         FastTableDWidth[bplvtotal].data[6] = 
-        FastTableDWidth[bplvtotal].data[7] = mainWin->cols[tmp];
+        FastTableDWidth[bplvtotal].data[7] = tmp;
 
       tmp=VideoULA_Palette[beebpixvr];
 
@@ -376,7 +374,7 @@ static void DoFastTable16XStep8(void) {
         FastTableDWidth[bplvtotal].data[12] = 
         FastTableDWidth[bplvtotal].data[13] =
         FastTableDWidth[bplvtotal].data[14] = 
-        FastTableDWidth[bplvtotal].data[15] = mainWin->cols[tmp];
+        FastTableDWidth[bplvtotal].data[15] = tmp;
     }
   }
 }
@@ -399,7 +397,7 @@ static void DoFastTable4(void) {
         }
 
         FastTable[beebpixv].data[0] = 
-            FastTable[beebpixv].data[1] = mainWin->cols[tmp];
+            FastTable[beebpixv].data[1] = tmp;
 
         pentry = ((beebpixv & 64) ? 8 : 0) |
             ((beebpixv & 16) ? 4 : 0) |
@@ -414,7 +412,7 @@ static void DoFastTable4(void) {
         }
 
         FastTable[beebpixv].data[2] = 
-            FastTable[beebpixv].data[3]=mainWin->cols[tmp];
+            FastTable[beebpixv].data[3] = tmp;
 
         pentry = ((beebpixv & 32)  ? 8 : 0) |
             ((beebpixv & 8)   ? 4 : 0) |
@@ -429,7 +427,7 @@ static void DoFastTable4(void) {
         }
 
         FastTable[beebpixv].data[4] =
-            FastTable[beebpixv].data[5] = mainWin->cols[tmp];
+            FastTable[beebpixv].data[5] = tmp;
 
         pentry = ((beebpixv & 16)  ? 8 : 0) |
             ((beebpixv & 4)   ? 4 : 0) |
@@ -444,7 +442,7 @@ static void DoFastTable4(void) {
         }
 
         FastTable[beebpixv].data[6] = 
-            FastTable[beebpixv].data[7] = mainWin->cols[tmp];
+            FastTable[beebpixv].data[7] = tmp;
     }
 }
 
@@ -468,7 +466,7 @@ static void DoFastTable4XStep4(void) {
         FastTableDWidth[beebpixv].data[0] = 
             FastTableDWidth[beebpixv].data[1] =
             FastTableDWidth[beebpixv].data[2] = 
-            FastTableDWidth[beebpixv].data[3] = mainWin->cols[tmp];
+            FastTableDWidth[beebpixv].data[3] = tmp;
 
         pentry = ((beebpixv & 64)  ? 8 : 0) |
             ((beebpixv & 16)  ? 4 : 0) |
@@ -485,7 +483,7 @@ static void DoFastTable4XStep4(void) {
         FastTableDWidth[beebpixv].data[4] = 
             FastTableDWidth[beebpixv].data[5] =
             FastTableDWidth[beebpixv].data[6] = 
-            FastTableDWidth[beebpixv].data[7] = mainWin->cols[tmp];
+            FastTableDWidth[beebpixv].data[7] = tmp;
 
         pentry = ((beebpixv & 32) ? 8 : 0) |
             ((beebpixv & 8)  ? 4 : 0) |
@@ -502,7 +500,7 @@ static void DoFastTable4XStep4(void) {
         FastTableDWidth[beebpixv].data[8] = 
             FastTableDWidth[beebpixv].data[9] =
             FastTableDWidth[beebpixv].data[10] = 
-            FastTableDWidth[beebpixv].data[11] = mainWin->cols[tmp];
+            FastTableDWidth[beebpixv].data[11] = tmp;
 
         pentry = ((beebpixv & 16) ? 8 : 0) |
             ((beebpixv & 4)  ? 4 : 0) |
@@ -519,7 +517,7 @@ static void DoFastTable4XStep4(void) {
         FastTableDWidth[beebpixv].data[12] = 
             FastTableDWidth[beebpixv].data[13] =
             FastTableDWidth[beebpixv].data[14] = 
-            FastTableDWidth[beebpixv].data[15] = mainWin->cols[tmp];
+            FastTableDWidth[beebpixv].data[15] = tmp;
     }
 }
 
@@ -546,7 +544,7 @@ static void DoFastTable2(void) {
         if (VideoULA_ControlReg & 1) tmp^=7;
       }
 
-      FastTable[beebpixv].data[pix] = mainWin->cols[tmp];
+      FastTable[beebpixv].data[pix] = tmp;
     }
   }
 }
@@ -563,7 +561,6 @@ static void DoFastTable2XStep2(void) {
                              ((beebpixvt & 32)  ? 4 : 0) |
                              ((beebpixvt & 8)   ? 2 : 0) |
                              ((beebpixvt & 2)   ? 1 : 0);
-
       beebpixvt<<=1;
       beebpixvt|=1;
 
@@ -574,8 +571,8 @@ static void DoFastTable2XStep2(void) {
         if (VideoULA_ControlReg & 1) tmp^=7;
       }
 
-      FastTableDWidth[beebpixv].data[pix*2] = 
-        FastTableDWidth[beebpixv].data[pix*2+1] = mainWin->cols[tmp];
+      FastTableDWidth[beebpixv].data[pix * 2] = 
+        FastTableDWidth[beebpixv].data[pix * 2 + 1] = tmp;
     }
   }
 }
@@ -821,11 +818,11 @@ static void DoMode7Row(void) {
     int CurrentChar;
     unsigned char byte;
 
-    unsigned int Foreground=mainWin->cols[7];
+    unsigned int Foreground = 7;
     /* The foreground colour changes after the current character; only relevant for hold graphics */
     unsigned int ForegroundPending=Foreground;
     unsigned int ActualForeground;
-    unsigned int Background=mainWin->cols[0];
+    unsigned int Background = 0;
     bool Flash = false; // i.e. steady
     bool DoubleHeight = false; // Normal
     bool Graphics;
@@ -844,7 +841,6 @@ static void DoMode7Row(void) {
     int CurrentScanLine;
     int CurrentX=0;
     int CurrentPixel;
-    unsigned int col;
     int FontTypeIndex=0; /* 0=alpha, 1=contiguous graphics, 2=separated graphics */
 
     if (CRTC_HorizontalDisplayed>80) return; /* Not possible on beeb - and would break the double height lookup array */
@@ -877,7 +873,7 @@ static void DoMode7Row(void) {
                 case 133: // Alphanumeric magenta
                 case 134: // Alphanumeric cyan
                 case 135: // Alphanumeric white
-                    ForegroundPending = mainWin->cols[byte-128];
+                    ForegroundPending = byte - 128; 
                     NextGraphics = false;
                     NextHoldGraphChar=32;
                     break;
@@ -906,7 +902,7 @@ static void DoMode7Row(void) {
                 case 149: // Graphics magenta
                 case 150: // Graphics cyan
                 case 151: // Graphics white
-                    ForegroundPending = mainWin->cols[byte-144];
+                    ForegroundPending = byte - 144;
                     NextGraphics = true;
                     break;
 
@@ -923,7 +919,7 @@ static void DoMode7Row(void) {
                     break;
 
                 case 156: // Black background
-                    Background = mainWin->cols[0];
+                    Background = 0;
                     break;
 
                 case 157: // New background
@@ -942,7 +938,7 @@ static void DoMode7Row(void) {
 
             // This next line hides any non double height characters on the bottom line
             // Fudge so that the special character is just displayed in background
-            if (HoldGraph && Graphics==1) {
+            if (HoldGraph && Graphics) {
                 byte=HoldGraphChar; 
                 FontTypeIndex=HoldSeparated?2:1;
             } else {
@@ -1123,9 +1119,9 @@ void VideoDoScanLine(void) {
         if (!FrameNum) {
             if (VScreenAdjust>0 && VideoState.PixmapLine==0)
                 for (l=-VScreenAdjust; l<0; ++l)
-                    mainWin->doHorizLine(mainWin->cols[0], l, -36, 800);
+                    mainWin->doHorizLine(0, l, -36, 800);
             for (l=0; l<20 && VideoState.PixmapLine+l<512; ++l)
-                mainWin->doHorizLine(mainWin->cols[0], VideoState.PixmapLine+l, -36, 800);
+                mainWin->doHorizLine(0, VideoState.PixmapLine+l, -36, 800);
         }
 
         // RTW - Mode 7 emulation is rather broken, as we should be plotting it line-by-line instead
@@ -1203,7 +1199,7 @@ void VideoDoScanLine(void) {
 
     /* Clear the scan line */
     if (!FrameNum)
-      memset(mainWin->GetLinePtr(VideoState.PixmapLine),mainWin->cols[0],800);
+      memset(mainWin->GetLinePtr(VideoState.PixmapLine),0,800);
 
     // RTW - changed so we are even able to plot vertical total adjust region if CRTC_VerticalDisplayed is high enough
     if (VideoState.CharLine<CRTC_VerticalDisplayed) {
@@ -1220,14 +1216,14 @@ void VideoDoScanLine(void) {
             VideoState.Addr+=CRTC_HorizontalDisplayed;
         }
 
-        if ((VideoState.InCharLineUp < 8) && ((CRTC_InterlaceAndDelay & 0x30) != 0x30)) {
+        if (VideoState.InCharLineUp < 8 && ((CRTC_InterlaceAndDelay & 0x30) != 0x30)) {
             if (!FrameNum)
                 LowLevelDoScanLine();
         }
     }
 
     // See if we are at the cursor line
-    if ( (CurY == -1) && VideoState.Addr > (CRTC_CursorPosLow+(CRTC_CursorPosHigh<<8))) {
+    if ( (CurY == -1) && VideoState.Addr > (CRTC_CursorPosLow + (CRTC_CursorPosHigh<<8))) {
         CurY = VideoState.PixmapLine;
     }
 
@@ -1561,7 +1557,7 @@ static void VideoAddCursor(void) {
 		{
 			if (CurY + y >= 0)
             {
-				 mainWin->doInvHorizLine(mainWin->cols[7], CurY + y, CurX, CurSize);
+				 mainWin->doInvHorizLine(7, CurY + y, CurX, CurSize);
 			}
 		}
 	}
