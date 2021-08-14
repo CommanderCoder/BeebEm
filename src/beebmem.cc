@@ -119,9 +119,9 @@ static unsigned int WrapAddr(int in) {
    See 'BeebMemPtrWithWrapMo7' for use in Mode 7 - its a special case.
 */
 
-char *BeebMemPtrWithWrap(int a, int n) {
-  static char tmpBuf[1024];
-  char *tmpBufPtr;
+const unsigned char *BeebMemPtrWithWrap(int a, int n) {
+  static unsigned char tmpBuf[1024];
+  unsigned char *tmpBufPtr;
   int EndAddr=a+n-1;
   int toCopy;
 
@@ -140,18 +140,18 @@ char *BeebMemPtrWithWrap(int a, int n) {
       return(tmpBuf);
 	}
     else if (a<0x1000) {
-      return((char *)FSRam); // Should probably be PrivateRAM?
+      return((unsigned char *)FSRam); // Should probably be PrivateRAM?
     }
     else {
-      return((char *)FSRam+a-0x1000);
+      return((unsigned char *)FSRam+a-0x1000);
     }
   }
 
   if (a<=EndAddr && Sh_Display==0) {
-    return((char *)WholeRam+a);
+    return((unsigned char *)WholeRam+a);
   };
   if (a<=EndAddr && Sh_Display>0) {
-    return((char *)ShadowRAM+a);
+    return((unsigned char *)ShadowRAM+a);
   };
 
   toCopy=0x8000-a;
@@ -180,9 +180,9 @@ static unsigned int WrapAddrMo7(int in) {
 /* Special case of BeebMemPtrWithWrap for use in mode 7
 */
 
-char *BeebMemPtrWithWrapMo7(int a, int n) {
-  static char tmpBuf[1024];
-  char *tmpBufPtr;
+const unsigned char *BeebMemPtrWithWrapMode7(int a, int n) {
+  static unsigned char tmpBuf[1024];
+  unsigned char *tmpBufPtr;
   int EndAddr=a+n-1;
   int toCopy;
 
@@ -190,15 +190,15 @@ char *BeebMemPtrWithWrapMo7(int a, int n) {
   EndAddr=WrapAddrMo7(EndAddr);
 
   if (a<=EndAddr && Sh_Display==0) {
-    return((char *)WholeRam+a);
+    return((unsigned char *)WholeRam+a);
   };
   if (a<=EndAddr && Sh_Display>0) {
-    return((char *)ShadowRAM+a);
+    return((unsigned char *)ShadowRAM+a);
   };
 
   toCopy=0x8000-a;
-  if (toCopy>n && Sh_Display==0) return((char *)WholeRam+a);
-  if (toCopy>n && Sh_Display>0) return((char *)ShadowRAM+a);
+  if (toCopy>n && Sh_Display==0) return((unsigned char *)WholeRam+a);
+  if (toCopy>n && Sh_Display>0) return((unsigned char *)ShadowRAM+a);
   if (toCopy>0 && Sh_Display==0) memcpy(tmpBuf,WholeRam+a,toCopy);
   if (toCopy>0 && Sh_Display>0) memcpy(tmpBuf,ShadowRAM+a,toCopy);
   tmpBufPtr=tmpBuf+toCopy;
@@ -1040,6 +1040,19 @@ void BeebReadRoms(void) {
 	}
 }
 /*----------------------------------------------------------------------------*/
+void BeebReadFont(void) {
+ char TmpPath[256];
+ 
+ /* Read all ROM files in the BeebFile directory */
+ // This section rewritten for V.1.32 to take account of roms.cfg file.
+ strcpy(TmpPath,RomPath);
+ strcat(TmpPath,"teletext.fnt");
+
+ fprintf(stderr, "Opening %s\n", TmpPath);
+    BuildMode7Font(TmpPath);
+
+}
+/*----------------------------------------------------------------------------*/
 void BeebMemInit(unsigned char LoadRoms,unsigned char SkipIntegraBConfig) {
   /* Remove the non-win32 stuff here, soz, im not gonna do multi-platform master128 upgrades
   u want for linux? u do yourself! ;P - Richard Gellman */
@@ -1072,6 +1085,7 @@ void BeebMemInit(unsigned char LoadRoms,unsigned char SkipIntegraBConfig) {
 	  for (RomBlankingSlot=0xf;RomBlankingSlot<0x10;RomBlankingSlot--) memset(Roms[RomBlankingSlot],0,0x4000);
 	  // This shouldn't be required for sideways RAM.
 	  BeebReadRoms(); // Only load roms on start
+      BeebReadFont();
   }
 
   /* Put first ROM in */

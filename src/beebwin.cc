@@ -1941,6 +1941,7 @@ void BeebWin::Initialise(char *home)
 
 	LoadPreferences();
 
+
 	// load the default user keymap if it is present
 	char defaultUserKeymapPath [256];
 	sprintf(defaultUserKeymapPath, "%sdefault.kmap", RomPath);
@@ -2255,7 +2256,7 @@ CFStringRef pTitle;
 	AddDictNum(dict, CFSTR("AcornZ80"), AcornZ80);
 	AddDictNum(dict, CFSTR("OpCodes"), OpCodes);
 	AddDictNum(dict, CFSTR("BasicHardware"), BHardware);
-	AddDictNum(dict, CFSTR("TeletextHalfMode"), THalfMode);
+	AddDictNum(dict, CFSTR("TeletextHalfMode"), TeletextHalfMode);
 	AddDictNum(dict, CFSTR("SoundBlockSize"), SBSize);
 	AddDictNum(dict, CFSTR("isFullScreen"), m_isFullScreen);
 	AddDictNum(dict, CFSTR("MaintainAspectRatio"), m_maintainAspectRatio);
@@ -2487,7 +2488,7 @@ int LEDByte;
 	AcornZ80 = GetDictNum(dict, CFSTR("AcornZ80"), 0);
 	OpCodes = GetDictNum(dict, CFSTR("OpCodes"), 3);
 	BHardware = GetDictNum(dict, CFSTR("BasicHardware"), 0);
-	THalfMode = GetDictNum(dict, CFSTR("TeletextHalfMode"), 0);
+	TeletextHalfMode = GetDictNum(dict, CFSTR("teletextHalfMode"), 0);
 	SBSize = GetDictNum(dict, CFSTR("SoundBlockSize"), 0);
 	m_Invert = GetDictNum(dict, CFSTR("InvertBackground"), 0);
 

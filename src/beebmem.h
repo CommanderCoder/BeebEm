@@ -57,8 +57,8 @@ int BeebReadMem(int Address);
 void BeebWriteMem(int Address, unsigned char Value);
 #define BEEBWRITEMEM_FAST(Address, Value) if (Address<0x8000) WholeRam[Address]=Value; else BeebWriteMem(Address,Value);
 #define BEEBWRITEMEM_DIRECT(Address, Value) WholeRam[Address]=Value;
-char *BeebMemPtrWithWrap(int a, int n);
-char *BeebMemPtrWithWrapMo7(int a, int n);
+const unsigned char *BeebMemPtrWithWrap(int Address, int Length);
+const unsigned char *BeebMemPtrWithWrapMode7(int Address, int Length);
 void BeebReadRoms(void);
 void BeebMemInit(unsigned char LoadRoms,unsigned char SkipIntegraBConfig);
 

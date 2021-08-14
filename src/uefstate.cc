@@ -159,7 +159,6 @@ UEFStateResult LoadUEFState(const char *StateName) {
             if (Block==0x0466) LoadSWRMMemUEF(UEFState);
 			if (Block==0x0467) LoadViaUEF(UEFState);
 			if (Block==0x0468) LoadVideoUEF(UEFState, Version);
-			if (Block==0x046B) LoadSoundUEF(UEFState);
 			if (Block==0x046D) LoadIntegraBHiddenMemUEF(UEFState);
 			if (Block==0x046E) Load8271UEF(UEFState);
 			if (Block==0x046F) Load1770UEF(UEFState, Version);

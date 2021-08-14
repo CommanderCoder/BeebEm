@@ -77,6 +77,6 @@ extern bool TeletextEnabled;
 void SaveVideoUEF(FILE *SUEF);
 void LoadVideoUEF(FILE *SUEF, const int Version);
 extern char TeletextStyle;
-extern bool THalfMode;
+extern bool TeletextHalfMode;
 
 #endif
