@@ -502,7 +502,7 @@ static int delay = 0;
 
 			if (Cass_Relay == 1 && CSWOpen && TapeClock != OldClock)
 			{
-				int last_state = csw_state;
+				CSWState last_state = csw_state;
 				
 				CSW_BUF = csw_poll(TapeClock);
 				OldClock = TapeClock;
@@ -510,21 +510,21 @@ static int delay = 0;
 				if (last_state != csw_state)
 					TapeControlUpdateCounter(csw_ptr);
 
-				if (csw_state == 0)		// Waiting for tone
+				if (csw_state == CSWState::WaitingForTone)		// Waiting for tone
 				{
 					DCDI=1;
 					TapeAudio.Signal=0;
 				}
 				
 				// New data read in, so do something about it
-				if (csw_state == 1)		// In tone
+				if (csw_state == CSWState::Tone)		// In tone
 				{
 					DCDI=1;
 					TapeAudio.Signal=2;
 					TapeAudio.BytePos=11;
 				}
 
-				if ( (CSW_BUF >= 0) && (csw_state == 2) )
+                if ( (CSW_BUF >= 0) && (csw_state == CSWState::Data) )
 				{
 					DCDI=0;
 					HandleData(CSW_BUF);
@@ -641,7 +641,7 @@ void RewindTape(void) {
 	TapeTrigger=TotalCycles+TAPECYCLES;
 	TapeControlUpdateCounter(TapeClock);
 
-	csw_state = 0;
+	csw_state = CSWState::WaitingForTone;
 	csw_bit = 0;
 	csw_pulselen = 0;
 	csw_ptr = 0;
