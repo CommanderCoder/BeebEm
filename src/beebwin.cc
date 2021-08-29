@@ -5003,8 +5003,8 @@ OSErr err = noErr;
 
 	if (strstr(path, "ssd")) CreateDiscImage(path, Drive, 1, 80);
 	if (strstr(path, "dsd")) CreateDiscImage(path, Drive, 2, 80);
-	if (strstr(path, "adf")) CreateADFSImage(path, Drive, 80);
-	if (strstr(path, "adl")) CreateADFSImage(path, Drive, 160);
+	if (strstr(path, "adf")) CreateADFSImage(path, 80);
+	if (strstr(path, "adl")) CreateADFSImage(path, 160);
 			
 	LoadDisc(Drive, path);
 	
