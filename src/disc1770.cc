@@ -358,7 +358,7 @@ void Write1770Register(unsigned char Register, unsigned char Value) {
 		else if (ComBits == WD1770_COMMAND_READ_ADDRESS) {
 			FDCommand = 14;
 			Status |= WD1770_STATUS_BUSY;
-			ByteCount = 6;
+			dByteCount = 6;
 			if (!(Status & WD1770_STATUS_MOTOR_ON)) {
 				NextFDCommand = FDCommand;
 				FDCommand = 11; // Spin-Up delay
@@ -1136,163 +1136,177 @@ Disc1770Result Load1770DiscImage(const char *DscFileName, int DscDrive, DiscType
 	return Result;
 }
 
-void WriteFDCControlReg(unsigned char Value) {
-	// This function writes the control register @ &FE24
-	//fprintf(fdclog,"CTRL REG write of %02X\n",Value);
-	
-//	WriteLog("WriteFDCControlReg = %02x\n", Value);
-	
-	ExtControl=Value;
-	if ((ExtControl & 1)==1) { CurrentDisc=Disc0; CurrentDrive=0; CDiscOpen=&Disc0Open; }
-	if ((ExtControl & 2)==2) { CurrentDisc=Disc1; CurrentDrive=1; CDiscOpen=&Disc1Open; }
-	if ((ExtControl & 16)==16 && CurrentHead[CurrentDrive]==0) { 
-		CurrentHead[CurrentDrive]=1; 
-		if (*CDiscOpen) fseek(CurrentDisc,TrkLen[CurrentDrive],SEEK_CUR); 
-		DiscStrt[CurrentDrive]=DefStart[CurrentDrive]; 
-	}
-	if ((ExtControl & 16)!=16 && CurrentHead[CurrentDrive]==1) { 
-		CurrentHead[CurrentDrive]=0; 
- 		if (*CDiscOpen) fseek(CurrentDisc,0-TrkLen[CurrentDrive],SEEK_CUR); 
-		DiscStrt[CurrentDrive]=0; 
-	}
-	SelectedDensity=(Value & 32)>>5; // Density Select - 0 = Double 1 = Single
+// This function writes the control register at &FE24.
 
-//	WriteLog("Selected Density = %d\n", SelectedDensity);
-	
-//	SelectedDensity=1;
+void WriteFDCControlReg(unsigned char Value) {
+	// WriteLog("Disc1770: CTRL REG write of %02X\n", Value);
+
+	ExtControl = Value;
+
+	if (ExtControl & DRIVE_CONTROL_SELECT_DRIVE_0) {
+		CurrentDisc = Disc0;
+		CurrentDrive = 0;
+	}
+
+	if (ExtControl & DRIVE_CONTROL_SELECT_DRIVE_1) {
+		CurrentDisc = Disc1;
+		CurrentDrive = 1;
+	}
+
+	if ((ExtControl & DRIVE_CONTROL_SELECT_SIDE) && CurrentHead[CurrentDrive] == 0) {
+		// Select side 1
+		CurrentHead[CurrentDrive] = 1;
+		if (CurrentDisc != nullptr) {
+			fseek(CurrentDisc, TrkLen[CurrentDrive], SEEK_CUR);
+		}
+		DiscStrt[CurrentDrive] = DefStart[CurrentDrive];
+	}
+
+	if (!(ExtControl & DRIVE_CONTROL_SELECT_SIDE) && CurrentHead[CurrentDrive] == 1) {
+		// Select side 0
+		CurrentHead[CurrentDrive] = 0;
+		if (CurrentDisc != nullptr) {
+			fseek(CurrentDisc, 0 - TrkLen[CurrentDrive], SEEK_CUR);
+		}
+		DiscStrt[CurrentDrive] = 0;
+	}
+
+	// Density Select: 0 = Double, 1 = Single
+	SelectedDensity = (Value & DRIVE_CONTROL_SELECT_DENSITY) != 0;
+	// SelectedDensity = 1;
 }
 
 unsigned char ReadFDCControlReg(void) {
-	return(ExtControl);
+	return ExtControl;
 }
 
-void Reset1770(void) {
-	//fdclog=fopen("/fd.log","wb");
-	CurrentDisc=Disc0;
-	CurrentDrive=0;
-	CurrentHead[0]=CurrentHead[1]=0;
-	DiscStrt[0]=0; 
-	DiscStrt[1]=0; 
-	if (Disc0) fseek(Disc0,0,SEEK_SET);
-	if (Disc1) fseek(Disc1,0,SEEK_SET);
-	SetMotor(0,false);
-	SetMotor(1,false);
-	dStatus=0;
-	ExtControl=1; // Drive 0 selected, single density, side 0
-	MaxSects[0]=(DiscType[0]<2)?9:15;
-	MaxSects[1]=(DiscType[1]<2)?9:15;
-	if (DiscType[0] == 3) MaxSects[0]=4;
-	if (DiscType[1] == 3) MaxSects[1]=4;
-	if (DiscType[0] == 4) MaxSects[0]=8;
-	if (DiscType[1] == 4) MaxSects[1]=8;
-	if (DiscType[0] == 5) MaxSects[0]=17;
-	if (DiscType[1] == 5) MaxSects[1]=17;
+void Reset1770() {
+	CurrentDisc = Disc0;
+	CurrentDrive = 0;
+	CurrentHead[0] = 0;
+	CurrentHead[1] = 0;
+	DiscStrt[0] = 0;
+	DiscStrt[1] = 0;
+	if (Disc0) fseek(Disc0, 0, SEEK_SET);
+	if (Disc1) fseek(Disc1, 0, SEEK_SET);
+	SetMotor(0, false);
+	SetMotor(1, false);
+	Status = 0;
+	ExtControl = DRIVE_CONTROL_SELECT_DRIVE_0; // Drive 0 selected, single density, side 0
+	MaxSects[0] = (DscType[0] == DiscType::SSD || DscType[0] == DiscType::DSD) ? 9 : 15;
+	MaxSects[1] = (DscType[1] == DiscType::SSD || DscType[1] == DiscType::DSD) ? 9 : 15;
+	if (DscType[0] == DiscType::IMG) MaxSects[0] = 4;
+	if (DscType[1] == DiscType::IMG) MaxSects[1] = 4;
+	if (DscType[0] == DiscType::DOS) MaxSects[0] = 8;
+	if (DscType[1] == DiscType::DOS) MaxSects[1] = 8;
 }
 
-void Close1770Disc(char Drive) {
-	if ((Drive==0) && (Disc0Open)) {
+void Close1770Disc(int Drive)
+{
+	if (Drive == 0 && Disc0 != nullptr) {
 		fclose(Disc0);
-		Disc0=NULL;
-		Disc0Open=0;
+		Disc0 = nullptr;
 		DscFileNames[0][0] = 0;
 	}
-	if ((Drive==1) && (Disc1Open)) {
+
+	if (Drive == 1 && Disc1 != nullptr) {
 		fclose(Disc1);
-		Disc1=NULL;
-		Disc1Open=0;
+		Disc1 = nullptr;
 		DscFileNames[1][0] = 0;
 	}
 }
 
-#define BPUT(a) fputc(a,NewImage); CheckSum=(CheckSum+a)&255
+#define BPUT(a) fputc(a, file); CheckSum = (CheckSum + a) & 0xff
 
-void CreateADFSImage(char *ImageName,unsigned char Drive,unsigned char Tracks) {
-	// This function creates a blank ADFS disc image, and then loads it.
-	FILE *NewImage;
-	int CheckSum;
+// This function creates a blank ADFS disc image.
+
+bool CreateADFSImage(const char *FileName, int Tracks) {
 	int ent;
-	int sectors=(Tracks*16);
-	NewImage=fopen(ImageName,"wb");
-	if (NewImage!=NULL) {
+	const int sectors = (Tracks * 16);
+	FILE *file = fopen(FileName, "wb");
+	if (file != nullptr) {
 		// Now write the data - this is complex
 		// Free space map - T0S0 - start sectors
-		CheckSum=0;
+		int CheckSum = 0;
 		BPUT(7); BPUT(0); BPUT(0);
-		for (ent=0;ent<0xf9;ent++) BPUT(0);
-		BPUT(sectors & 255); BPUT((sectors>>8)&255); BPUT(0); // Total sectors
-		BPUT(CheckSum&255); // Checksum Byte
-		CheckSum=0;
+		for (ent = 0; ent < 0xf9; ent++) BPUT(0);
+		BPUT(sectors & 0xff); BPUT((sectors >> 8) & 0xff); BPUT(0); // Total sectors
+		BPUT(CheckSum & 0xff); // Checksum Byte
+		CheckSum = 0;
 		// Free space map - T0S1 - lengths
-		BPUT((sectors-7)&255); BPUT(((sectors-7)>>8)&255); BPUT(0); // Length of first free space
-		for (ent=0;ent<0xfb;ent++) BPUT(0);
+		BPUT((sectors - 7) & 0xff); BPUT(((sectors - 7) >> 8) & 0xff); BPUT(0); // Length of first free space
+		for (ent = 0; ent < 0xfb; ent++) BPUT(0);
 		BPUT(3); BPUT(CheckSum);
 		// Root Catalogue - T0S2-T0S7
 		BPUT(1);
 		BPUT('H'); BPUT('u'); BPUT('g'); BPUT('o'); // Hugo
-		for (ent=0; ent<47; ent++) {
-			int bcount;
+		for (ent = 0; ent < 47; ent++) {
 			// 47 catalogue entries
-			for (bcount=5; bcount<0x1e; bcount++) BPUT(0);
+			for (int bcount = 5; bcount < 0x1e; bcount++) BPUT(0);
 			BPUT(ent);
 		}
-//		for (ent=0x4cb; ent<0x4fa; ent++) BPUT(0);
 		BPUT(0);
-		BPUT('$');		// Set root directory name
+		BPUT('$'); // Set root directory name
 		BPUT(13);
-		for (ent=0x0; ent<11; ent++) BPUT(0);
-		BPUT('$');		// Set root title name
+		for (ent = 0x0; ent < 11; ent++) BPUT(0);
+		BPUT('$'); // Set root title name
 		BPUT(13);
-		for (ent=0x0; ent<31; ent++) BPUT(0);
+		for (ent = 0x0; ent < 31; ent++) BPUT(0);
 		BPUT(1);
 		BPUT('H'); BPUT('u'); BPUT('g'); BPUT('o'); // Hugo
 		BPUT(0);
-		fclose(NewImage);
-		Load1770DiscImage(ImageName,Drive,2);
+		fclose(file);
+
+		return true;
 	}
+
+	return false;
 }
 
 void Save1770UEF(FILE *SUEF)
 {
+	extern char FDCDLL[256];
 	extern char CDiscName[2][256];
 	char blank[256];
 	memset(blank,0,256);
 
 	fput16(0x046F,SUEF);
 	fput32(857,SUEF);
-	fputc(DiscType[0],SUEF);
-	fputc(DiscType[1],SUEF);
+	fputc(static_cast<int>(DscType[0]), SUEF);
+	fputc(static_cast<int>(DscType[1]), SUEF);
 
-	if (Disc0Open==0) {
+	if (Disc0 != nullptr) {
+		fwrite(CDiscName[0],1,256,SUEF);
+	}
+	else {
 		// No disc in drive 0
 		fwrite(blank,1,256,SUEF);
 	}
-	else {
-		fwrite(CDiscName[0],1,256,SUEF);
+
+	if (Disc1 != nullptr) {
+		fwrite(CDiscName[1],1,256,SUEF);
 	}
-	if (Disc1Open==0) {
+	else {
 		// No disc in drive 1
 		fwrite(blank,1,256,SUEF);
 	}
-	else {
-		fwrite(CDiscName[1],1,256,SUEF);
-	}
 
-	fputc(dStatus,SUEF);
+	fputc(Status,SUEF);
 	fputc(Data,SUEF);
-	fputc(MyTrack,SUEF);
+	fputc(Track,SUEF);
 	fputc(ATrack,SUEF);
 	fputc(Sector,SUEF);
 	fputc(HeadDir,SUEF);
 	fputc(FDCommand,SUEF);
-	fputc(NFDCommand,SUEF);
+	fputc(NextFDCommand,SUEF);
 	fput32(LoadingCycles,SUEF);
 	fput32(SpinDown[0],SUEF);
 	fput32(SpinDown[1],SUEF);
 	fputc(UpdateTrack,SUEF);
 	fputc(MultiSect,SUEF);
-	fputc(CStepRate,SUEF);
-	fputc(ESpinUp,SUEF);
-	fputc(EVerify,SUEF);
+	fputc(StepRate,SUEF);
+	fputc(SpinUp,SUEF);
+	fputc(Verify,SUEF);
 	fputc(LightsOn[0],SUEF);
 	fputc(LightsOn[1],SUEF);
 	fput32(dByteCount,SUEF);
@@ -1319,101 +1333,95 @@ void Save1770UEF(FILE *SUEF)
 	fputc(DiskDensity[1],SUEF);
 	fputc(SelectedDensity,SUEF);
 	fputc(RotSect,SUEF);
+	fwrite(FDCDLL,1,256,SUEF);
 }
 
 void Load1770UEF(FILE *SUEF, int Version)
 {
 	extern bool DiscLoaded[2];
 	char FileName[256];
-	int Loaded=0;
-	int LoadFailed=0;
+	bool Loaded = false;
+	bool LoadFailed = false;
 
 	// Close current images, don't want them corrupted if
 	// saved state was in middle of writing to disc.
 	Close1770Disc(0);
 	Close1770Disc(1);
-	DiscLoaded[0]=FALSE;
-	DiscLoaded[1]=FALSE;
+	DiscLoaded[0] = false;
+	DiscLoaded[1] = false;
 
-	DiscType[0]=fgetc(SUEF);
-	DiscType[1]=fgetc(SUEF);
+	DscType[0] = static_cast<DiscType>(fgetc(SUEF));
+	DscType[1] = static_cast<DiscType>(fgetc(SUEF));
 
 	fread(FileName,1,256,SUEF);
 	if (FileName[0]) {
 		// Load drive 0
-		Loaded=1;
-		Load1770DiscImage(FileName, 0, DiscType[0]);
-		if (!Disc0Open)
-			LoadFailed=1;
+		Loaded = true;
+		Load1770DiscImage(FileName, 0, DscType[0]);
+		if (Disc0 == nullptr)
+			LoadFailed = true;
 	}
 
 	fread(FileName,1,256,SUEF);
 	if (FileName[0]) {
 		// Load drive 1
-		Loaded=1;
-		Load1770DiscImage(FileName, 1, DiscType[1]);
-		if (!Disc1Open)
-			LoadFailed=1;
+		Loaded = true;
+		Load1770DiscImage(FileName, 1, DscType[1]);
+		if (Disc1 == nullptr)
+			LoadFailed = true;
 	}
 
-	if (Loaded && !LoadFailed)
-	{
-		dStatus=fgetc(SUEF);
-		Data=fgetc(SUEF);
-		MyTrack=fgetc(SUEF);
-		ATrack=fgetc(SUEF);
-		Sector=fgetc(SUEF);
-		HeadDir=fgetc(SUEF);
-		FDCommand=fgetc(SUEF);
-		NFDCommand=fgetc(SUEF);
-		LoadingCycles=fget32(SUEF);
-		SpinDown[0]=fget32(SUEF);
-		SpinDown[1]=fget32(SUEF);
-		UpdateTrack=fgetc(SUEF);
-		MultiSect=fgetc(SUEF);
-		CStepRate=fgetc(SUEF);
-		ESpinUp=fgetc(SUEF);
-		EVerify=fgetc(SUEF);
-		LightsOn[0]=fgetc(SUEF);
-		LightsOn[1]=fgetc(SUEF);
-		dByteCount=fget32(SUEF);
-		DataPos=fget32(SUEF);
-		ExtControl=fgetc(SUEF);
+	if (Loaded && !LoadFailed) {
+		Status = fgetc(SUEF);
+		Data = fgetc(SUEF);
+		Track = fgetc(SUEF);
+		ATrack = fgetc(SUEF);
+		Sector = fgetc(SUEF);
+		HeadDir = fgetc(SUEF);
+		FDCommand = fgetc(SUEF);
+		NextFDCommand = fgetc(SUEF);
+		LoadingCycles = fget32(SUEF);
+		SpinDown[0] = fget32(SUEF);
+		SpinDown[1] = fget32(SUEF);
+		UpdateTrack = fgetc(SUEF);
+		MultiSect = fgetc(SUEF);
+		StepRate = fgetc(SUEF);
+		SpinUp = fgetc(SUEF);
+		Verify = fgetc(SUEF);
+		LightsOn[0] = fgetc(SUEF);
+		LightsOn[1] = fgetc(SUEF);
+		dByteCount = fget32(SUEF);
+		DataPos = fget32(SUEF);
+		ExtControl = fgetc(SUEF);
 		CurrentDrive=fgetc(SUEF);
-		HeadPos[0]=fget32(SUEF);
-		HeadPos[1]=fget32(SUEF);
-		CurrentHead[0]=fgetc(SUEF);
+		HeadPos[0] = fget32(SUEF);
+		HeadPos[1] = fget32(SUEF);
+		CurrentHead[0] = fgetc(SUEF);
 		CurrentHead[1]=fgetc(SUEF);
-		DiscStep[0]=fget32(SUEF);
-		DiscStep[1]=fget32(SUEF);
-		DiscStrt[0]=fget32(SUEF);
-		DiscStrt[1]=fget32(SUEF);
-		MaxSects[0]=fgetc(SUEF);
-		MaxSects[1]=fgetc(SUEF);
-		DefStart[0]=fget32(SUEF);
-		DefStart[1]=fget32(SUEF);
-		TrkLen[0]=fget32(SUEF);
-		TrkLen[1]=fget32(SUEF);
-		DWriteable[0]=fgetc(SUEF);
-		DWriteable[1]=fgetc(SUEF);
-		DiskDensity[0]=fgetc(SUEF);
+		DiscStep[0] = fget32(SUEF);
+		DiscStep[1] = fget32(SUEF);
+		DiscStrt[0] = fget32(SUEF);
+		DiscStrt[1] = fget32(SUEF);
+		MaxSects[0] = fgetc(SUEF);
+		MaxSects[1] = fgetc(SUEF);
+		DefStart[0] = fget32(SUEF);
+		DefStart[1] = fget32(SUEF);
+		TrkLen[0] = fget32(SUEF);
+		TrkLen[1] = fget32(SUEF);
+		DWriteable[0] = fgetc(SUEF);
+		DWriteable[1] = fgetc(SUEF);
+		DiskDensity[0] = fgetc(SUEF);
 		if (Version <= 9)
 			DiskDensity[1]=DiskDensity[0];
 		else
 			DiskDensity[1]=fgetc(SUEF);
 		SelectedDensity=fgetc(SUEF);
 		RotSect=fgetc(SUEF);
-
-		if (CurrentDrive==1)
-			CDiscOpen=&Disc1Open;
-		else
-			CDiscOpen=&Disc0Open;
 	}
 }
 
-/*--------------------------------------------------------------------------*/
-void Get1770DiscInfo(int DscDrive, int *Type, char *pFileName)
+void Get1770DiscInfo(int DscDrive, DiscType *Type, char *pFileName)
 {
-	*Type = DiscType[DscDrive];
+	*Type = DscType[DscDrive];
 	strcpy(pFileName, DscFileNames[DscDrive]);
 }
