@@ -41,7 +41,6 @@ unsigned char Read1770Register(unsigned char Register);
 void Write1770Register(unsigned char Register, unsigned char Value);
 Disc1770Result Load1770DiscImage(const char *DscFileName, int DscDrive, DiscType Type);
 void WriteFDCControlReg(unsigned char Value);
-void Load1770DiscImage(char *DscFileName,int DscDrive,unsigned char DscType);
 unsigned char ReadFDCControlReg(void);
 void Reset1770(void);
 void Poll1770(int NCycles);

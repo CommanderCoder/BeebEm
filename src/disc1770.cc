@@ -1265,7 +1265,6 @@ bool CreateADFSImage(const char *FileName, int Tracks) {
 
 void Save1770UEF(FILE *SUEF)
 {
-	extern char FDCDLL[256];
 	extern char CDiscName[2][256];
 	char blank[256];
 	memset(blank,0,256);
@@ -1333,7 +1332,6 @@ void Save1770UEF(FILE *SUEF)
 	fputc(DiskDensity[1],SUEF);
 	fputc(SelectedDensity,SUEF);
 	fputc(RotSect,SUEF);
-	fwrite(FDCDLL,1,256,SUEF);
 }
 
 void Load1770UEF(FILE *SUEF, int Version)

@@ -61,6 +61,8 @@
 #include "Arm.h"
 #include "Printing.h"
 #include "discedit.h"
+#include "disctype.h"
+#include "disc1770.h"
 
 // #include "keytable_2"
 
@@ -6045,7 +6047,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     char path[256];
     bool success = true;
     int drive;
-    int type;
+    DiscType type;
     char szDiscFile[MAX_PATH];
     int heads;
     int side;
@@ -6072,9 +6074,9 @@ void BeebWin::ImportDiscFiles(int menuId)
     {
         // 1770 controller
         Get1770DiscInfo(drive, &type, szDiscFile);
-        if (type == 0)
+        if (type == DiscType::SSD)
             heads = 1;
-        else if (type == 1)
+        else if (type == DiscType::DSD)
             heads = 2;
         else
         {
