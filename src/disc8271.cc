@@ -1336,7 +1336,7 @@ void FreeDiscImage(int DriveNum) {
       
 /*--------------------------------------------------------------------------*/
 
-void LoadSimpleDiscImage( char *FileName, int DriveNum, int HeadNum, int Tracks) {
+void LoadSimpleDiscImage(const char *FileName, int DriveNum, int HeadNum, int Tracks) {
   FILE *infile=fopen(FileName,"rb");
   if (!infile) {
 #ifdef WIN32
