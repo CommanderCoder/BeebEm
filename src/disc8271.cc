@@ -465,31 +465,34 @@ static void Do128ByteSR_ReadDataCommand(void) {
 
 /*--------------------------------------------------------------------------*/
 static void DoVarLength_ReadDataCommand(void) {
-  int Drive=-1;
-
   DoSelects();
   DoLoadHead();
 
-  if (!CheckReady()) {
-    DoErr(0x10); /* Drive not ready */
-    return;
-  };
+  const int Drive = GetSelectedDrive();
 
-  if (Selects[0]) Drive=0;
-  if (Selects[1]) Drive=1;
+  if (Drive < 0) {
+    DoErr(RESULT_REG_DRIVE_NOT_READY);
+    return;
+  }
+
+  // Reset shift state if it was set by Run Disc 
+  // if (mainWin->m_ShiftBooted) {
+  //    mainWin->m_ShiftBooted = false;
+  //    BeebKeyUp(0, 0);
+  // }
 
   Internal_CurrentTrack[Drive]=Params[0];
   CommandStatus.CurrentTrackPtr=GetTrackPtr(Params[0]);
   if (CommandStatus.CurrentTrackPtr==NULL) {
-    DoErr(0x10);
+    DoErr(RESULT_REG_DRIVE_NOT_READY);
     return;
-  };
+  }
 
-  CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,Params[1],0);
+  CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,Params[1], false);
   if (CommandStatus.CurrentSectorPtr==NULL) {
-    DoErr(0x1e); /* Sector not found */
+    DoErr(RESULT_REG_DRIVE_NOT_PRESENT);
     return;
-  };
+  }
 
   CommandStatus.TrackAddr=Params[0];
   CommandStatus.CurrentSector=Params[1];
@@ -498,125 +501,121 @@ static void DoVarLength_ReadDataCommand(void) {
 
   if (ValidateSector(CommandStatus.CurrentSectorPtr,CommandStatus.TrackAddr,CommandStatus.SectorLength)) {
     CommandStatus.ByteWithinSector=0;
-    SetMotor(Drive,true);
     SetTrigger(TIMEBETWEENBYTES,Disc8271Trigger);
-    StatusReg=0x80; /* Command busy */
+    StatusReg = STATUS_REG_COMMAND_BUSY;
     UPDATENMISTATUS;
-    CommandStatus.ByteWithinSector=0;
   } else {
-    DoErr(0x1e); /* Sector not found */
-  };
-};
+    DoErr(RESULT_REG_DRIVE_NOT_PRESENT);
+  }
+}
 
 /*--------------------------------------------------------------------------*/
 static void ReadInterrupt(void) {
-  int LastByte=0;
+  bool LastByte = false;
 
   if (CommandStatus.SectorsToGo<0) {
-    StatusReg=0x18; /* Result and interrupt */
-    if (Selects[0])
-      SetMotor(0,false);
-    if (Selects[1])
-      SetMotor(1,false);
+    StatusReg = STATUS_REG_RESULT_FULL | STATUS_REG_INTERRUPT_REQUEST;
     UPDATENMISTATUS;
     return;
-  };
+  }
 
   DataReg=CommandStatus.CurrentSectorPtr->Data[CommandStatus.ByteWithinSector++];
-  /*cerr << "ReadInterrupt called - DataReg=0x" << hex << int(DataReg) << dec << "ByteWithinSector=" << CommandStatus.ByteWithinSector << "\n"; */
 
-  /* DumpAfterEach=1; */
+#if ENABLE_LOG
+WriteLog("ReadInterrupt called - DataReg=0x%02X ByteWithinSector=%d\n", DataReg, CommandStatus.ByteWithinSector);
+#endif
+
   ResultReg=0;
   if (CommandStatus.ByteWithinSector>=CommandStatus.SectorLength) {
     CommandStatus.ByteWithinSector=0;
     /* I don't know if this can cause the thing to step - I presume not for the moment */
     if (--CommandStatus.SectorsToGo) {
       CommandStatus.CurrentSector++;
-      if (CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,CommandStatus.CurrentSector,0),
-          CommandStatus.CurrentSectorPtr==NULL) {
-        DoErr(0x1e); /* Sector not found */
+      CommandStatus.CurrentSectorPtr = GetSectorPtr(CommandStatus.CurrentTrackPtr,
+                                                        CommandStatus.CurrentSector,
+                                                        false);
+      if (CommandStatus.CurrentSectorPtr == NULL) {
+        DoErr(RESULT_REG_DRIVE_NOT_PRESENT); // Sector not found
         return;
-      }/* else cerr << "all ptr for sector " << CommandStatus.CurrentSector << "\n"*/;
+      }
     } else {
       /* Last sector done */
-      StatusReg=0x9c;
+      StatusReg = STATUS_REG_COMMAND_BUSY |
+                  STATUS_REG_RESULT_FULL |
+                  STATUS_REG_INTERRUPT_REQUEST |
+                  STATUS_REG_NON_DMA_MODE;
       UPDATENMISTATUS;
-      LastByte=1;
+      LastByte = true;
       CommandStatus.SectorsToGo=-1; /* To let us bail out */
       SetTrigger(TIMEBETWEENBYTES,Disc8271Trigger); /* To pick up result */
-    };
-  };
+    }
+  }
   
   if (!LastByte) {
-    StatusReg=0x8c; /* Command busy, */
+    StatusReg = STATUS_REG_COMMAND_BUSY |
+                STATUS_REG_INTERRUPT_REQUEST |
+                STATUS_REG_NON_DMA_MODE;
     UPDATENMISTATUS;
     SetTrigger(TIMEBETWEENBYTES,Disc8271Trigger);
-  };
-}; /* ReadInterrupt */
+  }
+}
 
 /*--------------------------------------------------------------------------*/
 static void Do128ByteSR_ReadDataAndDeldCommand(void) {
   DoSelects();
   NotImp("Do128ByteSR_ReadDataAndDeldCommand");
-};
+}
+
 /*--------------------------------------------------------------------------*/
 static void DoVarLength_ReadDataAndDeldCommand(void) {
   /* Use normal read command for now - deleted data not supported */
   DoVarLength_ReadDataCommand();
-};
+}
+
 /*--------------------------------------------------------------------------*/
 static void DoReadIDCommand(void) {
-  int Drive=-1;
-
   DoSelects();
   DoLoadHead();
 
-  if (!CheckReady()) {
-    DoErr(0x10); /* Drive not ready */
-    return;
-  };
+    const int Drive = GetSelectedDrive();
 
-  if (Selects[0]) Drive=0;
-  if (Selects[1]) Drive=1;
+  if (Drive < 0) {
+    DoErr(RESULT_REG_DRIVE_NOT_READY);
+    return;
+  }
 
   Internal_CurrentTrack[Drive]=Params[0];
   CommandStatus.CurrentTrackPtr=GetTrackPtr(Params[0]);
   if (CommandStatus.CurrentTrackPtr==NULL) {
-    DoErr(0x10);
+    DoErr(RESULT_REG_DRIVE_NOT_READY);
     return;
-  };
+  }
 
-  CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,0,0);
+  CommandStatus.CurrentSectorPtr = GetSectorPtr(CommandStatus.CurrentTrackPtr, 0, false);
   if (CommandStatus.CurrentSectorPtr==NULL) {
-    DoErr(0x1e); /* Sector not found */
+    DoErr(RESULT_REG_DRIVE_NOT_PRESENT); // Sector not found
     return;
-  };
+  }
 
   CommandStatus.TrackAddr=Params[0];
   CommandStatus.CurrentSector=0;
   CommandStatus.SectorsToGo=Params[2];
 
   CommandStatus.ByteWithinSector=0;
-  SetMotor(Drive,true);
   SetTrigger(TIMEBETWEENBYTES,Disc8271Trigger);
-  StatusReg=0x80; /* Command busy */
+  StatusReg = STATUS_REG_COMMAND_BUSY;
   UPDATENMISTATUS;
-  CommandStatus.ByteWithinSector=0;
-};
+}
 
 /*--------------------------------------------------------------------------*/
 static void ReadIDInterrupt(void) {
-  int LastByte=0;
+  bool LastByte = false;
 
   if (CommandStatus.SectorsToGo<0) {
-    StatusReg=0x18; /* Result and interrupt */
+    StatusReg = STATUS_REG_RESULT_FULL | STATUS_REG_INTERRUPT_REQUEST;
     UPDATENMISTATUS;
-	if (Selects[0])
-      SetMotor(0,false);
-	if (Selects[1])
-      SetMotor(1,false);
     return;
-  };
+  }
 
   if (CommandStatus.ByteWithinSector==0)
     DataReg=CommandStatus.CurrentSectorPtr->IDField.CylinderNum;
@@ -634,76 +633,76 @@ static void ReadIDInterrupt(void) {
     CommandStatus.ByteWithinSector=0;
     if (--CommandStatus.SectorsToGo) {
       CommandStatus.CurrentSector++;
-      CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,
-                                                      CommandStatus.CurrentSector,0);
+      CommandStatus.CurrentSectorPtr = GetSectorPtr(CommandStatus.CurrentTrackPtr,
+                                                      CommandStatus.CurrentSector,
+                                                      false);
       if (CommandStatus.CurrentSectorPtr==NULL) {
-        DoErr(0x1e); /* Sector not found */
+        DoErr(RESULT_REG_DRIVE_NOT_PRESENT); // Sector not found
         return;
       }
     } else {
       /* Last sector done */
-      StatusReg=0x9c;
+      StatusReg = STATUS_REG_COMMAND_BUSY |
+                  STATUS_REG_INTERRUPT_REQUEST |
+                  STATUS_REG_NON_DMA_MODE;
       UPDATENMISTATUS;
-      LastByte=1;
+      LastByte = true;
       CommandStatus.SectorsToGo=-1; /* To let us bail out */
       SetTrigger(TIMEBETWEENBYTES,Disc8271Trigger); /* To pick up result */
-    };
-  };
+    }
+  }
   
   if (!LastByte) {
-    StatusReg=0x8c; /* Command busy, */
+    StatusReg = STATUS_REG_COMMAND_BUSY |
+                STATUS_REG_INTERRUPT_REQUEST |
+                STATUS_REG_NON_DMA_MODE;
     UPDATENMISTATUS;
     SetTrigger(TIMEBETWEENBYTES,Disc8271Trigger);
-  };
-}; /* ReadIDInterrupt */
+  }
+}
 
 /*--------------------------------------------------------------------------*/
 static void Do128ByteSR_VerifyDataAndDeldCommand(void) {
   DoSelects();
   NotImp("Do128ByteSR_VerifyDataAndDeldCommand");
-};
+}
+
 /*--------------------------------------------------------------------------*/
 static void DoVarLength_VerifyDataAndDeldCommand(void) {
-  int Drive=-1;
-
   DoSelects();
 
-  if (!CheckReady()) {
-    DoErr(0x10); /* Drive not ready */
-    return;
-  };
+  const int Drive = GetSelectedDrive();
 
-  if (Selects[0]) Drive=0;
-  if (Selects[1]) Drive=1;
+  if (Drive < 0) {
+    DoErr(RESULT_REG_DRIVE_NOT_READY);
+    return;
+  }
 
   Internal_CurrentTrack[Drive]=Params[0];
   CommandStatus.CurrentTrackPtr=GetTrackPtr(Params[0]);
   if (CommandStatus.CurrentTrackPtr==NULL) {
-    DoErr(0x10);
+    DoErr(RESULT_REG_DRIVE_NOT_READY);
     return;
   };
 
   CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,Params[1],0);
   if (CommandStatus.CurrentSectorPtr==NULL) {
-    DoErr(0x1e); /* Sector not found */
+    DoErr(RESULT_REG_DRIVE_NOT_PRESENT); // Sector not found
     return;
-  };
+  }
 
-  StatusReg=0x80; /* Command busy */
+  StatusReg = STATUS_REG_COMMAND_BUSY;
   UPDATENMISTATUS;
-  SetMotor(Drive,true);
   SetTrigger(100,Disc8271Trigger); /* A short delay to causing an interrupt */
-};
+}
+
 /*--------------------------------------------------------------------------*/
 static void VerifyInterrupt(void) {
-  StatusReg=0x18; /* Result with interrupt */
+  StatusReg = STATUS_REG_RESULT_FULL | STATUS_REG_INTERRUPT_REQUEST; /* Result with interrupt */
   UPDATENMISTATUS;
-  if (Selects[0])
-    SetMotor(0,false);
-  if (Selects[1])
-    SetMotor(1,false);
-  ResultReg=0; /* All OK */
-};
+  ResultReg = RESULT_REG_SUCCESS; // All OK
+}
+
 /*--------------------------------------------------------------------------*/
 static void DoFormatCommand(void) {
   int Drive=-1;
