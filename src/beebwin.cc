@@ -131,7 +131,7 @@ bool m_PageFlipping=0;
 
 bool DiscLoaded[2]={false,false}; // Set to TRUE when a disc image has been loaded.
 char CDiscName[2][256]; // Filename of disc current in drive 0 and 1;
-char CDiscType[2]; // Current disc types
+DiscType CDiscType[2]; // Current disc types
 
 static const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
 
@@ -436,7 +436,7 @@ bool bit = false;
 				arm = new CArm;
 				Enable_Arm = 1;
 			}
-			Disc8271_reset();
+			Disc8271Reset();
 			Reset1770();
 			if (EconetEnabled) EconetReset();
             if (SCSIDriveEnabled) SCSIReset();
@@ -2052,7 +2052,7 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	SysVIAReset();
 	UserVIAReset();
 	VideoInit();
-	Disc8271_reset();
+	Disc8271Reset();
 	if (EconetEnabled) EconetReset();
 	Reset1770();
 	AtoDInit();
@@ -2068,10 +2068,10 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	if (MachineType==3) InvertTR00=false;
 	if ((MachineType!=3) && (NativeFDC)) {
 		// 8271 disc
-		if ((DiscLoaded[0]) && (CDiscType[0]==0)) LoadSimpleDiscImage(CDiscName[0],0,0,80);
-		if ((DiscLoaded[0]) && (CDiscType[0]==1)) LoadSimpleDSDiscImage(CDiscName[0],0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==0)) LoadSimpleDiscImage(CDiscName[1],1,0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==1)) LoadSimpleDSDiscImage(CDiscName[1],1,80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[0],0,0,80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[0],0,80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[1],1,0,80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[1],1,80);
 	}
 	if (((MachineType!=3) && (!NativeFDC)) || (MachineType==3)) {
 		// 1770 Disc
@@ -2082,7 +2082,7 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	InitMenu();
 }
 
-void BeebWin::SetImageName(char *DiscName,char Drive,char DType) {
+void BeebWin::SetImageName(const char *DiscName,int Drive,DiscType DType) {
 MenuRef			menu = nil;
 MenuItemIndex	j;
 OSStatus		err;
@@ -2133,7 +2133,7 @@ char			Title[100];
 	Close1770Disc(Drive);
 	
 	strcpy(CDiscName[Drive], "");
-	CDiscType[Drive] = 0;
+	CDiscType[Drive] = DiscType::SSD;
 	DiscLoaded[Drive] = FALSE;
 
 	sprintf(Title, "Eject Disc %d", Drive);

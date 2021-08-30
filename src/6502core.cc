@@ -3026,7 +3026,7 @@ void PollHardware(unsigned int nCycles)
 		AtoD_poll(nCycles);
 		Serial_Poll();
 	}
-	Disc8271_poll(nCycles);
+	Disc8271Poll();
 	Sound_Trigger(nCycles);
 	if (DisplayCycles>0) DisplayCycles-=nCycles; // Countdown time till end of display of info.
 	if ((MachineType==3) || (!NativeFDC)) Poll1770(nCycles); // Do 1770 Background stuff

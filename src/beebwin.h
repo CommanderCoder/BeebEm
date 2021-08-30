@@ -31,6 +31,7 @@
 
 #include "port.h"
 #include "video.h"
+#include "disctype.h"
 
 typedef union {
 	unsigned char data[8];
@@ -114,7 +115,7 @@ public:
 	void UpdateModelType();
 	void SetSoundMenu(void);
 	void SetPBuff(void);
-	void SetImageName(char *DiscName,char Drive,char DType);
+	void SetImageName(const char *DiscName,int Drive,DiscType DType);
 	void SetTapeSpeedMenu(void);
 	void SetDiscWriteProtects(void);
 	void SetRomMenu(void);				// LRW  Added for individual ROM/Ram

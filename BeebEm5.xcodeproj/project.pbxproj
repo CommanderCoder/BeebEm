@@ -81,6 +81,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8B268E3926DD09DE006CD26F /* disctype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = disctype.h; path = src/disctype.h; sourceTree = "<group>"; };
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 		DC10ACE22567BA1300DA8E32 /* create_dmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_dmg.sh; sourceTree = "<group>"; };
 		DC59F1A224BE01D000687D2A /* beebem5-distribution */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "beebem5-distribution"; sourceTree = "<group>"; };
@@ -408,6 +409,7 @@
 				DCD4ADFA24A4D56E0000C40A /* disc1770.h */,
 				DCD4ADF724A4D56E0000C40A /* disc8271.h */,
 				DCD4ADF224A4D56E0000C40A /* discedit.h */,
+				8B268E3926DD09DE006CD26F /* disctype.h */,
 				DCD4ADE824A4D56E0000C40A /* ea.h */,
 				DCD4ADEE24A4D56E0000C40A /* econet.h */,
 				DCD4ADF924A4D56E0000C40A /* GetFile.h */,
