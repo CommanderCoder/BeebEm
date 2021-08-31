@@ -2068,10 +2068,10 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	if (MachineType==3) InvertTR00=false;
 	if ((MachineType!=3) && (NativeFDC)) {
 		// 8271 disc
-		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[0],0,0,80);
-		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[0],0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[1],1,0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[1],1,80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[0], 0 ,0, 80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[0], (int)0, (int)80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[1], 1, 0, 80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[1], (int)1, (int)80);
 	}
 	if (((MachineType!=3) && (!NativeFDC)) || (MachineType==3)) {
 		// 1770 Disc
@@ -3067,14 +3067,14 @@ bool wdd = false;
 			if (NativeFDC)
 				LoadSimpleDSDiscImage(path, drive, 80);
 			else
-				Load1770DiscImage(path, drive, 1);		// 1 = dsd
+				Load1770DiscImage(path, drive, DiscType::DSD);		// 1 = dsd
 		}
 		if (ssd || img)
 		{
 			if (NativeFDC)
 				LoadSimpleDiscImage(path,drive, 0, 80);
 			else
-				Load1770DiscImage(path, drive, 0);		// 0 = ssd
+				Load1770DiscImage(path, drive, DiscType::SSD);		// 0 = ssd
 		}
 		if (adfs)
 		{
@@ -3083,7 +3083,7 @@ bool wdd = false;
 				fprintf(stderr, "The native 8271 FDC cannot read ADFS discs\n");
 			}
 			else
-				Load1770DiscImage(path, drive, 2);					// 2 = adfs
+				Load1770DiscImage(path, drive, DiscType::ADFS);					// 2 = adfs
 		}
 		if (wdd)
 		{
@@ -3092,24 +3092,24 @@ bool wdd = false;
 				fprintf(stderr, "The native 8271 FDC cannot read Watford Double Density discs\n");
 			}
 			else
-				Load1770DiscImage(path, drive, 5);					// 5 = watford double density
+				Load1770DiscImage(path, drive, DiscType::DSD);					// 5 = watford double density
 		}
 	}
 			
 	if (MachineType == 3)
 	{
 		if (dsd)
-			Load1770DiscImage(path, drive, 1);						// 1 = dsd
+			Load1770DiscImage(path, drive, DiscType::DSD);						// 1 = dsd
 		if (ssd)
-			Load1770DiscImage(path, drive, 0);						// 0 = ssd
+			Load1770DiscImage(path, drive, DiscType::SSD);						// 0 = ssd
 		if (adfs)
-			Load1770DiscImage(path, drive, 2);						// ADFS
+			Load1770DiscImage(path, drive, DiscType::ADFS);						// ADFS
 		if (img)
-			Load1770DiscImage(path, drive, 3);						// 800K DOS PLUS
+			Load1770DiscImage(path, drive, DiscType::DOS);						// 800K DOS PLUS
 		if (dos)
-			Load1770DiscImage(path, drive, 4);						// 720K DOS PLUS
+			Load1770DiscImage(path, drive, DiscType::DOS);						// 720K DOS PLUS
 		if (wdd)
-			Load1770DiscImage(path, drive, 5);						// 720K WATFORD DOUBLE DENSITY
+			Load1770DiscImage(path, drive, DiscType::DSD);						// 720K WATFORD DOUBLE DENSITY
 	}
 						
 	if (m_WriteProtectOnLoad != m_WriteProtectDisc[drive])
@@ -4990,7 +4990,7 @@ OSStatus err = noErr;
 void BeebWin::NewDiscImage(int Drive)
 
 {
-char path[256];  
+char *path;
 OSErr err = noErr;
 
 	*path = 0;
@@ -6185,8 +6185,8 @@ void BeebWin::ImportDiscFiles(int menuId)
         // 1770 controller
         Close1770Disc(drive);
         if (heads == 2)
-            Load1770DiscImage(szDiscFile, drive, 1);
+            Load1770DiscImage(szDiscFile, drive, DiscType::DSD);
         else
-            Load1770DiscImage(szDiscFile, drive, 0);
+            Load1770DiscImage(szDiscFile, drive, DiscType::SSD);
     }
 }

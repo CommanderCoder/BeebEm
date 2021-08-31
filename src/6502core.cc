@@ -2934,7 +2934,7 @@ void Exec6502Instruction(void) {
 		(CurrentInstruction==0x30) ||
 		(CurrentInstruction==0x50) ||
 		(CurrentInstruction==0x70) ||
-		(CurrentInstruction==0x80)  && MachineType == 3 ||
+		((CurrentInstruction==0x80)  && MachineType == 3) ||
 		(CurrentInstruction==0x90) ||
 		(CurrentInstruction==0xb0) ||
 		(CurrentInstruction==0xd0) ||
