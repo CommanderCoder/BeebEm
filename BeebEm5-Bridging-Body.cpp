@@ -41,16 +41,21 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
 {
      static int ctrl = 0x0000;
      int LastShift, LastCtrl, LastCaps, LastCmd;
-     int NewShift, NewCtrl, NewCaps;
-     static int NewCmd = 0;
+     int NewShift, NewCtrl=0, NewCaps;
+//     static int NewCmd = 0; //remember CMD pressed
+     
     
     switch (eventkind)
     {
         case kEventRawKeyDown:
 
-
-        //      fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
-                if ( (NewCmd) && (keycode == 6) )
+// ALL THESE HANDLE BY 'beeb_HandleCommand' since CMD-C and CMD-V are set to 'copy' and 'past'
+// Full screen is on CMD-CTRL-F
+// CMD-CTRL-S on PRINTSCREEN - 'swtd'
+// CMD-T is CMD-CTRL-T on TRACE
+#if 0 //ACH
+//              fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+                if ( (NewCmd) && (keycode == 6) ) // 6 = Z key
                 {
                     fprintf(stderr, "cmd-Z pressed, NewCmd = %d\n", NewCmd);
                     if (mainWin->m_isFullScreen)
@@ -60,32 +65,36 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
                         mainWin->m_isFullScreen = 0;
                         mainWin->SetMenuCommandIDCheck('vfsc', false);
                     }
-                } else if ( (NewCmd) && (NewCtrl) && (keycode == 1) )
+                } else if ( (NewCmd) && (NewCtrl) && (keycode == 1) ) // 1 = S key
                 {
                     fprintf(stderr, "ctrl-cmd-S pressed, NewCmd = %d\n", NewCmd);
 //                    mainWin->m_PrintScreen = true;
-                } else if ( (NewCmd) && (keycode == 8) )
+                } else if ( (NewCmd) && (keycode == 8) ) // 8 = C key
                 {
                     fprintf(stderr, "cmd-C pressed, NewCmd = %d\n", NewCmd);
 //                    mainWin->doCopy();
-                } else if ( (NewCmd) && (keycode == 9) )
+                } else if ( (NewCmd) && (keycode == 9) ) // 9 = V key
                 {
                     fprintf(stderr, "cmd-V pressed, NewCmd = %d\n", NewCmd);
 //                    mainWin->doPaste();
-                } else if ( (NewCmd) && (keycode == 17) )
+                } else if ( (NewCmd) && (keycode == 17) ) // 17 = T key
                 {
+                    // CMD-T
+                    fprintf(stderr, "cmd-T pressed, NewCmd = %d\n", NewCmd);
                     trace_186 = 1 - trace_186;
                 }
               else
+#endif
                 {
                     mainWin->KeyDown(keycode);
                 }
             break;
           case kEventRawKeyUp:
-    //        fprintf(stderr, "Key released: code = %d, '%c'\n", keycode, charCode);
+//            fprintf(stderr, "Key released: code = %d, '%c'\n", keycode, charCode);
             mainWin->KeyUp(keycode);
             break;
           case kEventRawKeyModifiersChanged:
+//            fprintf(stderr, "Key Modifier: code = %d, '%c'\n", keycode, charCode);
 
             /* Cocoa Event Handling used to be:
              cmd 0x0000
@@ -116,21 +125,22 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
             
                 LastShift = ctrl & 0x20006; // capture left and right shift
                 LastCtrl = ctrl & 0x40001; // capture left
-                LastCaps = ctrl & 0x80020; // capture left
-                LastCmd = ctrl & 0x100018; // capture left and right CMD
+                LastCaps = ctrl & 0x80020; // capture left ALT/Option
+//                LastCmd = ctrl & 0x100018; // capture left and right CMD
 
                 NewShift = keycode & 0x20006; // capture left and right shift
                 NewCtrl = keycode & 0x40001; // capture left
-                NewCaps = keycode & 0x80020; // capture left
-                NewCmd = keycode &  0x100018; // capture left and right CMD
+                NewCaps = keycode & 0x80020; // capture left ALT/Option
+//                NewCmd = keycode &  0x100018; // capture left and right CMD
 
             
 //                fprintf(stderr, "Key modifier : code = %016x\n", keycode);
                 
-                if (LastShift != NewShift) if (LastShift) mainWin->KeyUp(200); else mainWin->KeyDown(200);
-                if (LastCtrl  != NewCtrl)  if (LastCtrl)  mainWin->KeyUp(201); else mainWin->KeyDown(201);
-                if (LastCaps  != NewCaps)  if (LastCaps)  mainWin->KeyUp(202); else mainWin->KeyDown(202);
-                ctrl = keycode;
+            if (LastShift != NewShift) {if (LastShift) mainWin->KeyUp(200); else mainWin->KeyDown(200);}
+            if (LastCtrl  != NewCtrl)  {if (LastCtrl)  mainWin->KeyUp(201); else mainWin->KeyDown(201);}
+            if (LastCaps  != NewCaps)  {if (LastCaps)  mainWin->KeyUp(202); else mainWin->KeyDown(202);}
+            
+            ctrl = keycode;
             break;
     }
 }
@@ -189,7 +199,7 @@ extern "C" void beeb_video(int height, int width, struct CColour buffer[])
 
 extern "C" int beeb_main(int argc,char *argv[])
 {
-void *token;
+//void *token;
 int i;
 
     // NEED TO TURN OFF SANDBOXING IN ENTITLEMENTS FILE TO GET LOCAL FOLDERS TO WORK
@@ -342,7 +352,7 @@ char temp[256];
 
 extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
 {
-    char* propertyCHR = (char*)&property;
+//    char* propertyCHR = (char*)&property;
 
 //    printf("%c%c%c%c data %ld", propertyCHR[3], propertyCHR[2], propertyCHR[1], propertyCHR[0], itemID);
     

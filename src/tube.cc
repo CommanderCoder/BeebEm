@@ -307,7 +307,7 @@ void WriteTorchTubeFromHostSide(unsigned char IOAddr,unsigned char IOData)
 
 unsigned char ReadTorchTubeFromParasiteSide(unsigned char IOAddr) 
 {
-	unsigned char TmpData;
+	unsigned char TmpData=0;
 
 	switch (IOAddr) {
 	case 0:
@@ -356,7 +356,7 @@ void WriteTorchTubeFromParasiteSide(unsigned char IOAddr,unsigned char IOData)
 // Tube memory/io handling functions
 
 unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
-	unsigned char TmpData,TmpCntr;
+	unsigned char TmpData=0,TmpCntr;
 
 	if (! (EnableTube || Tube186Enabled || AcornZ80 || ArmTube) ) 
 		return(MachineType==3 ? 0xff : 0xfe); // return ff for master else return fe
@@ -494,7 +494,7 @@ void WriteTubeFromHostSide(unsigned char IOAddr,unsigned char IOData) {
 }
 
 unsigned char ReadTubeFromParasiteSide(unsigned char IOAddr) {
-	unsigned char TmpData;
+	unsigned char TmpData=0;
 
 	if (TorchTube) 
 		return ReadTorchTubeFromHostSide(IOAddr);

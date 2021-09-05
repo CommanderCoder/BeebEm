@@ -616,6 +616,7 @@ INLINE static void JSRInstrHandler(int16 address) {
 	  *pcptr=0;
 	  fprintf(osclilog,"%s\n",pcbuf);
   }
+ */
   /*if (ProgramCounter==0xffdd) {
 	  char errstr[250];
 	  sprintf(errstr,"OSFILE called\n");
@@ -1416,7 +1417,8 @@ void Exec6502Instruction(void) {
 	  *pcptr=0;
 	  fprintf(osclilog,"%s\n",pcbuf);
   }
-  /*if (ProgramCounter==0xffdd) {
+ */
+/*if (ProgramCounter==0xffdd) {
 	  char errstr[250];
 	  sprintf(errstr,"OSFILE called\n");
 	  MessageBox(GETHWND,errstr,"BBC Emulator",MB_OKCANCEL|MB_ICONERROR);
@@ -2257,7 +2259,7 @@ void Exec6502Instruction(void) {
 	PollVIAs(Cycles - ViaCycles);
 	PollHardware(Cycles);
 
-	DoKbdIntCheck();
+//	DoKbdIntCheck();
 	
 	// Check for IRQ
 	DoIntCheck();

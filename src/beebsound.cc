@@ -64,7 +64,7 @@ struct SoundSample
 {
 	const char *pFilename;
 	unsigned char *pBuf;
-	int len;
+	long len;
 	int pos;
 	bool playing;
 	bool repeat;

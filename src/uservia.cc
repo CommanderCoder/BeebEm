@@ -643,9 +643,9 @@ void DebugUserViaState()
 
 OSStatus BreakOutWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
-	int bit;
+//	int bit;
     
-    HICommand command;
+//    HICommand command;
     OSStatus err = noErr;
 #if 0 //ACH - breakout command handler
     err = GetEventParameter(event, kEventParamDirectObject,
@@ -744,6 +744,7 @@ CantGetParameter:
 		return err;
 }
 
+#if 0 //ACH - UNUSED
 static OSStatus BreakOutWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus err = noErr;
@@ -776,19 +777,20 @@ static OSStatus BreakOutWindowEventHandler(EventHandlerCallRef nextHandler, Even
     
     return err;
 }
+#endif
 
 void BreakOutOpenDialog()
 {
 
-	IBNibRef 		nibRef;
-	EventTypeSpec BreakOutCommands[] = {
-	{ kEventClassCommand, kEventCommandProcess }
-	};
+//	IBNibRef 		nibRef;
+//	EventTypeSpec BreakOutCommands[] = {
+//	{ kEventClassCommand, kEventCommandProcess }
+//	};
 		
-	EventTypeSpec BreakOutEvents[] = {
-	{ kEventClassWindow, kEventWindowClosed },
-	{ kEventClassKeyboard, kEventRawKeyDown}
-	};
+//	EventTypeSpec BreakOutEvents[] = {
+//	{ kEventClassWindow, kEventWindowClosed },
+//	{ kEventClassKeyboard, kEventRawKeyDown}
+//	};
 
 	if (mBreakOutWindow == NULL)
 	{
@@ -842,8 +844,8 @@ int GetValue(OSType box)
 
 {
  	ControlID dbControlID;
-	ControlRef dbControl;
-	int ret;
+//	ControlRef dbControl;
+	int ret=0;
 	
 	dbControlID.signature = box;
 	dbControlID.id = 0;
@@ -857,7 +859,7 @@ int GetValue(OSType box)
 void SetValue(OSType box, int State)
 {
 	ControlID dbControlID;
-	ControlRef dbControl;
+//	ControlRef dbControl;
 	
 	dbControlID.signature = box;
 	dbControlID.id = 0;
@@ -917,14 +919,14 @@ unsigned char changed_bits;
 void ShowBitKey(int key, int ctrlID)
 {
 char Keys[256];
-CFStringRef pTitle;
+//CFStringRef pTitle;
 
 	strcpy(Keys, BitKeyName(BitKeys[key]));
 
 //	fprintf(stderr, "Setting button text to '%s'\n", Keys);
 
 	ControlID dbKeyID;
-	ControlRef dbControl;
+//	ControlRef dbControl;
 	
 	dbKeyID.signature = ctrlID;
 	dbKeyID.id = 0;

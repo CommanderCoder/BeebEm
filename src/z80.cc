@@ -135,7 +135,7 @@ simz80(FASTREG PC)
     FASTREG SP = sp;
     FASTREG IX = ix;
     FASTREG IY = iy;
-    FASTWORK temp, acu, sum, cbits;
+    FASTWORK temp=0, acu=0, sum, cbits;
     FASTWORK op, adr;
 
     switch(GetBYTE_pp(PC)) {

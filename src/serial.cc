@@ -672,7 +672,7 @@ bool map_file(char *file_name)
 	int n;
 	int data;
 	int last_data;
-	int blk;
+	int blk=0;
 	int blk_num;
 	char block[500];
 	bool std_last_block=true;
@@ -852,8 +852,8 @@ OSStatus TCWindowCommandHandler(UInt32 cmdID)
             fprintf(stderr, "Tape Control Record selected\n");
 
 			SInt16 r;
-			Str255 S1;
-			Str255 S2;
+//			Str255 S1;
+//			Str255 S2;
 			
 			if (CSWOpen) break;
 				

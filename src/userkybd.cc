@@ -277,8 +277,8 @@ char Keys[256];
 
 OSStatus UKWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
-	int i;
-    HICommand command; 
+//	int i;
+//    HICommand command; 
     OSStatus err = noErr;
 #if 0 //ACH - command handler
 
@@ -331,6 +331,7 @@ CantGetParameter:
 		return err;
 }
 
+#if 0 //ACH - UNUSED
 static OSStatus UKWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus err = noErr;
@@ -361,6 +362,8 @@ static OSStatus UKWindowEventHandler(EventHandlerCallRef nextHandler, EventRef e
     
 	return err;
 }
+#endif
+
 #if 0 //ACH -  keyboard dialogs
 
 void UserKeyboardOpenDialog()

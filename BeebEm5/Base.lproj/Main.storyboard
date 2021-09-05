@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -293,7 +293,7 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Gm8-V2-P3x"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Screen Snapshot" enabled="NO" keyEquivalent="s" identifier="swtd" id="Mlw-Z4-Y2w">
+                                        <menuItem title="Screen Snapshot" keyEquivalent="s" identifier="swtd" id="Mlw-Z4-Y2w">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="xgR-UC-k59"/>
@@ -418,7 +418,7 @@
                                             </menu>
                                         </menuItem>
                                         <menuItem title="Rewind Tape" keyEquivalent="t" identifier="tpre" id="nO1-Tz-jtG">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="muZ-LQ-iw3"/>
                                             </connections>
@@ -429,7 +429,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Tape Control" keyEquivalent="t" identifier="tpco" id="SKV-Tt-ndz">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES"/>
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
                                                 <action selector="tapeControlMenuItem:" target="Voe-Tx-rLC" id="8gy-b9-w3Y"/>
                                                 <segue destination="T4f-Fh-Zp8" kind="show" id="Kwo-wY-9ji"/>
@@ -1329,6 +1329,12 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <segue destination="Epa-0N-Qqh" kind="show" id="Bjv-d8-Hzc"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Trace" keyEquivalent="T" identifier="trac" id="Am5-SD-yC9">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="72P-Lk-8Jl"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="5kM-tV-NeM"/>

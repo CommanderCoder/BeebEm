@@ -45,14 +45,14 @@ char *decodeMultiplyOrDataProcessing(uint32 address, uint32 instruction, char *b
 		// multiply
 		return decodeMultiply(address, instruction, buff);
 	}
-	else
-	{
-		// data processing
-		return decodeDataProcessing(address, instruction, buff);
-	}
+//	else
+//	{
+    // data processing
+    return decodeDataProcessing(address, instruction, buff);
+//	}
 
-	strcpy(buff, "ERROR DISASSEMBLING IN decodeMultiplyOrDataProcessing()");
-	return buff;
+//	strcpy(buff, "ERROR DISASSEMBLING IN decodeMultiplyOrDataProcessing()");
+//	return buff;
 }
 
 char *decodeSingleDataSwapOrDataProcessing(uint32 address, uint32 instruction, char *buff)
@@ -63,14 +63,14 @@ char *decodeSingleDataSwapOrDataProcessing(uint32 address, uint32 instruction, c
 		// single data swap
 		return decodeSingleDataSwap(address, instruction, buff);
 	}
-	else
-	{
+//	else
+//	{
 		// data processing
 		return decodeDataProcessing(address, instruction, buff);
-	}
-
-	strcpy(buff, "ERROR DISASSEMBLING IN decodeSingleDataSwapOrDataProcessing()");
-	return buff;
+//	}
+//
+//	strcpy(buff, "ERROR DISASSEMBLING IN decodeSingleDataSwapOrDataProcessing()");
+//	return buff;
 }
 
 char *decodeDataProcessing(uint32 address, uint32 instruction, char *buff)

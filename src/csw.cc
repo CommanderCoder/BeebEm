@@ -43,8 +43,8 @@ int CSW_CYCLES;
 
 void LoadCSW(char *file)
 {
-	int end;
-	int sourcesize;
+	long end;
+	long sourcesize;
 	
 //	csw_file = fopen("/Users/jonwelch/MyProjects/csw/AticAtac.csw", "rb");
 
@@ -182,7 +182,7 @@ void map_csw_file(void)
 {
 int data;
 int last_state = -1;
-char block[65535];
+unsigned char block[65535];
 int block_ptr = -1;
 int start_time;
 

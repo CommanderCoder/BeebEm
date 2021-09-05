@@ -290,10 +290,11 @@ static int NewCmd = 0;
 			switch (btn)
 			{
 			case kEventMouseButtonPrimary:
-				mainWin->SetMousestickButton(TRUE);
+				mainWin->SetMousestickButton(0,TRUE);
 				AMXButtons |= AMX_LEFT_BUTTON;
 				break;
 			case kEventMouseButtonSecondary:
+                mainWin->SetMousestickButton(1,TRUE);
 				AMXButtons |= AMX_RIGHT_BUTTON;
 				break;
 			case kEventMouseButtonTertiary:

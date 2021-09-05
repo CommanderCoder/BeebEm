@@ -137,7 +137,7 @@ public:
 	void DisplayTiming(void);
 	unsigned long GetTickCount(void);
 	void ScaleJoystick(unsigned int x, unsigned int y);
-	void SetMousestickButton(int button);
+	void SetMousestickButton(int index, bool button);
 	void ScaleMousestick(unsigned int x, unsigned int y);
 	void HandleCommand(int MenuId);
 	void SetAMXPosition(unsigned int x, unsigned int y);
@@ -289,8 +289,8 @@ public:
 	long	m_frameDuration;
 	long	m_frameSize;
 #endif
-	long	m_skip;
-	long	m_captureresolution;
+	int	m_skip;
+	int	m_captureresolution;
 	
 }; /* BeebWin */
 

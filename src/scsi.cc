@@ -232,6 +232,8 @@ int ReadData(void)
 			}
 			return data;
 			break;
+        default:
+            break;
 	}
 
 	if (scsi.phase == busfree)
@@ -335,6 +337,8 @@ void WriteData(int data)
 			scsi.next++;
 			scsi.offset = 0;
 			return;
+        default:
+            break;
 	}
 
 	BusFree();
@@ -679,7 +683,7 @@ int DiscModeSense(char *cdb, char *buf)
 	if (size == 0)
 		size = 22;
 
-	size = fread(buf, 1, size, f);
+	size = (unsigned int)fread(buf, 1, size, f);
 	
 // heads = buf[15];
 // cyl   = buf[13] * 256 + buf[14];

@@ -3360,8 +3360,8 @@ inline uint32 CArm::getDataProcessingRegisterOperand2S()
 	if( !getField(currentInstruction, 4, 11) )
 		return getRegisterWithPSR(rm);
 	
-	uint32 carry;
-	uint32 result;
+	uint32 carry = 0;
+	uint32 result = 0;
 
 	// if register-specified shift amount
 	if( getBit(currentInstruction, 4) )

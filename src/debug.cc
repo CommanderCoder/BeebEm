@@ -13,7 +13,7 @@ WindowRef mDebugWindow = NULL;
 int DebugEnabled = false;        // Debug dialog visible
 
 static int DebugOn = 0;         // Debugging active?
-static int LinesDisplayed = 0;  // Lines in info window
+//static int LinesDisplayed = 0;  // Lines in info window
 static int InstCount = 0;       // Instructions to execute before breaking
 static int DumpAddress = 0;     // Next address for memory dump command
 static int DisAddress = 0;      // Next address for disassemble command
@@ -628,14 +628,14 @@ void DebugCloseDialog()
 
 void DebugDisplayInfo(const char *info)
 {
-static int max = 0;
+long max = 0;
 
 //	fprintf(stderr, "%s\n", info);
 
 	if (strlen(info) > max)
 	{
 		max = strlen(info);
-		fprintf(stderr, "New max = %d, '%s'\n", max, info);
+		fprintf(stderr, "New max = %ld, '%s'\n", max, info);
 	}
 	
 	fprintf(stderr, "%s\n", info);
@@ -1074,8 +1074,8 @@ void DebugExecuteCommand()
 								BPCount--;
 								i = BPCount;
 
-								const ControlID dbControlID = { 'BLST', 0 };
-								ControlRef dbControl;
+//								const ControlID dbControlID = { 'BLST', 0 };
+//								ControlRef dbControl;
 								
 #if 0 //ACH - debug commands
 								GetControlByID (mDebugWindow, &dbControlID, &dbControl);
@@ -1102,8 +1102,8 @@ void DebugExecuteCommand()
 							BPCount++;
 						}
 
-						const ControlID dbControlID = { 'BLST', 0 };
-						ControlRef dbControl;
+//						const ControlID dbControlID = { 'BLST', 0 };
+//						ControlRef dbControl;
 			
 #if 0 //ACH - debug commands
 
@@ -1183,8 +1183,8 @@ int DebugDisassembleInstruction(int addr, bool host, char *opstr)
 	char *s;
 	int opcode;
 	InstInfo *ip; 
-	int operand;
-	int l;
+	int operand=0;
+	int l=0;
 	
 	sprintf(opstr, "%04X ", addr);
 	

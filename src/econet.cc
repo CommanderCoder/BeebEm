@@ -663,7 +663,7 @@ bool EconetPoll_real(void) {		//return NMI status
 						if (network[i].station != EconetStationNumber) {
 							RecvAddr.sin_family = AF_INET;
 							RecvAddr.sin_port = htons(network[i].port);
-							RecvAddr.sin_addr.s_addr = network[i].inet_addr;
+							RecvAddr.sin_addr.s_addr = (unsigned int)network[i].inet_addr;
 
 							// Send a datagram to the receiver
 							if (DebugEnabled) {
@@ -745,7 +745,7 @@ bool EconetPoll_real(void) {		//return NMI status
 					if (RetVal > 0)
 					{
 						// Read the packet
-						RetVal = recv(ListenSocket, (char *)Econetrxbuff, sizeof(Econetrxbuff), 0);
+						RetVal = (unsigned int)recv(ListenSocket, (char *)Econetrxbuff, sizeof(Econetrxbuff), 0);
   						if (RetVal > 0) {
 							if (DebugEnabled) {
 								sprintf (info, "EconetPoll: Packet received. %u bytes", (int)RetVal);
