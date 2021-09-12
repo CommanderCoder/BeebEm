@@ -461,7 +461,7 @@ static void ReadInterrupt(void) {
     /* I don't know if this can cause the thing to step - I presume not for the moment */
     if (--CommandStatus.SectorsToGo) {
       CommandStatus.CurrentSector++;
-      if (CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,CommandStatus.CurrentSector,0),
+        if (static_cast<void>(CommandStatus.CurrentSectorPtr=GetSectorPtr(CommandStatus.CurrentTrackPtr,CommandStatus.CurrentSector,0)),
           CommandStatus.CurrentSectorPtr==NULL) {
         DoErr(0x1e); /* Sector not found */
         return;
@@ -1432,7 +1432,7 @@ static bool SaveTrackImage(int DriveNum, int HeadNum, int TrackNum) {
   int dSuccess=1;
   int CurrentSector;
   long FileOffset;
-  long FileLength;
+  long FileLength=0;
   SectorType *SecPtr;
 
   FILE *outfile=fopen(FileNames[DriveNum],"r+b");

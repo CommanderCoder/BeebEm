@@ -246,7 +246,7 @@ int uef_getdata(int time)
 	int i, j;
 	int data;
 	int found = 0;
-	uef_chunk_info *ch;
+	uef_chunk_info *ch=0;
 
 	if (uef_last_chunk != NULL &&
 		time >= uef_last_chunk->start_time && time < uef_last_chunk->end_time)
@@ -462,6 +462,7 @@ int uef_write_chunk(void)
 	{
 		uef_errno = UEF_OPEN_NOFILE;
 		ok = 0;
+        return(ok);
 	}
 
 	if (ok)
@@ -496,8 +497,8 @@ int uef_write_chunk(void)
 
 void uef_unlock_offset_and_crc(uef_chunk_info *ch)
 {
-	unsigned char *data;
-	int len;
+	unsigned char *data=0;
+	int len=0;
 	int n;
 	int i;
 	int d;

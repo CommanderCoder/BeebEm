@@ -392,7 +392,7 @@ void tms5220_update(unsigned char *buff, int length)
 		else
 		{
 			if (buffer - buff != len)
-				fprintf(stderr, "Here for some reason - mismatch in num of samples = %d, %d\n", len, buffer - buff);
+				fprintf(stderr, "Here for some reason - mismatch in num of samples = %d, %ld\n", len, buffer - buff);
 			tms5220_process(info->chip, sample_data, 0);
 			return;
 		}
@@ -439,7 +439,7 @@ void tms5220_update(unsigned char *buff, int length)
 	info->curr_sample = curr;
 
 	if (buffer - buff != len)
-		fprintf(stderr, "At end of update - mismatch in num of samples = %d, %d\n", len, buffer - buff);
+		fprintf(stderr, "At end of update - mismatch in num of samples = %d, %ld\n", len, buffer - buff);
 }
 
 /**********************************************************************************************

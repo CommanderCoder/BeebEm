@@ -76,7 +76,9 @@ static unsigned char SlowDataBusWriteValue=0;
 static unsigned int KBDRow=0;
 static unsigned int KBDCol=0;
 
-static bool SysViaKbdState[16][8]; /* Col,row */
+#define KBD_ROWS 8
+#define KBD_COLS 16
+static char SysViaKbdState[KBD_COLS][KBD_ROWS]; /* Col,row */
 static int KeysDown=0;
 
 /*--------------------------------------------------------------------------*/
@@ -111,12 +113,9 @@ void BeebKeyUp(int row,int col) {
 /*--------------------------------------------------------------------------*/
 void BeebReleaseAllKeys() {
   KeysDown = 0;
-
-  for(int row=0;row<8;row++) {
-      for(int col=0;col<16;col++) {
-        SysViaKbdState[col][row]=false;
-      }
-    }
+    for(int row=0;row<KBD_ROWS;row++)
+      for(int col=0;col<KBD_COLS;col++)
+        SysViaKbdState[col][row]=0;
 }; /* BeebKeyUp */
 
 /*--------------------------------------------------------------------------*/
@@ -135,9 +134,9 @@ void DoKbdIntCheck() {
       SysVIAState.ifr|=1; /* CA2 */
       UpdateIFRTopBit();
     } else {
-      if (KBDCol<15) {
+      if (KBDCol<KBD_COLS) {
         int presrow;
-        for(presrow=1;presrow<8;presrow++) {
+        for(presrow=1;presrow<KBD_ROWS;presrow++) {
           if (SysViaKbdState[KBDCol][presrow]) {
             SysVIAState.ifr|=1;
             UpdateIFRTopBit();
@@ -146,6 +145,14 @@ void DoKbdIntCheck() {
       } /* KBDCol range */
     } /* WriteEnable on */
   } /* Keys down and CA2 input enabled */
+    
+#ifdef KBDDEBUG
+  cerr << "DoKbdIntCheck KeysDown=" << KeysDown << "pcr & c=" << (int)(SysVIAState.pcr & 0xc);
+  cerr << " IC32State & 8=" << (int)(IC32State & 8) << " KBDRow=" << KBDRow << "KBDCol=" << KBDCol;
+  cerr << " oldIFRflag=" << Oldflag << " Newflag=" << (int)(SysVIAState.ifr & 1) << "\n";
+#endif
+
+    
 } /* DoKbdIntCheck */
 
 /*--------------------------------------------------------------------------*/
@@ -169,7 +176,7 @@ void BeebKeyDown(int row,int col) {
   any keypressed interrupt */
 static bool KbdOP(void) {
   /* Check range validity */
-  if ((KBDCol>14) || (KBDRow>7)) return false; /* Key not down if overrange - perhaps we should do something more? */
+  if ((KBDCol>=KBD_COLS) || (KBDRow>=KBD_ROWS)) return(0); /* Key not down if overrange - perhaps we should do something more? */
 
   return(SysViaKbdState[KBDCol][KBDRow]);
 } /* KbdOP */
@@ -541,6 +548,9 @@ unsigned char SysVIARead(int Address)
 
     case 13:
       UpdateIFRTopBit();
+#ifdef KBDDEBUG
+      fprintf(stderr,  "Read IFR got=0x%X\n" ,(int)(SysVIAState.ifr) );
+#endif
       tmp = SysVIAState.ifr;
       break;
 
@@ -659,7 +669,7 @@ unsigned char BCD(unsigned char nonBCD) {
 }
 unsigned char BCDToBin(unsigned char BCD) {
     // convert a BCD value to decimal value
-    return ((BCD>>4) *10+(BCD&15));
+    return((BCD>>4)*10+(BCD&15));
 }
 /*-------------------------------------------------------------------------*/
 time_t CMOSConvertClock(void) {
@@ -677,6 +687,94 @@ time_t CMOSConvertClock(void) {
     tim = mktime(&Base);
     return tim;
 }
+/*-------------------------------------------------------------------------*/
+void RTCInit(void) {
+    struct tm *CurTime;
+    time( &SysTime );
+    CurTime = localtime( &SysTime );
+    CMOSRAM[0] = BCD(CurTime->tm_sec);
+    CMOSRAM[2] = BCD(CurTime->tm_min);
+    CMOSRAM[4] = BCD(CurTime->tm_hour);
+    CMOSRAM[6] = BCD((CurTime->tm_wday)+1);
+    CMOSRAM[7] = BCD(CurTime->tm_mday);
+    CMOSRAM[8] = BCD((CurTime->tm_mon)+1);
+    CMOSRAM[9] = BCD((CurTime->tm_year)-(RTCY2KAdjust ? 20 : 0));
+    RTCTimeOffset = SysTime - CMOSConvertClock();
+}
+/*-------------------------------------------------------------------------*/
+void RTCUpdate(void) {
+    struct tm *CurTime;
+    time( &SysTime );
+    SysTime -= RTCTimeOffset;
+    CurTime = localtime( &SysTime );
+    CMOSRAM[0] = BCD(CurTime->tm_sec);
+    CMOSRAM[2] = BCD(CurTime->tm_min);
+    CMOSRAM[4] = BCD(CurTime->tm_hour);
+    CMOSRAM[6] = BCD((CurTime->tm_wday)+1);
+    CMOSRAM[7] = BCD(CurTime->tm_mday);
+    CMOSRAM[8] = BCD((CurTime->tm_mon)+1);
+    CMOSRAM[9] = BCD(CurTime->tm_year);
+}
+/*-------------------------------------------------------------------------*/
+void CMOSWrite(unsigned char CMOSAddr,unsigned char CMOSData) {
+    // Many thanks to Tom Lees for supplying me with info on the 146818 registers
+    // for these two functions.
+    if (CMOSAddr>0xd) {
+        CMOSRAM[CMOSAddr]=CMOSData;
+    }
+    else if (CMOSAddr==0xa) {
+        // Control register A
+        CMOSRAM[CMOSAddr]=CMOSData & 0x7f; // Top bit not writable
+    }
+    else if (CMOSAddr==0xb) {
+        // Control register B
+        // Bit-7 SET - 0=clock running, 1=clock update halted
+        if (CMOSData & 0x80) {
+            RTCUpdate();
+        }
+        else if ((CMOSRAM[CMOSAddr] & 0x80) && !(CMOSData & 0x80)) {
+            // New clock settings
+            time(&SysTime);
+            RTCTimeOffset = SysTime - CMOSConvertClock();
+        }
+        CMOSRAM[CMOSAddr]=CMOSData;
+    }
+    else if (CMOSAddr==0xc) {
+        // Control register C - read only
+    }
+    else if (CMOSAddr==0xd) {
+        // Control register D - read only
+    }
+    else {
+        // Clock registers
+        CMOSRAM[CMOSAddr]=CMOSData;
+    }
+    
+    char TmpPath[256];
+    unsigned char CMA;
+
+    // write CMOS Ram
+    strcpy(TmpPath,RomPath); strcat(TmpPath,"/beebstate/cmos.ram");
+    CMDF=fopen(TmpPath,"wb");
+    if (CMDF != NULL)
+    {
+        for(CMA=0xe;CMA<64;CMA++) fputc(CMOSRAM[CMA],CMDF);
+        fclose(CMDF);
+    }
+
+}
+
+/*-------------------------------------------------------------------------*/
+unsigned char CMOSRead(unsigned char CMOSAddr) {
+    // 0x0 to 0x9 - Clock
+    // 0xa to 0xd - Regs
+    // 0xe to 0x3f - RAM
+    if (CMOSAddr<0xa)
+        RTCUpdate();
+    return(CMOSRAM[CMOSAddr]);
+}
+
+#if 0 //ACH
 /*-------------------------------------------------------------------------*/
 void RTCInit(void) {
     struct tm *CurTime;
@@ -745,6 +843,7 @@ unsigned char CMOSRead(unsigned char CMOSAddr) {
         RTCUpdate();
         return(CMOSRAM[CMOSAddr]);
 }
+#endif
 
 /*--------------------------------------------------------------------------*/
 void sysvia_dumpstate(void) {

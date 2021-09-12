@@ -336,7 +336,7 @@ void WriteTorchTubeFromHostSide(unsigned char IOAddr,unsigned char IOData)
 
 unsigned char ReadTorchTubeFromParasiteSide(unsigned char IOAddr) 
 {
-	unsigned char TmpData;
+	unsigned char TmpData=0;
 
 	switch (IOAddr) {
 	case 0:
@@ -385,7 +385,7 @@ void WriteTorchTubeFromParasiteSide(unsigned char IOAddr,unsigned char IOData)
 // Tube memory/io handling functions
 
 unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
-	unsigned char TmpData,TmpCntr;
+	unsigned char TmpData=0,TmpCntr;
 
     //TODO replace below when complete
     // if (TubeType == Tube::None)
@@ -531,7 +531,7 @@ void WriteTubeFromHostSide(unsigned char IOAddr,unsigned char IOData) {
 }
 
 unsigned char ReadTubeFromParasiteSide(unsigned char IOAddr) {
-	unsigned char TmpData;
+	unsigned char TmpData=0;
 
     // TODO replace when able 
     // if (TubeType == Tube::TorchZ80)
@@ -1189,52 +1189,6 @@ static void BranchOnBitSet(int bit)
 	}
 }
 
-INLINE static void BadInstrHandler(int opcode) {
-	if (!IgnoreIllegalInstructions)
-	{
-#ifdef WIN32
-		char errstr[250];
-		sprintf(errstr,"Unsupported 65C02 instruction 0x%02X at 0x%04X\n"
-			"  OK - instruction will be skipped\n"
-			"  Cancel - dump memory and exit",opcode,TubeProgramCounter-1);
-		if (MessageBox(GETHWND,errstr,"BBC Emulator",MB_OKCANCEL|MB_ICONERROR) == IDCANCEL)
-		{
-			exit(0);
-		}
-#else
-		fprintf(stderr,"Bad instruction handler called:\n");
-		fprintf(stderr,"Dumping main memory\n");
-		beebmem_dumpstate();
-		// abort();
-#endif
-	}
-
-	/* Do not know what the instruction does but can guess if it is 1,2 or 3 bytes */
-	switch (opcode & 0xf)
-	{
-	/* One byte instructions */
-	case 0xa:
-		break;
-
-	/* Two byte instructions */
-	case 0x0:
-	case 0x2:  /* Inst 0xf2 causes the 6502 to hang! Try it on your BBC Micro */
-	case 0x3:
-	case 0x4:
-	case 0x7:
-	case 0x9:
-	case 0xb:
-		TubeProgramCounter++;
-		break;
-
-	/* Three byte instructions */
-	case 0xc:
-	case 0xe:
-	case 0xf:
-		TubeProgramCounter+=2;
-		break;
-	}
-} /* BadInstrHandler */
 
 /*-------------------------------------------------------------------------*/
 /* Absolute  addressing mode handler                                       */

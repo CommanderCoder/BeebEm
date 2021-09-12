@@ -30,6 +30,7 @@ keyboard emulation - David Alan Gilbert 30/10/94 */
 
 extern VIAState SysVIAState;
 extern unsigned char IC32State;
+extern bool RTCY2KAdjust;
 
 void SysVIAWrite(int Address, int Value);
 unsigned char SysVIARead(int Address);
@@ -52,7 +53,7 @@ unsigned char CMOSRead(unsigned char CMOSAddr);
 
 void sysvia_dumpstate(void);
 void PulseSysViaCB1(void);
-void DoKbdIntCheck();
+//void DoKbdIntCheck();
 
 unsigned char BCD(unsigned char nonBCD);
 

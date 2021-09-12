@@ -36,4 +36,14 @@ extern const char *VersionDate;
 extern int trace_186;
 void WriteLog(const char *fmt, ...);
 
+
+
+struct CColour{
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+};
+
+
 #endif

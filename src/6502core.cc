@@ -886,43 +886,6 @@ INLINE static void KILInstrHandler(void) {
     ProgramCounter--;
 }
 
-INLINE static void BadInstrHandler(int opcode) {
-	if (!IgnoreIllegalInstructions)
-	{
-		fprintf(stderr,"Bad instruction handler called:\n");
-		DumpRegs();
-		fprintf(stderr,"Dumping main memory\n");
-		beebmem_dumpstate();
-		// abort();
-	}
-
-	/* Do not know what the instruction does but can guess if it is 1,2 or 3 bytes */
-	switch (opcode & 0xf)
-	{
-	/* One byte instructions */
-	case 0xa:
-		break;
-
-	/* Two byte instructions */
-	case 0x0:
-	case 0x2:  /* Inst 0xf2 causes the 6502 to hang! Try it on your BBC Micro */
-	case 0x3:
-	case 0x4:
-	case 0x7:
-	case 0x9:
-	case 0xb:
-		ProgramCounter++;
-		break;
-
-	/* Three byte instructions */
-	case 0xc:
-	case 0xe:
-	case 0xf:
-		ProgramCounter+=2;
-		break;
-	}
-} /* BadInstrHandler */
-
 /*-------------------------------------------------------------------------*/
 /* Absolute  addressing mode handler                                       */
 INLINE static int16 AbsAddrModeHandler_Data(void) {
@@ -2934,7 +2897,7 @@ void Exec6502Instruction(void) {
 		(CurrentInstruction==0x30) ||
 		(CurrentInstruction==0x50) ||
 		(CurrentInstruction==0x70) ||
-		(CurrentInstruction==0x80)  && MachineType == 3 ||
+		((CurrentInstruction==0x80)  && MachineType == 3) ||
 		(CurrentInstruction==0x90) ||
 		(CurrentInstruction==0xb0) ||
 		(CurrentInstruction==0xd0) ||
@@ -2955,6 +2918,7 @@ void Exec6502Instruction(void) {
 	PollHardware(Cycles);
 
 	//DoKbdIntCheck();
+
 	
 	// Check for IRQ
 	DoIntCheck();

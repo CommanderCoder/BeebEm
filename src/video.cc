@@ -917,7 +917,7 @@ void RedoMPTR(void) {
 
 /*-------------------------------------------------------------------------------------------------------------*/
 void VideoDoScanLine(void) {
-  int l;
+  long l;
   /* cerr << "CharLine=" << VideoState.CharLine << " InCharLineUp=" << VideoState.InCharLineUp << "\n"; */
   if (VideoState.IsTeletext) {
     static int DoCA1Int=0;
@@ -930,9 +930,9 @@ void VideoDoScanLine(void) {
     if (!FrameNum) {
       if (VScreenAdjust>0 && VideoState.PixmapLine==0)
         for (l=-VScreenAdjust; l<0; ++l)
-          mainWin->doHorizLine(mainWin->cols[0], l, -80, 800);
+          mainWin->doHorizLine(mainWin->cols[0], (unsigned int)l, -80, 800);
       for (l=0; l<20 && VideoState.PixmapLine+l<512; ++l)
-        mainWin->doHorizLine(mainWin->cols[0], VideoState.PixmapLine+l, -80, 800);
+        mainWin->doHorizLine(mainWin->cols[0], (unsigned int)(VideoState.PixmapLine+l), -80, 800);
     }
 
     if ((VideoState.CharLine!=-1) && (VideoState.CharLine<CRTC_VerticalDisplayed)) {
@@ -960,7 +960,7 @@ void VideoDoScanLine(void) {
         VideoAddLEDs();
         // Clear rest of screen below virtical total
         for (l=VideoState.PixmapLine; l<500/TeletextStyle; ++l)
-			mainWin->doHorizLine(0, l, -36, 800);
+			mainWin->doHorizLine(0, (unsigned int)l, -36, 800);
         mainWin->updateLines(0,(500/TeletextStyle));
       }
       VideoStartOfFrame();
@@ -1429,7 +1429,7 @@ void SaveVideoUEF(FILE *SUEF) {
 	for (int col = 0; col < 16; ++col)
 		fputc(VideoULA_Palette[col] ^ 7,SUEF); /* Use real ULA values */
 	fput16(ActualScreenWidth,SUEF);
-	fput32(ScreenAdjust,SUEF);
+	fput32((unsigned int)ScreenAdjust,SUEF);
 	fputc(CRTCControlReg,SUEF);
 	fputc(TeletextStyle,SUEF);
 	fput32(0,SUEF); // Pad out
