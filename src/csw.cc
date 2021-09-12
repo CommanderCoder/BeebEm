@@ -71,6 +71,11 @@ int CSW_CYCLES;
 
 CSWResult LoadCSW(const char *file)
 {
+	long end;
+	long sourcesize;
+	
+//	csw_file = fopen("/Users/jonwelch/MyProjects/csw/AticAtac.csw", "rb");
+
 	CloseCSW();
 
 	csw_file = fopen(file, "rb");
@@ -113,9 +118,9 @@ CSWResult LoadCSW(const char *file)
 		return CSWResult::InvalidHeaderExtension;
 	}
 	
-    int end = ftell(csw_file);
+    end = ftell(csw_file);
 	fseek(csw_file, 0, SEEK_END);
-	int sourcesize = ftell(csw_file) - end + 1;
+	sourcesize = ftell(csw_file) - end + 1;
 	fseek(csw_file, end, SEEK_SET);
 	
 	csw_bufflen = 8 * 1024 * 1024;

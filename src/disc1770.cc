@@ -62,7 +62,7 @@ bool LightsOn[2]={false,false};
 bool HeadLoaded[2]={false, false};
 // End of control bits
 int dByteCount=0;
-long DataPos;
+unsigned int DataPos;
 char errstr[250];
 unsigned char Disc1770Enabled = 1;
 /* File names of loaded disc images */
@@ -81,7 +81,7 @@ unsigned char *CDiscOpen=&Disc0Open; // Current Disc Open
 
 unsigned char ExtControl; // FDC External Control Register
 unsigned char CurrentDrive=0; // FDC Control drive setting
-long HeadPos[2]; // Position of Head on each drive for swapping
+unsigned int HeadPos[2]; // Position of Head on each drive for swapping
 unsigned char CurrentHead[2]; // Current Head on any drive
 int DiscStep[2]; // Single/Double sided disc step
 int DiscStrt[2]; // Single/Double sided disc start
@@ -174,7 +174,7 @@ void SetMotor(char Drive,bool State) {
 }
 
 void Write1770Register(unsigned char Register, unsigned char Value) {
-	unsigned char ComBits,HComBits;
+	unsigned char ComBits=0,HComBits;
 	int SectorCycles=0; // Number of cycles to wait for sector to come round
 	static int last_combits = 255;
 
@@ -462,7 +462,7 @@ void Poll1770(int NCycles) {
 	if ((FDCommand>=8) && (*CDiscOpen==1) && (FDCommand<=10)) { // Read/Write Prepare
 		SetStatus(0);
 		ResetStatus(5); ResetStatus(6); ResetStatus(2);
-		dByteCount=SecSize[CurrentDrive]+1; DataPos=ftell(CurrentDisc); HeadPos[CurrentDrive]=DataPos;
+		dByteCount=SecSize[CurrentDrive]+1; DataPos=(unsigned int)ftell(CurrentDisc); HeadPos[CurrentDrive]=DataPos;
 		LoadingCycles=45;
 		fseek(CurrentDisc,DiscStrt[CurrentDrive]+(DiscStep[CurrentDrive]*MyTrack)+(Sector*SecSize[CurrentDrive]),SEEK_SET);
 
@@ -609,7 +609,7 @@ void Poll1770(int NCycles) {
 		LoadingCycles=45;
 		fseek(CurrentDisc,DiscStrt[CurrentDrive]+(DiscStep[CurrentDrive]*MyTrack),SEEK_SET);
         Sector = 0;
-        dByteCount=0; DataPos=ftell(CurrentDisc); HeadPos[CurrentDrive]=DataPos;
+        dByteCount=0; DataPos=(unsigned int)ftell(CurrentDisc); HeadPos[CurrentDrive]=DataPos;
 //        WriteLog("Read/Write Track Prepare - Disc = %d, Track = %d\n", CurrentDrive, Track);
     }
 	if ((FDCommand>=20) && (*CDiscOpen==0) && (FDCommand<=21)) {

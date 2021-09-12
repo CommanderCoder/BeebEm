@@ -130,7 +130,7 @@ Float64 inSampleRate = (Float64) ratewanted;
     }
   }
 
-  bytecount = fragsize;
+  bytecount = (unsigned int)fragsize;
 
   propsize = sizeof(bytecount);
 
@@ -185,13 +185,13 @@ AudioValueRange theRange[10];
   }
 
   fprintf(stderr, "mSampleRate = %f\n", streamdesc.mSampleRate);
-  fprintf(stderr, "mFormatID = %lu\n", streamdesc.mFormatID);
-  fprintf(stderr, "mFormatFlags = %lu\n", streamdesc.mFormatFlags);
-  fprintf(stderr, "mBytesPerPacket = %lu\n", streamdesc.mBytesPerPacket);
-  fprintf(stderr, "mFramesPerPacket = %lu\n", streamdesc.mFramesPerPacket);
-  fprintf(stderr, "mBytesPerFrame = %lu\n", streamdesc.mBytesPerFrame);
-  fprintf(stderr, "mChannelsPerFrame = %lu\n", streamdesc.mChannelsPerFrame);
-  fprintf(stderr, "mBitsPerChannel = %lu\n", streamdesc.mBitsPerChannel);
+    fprintf(stderr, "mFormatID = %u\n", (unsigned int)streamdesc.mFormatID);
+    fprintf(stderr, "mFormatFlags = %u\n", (unsigned int)streamdesc.mFormatFlags);
+    fprintf(stderr, "mBytesPerPacket = %u\n", (unsigned int)streamdesc.mBytesPerPacket);
+    fprintf(stderr, "mFramesPerPacket = %u\n", (unsigned int)streamdesc.mFramesPerPacket);
+    fprintf(stderr, "mBytesPerFrame = %u\n", (unsigned int)streamdesc.mBytesPerFrame);
+    fprintf(stderr, "mChannelsPerFrame = %u\n", (unsigned int)streamdesc.mChannelsPerFrame);
+    fprintf(stderr, "mBitsPerChannel = %u\n", (unsigned int)streamdesc.mBitsPerChannel);
   
   rate = (long) streamdesc.mSampleRate;
 

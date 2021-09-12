@@ -138,9 +138,9 @@ void GetEPText(OSType box, char *text)
 int GetEPValue(OSType box)
 
 {
-	int ret;
+	int ret=0;
     ControlID dbControlID;
-    ControlRef dbControl;
+//    ControlRef dbControl;
 
 	dbControlID.signature = box;
 	dbControlID.id = 0;
@@ -154,7 +154,7 @@ int GetEPValue(OSType box)
 void SetEPValue(OSType box, int State)
 {
 	ControlID dbControlID;
-	ControlRef dbControl;
+//	ControlRef dbControl;
 	
 	dbControlID.signature = box;
 	dbControlID.id = 0;
@@ -587,7 +587,7 @@ int i;
 	if ( (ts_outlen > 0) && (mEthernetHandle > 0) )
 	{
 		char buff[256];
-		int bufflen = 0;
+		long bufflen = 0;
 
 		while (ts_outlen)
 		{
@@ -607,7 +607,7 @@ int i;
 		}
 		else
 		{
-			i = send(mEthernetHandle, buff, bufflen, 0);
+			i = (unsigned int)send(mEthernetHandle, buff, bufflen, 0);
 
 			if (i < bufflen)
 			{
@@ -1395,7 +1395,7 @@ int bytes;
 		if (bytes > 0)
 		{
 
-			b = read(mSerialHandle, buff, bytes);
+			b = (unsigned int)read(mSerialHandle, buff, bytes);
 			if (b > 0)
 			{
 				for (a = 0; a < b; a++)

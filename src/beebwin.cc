@@ -343,8 +343,8 @@ void BeebWin::CopyKey(int Value)
 int BeebWin::KeyDown(int vkey)
 {
 int row, col;
-int i;
-int mask = 0x01;
+//int i;
+//int mask = 0x01;
 bool bit = false;
 
 #if 0//ACH - ethernet
@@ -384,8 +384,8 @@ bool bit = false;
 int BeebWin::KeyUp(int vkey)
 {
 int row, col;
-int i;
-int mask = 0x01;
+//int i;
+//int mask = 0x01;
 bool bit = false;
 #if 0//ACH - ethernet
 	if (mEthernetPortWindow) return 0;
@@ -570,7 +570,7 @@ BeebWin::BeebWin()
   fprintf(stderr, "Base Address = %08lx\n", (unsigned long) m_screen);
 
   mBitMap.baseAddr = m_screen;
-  mBitMap.rowBytes = 800 | 0x8000;
+  mBitMap.rowBytes = (short)(800 | 0x8000);
   mBitMap.bounds.left = 0;
   mBitMap.bounds.top = 0;
   mBitMap.bounds.right = 640;
@@ -618,7 +618,8 @@ extern int done;
 
 void BeebWin::doHorizLine(unsigned long Col, int y, int sx, int width) 
 {
-int d, e;
+    long d;
+    int e;
 char *p;
 
 	if (TeletextEnabled) 
@@ -644,12 +645,12 @@ char *p;
 	if (d<0) return;
 	p = m_screen + d;
 
-	memset(m_screen + d, Col, width);
+	memset(m_screen + d, (int)Col, width);
 };
 
 void BeebWin::doInvHorizLine(unsigned long Col, int y, int sx, int width) 
 {
-int d;
+long d;
 int e;
 char *vaddr;
 
@@ -687,12 +688,12 @@ char *vaddr;
 void BeebWin::doUHorizLine(unsigned long Col, int y, int sx, int width) 
 {
 	if (y>500) return;
-    memset(m_screen + y*800 + sx, Col, width);
+    memset(m_screen + y*800 + sx, (int)Col, width);
 };
 
 EightUChars *BeebWin::GetLinePtr(int y) 
 {
-	int d = (y*800) + ScreenAdjust;
+	long d = (y*800) + ScreenAdjust;
 	if (d > (MAX_VIDEO_SCAN_LINES*800))
 		return((EightUChars *)(m_screen+(MAX_VIDEO_SCAN_LINES*800)));
 	return((EightUChars *)(m_screen + d));
@@ -700,7 +701,7 @@ EightUChars *BeebWin::GetLinePtr(int y)
 
 SixteenUChars *BeebWin::GetLinePtr16(int y) 
 {
-	int d = (y*800) + ScreenAdjust;
+	long d = (y*800) + ScreenAdjust;
 	if (d > (MAX_VIDEO_SCAN_LINES*800))
 		return((SixteenUChars *)(m_screen+(MAX_VIDEO_SCAN_LINES*800)));
 	return((SixteenUChars *)(m_screen + d));
@@ -1392,7 +1393,7 @@ extern char videobuffer[];
 // NEW updateLines based on bufferblit
 void BeebWin::updateLines(int starty, int nlines)
 {
-    int i, j;
+    int i, j=0;
     char *p;
     int width, height;
 
@@ -1503,7 +1504,7 @@ void BeebWin::updateLines(int starty, int nlines)
     int_fast16_t *pPtr16;  // on 32 bit machine this was 'short' which ought to be 16 bits
     int_fast16_t *pRPtr16;
 
-    PixMapHandle    pmh;
+//    PixMapHandle    pmh;
     Ptr             buffer;  // Ptr is a char which is 8 bits
     int                bpr;
     float            scalex;
@@ -1971,8 +1972,8 @@ void BeebWin::SetRomMenu(void)
 char Title[19];
 int i;
 
-MenuRef			menu = nil;
-MenuItemIndex	j;
+//MenuRef			menu = nil;
+//MenuItemIndex	j;
 OSStatus		err;
 
 	for (i = 0; i < 16; ++i)
@@ -2081,9 +2082,9 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 }
 
 void BeebWin::SetImageName(char *DiscName,char Drive,char DType) {
-MenuRef			menu = nil;
-MenuItemIndex	j;
-OSStatus		err;
+//MenuRef			menu = nil;
+//MenuItemIndex	j;
+//OSStatus		err;
 char			*fname;
 char			Title[100];
 
@@ -2122,9 +2123,9 @@ char			Title[100];
 }
 
 void BeebWin::EjectDiscImage(int Drive) {
-MenuRef			menu = nil;
-MenuItemIndex	j;
-OSStatus		err;
+//MenuRef			menu = nil;
+//MenuItemIndex	j;
+//OSStatus		err;
 char			Title[100];
 	
 	Eject8271DiscImage(Drive);
@@ -2255,6 +2256,9 @@ CFStringRef pTitle;
 	AddDictNum(dict, CFSTR("EthernetPortEnabled"), EthernetPortEnabled);
 	AddDictNum(dict, CFSTR("TouchScreenEnabled"), TouchScreenEnabled);
 	AddDictNum(dict, CFSTR("RTCEnabled"), RTC_Enabled);
+
+    AddDictNum(dict, CFSTR("RTCY2KAdjust"), RTCY2KAdjust);
+
 	AddDictNum(dict, CFSTR("InvertBackground"), m_Invert);
 	AddDictNum(dict, CFSTR("WriteProtectOnLoad"), m_WriteProtectOnLoad);
 	AddDictNum(dict, CFSTR("NativeFDC"), NativeFDC);
@@ -2281,6 +2285,7 @@ CFStringRef pTitle;
 		CFRelease(pTitle);
 	}
 	
+    
 	// Create a URL that specifies the file we will create to
 	// hold the XML data.
 
@@ -2444,6 +2449,7 @@ int LEDByte;
 	EthernetPortEnabled = GetDictNum(dict, CFSTR("EthernetPortEnabled"), 0);
 	TouchScreenEnabled = GetDictNum(dict, CFSTR("TouchScreenEnabled"), 0);
 	RTC_Enabled = GetDictNum(dict, CFSTR("RTCEnabled"), 0);
+    RTCY2KAdjust = GetDictNum(dict, CFSTR("RTCY2KAdjust"), 1);
 
 	SavePreferences();
 }
@@ -2705,7 +2711,7 @@ void BeebWin::TranslateFDC(void)
 void BeebWin::SetDriveControl(unsigned char value)
 {
 
-	unsigned char temp;
+	unsigned char temp = 0;
 	
 //	WriteLog("SetDriveControl - Type - %d, Value = %02x\n", FDCType, value);
 	
@@ -3579,6 +3585,8 @@ float r, g, b;
 			g *= 0.9;
 			b *= 0.1;
 			break;
+        default:
+            break;
 		}
 	}
 	
@@ -4338,6 +4346,10 @@ OSStatus err = noErr;
 			doPaste();
 			break;
 			
+        case 'trac':
+            fprintf(stderr, "trace186\n");
+            trace_186 = 1 - trace_186;
+            break;
 // AMX Mouse
 
         case 'amxo':
@@ -4560,10 +4572,10 @@ OSStatus err = noErr;
 		case 'abou':
             fprintf(stderr, "About Menu Selected\n");
 
-			Str255 S1;
-			Str255 S2;
-			SInt16 r;
-			char buff[256];
+//			Str255 S1;
+//			Str255 S2;
+//			SInt16 r;
+//			char buff[256];
 	
 #if 0 //ACH - aboutmenu
 			sprintf(buff, "MacBeebEm Ver %s", Version);
@@ -5211,13 +5223,13 @@ void BeebWin::SetAMXPosition(unsigned int x, unsigned int y)
 	}
 }
 
-void BeebWin::SetMousestickButton(int button)
+void BeebWin::SetMousestickButton(int index, bool button)
 {
-// TODO - FIX THIS
-//	if (m_MenuIdSticks)
-//	{
-//		JoystickButton[2] = button;
-//	}
+    if (m_MenuIdSticks == 1 ||
+        m_MenuIdSticks == 2)
+    {
+        JoystickButton[index] = button;
+    }
 }
 
 void BeebWin::ScaleMousestick(unsigned int x, unsigned int y)
@@ -5641,7 +5653,7 @@ ItemCount itemCount;
                     m_clipboard[dataIndex] = byte;
                 }
                         
-                m_clipboardlen = flavorDataSize;
+                m_clipboardlen = (int)flavorDataSize;
                 m_clipboardptr = 0;
                 SetupClipboard();
             }
@@ -5844,9 +5856,9 @@ void CopyToClipBoardAsPDF(int starty, int nlines)
 /* Disc Import / Export */
 
 static DFS_DISC_CATALOGUE dfsCat;
-static int filesSelected[DFS_MAX_CAT_SIZE];
-static int numSelected;
-static char szExportFolder[MAX_PATH];
+//static int filesSelected[DFS_MAX_CAT_SIZE];
+ //static int numSelected;
+//static char szExportFolder[MAX_PATH];
 
 //ACH - File export seems to have been removed in BeebEm4
 // File export
@@ -6085,7 +6097,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     }
     
     // Check for no disk loaded
-    if (szDiscFile[0] == 0 || heads == 1 && (menuId == 2 || menuId == 3))
+    if (szDiscFile[0] == 0 || (heads == 1 && (menuId == 2 || menuId == 3)))
     {
         fprintf(stderr, "No disc loaded in drive %d\n", menuId);
         return;

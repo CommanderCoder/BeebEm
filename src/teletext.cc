@@ -225,7 +225,7 @@ int RetVal;
 			RetVal = select(32, &RdFds, NULL, NULL, &TmOut);
 			if (RetVal > 0)
 			{
-				RetVal = recv(txtListenSocket, (char *) rxBuff, sizeof(rxBuff), 0);
+				RetVal = (unsigned int)recv(txtListenSocket, (char *) rxBuff, sizeof(rxBuff), 0);
 				if (RetVal > 0)
 				{
 				

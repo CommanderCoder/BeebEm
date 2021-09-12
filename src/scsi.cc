@@ -384,6 +384,8 @@ static void WriteData(int data)
 			scsi.next++;
 			scsi.offset = 0;
 			return;
+        default:
+            break;
 	}
 
 	BusFree();

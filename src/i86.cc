@@ -219,11 +219,13 @@ static void set_irq_line(int irqline, int state)
 	}
 }
 
+#if 0 //ACH - UNUSED
 /* PJB 03/05 */
 static void set_test_line(int state)
 {
         I.test_state = !state;
 }
+#endif
 
 void Dis186(void)
 
