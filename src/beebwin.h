@@ -129,6 +129,8 @@ public:
 
 	void RealizePalette(void) {};
 	void ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatus,unsigned char LoadRoms);
+    
+    void CreateDiscImage(const char *Filename, int Drive, int Heads, int Tracks);
 
 	void TranslateFDC(void);
 	void TranslateTiming(int TimingId);
