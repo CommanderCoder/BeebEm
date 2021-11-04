@@ -28,10 +28,10 @@ static bool LastAddrInROM = false;
 static bool DebugHost = false;
 static bool DebugParasite = false;
 
-extern "C" void swift_SetControlValue(unsigned int cmd, int state);
-extern "C" int swift_GetControlValue(unsigned int cmd);
-extern "C" void swift_SetControlEditText(unsigned int cmd, CFStringRef text);
-extern "C" void swift_GetControlEditText(unsigned int cmd, const char* text, int length);
+extern "C" void swift_menuSetControlValue(unsigned int cmd, int state);
+extern "C" int swift_menuGetControlValue(unsigned int cmd);
+extern "C" void swift_menuSetControlEditText(unsigned int cmd, CFStringRef text);
+extern "C" void swift_menuGetControlEditText(unsigned int cmd, const char* text, int length);
 
 
 //*******************************************************************
@@ -696,7 +696,7 @@ int ret;
 	GetControlByID (mDebugWindow, &dbControlID, &dbControl);
 	ret = GetControlValue(dbControl);
 #else
-    ret = swift_GetControlValue(box);
+    ret = swift_menuGetControlValue(box);
 #endif
     return ret;
 }
@@ -712,7 +712,7 @@ void SetCheckBoxValue(OSType box, int State)
 	GetControlByID (mDebugWindow, &dbControlID, &dbControl);
 	SetControlValue(dbControl, State);
 #else
-    swift_SetControlValue(box, State);
+    swift_menuSetControlValue(box, State);
 #endif
 }
 
@@ -949,7 +949,7 @@ void DebugExecuteCommand()
 	CFRelease (cmd_text);
 #else
     unsigned int Cmd = 'dcmd';
-    swift_GetControlEditText(Cmd, command, MAX_COMMAND_LEN + 1);
+    swift_menuGetControlEditText(Cmd, command, MAX_COMMAND_LEN + 1);
 #endif
 
 	if (strlen(command) == 0)
@@ -990,7 +990,7 @@ void DebugExecuteCommand()
 			SetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text);
             CFRelease (cmd_text);
 #else
-            swift_SetControlEditText(Cmd, cmd_text);
+            swift_menuSetControlEditText(Cmd, cmd_text);
 #endif
             break;
 			
@@ -1011,7 +1011,7 @@ void DebugExecuteCommand()
 			SetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text);
 			CFRelease (cmd_text);
 #else
-            swift_SetControlEditText(Cmd, cmd_text);
+            swift_menuSetControlEditText(Cmd, cmd_text);
 #endif
             break;
 			
@@ -1038,7 +1038,7 @@ void DebugExecuteCommand()
 			SetControlData(Cmd, 0, kControlEditTextCFStringTag, sizeof(CFStringRef), &cmd_text);
 			CFRelease (cmd_text);
 #else
-            swift_SetControlEditText(Cmd, cmd_text);
+            swift_menuSetControlEditText(Cmd, cmd_text);
 #endif
             break;
 			

@@ -27,4 +27,12 @@ void beeb_TapeControlCloseDialog();
 long beeb_getTableRowsCount(const char* tablename);
 const char* beeb_getTableCellData(unsigned int property, long itemID);
 
+
+long beeb_UKHandleCommand(unsigned int cmdID);
+
 int beeb_autorun(char *path);
+
+
+void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode);
+
+void beeb_uksetasstitle(const char* title);

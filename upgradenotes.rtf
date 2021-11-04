@@ -5,7 +5,32 @@
 \paperw12240\paperh15840\margl1440\margr1440\vieww9000\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 Making the Windows version work inside my framework.\
+\f0\fs24 \cf0 \
+\
+HMM.. 17 June 2021.  Had a break and now I've forgotten what I was doing.  Probably something to do with getting windows version more integrated.\
+However, the Mac version is still missing things like the keyboard prefs.  Should this come first?\
+\
+So, I removed the 'newSrc' from the build as they had conflicting filenames (e.g. tube.h, debug.h, z80.h) and log.cpp and debug.cpp had conflicting functions like DebugDisassembler and WriteLog\
+\
+Hard drives..   Read how to use a BBC hard drive. (IDE & SCSI)\
+\
+\
+see bugs.rtf for feedback\
+\
+search //ACH for removed bits \
+\
+Windows version:\
+joystick, mousestick, keymappings, \
+Disable keys : windows key, break key, escape key, shortcut key, all keys (?)\
+Debugger\
+Preference Options; autosave CMOS, autosave all, save folders, select user data folder...\
+\
+---\
+\
+\
+Pre-17 June 2021\
+\
+Making the Windows version work inside my framework.\
 \
 : skip anything that is a bit awkward\
   music5000\
@@ -17,6 +42,9 @@
   FolderSelectDialog\
   SelectKeyDialog\
   UserPortBreakoutBox\
+\
+\
+\
 \
 \
 : get the MAIN header working \

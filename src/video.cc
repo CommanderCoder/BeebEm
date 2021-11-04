@@ -51,6 +51,12 @@
 #endif
 #endif
 
+
+extern "C" enum KB_LEDS { CASS, CAPS, SHIFT };
+extern "C" int swift_SetLED(KB_LEDS led, bool on);
+
+
+
 /* Bit assignments in control reg:
    0 - Flash colour (0=first colour, 1=second)
    1 - Teletext select (0=on chip serialiser, 1=teletext)
@@ -1348,6 +1354,7 @@ static void VideoAddCursor(void) {
 	}
 }
 
+
 void VideoAddLEDs(void) {
 	// now add some keyboard leds
 	if (LEDs.ShowKB) {
@@ -1363,6 +1370,13 @@ void VideoAddLEDs(void) {
 		mainWin->doLED(618,LEDs.Disc0);
 		mainWin->doLED(628,LEDs.Disc1);
 	}
+    
+    // Swift LEDs here
+    if (MachineType==3) swift_SetLED(CASS,true); else swift_SetLED(CASS,LEDs.Motor);
+    swift_SetLED(CAPS,LEDs.CapsLock);
+    swift_SetLED(SHIFT,LEDs.ShiftLock);
+
+
 }
 
 /*-------------------------------------------------------------------------*/

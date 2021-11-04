@@ -27,6 +27,8 @@ extern FILE *tlog;
 extern unsigned char UEFOpen;
 
 
+extern OSStatus UKWindowCommandHandler(UInt32 cmdID);
+
 extern BeebWin *mainWin;
 
 extern char AutoRunPath[];
@@ -42,7 +44,7 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
      static int ctrl = 0x0000;
      int LastShift, LastCtrl, LastCaps, LastCmd;
      int NewShift, NewCtrl=0, NewCaps;
-//     static int NewCmd = 0; //remember CMD pressed
+     static int NewCmd = 0; //remember CMD pressed
      
     
     switch (eventkind)
@@ -80,11 +82,12 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
                 } else if ( (NewCmd) && (keycode == 17) ) // 17 = T key
                 {
                     // CMD-T
-                    fprintf(stderr, "cmd-T pressed, NewCmd = %d\n", NewCmd);
+//                    fprintf(stderr, "cmd-T pressed, NewCmd = %d\n", NewCmd);
                     trace_186 = 1 - trace_186;
                 }
               else
 #endif
+                if (! (NewCmd) )
                 {
                     mainWin->KeyDown(keycode);
                 }
@@ -126,12 +129,12 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
                 LastShift = ctrl & 0x20006; // capture left and right shift
                 LastCtrl = ctrl & 0x40001; // capture left
                 LastCaps = ctrl & 0x80020; // capture left ALT/Option
-//                LastCmd = ctrl & 0x100018; // capture left and right CMD
+                LastCmd = ctrl & 0x100018; // capture left and right CMD
 
                 NewShift = keycode & 0x20006; // capture left and right shift
                 NewCtrl = keycode & 0x40001; // capture left
                 NewCaps = keycode & 0x80020; // capture left ALT/Option
-//                NewCmd = keycode &  0x100018; // capture left and right CMD
+                NewCmd = keycode &  0x100018; // capture left and right CMD
 
             
 //                fprintf(stderr, "Key modifier : code = %016x\n", keycode);
@@ -330,7 +333,7 @@ extern "C" void beeb_TapeControlOpenDialog()
 
 extern "C" void beeb_TapeControlCloseDialog()
 {
-TapeControlCloseDialog();
+    TapeControlCloseDialog();
 }
 
 
@@ -341,6 +344,14 @@ extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
     return TCWindowCommandHandler(cmdID);
 }
     
+// user keyboard
+extern "C" long beeb_UKHandleCommand(unsigned int cmdID)
+{
+    char* cmdCHR = (char*)&cmdID;
+    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+    return UKWindowCommandHandler(cmdID);
+}
+
 extern "C" long beeb_getTableRowsCount(const char* tablename)
 {
     if (UEFOpen)

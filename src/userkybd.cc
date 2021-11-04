@@ -25,13 +25,17 @@
 #include "userkybd.h"
 #include "plist.h"
 
+extern "C" void swift_uksetasstitle(const char* title);
+extern "C" void swift_buttonSetControlValue(unsigned int cmd, int state);
+
 void GetKeysUsed( char *Keys );
 const char *KeyName( int Key );
 
 int		BBCRow;			// Used to store the Row and Col values while we wait 
 int		BBCCol;			// for a key press from the User.
 
-WindowRef mUKWindow = NULL; 
+WindowRef mUKWindow = NULL;
+
 
 // Row,Col  Default values set to transTable1
 int UserKeymap[256][2]={
@@ -264,40 +268,58 @@ char Keys[256];
 		SetControlValue(dbControl, 0);
 	}
 #else
-    // get 'ass ' control
-    // create a string with the _Keys_ value
     // set the 'ass ' text to the _Keys_ value
+    swift_uksetasstitle(Keys);
+
     // if a new last button -
-    // - key the control with this 'LastButton' and unset it
+    if ( (LastButton != 0) && (LastButton != key) )
+    {
+        // - find the control with this 'LastButton' and unset the control
+        swift_buttonSetControlValue(LastButton, 0);
+    }
 #endif
 	LastButton = key;
 }
 
 //*******************************************************************
+#if 0 //ACH - user keyboard (DONE)
 
 OSStatus UKWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
-//	int i;
-//    HICommand command; 
+	int i;
+    HICommand command;
     OSStatus err = noErr;
-#if 0 //ACH - command handler
 
     err = GetEventParameter(event, kEventParamDirectObject,
 							typeHICommand, NULL, sizeof(HICommand), NULL, &command);
     require_noerr (err, CantGetParameter);
 	
 	err = noErr;
+    UInt32 cmdID = command.commandID;
+#else
+OSStatus UKWindowCommandHandler(UInt32 cmdID)
+{
+    int i;
+    OSStatus err = noErr;
 
-	SetRowCol(command.commandID);
+    // get the command from the event
+    // if BBCrow and BBC col are both 0, then
+    // a) if command was 'ok  ', close keyboard dialogue
+    // b) if  'rest', copy trans into keymap and set LastButton
+    // if BBCrow and BBCcol are not both 0, then show the key
+
+#endif
+	SetRowCol(cmdID);
 	
 	if ((BBCRow == 0) & (BBCCol == 0))
 	{
-		switch (command.commandID)
+		switch (cmdID)
 		{
+#if 0 //ACH
 			case 'ok  ':
 				UserKeyboardCloseDialog();
 				break;
-				
+#endif
 			case 'rest':
 				for (i = 0; i < 256; ++i)
 				{
@@ -318,15 +340,9 @@ OSStatus UKWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event,
 	}
 	else
 	{
-		ShowKey(command.commandID);
+		ShowKey(cmdID);
 	}
-#else
-    // get the command from the event
-    // if BBCrow and BBC col are both 0, then
-    // a) if command was 'ok  ', close keyboard dialogue
-    // b) if  'rest', copy trans into keymap and set LastButton
-    // if BBCrow and BBCcol are not both 0, then show the key
-#endif
+
 CantGetParameter:
 		return err;
 }
@@ -338,36 +354,54 @@ static OSStatus UKWindowEventHandler(EventHandlerCallRef nextHandler, EventRef e
 	char charCode;
 	int keycode;
 
-	switch (GetEventKind(event)) 
-	{
-		case kEventRawKeyDown:
-			GetEventParameter(event, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(char), NULL, &charCode);
-			GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(int), NULL, &keycode);
-			fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
-			if (LastButton != 0)
-			{
-				SetBBCKeyForVKEY(keycode);
-				ShowKey(LastButton);
-			}
-			break;
+    switch (GetEventKind(event))
+    {
+        case kEventRawKeyDown:
+            GetEventParameter(event, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(char), NULL, &charCode);
+            GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(int), NULL, &keycode);
+            fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+            if (LastButton != 0)
+            {
+                SetBBCKeyForVKEY(keycode);
+                ShowKey(LastButton);
+            }
+            break;
 
-        case kEventWindowClosed: 
-			mUKWindow = NULL;
+        case kEventWindowClosed:
+            mUKWindow = NULL;
             break;
         
-		default:
+        default:
             err = eventNotHandledErr;
             break;
     }
-    
-	return err;
 }
-#endif
+#else
+    
+extern "C" void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode)
+{
 
-#if 0 //ACH -  keyboard dialogs
+    switch (eventkind)
+    {
+        case kEventRawKeyDown:
+
+            fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+            if (LastButton != 0)
+            {
+                SetBBCKeyForVKEY(keycode);
+                ShowKey(LastButton);
+            }
+    }
+
+}
+
+#endif
 
 void UserKeyboardOpenDialog()
 {
+
+#if 0 //ACH -  keyboard dialogs
+
 	IBNibRef 		nibRef;
 	EventTypeSpec UKcommands[] = {
 	{ kEventClassCommand, kEventCommandProcess }
@@ -398,18 +432,21 @@ void UserKeyboardOpenDialog()
 								   mUKWindow, NULL);
 		
 	}
+#endif
 }
 
 void UserKeyboardCloseDialog()
 {
+#if 0 //ACH -  keyboard dialogs
+
 	if (mUKWindow)
 	{
 		HideWindow(mUKWindow);
 		DisposeWindow(mUKWindow);
 	}
 	mUKWindow = NULL;
-}
 #endif
+}
 
 /****************************************************************************/
 void SetBBCKeyForVKEY( int Key )
@@ -747,3 +784,4 @@ void SaveUserKeyboard( char *path )
 	CFRelease(keyboardFile);
 #endif
 }
+

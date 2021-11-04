@@ -18,9 +18,27 @@ import Cocoa
     case KEYBOARD
 }
 
+
+@objc public enum KB_LEDs : Int {
+    case CASS = 0
+    case CAPS
+    case SHIFT
+}
+
+//option set (bit flags)
+struct LEDFlags: OptionSet
+{
+    let rawValue: Int
+
+    static let CassLED  = LEDFlags(rawValue: 1 << KB_LEDs.CASS.rawValue)
+    static let CapsLED  = LEDFlags(rawValue: 1 << KB_LEDs.CAPS.rawValue)
+    static let ShiftLED = LEDFlags(rawValue: 1 << KB_LEDs.SHIFT.rawValue)
+}
+
 enum CBridge {
     static var windowTitle = "-"
     static var nextCPU = 0
+    static var leds: LEDFlags = []
 }
 
 // allow access to this in C
@@ -135,6 +153,15 @@ func conv(_ value: UInt32) -> String
     return s
 }
 
+extension NSView {
+
+    func subviewsRecursive() -> [NSView] {
+        return subviews + subviews.flatMap { $0.subviewsRecursive() }
+    }
+}
+
+
+
 func recurse(find id: String, menu: NSMenu) -> NSMenuItem? {
   for item in menu.items {
       if item.identifier?.rawValue == id && item.isEnabled
@@ -237,8 +264,8 @@ public func swift_Alert(_ text: UnsafePointer<CChar>, _ text2: UnsafePointer<CCh
 }
 
 
-@_cdecl("swift_SetControlValue")
-public func swift_SetControlValue(_ cmd: UInt32, _ state: Int)
+@_cdecl("swift_menuSetControlValue")
+public func swift_menuSetControlValue(_ cmd: UInt32, _ state: Int)
 {
     let cmdSTR = conv(cmd)
     if let n = menuItemByIdentifier(id:cmdSTR)
@@ -248,8 +275,8 @@ public func swift_SetControlValue(_ cmd: UInt32, _ state: Int)
     }
 }
 
-@_cdecl("swift_GetControlValue")
-public func swift_GetControlValue(_ cmd: UInt32) -> Int
+@_cdecl("swift_menuGetControlValue")
+public func swift_menuGetControlValue(_ cmd: UInt32) -> Int
 {
     var val: Int = 0
     let cmdSTR =  conv(cmd)
@@ -261,8 +288,8 @@ public func swift_GetControlValue(_ cmd: UInt32) -> Int
     return val
 }
 
-@_cdecl("swift_SetControlEditText")
-public func swift_SetControlEditText(_ cmd: UInt32, _ text: NSString)
+@_cdecl("swift_menuSetControlEditText")
+public func swift_menuSetControlEditText(_ cmd: UInt32, _ text: NSString)
 {
     let cmdSTR =  conv(cmd)
     if let n = textFieldByIdentifier(id:cmdSTR)
@@ -271,8 +298,8 @@ public func swift_SetControlEditText(_ cmd: UInt32, _ text: NSString)
     }
 }
 
-@_cdecl("swift_GetControlEditText")
-public func swift_GetControlEditText(_ cmd: UInt32, _ text: NSMutableString, _ length:Int)
+@_cdecl("swift_menuGetControlEditText")
+public func swift_menuGetControlEditText(_ cmd: UInt32, _ text: NSMutableString, _ length:Int)
 {
     let cmdSTR =  conv(cmd)
     if let n = textFieldByIdentifier(id:cmdSTR)
@@ -284,3 +311,52 @@ public func swift_GetControlEditText(_ cmd: UInt32, _ text: NSMutableString, _ l
     }
     
 }
+
+
+
+// VERY POOR USE OF VARS
+@_cdecl("swift_SetLED")
+public func swift_SetLED(_ led: KB_LEDs, _ value: Bool)
+{
+    var ledf: LEDFlags
+    switch (led)
+    {
+    case KB_LEDs.CASS:
+        ledf = .CassLED
+        break
+    case KB_LEDs.CAPS:
+        ledf = .CapsLED
+        break
+    case KB_LEDs.SHIFT:
+        ledf = .ShiftLED
+        break
+    }
+    
+    if (value)
+    {
+        CBridge.leds.insert(ledf)
+    }
+    else
+    {
+        CBridge.leds.remove(ledf)
+    }
+}
+
+
+@_cdecl("swift_uksetasstitle")
+public func swift_uksetasstitle( _ text: UnsafePointer<CChar>)
+{
+    print("\(#function) \(text)")
+    kbViewControllerInstance?.setasstitle(String(cString: text));
+}
+
+
+
+@_cdecl("swift_buttonSetControlValue")
+public func swift_buttonSetControlValue(_ cmd: UInt32, _ state: Int)
+{
+    let cmdSTR = conv(cmd)
+    
+    kbViewControllerInstance?.buttonSetControlValue(cmdSTR, state);
+}
+

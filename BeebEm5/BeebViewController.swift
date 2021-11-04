@@ -73,7 +73,7 @@ class BeebViewController: NSViewController {
         var renderer = Renderer(width: 640, height: 512)
         renderer.draw()
         
-        imageView.image = NSImage(bitmap: renderer.bitmap)
+            imageView?.image = NSImage(bitmap: renderer.bitmap)
 
         // update the CPU
         update_cpu()
@@ -100,6 +100,11 @@ class BeebViewController: NSViewController {
     
     @IBOutlet weak var WIPlabel: NSTextField!
 
+    
+    @IBOutlet weak var CassMotorLED: NSImageView!
+    @IBOutlet weak var CapsLED: NSImageView!
+    @IBOutlet weak var ShiftLED: NSImageView!
+    
  
     func setupBeeb()
     {
@@ -114,7 +119,7 @@ class BeebViewController: NSViewController {
 
 
 
-// - CPU
+// - CPU part of the controller
 extension BeebViewController{
     
     func init_cpu()
@@ -155,7 +160,8 @@ extension BeebViewController{
             if let mainwindow = NSApplication.shared.mainWindow {
                 mainwindow.title = CBridge.windowTitle
             }
-            WIPlabel?.stringValue = CBridge.windowTitle
+            
+            update_hardware_bridge()
 
             cpuDelaying = true
             
@@ -173,6 +179,18 @@ extension BeebViewController{
 //        }
     }
 
+    func update_hardware_bridge()
+    {
+        WIPlabel?.stringValue = CBridge.windowTitle
+
+        if #available(OSX 10.14, *) {
+            CapsLED?.contentTintColor = CBridge.leds.contains(.CapsLED) ? NSColor.red: NSColor.darkGray
+            ShiftLED?.contentTintColor = CBridge.leds.contains(.ShiftLED) ? NSColor.red: NSColor.darkGray
+            CassMotorLED?.contentTintColor = CBridge.leds.contains(.CassLED) ? NSColor.red: NSColor.darkGray
+        } else {
+            // Fallback on earlier versions
+        }
+    }
     
     func end_cpu()
     {
