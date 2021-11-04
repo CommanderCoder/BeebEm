@@ -1286,7 +1286,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4qr-lk-NYG"/>
-                                        <menuItem title="Define User Keyboard" id="B1I-rl-rOd">
+                                        <menuItem title="Define User Keyboard" identifier="kusr" id="B1I-rl-rOd">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <segue destination="Z3G-lH-LH8" kind="show" id="lQr-K2-Upq"/>
@@ -1305,7 +1305,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="30f-hm-6UV"/>
-                                        <menuItem title="User Defined Mapping" enabled="NO" identifier="kusr" id="Dlw-PT-80g">
+                                        <menuItem title="User Defined Mapping" identifier="udkm" id="Dlw-PT-80g">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="moe-3e-tZ0"/>

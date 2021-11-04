@@ -10,6 +10,7 @@
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
 		DC41118225A2222A00E59712 /* Bugs.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC41118125A2222A00E59712 /* Bugs.rtf */; };
 		DC41118525A226BC00E59712 /* diskimg in Resources */ = {isa = PBXBuildFile; fileRef = DC41118425A226BC00E59712 /* diskimg */; };
+		DC692B27272E876400F8B465 /* KeyboardMappingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */; };
 		DC6A476924A54541007E4276 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476824A54541007E4276 /* libz.tbd */; };
 		DC6A476B24A54DA3007E4276 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */; };
 		DC70E75725A3A65300A7FF3E /* upgradenotes.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC70E75625A3A65300A7FF3E /* upgradenotes.rtf */; };
@@ -92,6 +93,7 @@
 		DC41118125A2222A00E59712 /* Bugs.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Bugs.rtf; sourceTree = "<group>"; };
 		DC41118425A226BC00E59712 /* diskimg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = diskimg; sourceTree = "<group>"; };
 		DC59F1A224BE01D000687D2A /* beebem5-distribution */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "beebem5-distribution"; sourceTree = "<group>"; };
+		DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardMappingViewController.swift; sourceTree = "<group>"; };
 		DC6A476824A54541007E4276 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		DC70E75625A3A65300A7FF3E /* upgradenotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = upgradenotes.rtf; sourceTree = "<group>"; };
@@ -319,6 +321,7 @@
 				DC8716A124CC3A5900FA27DF /* BeebImageView.swift */,
 				DC8716A324CC3A6800FA27DF /* BeebViewController.swift */,
 				DC4106F226E54DAC000A1E37 /* BeebApplication.swift */,
+				DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */,
 			);
 			path = BeebEm5;
 			sourceTree = "<group>";
@@ -597,6 +600,7 @@
 				DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */,
 				DCE5E862267B362C00F3CD34 /* z80_support.cc in Sources */,
 				DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */,
+				DC692B27272E876400F8B465 /* KeyboardMappingViewController.swift in Sources */,
 				DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */,
 				DC70E76F25A3AE6200A7FF3E /* econet.cc in Sources */,
 				DC70E77325A3AE6200A7FF3E /* serial.cc in Sources */,

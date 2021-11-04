@@ -28,8 +28,7 @@ class KeyboardMappingViewController: NSViewController {
         // Do view setup here.
         
         for case let btn as NSButton in keyboardBtns.subviewsRecursive() {
-            print(btn.title)
-//            btn.identifier = NSUserInterfaceItemIdentifier(btn.title.uppercased())
+            print("\(btn.title) {\(btn.identifier?.rawValue)}")
             btn.action = #selector(kbdbtnPressed)
         }
         
@@ -40,14 +39,14 @@ class KeyboardMappingViewController: NSViewController {
     @objc
     func kbdbtnPressed(sender: NSButton!)
     {
-        print("\(sender.title) Pressed")
-        TCHandleCommand(sender)
+        print("\(sender.title) Pressed {\(sender.identifier?.rawValue)}")
+        UKHandleCommand(sender)
     }
         
     // for reset button
-    @IBAction func TCHandleCommand(_ sender: NSButton) {
+    @IBAction func UKHandleCommand(_ sender: NSButton) {
 //        let cmd: String = sender.identifier?.rawValue ?? "none"
-          let cmd: String = sender.identifier?.rawValue ?? "none"
+        let cmd: String = sender.identifier?.rawValue.padding(toLength: 4, withPad: " ", startingAt: 0) ?? "none"
         beeb_UKHandleCommand(conv(cmd));
     }
 
