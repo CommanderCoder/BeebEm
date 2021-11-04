@@ -1749,42 +1749,42 @@
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hb8-TX-XaB" userLabel="row1">
                                         <rect key="frame" x="99" y="140" width="352" height="24"/>
                                         <subviews>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="I5p-NM-mnQ">
+                                            <button identifier="F0" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="I5p-NM-mnQ">
                                                 <rect key="frame" x="0.0" y="0.0" width="23" height="24"/>
                                                 <buttonCell key="cell" type="square" title="f0" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="OAp-xE-czk">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gMJ-V5-JHg">
+                                            <button identifier="F1" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gMJ-V5-JHg">
                                                 <rect key="frame" x="31" y="0.0" width="21" height="24"/>
                                                 <buttonCell key="cell" type="square" title="f1" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sgh-0G-rnI">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fGv-TY-GrM">
+                                            <button identifier="F2" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fGv-TY-GrM">
                                                 <rect key="frame" x="60" y="0.0" width="23" height="24"/>
                                                 <buttonCell key="cell" type="square" title="f2" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ctd-Bk-u0H">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dhO-pL-Uz4">
+                                            <button identifier="F3" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dhO-pL-Uz4">
                                                 <rect key="frame" x="91" y="0.0" width="23" height="24"/>
                                                 <buttonCell key="cell" type="square" title="f3" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rcJ-sz-9tW">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hE4-TB-kfF">
+                                            <button identifier="F4" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hE4-TB-kfF">
                                                 <rect key="frame" x="122" y="0.0" width="23" height="24"/>
                                                 <buttonCell key="cell" type="square" title="f4" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6Gt-ua-0Me">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pm4-DO-CET">
+                                            <button identifier="F5" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pm4-DO-CET">
                                                 <rect key="frame" x="153" y="0.0" width="23" height="24"/>
                                                 <buttonCell key="cell" type="square" title="f5" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Uuk-WZ-RdY">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1819,7 +1819,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="J19-WD-xfD">
+                                            <button identifier="BRK" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="J19-WD-xfD">
                                                 <rect key="frame" x="307" y="0.0" width="45" height="24"/>
                                                 <buttonCell key="cell" type="square" title="Break" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cga-m7-bfl">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1858,112 +1858,112 @@
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OHb-fU-fN8" userLabel="row2">
                                         <rect key="frame" x="0.0" y="112" width="550" height="24"/>
                                         <subviews>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rvm-hJ-CGc">
+                                            <button identifier="ESC" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rvm-hJ-CGc">
                                                 <rect key="frame" x="0.0" y="0.0" width="36" height="24"/>
                                                 <buttonCell key="cell" type="square" title="ESC" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="XuJ-DS-JjT">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lvS-4a-9e9">
+                                            <button identifier="1" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lvS-4a-9e9">
                                                 <rect key="frame" x="42" y="0.0" width="24" height="24"/>
                                                 <buttonCell key="cell" type="square" title="1 !" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Gnv-Mj-Ozo">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XNc-fl-GLS">
+                                            <button identifier="2" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XNc-fl-GLS">
                                                 <rect key="frame" x="72" y="0.0" width="27" height="24"/>
                                                 <buttonCell key="cell" type="square" title="2 &quot;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oh8-Ig-HR1">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="a9y-xc-ime">
+                                            <button identifier="3" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="a9y-xc-ime">
                                                 <rect key="frame" x="105" y="0.0" width="30" height="24"/>
                                                 <buttonCell key="cell" type="square" title="3 #" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="F3M-b8-51K">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SBb-Jz-j0w">
+                                            <button identifier="4" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SBb-Jz-j0w">
                                                 <rect key="frame" x="141" y="0.0" width="31" height="24"/>
                                                 <buttonCell key="cell" type="square" title="4 $" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="NHO-8B-rFZ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DQm-C4-yEj">
+                                            <button identifier="5" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DQm-C4-yEj">
                                                 <rect key="frame" x="178" y="0.0" width="33" height="24"/>
                                                 <buttonCell key="cell" type="square" title="5 %" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sbE-3E-mbA">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DSx-em-0mi">
+                                            <button identifier="6" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DSx-em-0mi">
                                                 <rect key="frame" x="217" y="0.0" width="31" height="24"/>
                                                 <buttonCell key="cell" type="square" title="6 &amp;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="t85-ij-3WQ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="can-qz-JEm">
+                                            <button identifier="7" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="can-qz-JEm">
                                                 <rect key="frame" x="254" y="0.0" width="25" height="24"/>
                                                 <buttonCell key="cell" type="square" title="7 '" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="EiC-vy-l4e">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DPw-Ma-S0b">
+                                            <button identifier="8" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DPw-Ma-S0b">
                                                 <rect key="frame" x="285" y="0.0" width="27" height="24"/>
                                                 <buttonCell key="cell" type="square" title="8 (" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="GyJ-l4-MFS">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rgw-sa-unN">
+                                            <button identifier="9" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rgw-sa-unN">
                                                 <rect key="frame" x="318" y="0.0" width="27" height="24"/>
                                                 <buttonCell key="cell" type="square" title="9 )" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="jV8-tc-ala">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hAd-lk-KPH">
+                                            <button identifier="0" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hAd-lk-KPH">
                                                 <rect key="frame" x="351" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="0" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="EhU-56-U7N">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BpA-dR-fM6">
+                                            <button identifier="-=" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BpA-dR-fM6">
                                                 <rect key="frame" x="376" y="0.0" width="29" height="24"/>
-                                                <buttonCell key="cell" type="square" title="- =" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="kii-du-hsD">
+                                                <buttonCell key="cell" type="square" title="- =" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" identifier="-=" imageScaling="proportionallyDown" inset="2" id="kii-du-hsD">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BWn-eS-Ba1">
+                                            <button identifier="^~" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BWn-eS-Ba1">
                                                 <rect key="frame" x="411" y="0.0" width="28" height="24"/>
                                                 <buttonCell key="cell" type="square" title="^ ~" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ByK-wv-r7U">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QFk-xJ-gfg">
+                                            <button identifier="\\|" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QFk-xJ-gfg">
                                                 <rect key="frame" x="445" y="0.0" width="23" height="24"/>
                                                 <buttonCell key="cell" type="square" title="\ |" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qqq-62-osJ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IQT-0y-9Y5">
+                                            <button identifier="LFT" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IQT-0y-9Y5">
                                                 <rect key="frame" x="474" y="0.0" width="33" height="24"/>
                                                 <buttonCell key="cell" type="square" title="LFT" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Qax-a4-BBm">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="U2O-fc-4iv">
+                                            <button identifier="RGT" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="U2O-fc-4iv">
                                                 <rect key="frame" x="513" y="0.0" width="37" height="24"/>
                                                 <buttonCell key="cell" type="square" title="RGT" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Nsw-lr-3HS">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2011,112 +2011,112 @@
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yef-dt-QWg" userLabel="row3">
                                         <rect key="frame" x="52" y="84" width="447" height="24"/>
                                         <subviews>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FHv-tz-2s8">
+                                            <button identifier="TAB" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FHv-tz-2s8">
                                                 <rect key="frame" x="0.0" y="0.0" width="35" height="24"/>
                                                 <buttonCell key="cell" type="square" title="TAB" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rc7-xt-jq2">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wKf-al-Lcu">
+                                            <button identifier="Q" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wKf-al-Lcu">
                                                 <rect key="frame" x="41" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="Q" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8xK-4E-6Vc">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aEO-1f-6hx">
+                                            <button identifier="W" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aEO-1f-6hx">
                                                 <rect key="frame" x="67" y="0.0" width="23" height="24"/>
                                                 <buttonCell key="cell" type="square" title="W" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ATz-b1-Lyw">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jlA-75-TTa">
+                                            <button identifier="E" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jlA-75-TTa">
                                                 <rect key="frame" x="96" y="0.0" width="18" height="24"/>
                                                 <buttonCell key="cell" type="square" title="E" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="UqY-gO-rGt">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mEm-dk-ZRw">
+                                            <button identifier="R" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mEm-dk-ZRw">
                                                 <rect key="frame" x="120" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="R" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="S1M-go-vSS">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RuH-yB-xZE">
+                                            <button identifier="T" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RuH-yB-xZE">
                                                 <rect key="frame" x="145" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="T" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="4iU-br-RGT">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="l8J-m9-Z36">
+                                            <button identifier="Y" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="l8J-m9-Z36">
                                                 <rect key="frame" x="170" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="Y" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qhY-5w-abE">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wz1-b8-e2D">
+                                            <button identifier="U" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wz1-b8-e2D">
                                                 <rect key="frame" x="195" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="U" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="T7k-yw-fFz">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NBV-Gq-OJq">
+                                            <button identifier="I" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NBV-Gq-OJq">
                                                 <rect key="frame" x="221" y="0.0" width="14" height="24"/>
                                                 <buttonCell key="cell" type="square" title="I" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="kIW-10-HUh">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DE8-9a-47y">
+                                            <button identifier="O" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DE8-9a-47y">
                                                 <rect key="frame" x="241" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="O" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="u86-X6-nAC">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WVe-ht-9oF">
+                                            <button identifier="P" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WVe-ht-9oF">
                                                 <rect key="frame" x="267" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="P" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6iY-wD-yKe">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QPS-N5-xxh">
+                                            <button identifier="@" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QPS-N5-xxh">
                                                 <rect key="frame" x="292" y="0.0" width="22" height="24"/>
                                                 <buttonCell key="cell" type="square" title="@" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oYa-Xl-AMX">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QUZ-SM-Ukc">
+                                            <button identifier="[{" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QUZ-SM-Ukc">
                                                 <rect key="frame" x="320" y="0.0" width="24" height="24"/>
                                                 <buttonCell key="cell" type="square" title="[ {" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="a7i-UA-HUb">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JjT-du-3Ja">
+                                            <button identifier="_£" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JjT-du-3Ja">
                                                 <rect key="frame" x="350" y="0.0" width="28" height="24"/>
                                                 <buttonCell key="cell" type="square" title="_ £" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Hcg-Ih-bAt">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HOS-Hf-8LZ">
+                                            <button identifier="UP" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HOS-Hf-8LZ">
                                                 <rect key="frame" x="384" y="0.0" width="28" height="24"/>
                                                 <buttonCell key="cell" type="square" title="UP" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="JdD-1Q-5Se">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6P7-wj-CGF">
+                                            <button identifier="DN" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6P7-wj-CGF">
                                                 <rect key="frame" x="418" y="0.0" width="29" height="24"/>
                                                 <buttonCell key="cell" type="square" title="DN" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xh4-1b-bCa">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2164,105 +2164,105 @@
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kmw-RP-mUX" userLabel="row4">
                                         <rect key="frame" x="36" y="56" width="478" height="24"/>
                                         <subviews>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="w4M-wN-Azl">
+                                            <button identifier="CAPS" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="w4M-wN-Azl">
                                                 <rect key="frame" x="0.0" y="0.0" width="45" height="24"/>
                                                 <buttonCell key="cell" type="square" title="CAPS" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5jz-wZ-ssF">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aIz-7p-mVS">
+                                            <button identifier="CTRL" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aIz-7p-mVS">
                                                 <rect key="frame" x="51" y="0.0" width="43" height="24"/>
                                                 <buttonCell key="cell" type="square" title="CTRL" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oWS-q7-Kfz">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wie-4w-Lja">
+                                            <button identifier="A" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wie-4w-Lja">
                                                 <rect key="frame" x="100" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="A" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="YOP-2O-WN1">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sra-bt-Hdz">
+                                            <button identifier="S" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sra-bt-Hdz">
                                                 <rect key="frame" x="125" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="S" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dFH-zp-3hg">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fzr-bM-sEx">
+                                            <button identifier="D" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fzr-bM-sEx">
                                                 <rect key="frame" x="150" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="D" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vwJ-og-FlV">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zRs-K1-bhz">
+                                            <button identifier="F" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zRs-K1-bhz">
                                                 <rect key="frame" x="176" y="0.0" width="18" height="24"/>
                                                 <buttonCell key="cell" type="square" title="F" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ghS-Xv-UwF">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bXh-Ml-bj2">
+                                            <button identifier="G" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bXh-Ml-bj2">
                                                 <rect key="frame" x="200" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="G" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="g6h-Sf-sGl">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dgK-gv-qmh">
+                                            <button identifier="H" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dgK-gv-qmh">
                                                 <rect key="frame" x="226" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="H" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bNg-VL-zqM">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NUO-Cf-l7S">
+                                            <button identifier="J" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NUO-Cf-l7S">
                                                 <rect key="frame" x="252" y="0.0" width="17" height="24"/>
                                                 <buttonCell key="cell" type="square" title="J" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="AQW-FV-vmo">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ckA-bS-jd3">
+                                            <button identifier="K" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ckA-bS-jd3">
                                                 <rect key="frame" x="275" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="K" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dem-1V-9rZ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IGz-oi-7Em">
+                                            <button identifier="L" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IGz-oi-7Em">
                                                 <rect key="frame" x="300" y="0.0" width="18" height="24"/>
                                                 <buttonCell key="cell" type="square" title="L" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="04X-kJ-mUg">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0By-yb-GaQ">
+                                            <button identifier=";+" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0By-yb-GaQ">
                                                 <rect key="frame" x="324" y="0.0" width="26" height="24"/>
                                                 <buttonCell key="cell" type="square" title="; +" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vwH-OG-stq">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fLe-In-I0F">
+                                            <button identifier=":*" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fLe-In-I0F">
                                                 <rect key="frame" x="356" y="0.0" width="24" height="24"/>
                                                 <buttonCell key="cell" type="square" title=": *" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Jep-Mc-84O">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="eeF-67-Qqx">
+                                            <button identifier="]}" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="eeF-67-Qqx">
                                                 <rect key="frame" x="386" y="0.0" width="24" height="24"/>
                                                 <buttonCell key="cell" type="square" title="] }" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="fff-3I-KWr">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="52a-cT-Yj8">
+                                            <button identifier="RET" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="52a-cT-Yj8">
                                                 <rect key="frame" x="416" y="0.0" width="62" height="24"/>
                                                 <buttonCell key="cell" type="square" title="RETURN" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sJR-b9-2qW">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2308,7 +2308,7 @@
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HvN-Q2-xDS" userLabel="row5">
                                         <rect key="frame" x="5" y="28" width="541" height="24"/>
                                         <subviews>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cDu-01-vAc">
+                                            <button identifier="SLCK" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cDu-01-vAc">
                                                 <rect key="frame" x="0.0" y="0.0" width="67" height="24"/>
                                                 <buttonCell key="cell" type="square" title="SHIFT LK" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="465-Hl-QyQ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2322,70 +2322,70 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wuQ-RQ-jEW">
+                                            <button identifier="Z" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wuQ-RQ-jEW">
                                                 <rect key="frame" x="126" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="Z" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="1Sw-kk-zSf">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="od7-bM-rdd">
+                                            <button identifier="X" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="od7-bM-rdd">
                                                 <rect key="frame" x="151" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="X" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ykw-Y6-cOd">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="211-pq-nzS">
+                                            <button identifier="C" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="211-pq-nzS">
                                                 <rect key="frame" x="176" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="C" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Sxv-Ou-fac">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="b6I-Yy-W0L">
+                                            <button identifier="V" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="b6I-Yy-W0L">
                                                 <rect key="frame" x="202" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="V" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rIY-gC-eSy">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Fp8-31-2gS">
+                                            <button identifier="B" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Fp8-31-2gS">
                                                 <rect key="frame" x="227" y="0.0" width="19" height="24"/>
                                                 <buttonCell key="cell" type="square" title="B" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="d8J-CD-EGf">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="d0p-lH-qO7">
+                                            <button identifier="N" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="d0p-lH-qO7">
                                                 <rect key="frame" x="252" y="0.0" width="20" height="24"/>
                                                 <buttonCell key="cell" type="square" title="N" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="MUn-6O-NZe">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iIP-GG-vCi">
+                                            <button identifier="M" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iIP-GG-vCi">
                                                 <rect key="frame" x="278" y="0.0" width="22" height="24"/>
                                                 <buttonCell key="cell" type="square" title="M" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5EP-dZ-dgr">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="N38-R0-UNJ">
+                                            <button identifier=",&lt;" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="N38-R0-UNJ">
                                                 <rect key="frame" x="306" y="0.0" width="26" height="24"/>
                                                 <buttonCell key="cell" type="square" title=", &lt;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="BO8-Ja-ea4">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WGi-lQ-vZ5">
+                                            <button identifier=".&gt;" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WGi-lQ-vZ5">
                                                 <rect key="frame" x="338" y="0.0" width="26" height="24"/>
                                                 <buttonCell key="cell" type="square" title=". &gt;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="B7f-ha-xgs">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PVm-hG-Kj0">
+                                            <button identifier="/?" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PVm-hG-Kj0">
                                                 <rect key="frame" x="370" y="0.0" width="25" height="24"/>
                                                 <buttonCell key="cell" type="square" title="/ ?" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3YN-d5-ImJ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2399,14 +2399,14 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WsU-wd-KFg">
+                                            <button identifier="DEL" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WsU-wd-KFg">
                                                 <rect key="frame" x="454" y="0.0" width="35" height="24"/>
                                                 <buttonCell key="cell" type="square" title="DEL" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="53B-Aj-TJd">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xZO-IC-3W0">
+                                            <button identifier="COPY" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xZO-IC-3W0">
                                                 <rect key="frame" x="495" y="0.0" width="46" height="24"/>
                                                 <buttonCell key="cell" type="square" title="COPY" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oqh-VC-TCH">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2452,7 +2452,7 @@
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7KB-m9-H35" userLabel="row6">
                                         <rect key="frame" x="242" y="0.0" width="67" height="24"/>
                                         <subviews>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YkW-la-vwC" userLabel="Spacebar">
+                                            <button identifier="SPC" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YkW-la-vwC" userLabel="Spacebar">
                                                 <rect key="frame" x="0.0" y="0.0" width="67" height="24"/>
                                                 <buttonCell key="cell" type="square" title="spacebar" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="QuS-S5-BSN">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
