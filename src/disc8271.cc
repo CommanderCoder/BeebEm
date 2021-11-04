@@ -1391,7 +1391,7 @@ void LoadSimpleDiscImage(const char *FileName, int DriveNum, int HeadNum, int Tr
 }
 
 /*--------------------------------------------------------------------------*/
-void LoadSimpleDSDiscImage(char *FileName, int DriveNum, int Tracks) {
+void LoadSimpleDSDiscImage(const char *FileName, int DriveNum, int Tracks) {
   FILE *infile=fopen(FileName,"rb");
 
   if (!infile) {
