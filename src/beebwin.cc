@@ -61,6 +61,8 @@
 #include "Arm.h"
 #include "Printing.h"
 #include "discedit.h"
+#include "disctype.h"
+#include "disc1770.h"
 
 // #include "keytable_2"
 
@@ -129,7 +131,7 @@ bool m_PageFlipping=0;
 
 bool DiscLoaded[2]={false,false}; // Set to TRUE when a disc image has been loaded.
 char CDiscName[2][256]; // Filename of disc current in drive 0 and 1;
-char CDiscType[2]; // Current disc types
+DiscType CDiscType[2]; // Current disc types
 
 static const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
 
@@ -434,7 +436,7 @@ bool bit = false;
 				arm = new CArm;
 				Enable_Arm = 1;
 			}
-			Disc8271_reset();
+			Disc8271Reset();
 			Reset1770();
 			if (EconetEnabled) EconetReset();
             if (SCSIDriveEnabled) SCSIReset();
@@ -2051,7 +2053,7 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	SysVIAReset();
 	UserVIAReset();
 	VideoInit();
-	Disc8271_reset();
+	Disc8271Reset();
 	if (EconetEnabled) EconetReset();
 	Reset1770();
 	AtoDInit();
@@ -2067,10 +2069,10 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	if (MachineType==3) InvertTR00=false;
 	if ((MachineType!=3) && (NativeFDC)) {
 		// 8271 disc
-		if ((DiscLoaded[0]) && (CDiscType[0]==0)) LoadSimpleDiscImage(CDiscName[0],0,0,80);
-		if ((DiscLoaded[0]) && (CDiscType[0]==1)) LoadSimpleDSDiscImage(CDiscName[0],0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==0)) LoadSimpleDiscImage(CDiscName[1],1,0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==1)) LoadSimpleDSDiscImage(CDiscName[1],1,80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[0], 0 ,0, 80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[0], (int)0, (int)80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[1], 1, 0, 80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[1], (int)1, (int)80);
 	}
 	if (((MachineType!=3) && (!NativeFDC)) || (MachineType==3)) {
 		// 1770 Disc
@@ -2081,10 +2083,10 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	InitMenu();
 }
 
-void BeebWin::SetImageName(char *DiscName,char Drive,char DType) {
-//MenuRef			menu = nil;
-//MenuItemIndex	j;
-//OSStatus		err;
+void BeebWin::SetImageName(const char *DiscName,int Drive,DiscType DType) {
+MenuRef			menu = nil;
+MenuItemIndex	j;
+OSStatus		err;
 char			*fname;
 char			Title[100];
 
@@ -2132,7 +2134,7 @@ char			Title[100];
 	Close1770Disc(Drive);
 	
 	strcpy(CDiscName[Drive], "");
-	CDiscType[Drive] = 0;
+	CDiscType[Drive] = DiscType::SSD;
 	DiscLoaded[Drive] = FALSE;
 
 	sprintf(Title, "Eject Disc %d", Drive);
@@ -3071,14 +3073,14 @@ bool wdd = false;
 			if (NativeFDC)
 				LoadSimpleDSDiscImage(path, drive, 80);
 			else
-				Load1770DiscImage(path, drive, 1);		// 1 = dsd
+				Load1770DiscImage(path, drive, DiscType::DSD);		// 1 = dsd
 		}
 		if (ssd || img)
 		{
 			if (NativeFDC)
 				LoadSimpleDiscImage(path,drive, 0, 80);
 			else
-				Load1770DiscImage(path, drive, 0);		// 0 = ssd
+				Load1770DiscImage(path, drive, DiscType::SSD);		// 0 = ssd
 		}
 		if (adfs)
 		{
@@ -3087,7 +3089,7 @@ bool wdd = false;
 				fprintf(stderr, "The native 8271 FDC cannot read ADFS discs\n");
 			}
 			else
-				Load1770DiscImage(path, drive, 2);					// 2 = adfs
+				Load1770DiscImage(path, drive, DiscType::ADFS);					// 2 = adfs
 		}
 		if (wdd)
 		{
@@ -3096,24 +3098,24 @@ bool wdd = false;
 				fprintf(stderr, "The native 8271 FDC cannot read Watford Double Density discs\n");
 			}
 			else
-				Load1770DiscImage(path, drive, 5);					// 5 = watford double density
+				Load1770DiscImage(path, drive, DiscType::DSD);					// 5 = watford double density
 		}
 	}
 			
 	if (MachineType == 3)
 	{
 		if (dsd)
-			Load1770DiscImage(path, drive, 1);						// 1 = dsd
+			Load1770DiscImage(path, drive, DiscType::DSD);						// 1 = dsd
 		if (ssd)
-			Load1770DiscImage(path, drive, 0);						// 0 = ssd
+			Load1770DiscImage(path, drive, DiscType::SSD);						// 0 = ssd
 		if (adfs)
-			Load1770DiscImage(path, drive, 2);						// ADFS
+			Load1770DiscImage(path, drive, DiscType::ADFS);						// ADFS
 		if (img)
-			Load1770DiscImage(path, drive, 3);						// 800K DOS PLUS
+			Load1770DiscImage(path, drive, DiscType::DOS);						// 800K DOS PLUS
 		if (dos)
-			Load1770DiscImage(path, drive, 4);						// 720K DOS PLUS
+			Load1770DiscImage(path, drive, DiscType::DOS);						// 720K DOS PLUS
 		if (wdd)
-			Load1770DiscImage(path, drive, 5);						// 720K WATFORD DOUBLE DENSITY
+			Load1770DiscImage(path, drive, DiscType::DSD);						// 720K WATFORD DOUBLE DENSITY
 	}
 						
 	if (m_WriteProtectOnLoad != m_WriteProtectDisc[drive])
@@ -5000,7 +5002,7 @@ OSStatus err = noErr;
 void BeebWin::NewDiscImage(int Drive)
 
 {
-char path[256];  
+char *path;
 OSErr err = noErr;
 
 	*path = 0;
@@ -5015,8 +5017,8 @@ OSErr err = noErr;
 
 	if (strstr(path, "ssd")) CreateDiscImage(path, Drive, 1, 80);
 	if (strstr(path, "dsd")) CreateDiscImage(path, Drive, 2, 80);
-	if (strstr(path, "adf")) CreateADFSImage(path, Drive, 80);
-	if (strstr(path, "adl")) CreateADFSImage(path, Drive, 160);
+	if (strstr(path, "adf")) CreateADFSImage(path, 80);
+	if (strstr(path, "adl")) CreateADFSImage(path, 160);
 			
 	LoadDisc(Drive, path);
 	
@@ -6057,7 +6059,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     char path[256];
     bool success = true;
     int drive;
-    int type;
+    DiscType type;
     char szDiscFile[MAX_PATH];
     int heads;
     int side;
@@ -6084,9 +6086,9 @@ void BeebWin::ImportDiscFiles(int menuId)
     {
         // 1770 controller
         Get1770DiscInfo(drive, &type, szDiscFile);
-        if (type == 0)
+        if (type == DiscType::SSD)
             heads = 1;
-        else if (type == 1)
+        else if (type == DiscType::DSD)
             heads = 2;
         else
         {
@@ -6195,8 +6197,86 @@ void BeebWin::ImportDiscFiles(int menuId)
         // 1770 controller
         Close1770Disc(drive);
         if (heads == 2)
-            Load1770DiscImage(szDiscFile, drive, 1);
+            Load1770DiscImage(szDiscFile, drive, DiscType::DSD);
         else
-            Load1770DiscImage(szDiscFile, drive, 0);
+            Load1770DiscImage(szDiscFile, drive, DiscType::SSD);
     }
 }
+
+/****************************************************************************/
+void BeebWin::CreateDiscImage(const char *FileName, int DriveNum,
+                              int Heads, int Tracks) {
+	bool Success = true;
+
+	// First check if file already exists
+	FILE *outfile = fopen(FileName, "rb");
+	if (outfile != nullptr) {
+		fclose(outfile);
+
+		char errstr[200];
+		sprintf(errstr, "File already exists:\n  %s\n\nOverwrite file?", FileName);
+//		if (MessageBox(m_hWnd, errstr, WindowTitle, MB_YESNO | MB_ICONQUESTION) != IDYES)
+			return;
+	}
+
+	outfile = fopen(FileName, "wb");
+	if (outfile == nullptr) {
+		char errstr[200];
+		sprintf(errstr, "Could not create disc file:\n  %s", FileName);
+//		MessageBox(m_hWnd, errstr, WindowTitle, MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	const int NumSectors = Tracks * 10;
+
+	// Create the first two sectors on each side - the rest will get created when
+	// data is written to it
+	for (int Sector = 0; Success && Sector < (Heads == 1 ? 2 : 12); Sector++) {
+		unsigned char SecData[256];
+		memset(SecData, 0, sizeof(SecData));
+
+		if (Sector == 1 || Sector == 11)
+		{
+			SecData[6] = (NumSectors >> 8) & 0xff;
+			SecData[7] = NumSectors & 0xff;
+		}
+
+		if (fwrite(SecData, 1, 256, outfile) != 256)
+			Success = false;
+	}
+
+	if (fclose(outfile) != 0)
+		Success = false;
+
+	if (!Success) {
+		char errstr[200];
+		sprintf(errstr, "Failed writing to disc file:\n  %s", FileName);
+//		MessageBox(m_hWnd, errstr, WindowTitle, MB_OK | MB_ICONERROR);
+	}
+	else
+	{
+		// Now load the new image into the correct drive
+		if (Heads == 1)
+		{
+//			if (MachineType == Model::Master128 || !NativeFDC) {
+			if (MachineType == 3 || !NativeFDC) {
+				Load1770DiscImage(FileName, DriveNum, DiscType::SSD);
+			}
+			else {
+				LoadSimpleDiscImage(FileName, DriveNum, 0, Tracks);
+			}
+		}
+		else
+		{
+//			if (MachineType == Model::Master128 || !NativeFDC) {
+			if (MachineType == 3 || !NativeFDC) {
+				Load1770DiscImage(FileName, DriveNum, DiscType::DSD);
+			}
+			else {
+				LoadSimpleDSDiscImage(FileName, DriveNum, Tracks);
+			}
+		}
+	}
+}
+
+

@@ -31,6 +31,7 @@
 
 #include "port.h"
 #include "video.h"
+#include "disctype.h"
 
 typedef union {
 	unsigned char data[8];
@@ -114,7 +115,7 @@ public:
 	void UpdateModelType();
 	void SetSoundMenu(void);
 	void SetPBuff(void);
-	void SetImageName(char *DiscName,char Drive,char DType);
+	void SetImageName(const char *DiscName,int Drive,DiscType DType);
 	void SetTapeSpeedMenu(void);
 	void SetDiscWriteProtects(void);
 	void SetRomMenu(void);				// LRW  Added for individual ROM/Ram
@@ -128,6 +129,8 @@ public:
 
 	void RealizePalette(void) {};
 	void ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatus,unsigned char LoadRoms);
+    
+    void CreateDiscImage(const char *Filename, int Drive, int Heads, int Tracks);
 
 	void TranslateFDC(void);
 	void TranslateTiming(int TimingId);
