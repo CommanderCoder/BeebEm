@@ -101,9 +101,20 @@ class BeebViewController: NSViewController {
     @IBOutlet weak var WIPlabel: NSTextField!
 
     
+    @IBOutlet weak var CassMotorLabel: NSTextField!
+    @IBOutlet weak var MasterPowerOnLabel: NSTextField!
+    
     @IBOutlet weak var CassMotorLED: NSImageView!
     @IBOutlet weak var CapsLED: NSImageView!
     @IBOutlet weak var ShiftLED: NSImageView!
+
+    @IBOutlet weak var HD0LED: NSImageView!
+    @IBOutlet weak var HD1LED: NSImageView!
+    @IBOutlet weak var HD2LED: NSImageView!
+    @IBOutlet weak var HD3LED: NSImageView!
+    @IBOutlet weak var FD0LED: NSImageView!
+    @IBOutlet weak var FD1LED: NSImageView!
+
     
  
     func setupBeeb()
@@ -187,7 +198,19 @@ extension BeebViewController{
             CapsLED?.contentTintColor = CBridge.leds.contains(.CapsLED) ? NSColor.red: NSColor.darkGray
             ShiftLED?.contentTintColor = CBridge.leds.contains(.ShiftLED) ? NSColor.red: NSColor.darkGray
             CassMotorLED?.contentTintColor = CBridge.leds.contains(.CassLED) ? NSColor.red: NSColor.darkGray
+
+            HD0LED?.contentTintColor = CBridge.leds.contains(.HD0LED) ? NSColor.yellow: NSColor.darkGray
+            HD1LED?.contentTintColor = CBridge.leds.contains(.HD1LED) ? NSColor.yellow: NSColor.darkGray
+            HD2LED?.contentTintColor = CBridge.leds.contains(.HD2LED) ? NSColor.yellow: NSColor.darkGray
+            HD3LED?.contentTintColor = CBridge.leds.contains(.HD3LED) ? NSColor.yellow: NSColor.darkGray
+            FD0LED?.contentTintColor = CBridge.leds.contains(.FD0LED) ? NSColor.yellow: NSColor.darkGray
+            FD1LED?.contentTintColor = CBridge.leds.contains(.FD1LED) ? NSColor.yellow: NSColor.darkGray
+
+            CassMotorLabel.isHidden = (CBridge.machineType == 3) // BBC Master
+            MasterPowerOnLabel.isHidden = !CassMotorLabel.isHidden // opposite of CassMotorLabel
+            
         } else {
+            // cannot COLOUR TINT on earlier versions
             // Fallback on earlier versions
         }
     }

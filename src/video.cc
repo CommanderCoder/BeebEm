@@ -52,8 +52,9 @@
 #endif
 
 
-extern "C" enum KB_LEDS { CASS, CAPS, SHIFT };
+extern "C" enum KB_LEDS { CASS, CAPS, SHIFT, HD0, HD1, HD2, HD3, FD0, FD1 };
 extern "C" int swift_SetLED(KB_LEDS led, bool on);
+extern "C" int swift_SetMachineType(int machinetype);
 
 
 
@@ -1372,9 +1373,17 @@ void VideoAddLEDs(void) {
 	}
     
     // Swift LEDs here
+    swift_SetMachineType(MachineType);
     if (MachineType==3) swift_SetLED(CASS,true); else swift_SetLED(CASS,LEDs.Motor);
     swift_SetLED(CAPS,LEDs.CapsLock);
     swift_SetLED(SHIFT,LEDs.ShiftLock);
+
+    swift_SetLED(HD0,LEDs.HDisc[0]);
+    swift_SetLED(HD1,LEDs.HDisc[1]);
+    swift_SetLED(HD2,LEDs.HDisc[2]);
+    swift_SetLED(HD3,LEDs.HDisc[3]);
+    swift_SetLED(FD0,LEDs.Disc0);
+    swift_SetLED(FD1,LEDs.Disc1);
 
 
 }

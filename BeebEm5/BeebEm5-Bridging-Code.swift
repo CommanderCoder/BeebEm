@@ -19,26 +19,39 @@ import Cocoa
 }
 
 
-@objc public enum KB_LEDs : Int {
+@objc public enum KB_LEDs : UInt16 {
     case CASS = 0
     case CAPS
     case SHIFT
+    case HD0
+    case HD1
+    case HD2
+    case HD3
+    case FD0
+    case FD1
 }
 
 //option set (bit flags)
 struct LEDFlags: OptionSet
 {
-    let rawValue: Int
+    let rawValue: UInt16
 
     static let CassLED  = LEDFlags(rawValue: 1 << KB_LEDs.CASS.rawValue)
     static let CapsLED  = LEDFlags(rawValue: 1 << KB_LEDs.CAPS.rawValue)
     static let ShiftLED = LEDFlags(rawValue: 1 << KB_LEDs.SHIFT.rawValue)
+    static let HD0LED  = LEDFlags(rawValue: 1 << KB_LEDs.HD0.rawValue)
+    static let HD1LED  = LEDFlags(rawValue: 1 << KB_LEDs.HD1.rawValue)
+    static let HD2LED  = LEDFlags(rawValue: 1 << KB_LEDs.HD2.rawValue)
+    static let HD3LED  = LEDFlags(rawValue: 1 << KB_LEDs.HD3.rawValue)
+    static let FD0LED  = LEDFlags(rawValue: 1 << KB_LEDs.FD0.rawValue)
+    static let FD1LED  = LEDFlags(rawValue: 1 << KB_LEDs.FD1.rawValue)
 }
 
 enum CBridge {
     static var windowTitle = "-"
     static var nextCPU = 0
     static var leds: LEDFlags = []
+    static var machineType = 0
 }
 
 // allow access to this in C
@@ -313,35 +326,25 @@ public func swift_menuGetControlEditText(_ cmd: UInt32, _ text: NSMutableString,
 }
 
 
-
-// VERY POOR USE OF VARS
 @_cdecl("swift_SetLED")
 public func swift_SetLED(_ led: KB_LEDs, _ value: Bool)
 {
-    var ledf: LEDFlags
-    switch (led)
-    {
-    case KB_LEDs.CASS:
-        ledf = .CassLED
-        break
-    case KB_LEDs.CAPS:
-        ledf = .CapsLED
-        break
-    case KB_LEDs.SHIFT:
-        ledf = .ShiftLED
-        break
-    }
-    
-    if (value)
-    {
+    // CASS,CAPS,SHIFT from KB_LEDs
+    let ledf: LEDFlags = LEDFlags(rawValue: 1 << led.rawValue)
+
+    if (value) {
         CBridge.leds.insert(ledf)
-    }
-    else
-    {
+    } else {
         CBridge.leds.remove(ledf)
     }
 }
 
+
+@_cdecl("swift_SetMachineType")
+public func swift_SetMachineType(_ type: Int)
+{
+    CBridge.machineType = type;
+}
 
 @_cdecl("swift_uksetasstitle")
 public func swift_uksetasstitle( _ text: UnsafePointer<CChar>)
