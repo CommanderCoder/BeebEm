@@ -242,7 +242,7 @@ again : ;
 			// WriteLog("Decoded Block of length %d, starting at %d\n", block_ptr, start_time);
 			// HexDump(block, block_ptr);
 
-			if (block_ptr == 1 && block[0] == 0x80 && Clk_Divide != 64) // 300 baud block?
+			if (block_ptr == 1 && (uint8_t)block[0] == 0x80 && Clk_Divide != 64) // 300 baud block?
 			{
 				Clk_Divide = 64;
 				csw_ptr = last_tone;
@@ -549,7 +549,9 @@ int csw_poll(int clock)
 					break;
 			}
 			break;
-	}
+        case CSWState::Undefined:
+            break;
+    }
 
 	bit_count += csw_data(); // Get next bit
 
