@@ -1309,11 +1309,11 @@ void Save1770UEF(FILE *SUEF)
 	fputc(LightsOn[0],SUEF);
 	fputc(LightsOn[1],SUEF);
 	fput32(dByteCount,SUEF);
-	fput32(DataPos,SUEF);
+	fput32((unsigned int)DataPos,SUEF);
 	fputc(ExtControl,SUEF);
 	fputc(CurrentDrive,SUEF);
-	fput32(HeadPos[0],SUEF);
-	fput32(HeadPos[1],SUEF);
+	fput32((unsigned int)HeadPos[0],SUEF);
+	fput32((unsigned int)HeadPos[1],SUEF);
 	fputc(CurrentHead[0],SUEF);
 	fputc(CurrentHead[1],SUEF);
 	fput32(DiscStep[0],SUEF);
