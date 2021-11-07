@@ -2084,9 +2084,9 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 }
 
 void BeebWin::SetImageName(const char *DiscName,int Drive,DiscType DType) {
-MenuRef			menu = nil;
-MenuItemIndex	j;
-OSStatus		err;
+// MenuRef			menu = nil;
+// MenuItemIndex	j;
+// OSStatus		err;
 char			*fname;
 char			Title[100];
 
@@ -5002,10 +5002,9 @@ OSStatus err = noErr;
 void BeebWin::NewDiscImage(int Drive)
 
 {
-char *path;
+char *path = 0;
 OSErr err = noErr;
 
-	*path = 0;
 	err = SaveFile(path, nil);
 
 // For some reason, Return key sticks down if replace an existing file
