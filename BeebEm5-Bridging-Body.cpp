@@ -41,7 +41,7 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
 {
      static int ctrl = 0x0000;
      int LastShift, LastCtrl, LastCaps, LastCmd;
-     int NewShift, NewCtrl=0, NewCaps;
+     int NewShift, NewCtrl = 0, NewCaps;
 //     static int NewCmd = 0; //remember CMD pressed
      
     
