@@ -69,7 +69,7 @@ extern unsigned char TeletextEnabled;
 #define MAX_VIDEO_SCAN_LINES 304
 
 void SaveVideoUEF(FILE *SUEF);
-void LoadVideoUEF(FILE *SUEF);
+void LoadVideoUEF(FILE *SUEF, const int Version);
 extern char TeletextStyle;
 extern int THalfMode;
 #endif

@@ -1435,7 +1435,7 @@ void SaveVideoUEF(FILE *SUEF) {
 	fput32(0,SUEF); // Pad out
 }
 
-void LoadVideoUEF(FILE *SUEF) {
+void LoadVideoUEF(FILE *SUEF, const int Version) {
 	CRTC_HorizontalTotal=fgetc(SUEF);
 	CRTC_HorizontalDisplayed=fgetc(SUEF);
 	CRTC_HorizontalSyncPos=fgetc(SUEF);
