@@ -1,5 +1,26 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2006  Jon Welch
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 /* SASI Support for Beebem */
 /* Based on code written by Y. Tanaka */
+/* 26/12/2011 JGH: Disk images at DiscsPath, not AppPath */
 
 /*
 
@@ -15,9 +36,37 @@ Offset  Description                 Access
 #include <stdio.h>
 #include <stdlib.h>
 #include "6502core.h"
+// #include "log.h"
 #include "main.h"
 #include "sasi.h"
 #include "beebmem.h"
+
+static int SASIReadData();
+static void SASIWriteData(int data);
+static void SASIBusFree();
+static void SASISelection(int data);
+static void SASICommand();
+static void SASIExecute();
+static void SASIStatus();
+static void SASIMessage();
+static bool SASIDiscTestUnitReady(unsigned char *buf);
+static void SASITestUnitReady();
+static void SASIRequestSense();
+static int SASIDiscRequestSense(unsigned char *cdb, unsigned char *buf);
+static void SASIRead();
+static int SASIReadSector(unsigned char *buf, int block);
+static bool SASIWriteSector(unsigned char *buf, int block);
+static void SASIWrite();
+static void SASISetGeometory();
+static bool SASIWriteGeometory(unsigned char *buf);
+static bool SASIDiscFormat(unsigned char *buf);
+static void SASIFormat();
+static bool SASIDiscRezero(unsigned char *buf);
+static void SASIRezero();
+static void SASIVerify();
+static void SASIRamDiagnostics();
+static void SASIControllerDiagnostics();
+static void SASISeek();
 
 enum phase_s {
 	busfree,
@@ -39,10 +88,10 @@ typedef struct {
 	bool bsy;
 	bool req;
 	bool irq;
-	char cmd[10];
+	unsigned char cmd[10];
 	int status;
 	int message;
-	char buffer[0x800];
+	unsigned char buffer[0x800];
 	int blocks;
 	int next;
 	int offset;
@@ -54,19 +103,18 @@ typedef struct {
 } sasi_t;
 
 sasi_t sasi;
-FILE *SASIDisc[4] = {NULL, NULL, NULL, NULL};
+FILE *SASIDisc[4] = {0};
 
-extern char SCSIDriveEnabled;
+extern bool SCSIDriveEnabled;
 
 void SASIReset(void)
 {
-int i;
 char buff[256];
 
 	sasi.code = 0x00;
 	sasi.sector = 0x00;
 	
-	for (i = 0; i < 1; ++i)		// only one drive allowed under Torch Z80 ?
+	for (int i = 0; i < 1; ++i)		// only one drive allowed under Torch Z80 ?
     {
         sprintf(buff, "%s/diskimg/sasi%d.dat", RomPath, i);
 
@@ -92,7 +140,6 @@ char buff[256];
 
 void SASIWrite(int Address, int Value) 
 {
-
     if (!SCSIDriveEnabled)
 		return;
 
@@ -118,12 +165,12 @@ void SASIWrite(int Address, int Value)
     }
 }
 
-int SASIRead(int Address)
+unsigned char SASIRead(int Address)
 {
-int data = 0xff;
-
     if (!SCSIDriveEnabled)
-		return data;
+        return 0xff;
+
+    unsigned char data =0xff;
 
     switch (Address)
     {
@@ -134,15 +181,15 @@ int data = 0xff;
 	case 0x02:
 		data = 0x01;
 
-		if (sasi.sel == false) data |= 0x80;
-		if (sasi.req == false) data |= 0x40;
-		if (sasi.cd == true) data |= 0x20;
-		if (sasi.io == true) data |= 0x10;
-		if (sasi.irq) data |= 0x08;
-		if (sasi.msg == false) data |= 0x04;
-		if (sasi.bsy == false) data |= 0x02;
-			
-		break;
+        if (!sasi.sel) data |= 0x80;
+        if (!sasi.req) data |= 0x40;
+        if (sasi.cd) data |= 0x20;
+        if (sasi.io) data |= 0x10;
+        if (sasi.irq) data |= 0x08;
+        if (!sasi.msg) data |= 0x04;
+        if (!sasi.bsy) data |= 0x02;
+        break;
+
     case 0x03:
         break;
     }
@@ -151,8 +198,20 @@ int data = 0xff;
 	
     return data;
 }
+void SASIClose()
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        if (SASIDisc[i] != nullptr)
+        {
+            fclose(SASIDisc[i]);
+            SASIDisc[i] = nullptr;
+        }
+    }
+}
 
-int SASIReadData(void)
+
+static int SASIReadData(void)
 {
 	int data;
 	
@@ -184,29 +243,27 @@ int SASIReadData(void)
 				}
 				
 				sasi.length = SASIReadSector(sasi.buffer, sasi.next);
-				if (sasi.length <= 0) {
-					sasi.status = (sasi.lun << 5) | 0x02;
-					sasi.message = 0x00;
-					SASIStatus();
-					return data;
-				}
-				sasi.offset = 0;
-				sasi.next++;
-			}
-			return data;
-			break;
+                if (sasi.length <= 0) {
+                    sasi.status = (sasi.lun << 5) | 0x02;
+                    sasi.message = 0x00;
+                    SASIStatus();
+                    return data;
+                }
+                sasi.offset = 0;
+                sasi.next++;
+            }
+            return data;
+
+        case busfree:
+            return sasi.lastwrite;
+
         default:
-            break;
-	}
-
-	if (sasi.phase == busfree)
-		return sasi.lastwrite;
-
-	SASIBusFree();
-	return sasi.lastwrite;
+            SASIBusFree();
+            return sasi.lastwrite;
+    }
 }
 
-void SASIWriteData(int data)
+static void SASIWriteData(int data)
 {
 
 	sasi.lastwrite = data;
@@ -286,14 +343,12 @@ void SASIWriteData(int data)
 			sasi.next++;
 			sasi.offset = 0;
 			return;
-        default:
-            break;
 	}
 
 	SASIBusFree();
 }
 
-void SASIBusFree(void)
+static void SASIBusFree(void)
 {
 	sasi.msg = false;
 	sasi.cd = false;
@@ -311,15 +366,13 @@ void SASIBusFree(void)
 	
 }
 
-void SASISelection(int data)
+static void SASISelection(int data)
 {
 	sasi.bsy = true;
 	sasi.phase = selection;
 }
 
-
-void SASICommand(void)
-
+static void SASICommand(void)
 {
 	sasi.phase = command;
 	
@@ -331,7 +384,7 @@ void SASICommand(void)
 	sasi.length = 6;
 }
 
-void SASIExecute(void)
+static void SASIExecute(void)
 {
 	sasi.phase = execute;
 	
@@ -386,7 +439,7 @@ void SASIExecute(void)
 	SASIStatus();
 }
 
-void SASIStatus(void)
+static void SASIStatus(void)
 {
 	sasi.phase = status;
 	
@@ -396,7 +449,7 @@ void SASIStatus(void)
 	sasi.req = true;
 }
 
-void SASIMessage(void)
+static void SASIMessage(void)
 {
 	sasi.phase = message;
 	
@@ -406,18 +459,15 @@ void SASIMessage(void)
 	sasi.req = true;
 }
 
-bool SASIDiscTestUnitReady(char *buf)
+static bool SASIDiscTestUnitReady(unsigned char *buf)
 
 {
-	if (SASIDisc[sasi.lun] == NULL) return false;
-	return true;
+    return SASIDisc[sasi.lun] != nullptr;
 }
 
-void SASITestUnitReady(void)
+static void SASITestUnitReady(void)
 {
-	bool status;
-	
-	status = SASIDiscTestUnitReady(sasi.cmd);
+	bool status = SASIDiscTestUnitReady(sasi.cmd);
 	if (status) {
 		sasi.status = 0x00;
 		sasi.message = 0x00;
@@ -425,10 +475,11 @@ void SASITestUnitReady(void)
 		sasi.status = (sasi.lun << 5) | 0x02;
 		sasi.message = 0x00;
 	}
+
 	SASIStatus();
 }
 
-void SASIRequestSense(void)
+static void SASIRequestSense(void)
 {
 	sasi.length = SASIDiscRequestSense(sasi.cmd, sasi.buffer);
 	
@@ -453,11 +504,9 @@ void SASIRequestSense(void)
 	}
 }
 
-int SASIDiscRequestSense(char *cdb, char *buf)
+static int SASIDiscRequestSense(unsigned char *cdb, unsigned char *buf)
 {
-	int size;
-	
-	size = cdb[4];
+	int size = cdb[4];
 	if (size == 0)
 		size = 4;
 	
@@ -468,6 +517,7 @@ int SASIDiscRequestSense(char *cdb, char *buf)
 			buf[2] = 0x00;
 			buf[3] = 0x00;
 			break;
+
 		case 0x80 :
 			buf[0] = 0x80;
 			buf[1] = ((sasi.sector >> 16) & 0xff) | (sasi.lun << 5);
@@ -484,11 +534,9 @@ int SASIDiscRequestSense(char *cdb, char *buf)
 	return size;
 }
 
-void SASIRead(void)
+static void SASIRead(void)
 {
-	int record;
-	
-	record = sasi.cmd[1] & 0x1f;
+	int record = sasi.cmd[1] & 0x1f;
 	record <<= 8;
 	record |= sasi.cmd[2];
 	record <<= 8;
@@ -522,7 +570,7 @@ void SASIRead(void)
 	sasi.req = true;
 }
 
-int SASIReadSector(char *buf, int block)
+static int SASIReadSector(unsigned char *buf, int block)
 
 {
 
@@ -539,7 +587,7 @@ int SASIReadSector(char *buf, int block)
 	return 256;
 }
 
-bool SASIWriteSector(char *buf, int block)
+static bool SASIWriteSector(unsigned char *buf, int block)
 
 {
 	if (SASIDisc[sasi.lun] == NULL) return false;
@@ -551,11 +599,9 @@ bool SASIWriteSector(char *buf, int block)
 	return true;
 }
 
-void SASIWrite(void)
+static void SASIWrite(void)
 {
-	int record;
-	
-	record = sasi.cmd[1] & 0x1f;
+	int record = sasi.cmd[1] & 0x1f;
 	record <<= 8;
 	record |= sasi.cmd[2];
 	record <<= 8;
@@ -580,7 +626,7 @@ void SASIWrite(void)
 	sasi.req = true;
 }
 
-void SASISetGeometory(void)
+static void SASISetGeometory(void)
 {
 
 	sasi.length = 8;
@@ -601,7 +647,7 @@ void SASISetGeometory(void)
 
 }
 
-bool SASIWriteGeometory(char *buf)
+static bool SASIWriteGeometory(unsigned char *buf)
 {
 	
 //	fprintf(stderr, "Write Geometory 0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x\n", 
@@ -612,23 +658,20 @@ bool SASIWriteGeometory(char *buf)
 	return true;
 }
 
-bool SASIDiscFormat(char *buf)
-
+static bool SASIDiscFormat(unsigned char *buf)
 {
-	char buff[256];
-	int record;
-	
 	if (SASIDisc[sasi.lun] != NULL) {
 		fclose(SASIDisc[sasi.lun]);
 		SASIDisc[sasi.lun] = NULL;
 	}
 	
-	record = buf[1] & 0x1f;
+	int record = buf[1] & 0x1f;
 	record <<= 8;
 	record |= buf[2];
 	record <<= 8;
 	record |= buf[3];
 	
+    char buff[256];
 	sprintf(buff, "%s/diskimg/sasi%d.dat", RomPath, sasi.lun);
 	
 	SASIDisc[sasi.lun] = fopen(buff, "wb");
@@ -640,7 +683,7 @@ bool SASIDiscFormat(char *buf)
 	return true;
 }
 
-void SASIFormat(void)
+static void SASIFormat(void)
 {
 	bool status;
 	
@@ -657,17 +700,14 @@ void SASIFormat(void)
 	SASIStatus();
 }
 
-bool SASIDiscRezero(char *buf)
-
+static bool SASIDiscRezero(unsigned char *buf)
 {
 	return true;
 }
 
 void SASIRezero(void)
 {
-	bool status;
-	
-	status = SASIDiscRezero(sasi.cmd);
+	bool status = SASIDiscRezero(sasi.cmd);
 	if (status) {
 		sasi.status = 0x00;
 		sasi.message = 0x00;
@@ -675,24 +715,23 @@ void SASIRezero(void)
 		sasi.status = (sasi.lun << 5) | 0x02;
 		sasi.message = 0x00;
 	}
+
 	SASIStatus();
 }
 
-void SASIVerify(void)
+static void SASIVerify(void)
 {
-	bool status;
-	int sector, blocks;
 	
-	sector = sasi.cmd[1] & 0x1f;
+	int sector = sasi.cmd[1] & 0x1f;
 	sector <<= 8;
 	sector |= sasi.cmd[2];
 	sector <<= 8;
 	sector |= sasi.cmd[3];
-	blocks = sasi.cmd[4];
+	int blocks = sasi.cmd[4];
 
 //	fprintf(stderr, "Verifying sector %d, blocks %d\n", sector, blocks);
 
-	status = true;
+	bool status = true;
 	
 	if (status) {
 		sasi.status = 0x00;
@@ -705,7 +744,7 @@ void SASIVerify(void)
 	SASIStatus();
 }
 
-void SASIRamDiagnostics(void)
+static void SASIRamDiagnostics(void)
 {
 	sasi.status = 0x00;
 	sasi.message = 0x00;
@@ -713,19 +752,16 @@ void SASIRamDiagnostics(void)
 }
 
 
-void SASIControllerDiagnostics(void)
+static void SASIControllerDiagnostics(void)
 {
 	sasi.status = 0x00;
 	sasi.message = 0x00;
 	SASIStatus();
 }
 
-void SASISeek(void)
-
+static void SASISeek(void)
 {
-	int sector;
-	
-	sector = sasi.cmd[1] & 0x1f;
+	int sector = sasi.cmd[1] & 0x1f;
 	sector <<= 8;
 	sector |= sasi.cmd[2];
 	sector <<= 8;

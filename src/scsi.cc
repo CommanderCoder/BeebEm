@@ -101,7 +101,7 @@ struct scsi_t {
 };
 
 scsi_t scsi;
-FILE *SCSIDisc[4] = {NULL, NULL, NULL, NULL};
+FILE *SCSIDisc[4] = {nullptr, nullptr, nullptr, nullptr};
 int SCSISize[4];
 
 bool SCSIDriveEnabled = false;
@@ -239,10 +239,10 @@ void SCSIClose(void)
 {
     for (int i = 0; i < 4; ++i)
     {
-        if (SCSIDisc[i] != NULL)
+        if (SCSIDisc[i] != nullptr)
         {
             fclose(SCSIDisc[i]);
-            SCSIDisc[i] = NULL;
+            SCSIDisc[i] = nullptr;
         }
     }
 }
@@ -364,6 +364,7 @@ static void WriteData(int data)
 						return;
 					}
 					break;
+
 				case 0x15 :
 					if (!WriteGeometory(scsi.buffer)) {
 						scsi.status = (scsi.lun << 5) | 0x02;
@@ -384,8 +385,6 @@ static void WriteData(int data)
 			scsi.next++;
 			scsi.offset = 0;
 			return;
-        default:
-            break;
 	}
 
 	BusFree();
@@ -595,7 +594,6 @@ static int DiscRequestSense(unsigned char *cdb, unsigned char *buf)
 
 static void Read6(void)
 {
-	
 	int record = scsi.cmd[1] & 0x1f;
 	record <<= 8;
 	record |= scsi.cmd[2];
@@ -728,7 +726,6 @@ static int DiscModeSense(unsigned char *cdb, unsigned char *buf)
 
 static void ModeSelect(void)
 {
-
 	scsi.length = scsi.cmd[4];
 	scsi.blocks = 1;
 	
@@ -763,7 +760,7 @@ bool WriteGeometory(unsigned char *buf)
 }
 
 
-static bool DiscFormat(unsigned char *buf)
+bool DiscFormat(unsigned char *buf)
 {
     // Ignore defect list
 
