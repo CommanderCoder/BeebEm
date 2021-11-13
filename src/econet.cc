@@ -19,7 +19,7 @@
 #include "sysvia.h"
 
 bool EconetStateChanged=FALSE;
-char EconetEnabled;							// Enable hardware
+bool EconetEnabled;							// Enable hardware
 bool EconetNMIenabled;						// 68B54 -> NMI enabled. (IC97)
 int EconetTrigger;							// Poll timer
 
