@@ -45,7 +45,7 @@
 #include "z80mem.h"
 #include "z80.h"
 #include "econet.h"
-// #include "scsi.h"
+#include "scsi.h"
 // #include "ide.h"
 // #include "debug.h"
 #include "Arm.h"
