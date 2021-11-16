@@ -187,13 +187,13 @@ bool BuildMode7Font(const char *filename)
         Mode7Font[2][Character-32][1] = 0;
 
         // Read 18 lines of 16 pixels each from the file.
-        for (int y = 2; y < 20; y++)
+        for (int y = 0; y <= 17; y++)
         {
             unsigned int Bitmap = fget16(TeletextFontFile);
 
-            Mode7Font[0][Character - 32][y] = Bitmap << 2; // Text  bank
-            Mode7Font[1][Character - 32][y] = Bitmap << 2; // Contiguous graphics bank
-            Mode7Font[2][Character - 32][y] = Bitmap << 2; // Separated graphics bank
+            Mode7Font[0][Character - 32][y+2] = Bitmap << 2; // Text  bank
+            Mode7Font[1][Character - 32][y+2] = Bitmap << 2; // Contiguous graphics bank
+            Mode7Font[2][Character - 32][y+2] = Bitmap << 2; // Separated graphics bank
         }
     }
 
@@ -1795,13 +1795,14 @@ void VideoGetText(char *text, int line)
     text[x] = '\0';
 }
 
+/*
 static void altBuildMode7Font(void) {
   FILE *m7File;
   unsigned char m7cc,m7cy;
   unsigned int m7cb;
   unsigned int row1,row2,row3; // row builders for mode 7 graphics
   char TxtFnt[256];
-  /* cout <<"Building mode 7 font data structures\n"; */
+  // cout <<"Building mode 7 font data structures\n";
 // Build enhanced mode 7 font
   strcpy(TxtFnt,RomPath);
   strcat(TxtFnt,"teletext.fnt");
@@ -1867,3 +1868,4 @@ static void altBuildMode7Font(void) {
   } // character loop.
 }; /* BuildMode7Font */
 /*
+*/
