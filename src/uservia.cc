@@ -59,7 +59,7 @@ int AMXDeltaX = 0;
 int AMXDeltaY = 0;
 
 
-/* Printer Port */
+/* Printer port */
 bool PrinterEnabled = false;
 int PrinterTrigger = 0;
 static char PrinterFileName[256];
@@ -70,7 +70,7 @@ static int SRTrigger = 0;
 static void SRPoll();
 static void UpdateSRState(bool SRrw);
 
-// SW RAM board 
+/* SW RAM board */
 bool SWRAMBoardEnabled = false;
 
 extern int DumpAfterEach;
@@ -86,13 +86,13 @@ static void UpdateIFRTopBit(void) {
     UserVIAState.ifr&=0x7f;
   intStatus&=~(1<<userVia);
   intStatus|=((UserVIAState.ifr & 128)?(1<<userVia):0);
-}; /* UpdateIFRTopBit */
+}
 
 /*--------------------------------------------------------------------------*/
 /* Address is in the range 0-f - with the fe60 stripped out */
 void UserVIAWrite(int Address, int Value) {
 
-static int last_Value = 0xff;
+static int lastValue = 0xff;
 
 /* cerr << "UserVIAWrite: Address=0x" << hex << Address << " Value=0x" << Value << dec << " at " << TotalCycles << "\n";
   DumpRegs(); */
@@ -113,7 +113,7 @@ static int last_Value = 0xff;
 		if (mBreakOutWindow) ShowOutputs(UserVIAState.orb);
 			if (RTC_Enabled)
 			{
-				if ( ((last_Value & 0x02) == 0x02) && ((Value & 0x02) == 0x00) )		// falling clock edge
+				if ( ((lastValue & 0x02) == 0x02) && ((Value & 0x02) == 0x00) )		// falling clock edge
 				{
 					if ((Value & 0x04) == 0x04)
 					{
@@ -174,7 +174,7 @@ static int last_Value = 0xff;
 					}
 				}
 			}
-				last_Value = Value;
+				lastValue = Value;
 		break;
 
     case 1:
@@ -184,14 +184,14 @@ static int last_Value = 0xff;
 	  if (PrinterEnabled) {
 		if (PrinterFileHandle != NULL)
 		{
-	      if (fputc(UserVIAState.ora, PrinterFileHandle) == EOF ) {
-			  fprintf(stderr, "Failed to write to printer file %s\n", PrinterFileName);
-		  }
-		  else {
+	      if (fputc(UserVIAState.ora, PrinterFileHandle) == EOF )
+          {
+              fprintf(stderr, "Failed to write to printer file %s\n", PrinterFileName);
+		  } else { 
 		    fflush(PrinterFileHandle);
 		    SetTrigger(PRINTER_TRIGGER, PrinterTrigger);
-	  	  }
-		} else {		// Write to clipboard
+          }
+        } else {		// Write to clipboard
 			mainWin->CopyKey(UserVIAState.ora);
 			SetTrigger(PRINTER_TRIGGER, PrinterTrigger);
 		}
@@ -224,7 +224,7 @@ static int last_Value = 0xff;
       if (UserVIAState.acr & 128) {
         UserVIAState.orb&=0x7f;
         UserVIAState.irb&=0x7f;
-      };
+      }
       UpdateIFRTopBit();
       UserVIAState.timer1hasshot=false; //Added by K.Lowe 24/08/03
       break;
@@ -255,13 +255,13 @@ static int last_Value = 0xff;
       break;
 
     case 10:
-      UserVIAState.sr=Value * 0xff;
+      UserVIAState.sr=Value & 0xff;
       UpdateSRState(true);
       break;
 
     case 11:
       UserVIAState.acr=Value & 0xff;
-      UpdateSRState(true);
+      UpdateSRState(false);
       break;
 
     case 12:
@@ -286,65 +286,62 @@ static int last_Value = 0xff;
     case 15:
       UserVIAState.ora=Value & 0xff;
       break;
-  } /* Address switch */
-} /* UserVIAWrite */
+  }
+}
 
 /*--------------------------------------------------------------------------*/
-/* Address is in the range 0-f - with the fe60 stripped out */
-unsigned char UserVIARead(int Address) {
-  unsigned char tmp = 0xff;
-  // Local copy for processing middle button
-  int amxButtons = AMXButtons;
-  /* cerr << "UserVIARead: Address=0x" << hex << Address << dec << " at " << TotalCycles << "\n";
-  DumpRegs(); */
 
-  switch (Address) {
-    case 0: /* IRB read */
-      tmp=(UserVIAState.orb & UserVIAState.ddrb) | (UserVIAState.irb & (~UserVIAState.ddrb));
+// Address is in the range 0-f - with the fe60 stripped out
 
-	  if ((UserVIAState.ifr & 0x10) && ((UserVIAState.pcr & 0x10)==0x10)) {
-		  UserVIAState.ifr&=0xef;
-		  UpdateIFRTopBit();
-	  };
-		  
-	  if (RTC_Enabled)
-	  {
-		tmp = (tmp & 0xfe) | (RTC_data & 0x01);
-		RTC_data = RTC_data >> 1;
-	  }
+unsigned char UserVIARead(int Address)
+{
+    unsigned char tmp = 0xff;
+    // Local copy for processing middle button
+    int amxButtons = AMXButtons;
+    /* cerr << "UserVIARead: Address=0x" << hex << Address << dec << " at " << TotalCycles << "\n";
+       DumpRegs(); */
 
-	  if (mBreakOutWindow) ShowInputs(tmp);
+    switch (Address) {
+        case 0: /* IRB read */
+            tmp=(UserVIAState.orb & UserVIAState.ddrb) | (UserVIAState.irb & (~UserVIAState.ddrb));
 
-      if (AMXMouseEnabled) {
-          if (AMXLRForMiddle) {
-              if ((amxButtons & AMX_LEFT_BUTTON) && (amxButtons & AMX_RIGHT_BUTTON))
-                  amxButtons = AMX_MIDDLE_BUTTON;
-          }
+            if (RTC_Enabled)
+            {
+                tmp = (tmp & 0xfe) | (RTC_data & 0x01);
+                RTC_data = RTC_data >> 1;
+            }
 
-		if (Tube186Enabled)
-		{
-			tmp &= 0xf8;
-			tmp |= (amxButtons ^ 7);
-		}
-		else
-		{
-			tmp &= 0x1f;
-			tmp	|= (amxButtons ^ 7) << 5;
-			UserVIAState.ifr&=0xe7;
-		}
-		  
-	  UpdateIFRTopBit();
+            if (mBreakOutWindow != nullptr) ShowInputs(tmp);
 
-		  /* Set up another interrupt if not at target */
-        if ( (AMXTargetX != AMXCurrentX) || (AMXTargetY != AMXCurrentY) || AMXDeltaX || AMXDeltaY) {
-          SetTrigger(AMX_TRIGGER, AMXTrigger);
-        }
-        else {
-          ClearTrigger(AMXTrigger);
-        }
-      }
+            if (AMXMouseEnabled) {
+                if (AMXLRForMiddle) {
+                    if ((amxButtons & AMX_LEFT_BUTTON) && (amxButtons & AMX_RIGHT_BUTTON))
+                        amxButtons = AMX_MIDDLE_BUTTON;
+                }
 
-      break;
+                if (Tube186Enabled)
+                {
+                    tmp &= 0xf8;
+                    tmp |= (amxButtons ^ 7);
+                }
+                else
+                {
+                    tmp &= 0x1f;
+                    tmp	|= (amxButtons ^ 7) << 5;
+                    UserVIAState.ifr&=0xe7;
+                }
+
+                UpdateIFRTopBit();
+
+                /* Set up another interrupt if not at target */
+                if ( (AMXTargetX != AMXCurrentX) || (AMXTargetY != AMXCurrentY) || AMXDeltaX || AMXDeltaY) {
+                    SetTrigger(AMX_TRIGGER, AMXTrigger);
+                }
+                else {
+                    ClearTrigger(AMXTrigger);
+                }
+            }
+            break;
 
     case 2:
       tmp = UserVIAState.ddrb;
@@ -461,7 +458,7 @@ void UserVIA_poll_real(void) {
   }
 	
   if (UserVIAState.timer2c<-2) {
-    if (UserVIAState.timer2hasshot==0) {
+    if (!UserVIAState.timer2hasshot) {
      /* cerr << "UserVIA timer2c - int\n"; */
       UserVIAState.ifr|=0x20; /* Timer 2 interrupt */
       UpdateIFRTopBit();
@@ -475,20 +472,20 @@ void UserVIA_poll_real(void) {
   if (UserVIAState.timer2c<-3) {
 	  UserVIAState.timer2c += 0x20000; // Do not reload latches for T2
   }
-
 } /* UserVIA_poll */
 
 void UserVIA_poll(unsigned int ncycles) {
   // Converted to a proc to allow shift register functions
+  
   UserVIAState.timer1c-=ncycles; 
   if (!(UserVIAState.acr & 0x20))
 	UserVIAState.timer2c-=ncycles; 
   if ((UserVIAState.timer1c<0) || (UserVIAState.timer2c<0)) UserVIA_poll_real();
+
   if (AMXMouseEnabled && AMXTrigger<=TotalCycles) AMXMouseMovement();
   if (PrinterEnabled && PrinterTrigger <= TotalCycles) PrinterPoll();
   if (SRTrigger<=TotalCycles) SRPoll();
 }
-
 
 /*--------------------------------------------------------------------------*/
 void UserVIAReset(void) {
@@ -545,8 +542,8 @@ static void UpdateSRState(bool SRrw)
 }
 
 /*-------------------------------------------------------------------------*/
-void AMXMouseMovement() {
-
+void AMXMouseMovement()
+{
 	ClearTrigger(AMXTrigger);
 
 	// Check if there is an outstanding interrupt //
@@ -580,7 +577,7 @@ void AMXMouseMovement() {
                 else
                      UserVIAState.irb |= xpulse;
 
-                if(!(UserVIAState.pcr & 0x10)) // Interupt on falling CB1 edge
+                if(!(UserVIAState.pcr & 0x10)) // Interrupt on falling CB1 edge
                 {
                     // Warp time to the falling edge, invert the input
                     UserVIAState.irb ^= xpulse;
@@ -598,11 +595,11 @@ void AMXMouseMovement() {
                      UserVIAState.irb &= ~ypulse;
                 if (!(UserVIAState.pcr & 0x40)) // Interrupt on falling CB2 edge
                  {
-                     // Warp Time to the falling edge, invert the input
+                     // Warp time to the falling edge, invert the input
                      UserVIAState.irb ^= ypulse;
                  }
 
-                 // Trigger the Interrupt
+                 // Trigger the interrupt
                  UserVIAState.ifr |= 0x08;
             }
 
@@ -614,7 +611,7 @@ void AMXMouseMovement() {
             if (AMXDeltaY != 0)
                 AMXDeltaY -= ydir;
             else
-                 AMXCurrentY += ydir;;    
+                 AMXCurrentY += ydir;    
 
             UpdateIFRTopBit();
         }
@@ -632,20 +629,19 @@ void PrinterEnable(char *FileName) {
 	}
 
     if (strcmp(FileName, "CLIPBOARD") == 0)
-	{
-	}
-	else
-	{
-		strcpy(PrinterFileName, FileName);
-		PrinterFileHandle = fopen(FileName, "wb");
-		if (PrinterFileHandle == NULL)
-		{
-			fprintf(stderr, "Failed to open printer %s\n", PrinterFileName);
-			return;
-		}
-	}
-	PrinterEnabled = true;
-	SetTrigger(PRINTER_TRIGGER, PrinterTrigger);
+    {
+        // Do nothing
+    } else {
+        strcpy(PrinterFileName, FileName);
+        PrinterFileHandle = fopen(FileName, "wb");
+        if (PrinterFileHandle == NULL)
+        {
+            fprintf(stderr, "Failed to open printer %s\n", PrinterFileName);
+            return;
+        }
+    }
+    PrinterEnabled = true;
+    SetTrigger(PRINTER_TRIGGER, PrinterTrigger);
 }
 
 /*-------------------------------------------------------------------------*/
