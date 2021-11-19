@@ -37,6 +37,26 @@ extern "C" void beeb_autorun(char* path)
     strcpy(AutoRunPath, path);
 }
 
+extern "C" void beeb_handlemouse(long eventkind)
+{
+  // here
+    switch (eventkind)
+    {
+        case mouseDown:
+            fprintf(stderr, "Mouse button down\n");
+            break;
+        case mouseUp:
+            fprintf(stderr, "Mouse button up\n");
+            break;
+            
+    }
+}
+
+extern "C" void beeb_SetAMXPosition(unsigned int x, unsigned int y)
+{
+    BeebWin::SetAMXPosition(x, y);
+}
+
 extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charCode)
 {
      static int ctrl = 0x0000;

@@ -11,6 +11,57 @@ import Carbon
 
 class BeebImageView: NSImageView {
     
+    var trackingArea: NSTrackingArea?
+    var mouseLocation: NSPoint { NSEvent.mouseLocation }
+
+    // MARK: - Tracking area management
+
+    /// Will install tracking area on the view if a window is set
+    override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        installTrackingArea()
+    }
+    
+    /// Install tracking area if window is set, remove previous one if needed.
+    func installTrackingArea() {
+        guard let window = window else { return }
+        window.acceptsMouseMovedEvents = true
+        if trackingArea != nil { removeTrackingArea(trackingArea!) }
+//        let trackingOptions = [.activeAlways, .mouseEnteredAndExited, .mouseMoved]
+        trackingArea = NSTrackingArea(rect: frame,
+                                      options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved],
+                                      owner: self, userInfo: nil)
+        self.addTrackingArea(trackingArea!)
+    }
+    
+    /// Called when layout is modified
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        installTrackingArea()
+    }
+    
+    override func mouseEntered(with event: NSEvent) {
+        updateTrackingAreas()
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        window!.acceptsMouseMovedEvents = false
+        removeTrackingArea(trackingArea!)
+
+    }
+    
+    override func mouseMoved(with event: NSEvent) {
+        print(String(format: "%.0f, %.0f", self.mouseLocation.x, self.mouseLocation.y))
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        beeb_handlemouse(kEventMouseUp);
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        beeb_handlemouse(kEventMouseDown);
+    }
+    
     override func draw(_ dirtyRect: NSRect) {
                 NSGraphicsContext.current?.imageInterpolation = .none
         
@@ -42,6 +93,11 @@ class BeebImageView: NSImageView {
     }
     
     
+}
+
+func sendAMXPosition( x: Int, y: Int)
+{
+  SetAMXPosition(x,y)
 }
 
 

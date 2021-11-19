@@ -16,9 +16,12 @@ void beeb_MainCpuLoop();
 int beeb_end();
 void beeb_video(long height, long width, struct CColour buffer[]);
 void beeb_handlekeys(long eventkind, unsigned long keycode, char charCode);
+void beeb_handlemouse(long eventkind);
 
 int beeb_HandleCommand(unsigned int cmdID);
 void beeb_setFilePath(const char* _path);
+
+void beeb_setAMXPosition(unsigned int x,unsigned int y);
 
 
 long beeb_TCHandleCommand(unsigned int cmdID);

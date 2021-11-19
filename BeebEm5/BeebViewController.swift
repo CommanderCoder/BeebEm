@@ -31,11 +31,11 @@ class BeebViewController: NSViewController {
     @IBOutlet var imageView: BeebImageView!
     
     var displayLink : CVDisplayLink?
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
-        
  
         // create a callback for the DisplayLink to the update() method of this class
         let displayLinkOutputCallback: CVDisplayLinkOutputCallback = {
