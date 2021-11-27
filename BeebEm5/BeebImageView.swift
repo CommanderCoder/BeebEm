@@ -95,9 +95,8 @@ class BeebImageView: NSImageView {
     
 }
 
-func sendAMXPosition( x: Int, y: Int)
+func sendAMXPosition( x: UInt, y: UInt)
 {
-  SetAMXPosition(x,y)
 }
 
 
