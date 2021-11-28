@@ -55,6 +55,7 @@ extern "C" void beeb_handlemouse(long eventkind)
 extern "C" void beeb_SetAMXPosition(unsigned int x, unsigned int y)
 {
     // TODO: Put call to BeebWin::SetAMXPosition(x,y) here but how?
+    mainWin->SetAMXPosition(x, y);
 }
 
 extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charCode)
