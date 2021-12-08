@@ -68,6 +68,14 @@ class BeebImageView: NSImageView {
         beeb_handlemouse(kEventMouseDown);
     }
     
+    override func rightMouseUp(with event: NSEvent) {
+        beeb_handlemouse(kEventMouseUp);
+    }
+    
+    override func rightMouseDown(with event: NSEvent) {
+        beeb_handlemouse(kEventMouseDown);
+    }
+    
     override func draw(_ dirtyRect: NSRect) {
                 NSGraphicsContext.current?.imageInterpolation = .none
         

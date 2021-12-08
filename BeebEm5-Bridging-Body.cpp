@@ -42,11 +42,18 @@ extern "C" void beeb_handlemouse(long eventkind)
   // here
     switch (eventkind)
     {
+            // TODO: see main.cc for how it was done previously
         case mouseDown:
-            fprintf(stderr, "Mouse button down\n");
+            fprintf(stderr, "Left Mouse button down\n");
             break;
         case mouseUp:
-            fprintf(stderr, "Mouse button up\n");
+            fprintf(stderr, "Left Mouse button up\n");
+            break;
+        case kCGEventRightMouseDown:
+            fprintf(stderr, "Right Mouse buttom down\n");
+            break;
+        case kCGEventRightMouseUp:
+            fprintf(stderr, "Right Mouse button up\n");
             break;
             
     }
