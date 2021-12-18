@@ -33,6 +33,10 @@
 #include "video.h"
 #include "disctype.h"
 
+#include "model.h"
+
+extern Model MachineType;
+
 typedef union {
 	unsigned char data[8];
   EightByteType eightbyte;
@@ -128,7 +132,7 @@ public:
 	void doLED(int sx,bool on);
 
 	void RealizePalette(void) {};
-	void ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatus,unsigned char LoadRoms);
+	void ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsigned char LoadRoms);
     
     void CreateDiscImage(const char *Filename, int Drive, int Heads, int Tracks);
 

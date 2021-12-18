@@ -87,6 +87,7 @@
 
 /* Begin PBXFileReference section */
 		8B268E3926DD09DE006CD26F /* disctype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = disctype.h; path = src/disctype.h; sourceTree = "<group>"; };
+		8B31157E276E9AAA00B23CD7 /* model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = model.h; path = src/model.h; sourceTree = "<group>"; };
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 		DC10ACE22567BA1300DA8E32 /* create_dmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_dmg.sh; sourceTree = "<group>"; };
 		DC4106F226E54DAC000A1E37 /* BeebApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebApplication.swift; sourceTree = "<group>"; };
@@ -411,6 +412,7 @@
 		DCD4ADE624A4D54A0000C40A /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				8B31157E276E9AAA00B23CD7 /* model.h */,
 				DCD4ADFC24A4D56E0000C40A /* 6502core.h */,
 				DCD4AE0224A4D56F0000C40A /* Arm.h */,
 				DCD4ADF824A4D56E0000C40A /* ArmDisassembler.h */,

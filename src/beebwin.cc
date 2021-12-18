@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "model.h"
 #include "main.h"
 #include "beebwin.h"
 #include "port.h"
@@ -2021,7 +2022,7 @@ void BeebWin::SetSoundMenu(void) {
 }
 
 /****************************************************************************/
-void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatus,unsigned char LoadRoms) 
+void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsigned char LoadRoms)
 {
 	BeebReleaseAllKeys();
 	SwitchOnCycles=0; // Reset delay
@@ -2066,15 +2067,15 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
     if (SCSIDriveEnabled) SCSIReset();
     if (SCSIDriveEnabled) SASIReset();
     if (TeleTextAdapterEnabled) TeleTextInit();
-	if (MachineType==3) InvertTR00=false;
-	if ((MachineType!=3) && (NativeFDC)) {
+	if (MachineType == Model::Master128) InvertTR00=false;
+	if ((MachineType!= Model::Master128) && (NativeFDC)) {
 		// 8271 disc
 		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[0], 0 ,0, 80);
 		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[0], (int)0, (int)80);
 		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[1], 1, 0, 80);
 		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[1], (int)1, (int)80);
 	}
-	if (((MachineType!=3) && (!NativeFDC)) || (MachineType==3)) {
+	if (((MachineType!= Model::Master128) && (!NativeFDC)) || (MachineType == Model::Master128)) {
 		// 1770 Disc
 		if (DiscLoaded[0]) Load1770DiscImage(CDiscName[0],0,CDiscType[0]);
 		if (DiscLoaded[1]) Load1770DiscImage(CDiscName[1],1,CDiscType[1]);
@@ -2204,7 +2205,28 @@ CFStringRef pTitle;
 // Because the values are retained as they are placed into the
 //  dictionary, we can release any allocated objects here.
 
-	AddDictNum(dict, CFSTR("MachineType"), MachineType);
+    int dumb_machineType = 0;
+    switch (MachineType)
+    {
+        case Model::B :
+            dumb_machineType = 0;
+            break;
+        case Model::IntegraB :
+            dumb_machineType = 1;
+            break;
+        case Model::BPlus :
+            dumb_machineType = 2;
+            break;
+        case Model::Master128 :
+            dumb_machineType = 3;
+            break;
+        case Model::Last :
+            dumb_machineType = 0;
+            break;
+    }
+    
+    
+    AddDictNum(dict, CFSTR("MachineType"), dumb_machineType);
 	AddDictNum(dict, CFSTR("ShowFPS"), m_ShowSpeedAndFPS);
 	AddDictNum(dict, CFSTR("TubeEnabled"), TubeEnabled);
 	AddDictNum(dict, CFSTR("Tube186Enabled"), Tube186Enabled);
@@ -2349,8 +2371,29 @@ int LEDByte;
 	FDCType = GetDictNum(dict, CFSTR("FDCType"), 0);
 	TranslateFDC();
 
+    int dumb_machineType = 0;
+    
 	m_WriteProtectOnLoad = GetDictNum(dict, CFSTR("WriteProtectOnLoad"), 1);
-	MachineType = GetDictNum(dict, CFSTR("MachineType"), 3);
+	dumb_machineType = GetDictNum(dict, CFSTR("MachineType"), 3);
+    
+    switch (dumb_machineType)
+    {
+        case 0:
+            MachineType = Model::B;
+            break;
+        case 1:
+            MachineType = Model::IntegraB;
+            break;
+        case 2:
+            MachineType = Model::BPlus;
+            break;
+        case 3:
+            MachineType = Model::Master128;
+            break;
+        case 4:
+            MachineType = Model::B;
+    }
+    
 	m_isFullScreen = GetDictNum(dict, CFSTR("isFullScreen"), 0);
 	m_maintainAspectRatio = GetDictNum(dict, CFSTR("MaintainAspectRatio"), 1);
 	m_MenuIdWinSize = GetDictNum(dict, CFSTR("WindowSize"), 4);
@@ -3066,7 +3109,7 @@ bool wdd = false;
 	if (strstr(path, ".IMG")) img = true;
 	if (strstr(path, ".DOS")) dos = true;
 	
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		if (dsd)
 		{
@@ -3102,7 +3145,7 @@ bool wdd = false;
 		}
 	}
 			
-	if (MachineType == 3)
+	if (MachineType == Model::Master128)
 	{
 		if (dsd)
 			Load1770DiscImage(path, drive, DiscType::DSD);						// 1 = dsd
@@ -3310,7 +3353,7 @@ int BeebWin::StartOfFrame(void)
 void BeebWin::ToggleWriteProtect(int Drive)
 {
 
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		if (m_WriteProtectDisc[Drive])
 		{
@@ -3329,7 +3372,7 @@ void BeebWin::ToggleWriteProtect(int Drive)
 			SetMenuCommandIDCheck('wrp1', (m_WriteProtectDisc[1]) ? true : false);
 	}
 
-	if ((MachineType == 3) || ((MachineType == 0) && (!NativeFDC)))
+	if ((MachineType == Model::Master128) || ((MachineType == Model::B) && (!NativeFDC)))
 	{
 		DWriteable[Drive] = 1 - DWriteable[Drive];
 
@@ -3345,7 +3388,7 @@ void BeebWin::ToggleWriteProtect(int Drive)
 void BeebWin::SetDiscWriteProtects(void)
 {
 
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		m_WriteProtectDisc[0] = !IsDiscWritable(0);
 		m_WriteProtectDisc[1] = !IsDiscWritable(1);
@@ -3431,7 +3474,7 @@ void BeebWin::InitMenu(void)
     }
 #endif
 
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		SetMenuCommandIDCheck('wrp0', (m_WriteProtectDisc[0]) ? true : false);
 		SetMenuCommandIDCheck('wrp1', (m_WriteProtectDisc[1]) ? true : false);
@@ -3509,10 +3552,10 @@ void BeebWin::UpdateMonitorMenu(void)
 
 void BeebWin::UpdateModelType(void)
 {
-	SetMenuCommandIDCheck('bbcb', (MachineType == 0) ? true : false);
-	SetMenuCommandIDCheck('bbci', (MachineType == 1) ? true : false);
-	SetMenuCommandIDCheck('bbcp', (MachineType == 2) ? true : false);
-	SetMenuCommandIDCheck('bbcm', (MachineType == 3) ? true : false);
+	SetMenuCommandIDCheck('bbcb', (MachineType == Model::B) ? true : false);
+	SetMenuCommandIDCheck('bbci', (MachineType == Model::IntegraB) ? true : false);
+	SetMenuCommandIDCheck('bbcp', (MachineType == Model::BPlus) ? true : false);
+	SetMenuCommandIDCheck('bbcm', (MachineType == Model::Master128) ? true : false);
 }
 
 void BeebWin::UpdateEconetMenu(void)
@@ -3716,33 +3759,33 @@ OSStatus err = noErr;
             break;
         case 'bbcb':
             fprintf(stderr, "BBC B selected\n");
-			if (MachineType != 0)
+			if (MachineType != Model::B)
 			{
-				ResetBeebSystem(0, EnableTube, 1);
+				ResetBeebSystem(Model::B, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
         case 'bbci':
             fprintf(stderr, "BBC B Integra selected\n");
-			if (MachineType != 1)
+			if (MachineType != Model::IntegraB)
 			{
-				ResetBeebSystem(1, EnableTube, 1);
+				ResetBeebSystem( Model::IntegraB, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
         case 'bbcp':
             fprintf(stderr, "BBC B Plus selected\n");
-			if (MachineType != 2)
+			if (MachineType != Model::BPlus)
 			{
-				ResetBeebSystem(2, EnableTube, 1);
+				ResetBeebSystem( Model::BPlus, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
         case 'bbcm':
             fprintf(stderr, "BBC Master 128 selected\n");
-			if (MachineType != 3)
+			if (MachineType != Model::Master128)
 			{
-				ResetBeebSystem(3, EnableTube, 1);
+				ResetBeebSystem( Model::Master128, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
@@ -5157,7 +5200,28 @@ void SaveEmuUEF(FILE *SUEF) {
 	// Emulator Specifics
 	// Note about this block: It should only be handled by beebem from uefstate.cpp if
 	// the UEF has been determined to be from BeebEm (Block 046C)
-	fputc(MachineType,SUEF);
+    
+    int dumb_machineType = 0;
+    switch (MachineType)
+    {
+    case Model::B :
+        dumb_machineType = 0;
+        break;
+    case Model::IntegraB :
+        dumb_machineType = 1;
+        break;
+        case Model::BPlus :
+            dumb_machineType = 2;
+            break;
+        case Model::Master128 :
+            dumb_machineType = 3;
+            break;
+        default:
+            dumb_machineType = 0;
+            break;
+    }
+    
+	fputc(dumb_machineType,SUEF);
 	fputc((NativeFDC)?0:1,SUEF);
 	fputc(TubeEnabled,SUEF);
 	fputc(0,SUEF); // Monitor type, reserved
@@ -5169,9 +5233,29 @@ void SaveEmuUEF(FILE *SUEF) {
 }
 
 void LoadEmuUEF(FILE *SUEF, int Version) {
-	MachineType=fgetc(SUEF);
-	if (Version <= 8 && MachineType == 1)
-		MachineType = 3;
+    int dumb_machineType = 0;
+
+	dumb_machineType = fgetc(SUEF);
+    switch (dumb_machineType)
+    {
+        case 0 :
+            MachineType = Model::B;
+            break;
+        case 1 :
+            MachineType = Model::IntegraB;
+            break;
+        case 2 :
+            MachineType = Model::BPlus;
+            break;
+        case 3 :
+            MachineType = Model::Master128;
+            break;
+        default:
+            MachineType = Model::B;
+            break;
+    }
+	if (Version <= 8 && MachineType == Model::IntegraB)
+		MachineType = Model::Master128;
 	NativeFDC=(fgetc(SUEF)==0)?TRUE:FALSE;
 	TubeEnabled=fgetc(SUEF);
 	mainWin->ResetBeebSystem(MachineType,TubeEnabled,1);
@@ -6076,7 +6160,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     else
         drive = 1;
     
-    if (MachineType != 3 && NativeFDC)
+    if (MachineType != Model::Master128 && NativeFDC)
     {
         // 8271 controller
         Get8271DiscInfo(drive, szDiscFile, &heads);
@@ -6182,7 +6266,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     fprintf(stderr, "Files successfully imported: %d\n", n);
     
     // Re-read disc image
-    if (MachineType != 3 && NativeFDC)
+    if (MachineType != Model::Master128 && NativeFDC)
     {
         // 8271 controller
         Eject8271DiscImage(drive);
@@ -6258,7 +6342,7 @@ void BeebWin::CreateDiscImage(const char *FileName, int DriveNum,
 		if (Heads == 1)
 		{
 //			if (MachineType == Model::Master128 || !NativeFDC) {
-			if (MachineType == 3 || !NativeFDC) {
+			if (MachineType == Model::Master128 || !NativeFDC) {
 				Load1770DiscImage(FileName, DriveNum, DiscType::SSD);
 			}
 			else {
@@ -6268,7 +6352,7 @@ void BeebWin::CreateDiscImage(const char *FileName, int DriveNum,
 		else
 		{
 //			if (MachineType == Model::Master128 || !NativeFDC) {
-			if (MachineType == 3 || !NativeFDC) {
+			if (MachineType == Model::Master128 || !NativeFDC) {
 				Load1770DiscImage(FileName, DriveNum, DiscType::DSD);
 			}
 			else {

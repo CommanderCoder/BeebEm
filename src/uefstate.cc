@@ -96,7 +96,7 @@ UEFStateResult SaveUEFState(const char *StateName) {
 		SaveVideoUEF(UEFState);
 		SaveVIAUEF(UEFState);
 		SaveSoundUEF(UEFState);
-		if (MachineType != 3 && NativeFDC)
+		if (MachineType != Model::Master128 && NativeFDC)
 			Save8271UEF(UEFState);
 		else
 			Save1770UEF(UEFState);

@@ -205,11 +205,11 @@ static void IC32Write(unsigned char Value) {
   tmpCMOSState=(IC32State & 4) !=0;
   CMOS.DataStrobe=(tmpCMOSState==OldCMOSState) ? false : true;
   OldCMOSState=tmpCMOSState;
-  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType==3) {
+  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType == Model::Master128) {
 	  CMOSWrite(CMOS.Address,SlowDataBusWriteValue);
 	  if (CMOSDebug) fprintf(CMDF,"Wrote %02x to %02x\n",SlowDataBusWriteValue,CMOS.Address);
   }
-  if (CMOS.Enabled && CMOS.Op && MachineType==3) {
+  if (CMOS.Enabled && CMOS.Op && MachineType == Model::Master128) {
 	  SysVIAState.ora=CMOSRead(CMOS.Address);
 	  if (CMOSDebug) fprintf(CMDF,"Read %02x from %02x\n",SysVIAState.ora,CMOS.Address);
   }
@@ -253,7 +253,7 @@ static void SlowDataBusWrite(unsigned char Value) {
     DoKbdIntCheck(); /* Should really only if write enable on KBD changes */
   } /* kbd write */
 
-  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType==3) 
+  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType == Model::Master128)
   {
         CMOSWrite(CMOS.Address,Value);
   }
@@ -272,7 +272,7 @@ static void SlowDataBusWrite(unsigned char Value) {
 static int SlowDataBusRead(void) {
   int result;
 
-  if (CMOS.Enabled && CMOS.Op && MachineType==3) 
+  if (CMOS.Enabled && CMOS.Op && MachineType == Model::Master128)
   {
        SysVIAState.ora=CMOSRead(CMOS.Address); //SysVIAState.ddra ^ CMOSRAM[CMOS.Address];
 	  if (CMOSDebug) fprintf(CMDF,"Read %02x from %02x\n",SysVIAState.ora,CMOS.Address);
@@ -281,8 +281,8 @@ static int SlowDataBusRead(void) {
   if (CMOS.Enabled) result=(SysVIAState.ora & ~SysVIAState.ddra);
   /* I don't know this lot properly - just put in things as we figure them out */
 
-  if (MachineType!=3) if (!(IC32State & 8)) { if (KbdOP()) result|=128; }
-  if ((MachineType==3) && (!CMOS.Enabled)) {
+  if (MachineType!= Model::Master128) if (!(IC32State & 8)) { if (KbdOP()) result|=128; }
+  if ((MachineType == Model::Master128) && (!CMOS.Enabled)) {
 	  if (KbdOP()) result|=128; 
   }
 
@@ -292,7 +292,7 @@ static int SlowDataBusRead(void) {
   }
 #endif 
 
-  if ((!(IC32State & 4)) && (MachineType != 3) ) {
+  if ((!(IC32State & 4)) && (MachineType != Model::Master128) ) {
 	  result = 0xff;
   }
 	  
@@ -471,7 +471,7 @@ unsigned char SysVIARead(int Address)
           tmp |= 32;    /* Fire button 2 released */
       if (!JoystickButton[0])
           tmp |= 16;    
-      if (MachineType == 3)
+      if (MachineType == Model::Master128)
       {
           tmp |= 192; /* Speech system non existant */
       }

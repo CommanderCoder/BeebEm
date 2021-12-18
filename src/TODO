@@ -1,0 +1,6 @@
+TODO:
+
+When starting it always selects the machine Master128, even though the file was saved with something else
+Need to fix this.
+
+

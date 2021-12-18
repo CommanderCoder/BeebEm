@@ -230,8 +230,8 @@ unsigned char ReadTorchTubeFromHostSide(unsigned char IOAddr)
 {
 unsigned char TmpData = 0xff;
 
-	if (!TorchTubeActive) 
-		return(MachineType==3 ? 0xff : 0xfe); 
+	if (!TorchTubeActive)
+        return MachineType == Model::Master128 ? 0xff : 0xfe;
 
 	switch (IOAddr) {
 	case 0:
@@ -389,10 +389,10 @@ unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
 
     //TODO replace below when complete
     // if (TubeType == Tube::None)
-    // return MachineType == 3 ? 0xff : 0xfe;
+    // return MachineType == Model::Master128 ? 0xff : 0xfe;
 
 	if (! (EnableTube || Tube186Enabled || AcornZ80 || ArmTube) ) 
-		return(MachineType==3 ? 0xff : 0xfe); // return ff for master else return fe
+		return(MachineType == Model::Master128 ? 0xff : 0xfe); // return ff for master else return fe
 
 	switch (IOAddr) {
 	case 0:

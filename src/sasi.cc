@@ -295,55 +295,61 @@ static void SASIWriteData(int data)
 			}
 			return;
 			
-		case s_write :
-
-			sasi.buffer[sasi.offset] = data;
-			sasi.offset++;
-			sasi.length--;
-			sasi.req = false;
-			
-			if (sasi.length > 0)
-				return;
-				
-			switch (sasi.cmd[0]) {
-				case 0x0a :
-				case 0x0c :
-					break;
-				default :
-					SASIStatus();
-					return;
-			}
-
-			switch (sasi.cmd[0]) {
-				case 0x0a :
-					if (!SASIWriteSector(sasi.buffer, sasi.next - 1)) {
-						sasi.status = (sasi.lun << 5) | 0x02;
-						sasi.message = 0;
-						SASIStatus();
-						return;
-					}
-					break;
-				case 0x0c :
-					if (!SASIWriteGeometory(sasi.buffer)) {
-						sasi.status = (sasi.lun << 5) | 0x02;
-						sasi.message = 0;
-						SASIStatus();
-						return;
-					}
-					break;
-			}
-				
-			sasi.blocks--;
-			
-			if (sasi.blocks == 0) {
-				SASIStatus();
-				return;
-			}
-			sasi.length = 256;
-			sasi.next++;
-			sasi.offset = 0;
-			return;
-	}
+        case execute:
+        case s_read:
+            break;
+        case s_write :
+            
+            sasi.buffer[sasi.offset] = data;
+            sasi.offset++;
+            sasi.length--;
+            sasi.req = false;
+            
+            if (sasi.length > 0)
+                return;
+            
+            switch (sasi.cmd[0]) {
+                case 0x0a :
+                case 0x0c :
+                    break;
+                default :
+                    SASIStatus();
+                    return;
+            }
+            
+            switch (sasi.cmd[0]) {
+                case 0x0a :
+                    if (!SASIWriteSector(sasi.buffer, sasi.next - 1)) {
+                        sasi.status = (sasi.lun << 5) | 0x02;
+                        sasi.message = 0;
+                        SASIStatus();
+                        return;
+                    }
+                    break;
+                case 0x0c :
+                    if (!SASIWriteGeometory(sasi.buffer)) {
+                        sasi.status = (sasi.lun << 5) | 0x02;
+                        sasi.message = 0;
+                        SASIStatus();
+                        return;
+                    }
+                    break;
+            }
+            
+            sasi.blocks--;
+            
+            if (sasi.blocks == 0) {
+                SASIStatus();
+                return;
+            }
+            sasi.length = 256;
+            sasi.next++;
+            sasi.offset = 0;
+            return;
+        case status:
+        case message:
+            break;
+    }
 
 	SASIBusFree();
 }

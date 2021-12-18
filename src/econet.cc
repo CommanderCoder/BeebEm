@@ -279,7 +279,7 @@ void EconetReset(void) {
 	}
 
 	// On Master the station number is read from CMOS so update it
-	if (MachineType == 3) {
+	if (MachineType == Model::Master128) {
 		CMOSWrite(0x0e, EconetStationNumber);
 	}
 		

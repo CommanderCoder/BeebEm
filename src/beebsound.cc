@@ -148,7 +148,7 @@ void PlayUpTil(double DestTime) {
 	int i;
 	
 //		fprintf(stderr, "Sound Samples = %d\n", (int) (DestTime - OurTime));
-	if (MachineType != 3 && SpeechEnabled)
+    if (MachineType != Model::Master128 && SpeechEnabled)
 	{
 		SpeechPtr = 0;
 		memset(SpeechBuf, 128, sizeof(SpeechBuf));
@@ -302,7 +302,7 @@ void PlayUpTil(double DestTime) {
 
 			// Mix in speech sound
  
-			if (SpeechEnabled) if (MachineType != 3) tmptotal += (SpeechBuf[SpeechPtr++]-128)*10;
+			if (SpeechEnabled) if (MachineType != Model::Master128) tmptotal += (SpeechBuf[SpeechPtr++]-128)*10;
 
 			// Mix in sound samples here
 			for (i = 0; i < NUM_SOUND_SAMPLES; ++i) {

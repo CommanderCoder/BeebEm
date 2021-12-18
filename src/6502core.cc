@@ -481,7 +481,7 @@ INLINE static void ADCInstrHandler(int16 operand) {
 
     Accumulator=hn|ln;
 
-    if (MachineType == 3) {
+    if (MachineType == Model::Master128) {
         ZFlag=(Accumulator==0);
         NFlag=(Accumulator&128);
     }
@@ -798,7 +798,7 @@ INLINE static void SBCInstrHandler(int16 operand) {
       ((Accumulator & 128) > 0) ^ ((TmpResultV & 256) != 0),
       Accumulator & 128);
   } else {
-    if (MachineType == 3 ) {
+    if (MachineType == Model::Master128 ) {
       int ohn = operand & 0xf0;
       int oln = operand & 0x0f;
 
@@ -1034,7 +1034,7 @@ INLINE static int16 IndAddrModeHandler_Address(void) {
   According to my BBC Master Reference Manual Part 2
   the 6502 has a bug concerning this addressing mode and VectorLocation==xxFF
   so, we're going to emulate that bug -- Richard Gellman */
-  if ((VectorLocation & 0xff)!=0xff || MachineType == 3) {
+  if ((VectorLocation & 0xff)!=0xff || MachineType == Model::Master128) {
    EffectiveAddress=ReadPaged(VectorLocation);
    EffectiveAddress|=ReadPaged(VectorLocation+1) << 8;
   } else {
@@ -1105,7 +1105,7 @@ INLINE static int16 ZeroPgYAddrModeHandler_Address(void) {
 /*-------------------------------------------------------------------------*/
 /* Initialise 6502core                                                     */
 void Init6502core(void) {
-    if (MachineType == 3) {
+    if (MachineType == Model::Master128) {
         CyclesTable = CyclesTable65C02;
         CyclesToMemRead = CyclesToMemWrite65C02;
         CyclesToMemWrite = CyclesToMemWrite65C02;
@@ -1271,7 +1271,7 @@ void Exec6502Instruction(void) {
             case 0x22:
             case 0x42:
             case 0x62:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP immediate
                     ReadPaged(ProgramCounter++);
                 } else {
@@ -1280,7 +1280,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x03:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SLO (zp,x)
@@ -1290,7 +1290,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x04:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // TSB zp
                     TSBInstrHandler(ZeroPgAddrModeHandler_Address());
                 } else {
@@ -1307,7 +1307,7 @@ void Exec6502Instruction(void) {
                 ASLInstrHandler(ZeroPgAddrModeHandler_Address());
                 break;
             case 0x07:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SLO zp
@@ -1330,7 +1330,7 @@ void Exec6502Instruction(void) {
                 break;
             case 0x0b:
             case 0x2b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ANC imm
@@ -1339,7 +1339,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x0c:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // TSB abs
                     TSBInstrHandler(AbsAddrModeHandler_Address());
                 } else {
@@ -1354,7 +1354,7 @@ void Exec6502Instruction(void) {
                 ASLInstrHandler(AbsAddrModeHandler_Address());
                 break;
             case 0x0f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SLO abs
@@ -1371,7 +1371,7 @@ void Exec6502Instruction(void) {
                 ORAInstrHandler(IndYAddrModeHandler_Data());
                 break;
             case 0x12:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // ORA (zp)
                     ORAInstrHandler(ZPIndAddrModeHandler_Data());
                 } else {
@@ -1380,7 +1380,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x13:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // undocumented Instruction: SLO (zp),Y
@@ -1390,7 +1390,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x14:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // TRB zp
                     TRBInstrHandler(ZeroPgAddrModeHandler_Address());
                 } else {
@@ -1407,7 +1407,7 @@ void Exec6502Instruction(void) {
                 ASLInstrHandler(ZeroPgXAddrModeHandler_Address());
                 break;
             case 0x17:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction SLO zp,X
@@ -1425,7 +1425,7 @@ void Exec6502Instruction(void) {
                 ORAInstrHandler(AbsYAddrModeHandler_Data());
                 break;
             case 0x1a:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // INC
                     INAInstrHandler();
                 } else {
@@ -1433,7 +1433,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x1b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SLO abs,Y
@@ -1443,7 +1443,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x1c:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     TRBInstrHandler(AbsAddrModeHandler_Address());
                 } else {
                     // undocumented instruction: NOP abs,X
@@ -1457,7 +1457,7 @@ void Exec6502Instruction(void) {
                 ASLInstrHandler(AbsXAddrModeHandler_Address());
                 break;
             case 0x1f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SLO abs,X
@@ -1473,7 +1473,7 @@ void Exec6502Instruction(void) {
                 ANDInstrHandler(IndXAddrModeHandler_Data());
                 break;
             case 0x23:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RLA (zp,x)
@@ -1495,7 +1495,7 @@ void Exec6502Instruction(void) {
                 ROLInstrHandler(ZeroPgAddrModeHandler_Address());
                 break;
             case 0x27:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction RLA zp
@@ -1539,7 +1539,7 @@ void Exec6502Instruction(void) {
                 ROLInstrHandler(AbsAddrModeHandler_Address());
                 break;
             case 0x2f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // undocumented instruction: RLA abs
@@ -1557,7 +1557,7 @@ void Exec6502Instruction(void) {
                 ANDInstrHandler(IndYAddrModeHandler_Data());
                 break;
             case 0x32:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // AND (zp)
                     ANDInstrHandler(ZPIndAddrModeHandler_Data());
                 } else {
@@ -1566,7 +1566,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x33:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction RLA (zp),Y
@@ -1576,7 +1576,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x34:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // BIT abs,X
                     BITInstrHandler(ZeroPgXAddrModeHandler_Data());
                 } else {
@@ -1593,7 +1593,7 @@ void Exec6502Instruction(void) {
                 ROLInstrHandler(ZeroPgXAddrModeHandler_Address());
                 break;
             case 0x37:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RLA zp,X
@@ -1611,7 +1611,7 @@ void Exec6502Instruction(void) {
                 ANDInstrHandler(AbsYAddrModeHandler_Data());
                 break;
             case 0x3a:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // DEC A
                     DEAInstrHandler();
                 } else {
@@ -1619,7 +1619,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x3b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented Instruction: RLA abs,Y
@@ -1629,7 +1629,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x3c:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // BIT abs,X
                     BITInstrHandler(AbsXAddrModeHandler_Data());
                 } else {
@@ -1646,7 +1646,7 @@ void Exec6502Instruction(void) {
                 ROLInstrHandler(AbsXAddrModeHandler_Address());
                 break;
             case 0x3f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RLA abs,X
@@ -1666,7 +1666,7 @@ void Exec6502Instruction(void) {
                 EORInstrHandler(IndXAddrModeHandler_Data());
                 break;
             case 0x43:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SRE (zp,X)
@@ -1688,7 +1688,7 @@ void Exec6502Instruction(void) {
                 LSRInstrHandler(ZeroPgAddrModeHandler_Address());
                 break;
             case 0x47:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SRE zp
@@ -1710,7 +1710,7 @@ void Exec6502Instruction(void) {
                 LSRInstrHandler_Acc();
                 break;
             case 0x4b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ALR imm
@@ -1731,7 +1731,7 @@ void Exec6502Instruction(void) {
                 LSRInstrHandler(AbsAddrModeHandler_Address());
                 break;
             case 0x4f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SRE abs
@@ -1749,7 +1749,7 @@ void Exec6502Instruction(void) {
                 EORInstrHandler(IndYAddrModeHandler_Data());
                 break;
             case 0x52:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // EOR (zp)
                     EORInstrHandler(ZPIndAddrModeHandler_Data());
                 } else {
@@ -1758,7 +1758,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x53:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SRE (zp),Y
@@ -1782,7 +1782,7 @@ void Exec6502Instruction(void) {
                 LSRInstrHandler(ZeroPgXAddrModeHandler_Address());
                 break;
             case 0x57:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SRE zp,X
@@ -1803,7 +1803,7 @@ void Exec6502Instruction(void) {
                 EORInstrHandler(AbsYAddrModeHandler_Data());
                 break;
             case 0x5a:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // PHY
                     Push(YReg);
                 } else {
@@ -1811,7 +1811,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x5b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SRE abs,Y
@@ -1821,7 +1821,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x5c:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP abs
                     AbsAddrModeHandler_Address();
                 } else {
@@ -1838,7 +1838,7 @@ void Exec6502Instruction(void) {
                 LSRInstrHandler(AbsXAddrModeHandler_Address());
                 break;
             case 0x5f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SRE abs,X
@@ -1856,7 +1856,7 @@ void Exec6502Instruction(void) {
                 ADCInstrHandler(IndXAddrModeHandler_Data());
                 break;
             case 0x63:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RRA (zp,X)
@@ -1866,7 +1866,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x64:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // STZ zp
                     BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(), 0);
                 } else {
@@ -1883,7 +1883,7 @@ void Exec6502Instruction(void) {
                 RORInstrHandler(ZeroPgAddrModeHandler_Address());
                 break;
             case 0x67:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RRA zp
@@ -1906,7 +1906,7 @@ void Exec6502Instruction(void) {
                 RORInstrHandler_Acc();
                 break;
             case 0x6b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ARR imm
@@ -1927,7 +1927,7 @@ void Exec6502Instruction(void) {
                 RORInstrHandler(AbsAddrModeHandler_Address());
                 break;
             case 0x6f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RRA abs
@@ -1945,7 +1945,7 @@ void Exec6502Instruction(void) {
                 ADCInstrHandler(IndYAddrModeHandler_Data());
                 break;
             case 0x72:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // ADC (zp)
                     ADCInstrHandler(ZPIndAddrModeHandler_Data());
                 } else {
@@ -1954,7 +1954,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x73:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RRA (zp),Y
@@ -1965,7 +1965,7 @@ void Exec6502Instruction(void) {
                 break;
             case 0x74:
                 // STZ zp,X
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     BEEBWRITEMEM_DIRECT(ZeroPgXAddrModeHandler_Address(), 0);
                 } else {
                     // Undocumented instruction: NOP zp,X
@@ -1981,7 +1981,7 @@ void Exec6502Instruction(void) {
                 RORInstrHandler(ZeroPgXAddrModeHandler_Address());
                 break;
             case 0x77:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RRA zp,X
@@ -2002,7 +2002,7 @@ void Exec6502Instruction(void) {
                 ADCInstrHandler(AbsYAddrModeHandler_Data());
                 break;
             case 0x7a:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // PLY
                     YReg = Pop();
                     SetPSRZN(YReg);
@@ -2011,7 +2011,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x7b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RRA abs,Y
@@ -2021,7 +2021,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x7c:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // JMP abs,X
                     ProgramCounter = IndAddrXModeHandler_Address();
                 } else {
@@ -2038,7 +2038,7 @@ void Exec6502Instruction(void) {
                 RORInstrHandler(AbsXAddrModeHandler_Address());
                 break;
             case 0x7f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: RRA abs,X
@@ -2048,7 +2048,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x80:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // BRA rel
                     BRAInstrHandler();
                 } else {
@@ -2068,7 +2068,7 @@ void Exec6502Instruction(void) {
                 ReadPaged(ProgramCounter++);
                 break;
             case 0x83:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SAX (zp,x)
@@ -2094,7 +2094,7 @@ void Exec6502Instruction(void) {
                 BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(), XReg);
                 break;
             case 0x87:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SAX zp
@@ -2110,7 +2110,7 @@ void Exec6502Instruction(void) {
                 SetPSRZN(YReg);
                 break;
             case 0x89: /* BIT Immediate */
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // BIT imm
                     BITImmedInstrHandler(ReadPaged(ProgramCounter++));
                 } else {
@@ -2124,7 +2124,7 @@ void Exec6502Instruction(void) {
                 SetPSRZN(Accumulator);
                 break;
             case 0x8b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: XAA imm
@@ -2148,7 +2148,7 @@ void Exec6502Instruction(void) {
                 STXInstrHandler(AbsAddrModeHandler_Address());
                 break;
             case 0x8f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SAX abs
@@ -2165,7 +2165,7 @@ void Exec6502Instruction(void) {
                 /* STA */
                 break;
             case 0x92:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // STA (zp)
                     AdvanceCyclesForMemWrite();
                     WritePaged(ZPIndAddrModeHandler_Address(), Accumulator);
@@ -2175,7 +2175,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x93:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: AHX (zp),X
@@ -2203,7 +2203,7 @@ void Exec6502Instruction(void) {
                 STXInstrHandler(ZeroPgYAddrModeHandler_Address());
                 break;
             case 0x97:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: SAX zp,Y
@@ -2226,7 +2226,7 @@ void Exec6502Instruction(void) {
                 StackReg = XReg;
                 break;
             case 0x9b:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: TAS abs,Y
@@ -2235,7 +2235,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x9c:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // STZ abs
                     WritePaged(AbsAddrModeHandler_Address(), 0);
                 } else {
@@ -2251,7 +2251,7 @@ void Exec6502Instruction(void) {
                 WritePaged(AbsXAddrModeHandler_Address(), Accumulator);
                 break;
             case 0x9e:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // STZ abs,x
                     AdvanceCyclesForMemWrite();
                     WritePaged(AbsXAddrModeHandler_Address(), 0);
@@ -2263,7 +2263,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x9f:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: AHX abs,X
@@ -2286,7 +2286,7 @@ void Exec6502Instruction(void) {
                 LDXInstrHandler(ReadPaged(ProgramCounter++)); /* immediate */
                 break;
             case 0xa3:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: LAX (zp,X)
@@ -2307,7 +2307,7 @@ void Exec6502Instruction(void) {
                 LDXInstrHandler(WholeRam[ReadPaged(ProgramCounter++)]/*zp */);
                 break;
             case 0xa7:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: LAX zp
@@ -2330,7 +2330,7 @@ void Exec6502Instruction(void) {
                 SetPSRZN(Accumulator);
                 break;
             case 0xab:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: LAX imm
@@ -2351,7 +2351,7 @@ void Exec6502Instruction(void) {
                 LDXInstrHandler(AbsAddrModeHandler_Data());
                 break;
             case 0xaf:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: LAX abs
@@ -2367,7 +2367,7 @@ void Exec6502Instruction(void) {
                 LDAInstrHandler(IndYAddrModeHandler_Data());
                 break;
             case 0xb2:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // LDA (zp)
                     LDAInstrHandler(ZPIndAddrModeHandler_Data());
                 } else {
@@ -2376,7 +2376,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0xb3:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: LAX (zp),Y
@@ -2397,7 +2397,7 @@ void Exec6502Instruction(void) {
                 LDXInstrHandler(ZeroPgYAddrModeHandler_Data());
                 break;
             case 0xb7:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: LAX zp,Y
@@ -2419,7 +2419,7 @@ void Exec6502Instruction(void) {
                 SetPSRZN(XReg);
                 break;
             case 0xbb:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: LAS abs,Y
@@ -2441,7 +2441,7 @@ void Exec6502Instruction(void) {
                 LDXInstrHandler(AbsYAddrModeHandler_Data());
                 break;
             case 0xbf:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction LAX abs,Y
@@ -2458,7 +2458,7 @@ void Exec6502Instruction(void) {
                 CMPInstrHandler(IndXAddrModeHandler_Data());
                 break;
             case 0xc3:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction DCP (zp,X)
@@ -2480,7 +2480,7 @@ void Exec6502Instruction(void) {
                 DECInstrHandler(ZeroPgAddrModeHandler_Address());
                 break;
             case 0xc7:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: DCP zp
@@ -2504,7 +2504,7 @@ void Exec6502Instruction(void) {
                 DEXInstrHandler();
                 break;
             case 0xcb:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ASX imm
@@ -2532,7 +2532,7 @@ void Exec6502Instruction(void) {
                 DECInstrHandler(AbsAddrModeHandler_Address());
                 break;
             case 0xcf:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: DCP abs
@@ -2549,7 +2549,7 @@ void Exec6502Instruction(void) {
                 CMPInstrHandler(IndYAddrModeHandler_Data());
                 break;
             case 0xd2:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // CMP (zp)
                     CMPInstrHandler(ZPIndAddrModeHandler_Data());
                 } else {
@@ -2558,7 +2558,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0xd3:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: DCP (zp),Y
@@ -2575,7 +2575,7 @@ void Exec6502Instruction(void) {
                 DECInstrHandler(ZeroPgXAddrModeHandler_Address());
                 break;
             case 0xd7:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: DCP zp,X
@@ -2593,7 +2593,7 @@ void Exec6502Instruction(void) {
                 CMPInstrHandler(AbsYAddrModeHandler_Data());
                 break;
             case 0xda:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // PHX
                     Push(XReg);
                 } else {
@@ -2601,7 +2601,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0xdb:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction DCP abs,Y
@@ -2612,7 +2612,7 @@ void Exec6502Instruction(void) {
                 break;
             case 0xdc:
             case 0xfc:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP abs
                     AbsAddrModeHandler_Address();
                 } else {
@@ -2629,7 +2629,7 @@ void Exec6502Instruction(void) {
                 DECInstrHandler(AbsXAddrModeHandler_Address());
                 break;
             case 0xdf:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: DCP abs,X
@@ -2647,7 +2647,7 @@ void Exec6502Instruction(void) {
                 SBCInstrHandler(IndXAddrModeHandler_Data());
                 break;
             case 0xe3:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ISC (zp,X)
@@ -2669,7 +2669,7 @@ void Exec6502Instruction(void) {
                 INCInstrHandler(ZeroPgAddrModeHandler_Address());
                 break;
             case 0xe7:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // Undocumented instruction: ISC zp
                     int16 zpaddr = ZeroPgAddrModeHandler_Address();
                     INCInstrHandler(zpaddr);
@@ -2688,7 +2688,7 @@ void Exec6502Instruction(void) {
                 // NOP
                 break;
             case 0xeb:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // TODO: SBC imm
@@ -2707,7 +2707,7 @@ void Exec6502Instruction(void) {
                 INCInstrHandler(AbsAddrModeHandler_Address());
                 break;
             case 0xef:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ISC abs
@@ -2725,7 +2725,7 @@ void Exec6502Instruction(void) {
                 SBCInstrHandler(IndYAddrModeHandler_Data());
                 break;
             case 0xf2:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // SBC (zp)
                     SBCInstrHandler(ZPIndAddrModeHandler_Data());
                 } else {
@@ -2734,7 +2734,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0xf3:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ISC (zp),Y
@@ -2752,7 +2752,7 @@ void Exec6502Instruction(void) {
                 INCInstrHandler(ZeroPgXAddrModeHandler_Address());
                 break;
             case 0xf7:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ISC zp,X
@@ -2770,7 +2770,7 @@ void Exec6502Instruction(void) {
                 SBCInstrHandler(AbsYAddrModeHandler_Data());
                 break;
             case 0xfa:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // PLX
                     XReg = Pop();
                     SetPSRZN(XReg);
@@ -2779,7 +2779,7 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0xfb:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ISC abs,Y
@@ -2797,7 +2797,7 @@ void Exec6502Instruction(void) {
                 INCInstrHandler(AbsXAddrModeHandler_Address());
                 break;
             case 0xff:
-                if (MachineType == 3) {
+                if (MachineType == Model::Master128) {
                     // NOP
                 } else {
                     // Undocumented instruction: ISC abs,X
@@ -2813,7 +2813,7 @@ void Exec6502Instruction(void) {
                 (CurrentInstruction == 0x30) ||
                 (CurrentInstruction == 0x50) ||
                 (CurrentInstruction == 0x70) ||
-                ((CurrentInstruction == 0x80)  && MachineType  ==  3) ||
+                ((CurrentInstruction == 0x80)  && MachineType  ==  Model::Master128) ||
                 (CurrentInstruction == 0x90) ||
                 (CurrentInstruction == 0xb0) ||
                 (CurrentInstruction == 0xd0) ||
@@ -2905,7 +2905,7 @@ void PollHardware(unsigned int nCycles) {
     // Countdown time till end of display of info.
     if (DisplayCycles > 0) DisplayCycles-=nCycles;
     // Do 1770 Background stuff
-    if ((MachineType == 3) || (!NativeFDC)) Poll1770(nCycles);
+    if ((MachineType == Model::Master128) || (!NativeFDC)) Poll1770(nCycles);
 
     if (EconetEnabled && EconetPoll()) {
         if (EconetNMIenabled) {

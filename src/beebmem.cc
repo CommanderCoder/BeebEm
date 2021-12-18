@@ -128,7 +128,7 @@ char *BeebMemPtrWithWrap(int a, int n) {
   EndAddr=WrapAddr(EndAddr);
 
   // On Master the FSRam area is displayed if start addr below shadow area
-  if ( (MachineType==3) && (a<=EndAddr) && (Sh_Display>0) && (a<0x3000) ) {
+  if ( (MachineType == Model::Master128) && (a<=EndAddr) && (Sh_Display>0) && (a<0x3000) ) {
     if (0x3000-a < n) {
       toCopy=0x3000-a;
       if (toCopy>n) toCopy=n;
@@ -214,7 +214,7 @@ int BeebReadMem(int Address) {
 int Value = 0xff;
 	
 // BBC B Start
-  if (MachineType==0) {
+  if (MachineType == Model::B) {
 	  if (Address>=0x8000 && Address<0xc000) return(Roms[ROMSEL][Address-0x8000]);
 	  if (Address<0xfc00) return(WholeRam[Address]);
 	  if (Address>=0xff00) return(WholeRam[Address]);
@@ -223,7 +223,7 @@ int Value = 0xff;
 
 
 //BBC B Integra B Start
-  if (MachineType==1) { 
+  if (MachineType == Model::IntegraB) {
 	    if (Address<0x3000) return(WholeRam[Address]);
 		if ((Address>=0x8000) && (Address<0x8400) && (Prvs8==1) && (PrvEn==1)) return(Private[Address-0x8000]);
 		if ((Address>=0x8000) && (Address<0x9000) && (Prvs4==1) && (PrvEn==1)) return(Private[Address-0x8000]);
@@ -251,7 +251,7 @@ int Value = 0xff;
 //BBC B Integra B End
 
 //BBC B+ Start
-  if (MachineType==2) { 
+  if (MachineType == Model::BPlus) {
 	    if (Address<0x3000) return(WholeRam[Address]);
 		if ((Address<0x8000) && (Sh_Display==1) && (PrePC>=0xC000) && (PrePC<0xE000)) return(ShadowRAM[Address]);
 		if ((Address<0x8000) && (Sh_Display==1) && (MemSel==1) && (PrePC>=0xA000) && (PrePC<0xB000)) return(ShadowRAM[Address]);
@@ -265,7 +265,7 @@ int Value = 0xff;
 
 
 // Master 128 Start
-	if (MachineType==3) {
+	if (MachineType == Model::Master128) {
 		switch ((Address&0xf000)>>12) {
 		case 0:
 		case 1:
@@ -373,15 +373,15 @@ int Value = 0xff;
 	  */ 
 
   if (EconetEnabled &&
-	  ((MachineType != 3 && (Address & ~3)==0xfe18) ||
-	   (MachineType == 3 && (Address & ~3)==0xfe38)) ) { 
+	  ((MachineType != Model::Master128 && (Address & ~3)==0xfe18) ||
+	   (MachineType == Model::Master128 && (Address & ~3)==0xfe38)) ) { 
 	  if (DebugEnabled)
 		  DebugDisplayTrace(DEBUG_ECONET, true, "Econet: INTOFF");
 	  EconetNMIenabled = INTOFF; 
 	  return(Read_Econet_Station()); 
   }
 
-  if (Address>=0xfe18 && Address<=0xfe20 && MachineType==3) {
+  if (Address>=0xfe18 && Address<=0xfe20 && MachineType == Model::Master128) {
 	  return(AtoDRead(Address - 0xfe18));
   }
   
@@ -393,8 +393,8 @@ int Value = 0xff;
 	  */
 
   if (EconetEnabled &&
-	  ((MachineType != 3 && (Address & ~3)==0xfe20) ||
-	   (MachineType == 3 && (Address & ~3)==0xfe3c)) ) { 
+	  ((MachineType != Model::Master128 && (Address & ~3)==0xfe20) ||
+	   (MachineType == Model::Master128 && (Address & ~3)==0xfe3c)) ) { 
 
 	  if (DebugEnabled) DebugDisplayTrace(DEBUG_ECONET, true, "Econet: INTON");
 	  if (!EconetNMIenabled) {  // was off
@@ -411,10 +411,10 @@ int Value = 0xff;
   }
   
   // Master uses fe24 to fe2f for FDC
-  if (Address==0xfe24 && MachineType==3) {
+  if (Address==0xfe24 && MachineType == Model::Master128) {
 	  return(ReadFDCControlReg());
   }
-  if ((Address & ~7)==0xfe28 && MachineType==3) {
+  if ((Address & ~7)==0xfe28 && MachineType == Model::Master128) {
 	  return(Read1770Register(Address & 0x7));
   }
   
@@ -423,11 +423,11 @@ int Value = 0xff;
 	  correct me if im wrong. - Richard Gellman */
   }
   // In the Master at least, ROMSEL/ACCCON seem to be duplicated over a 4 byte block.
-  if ((Address & ~3)==0xfe34 && MachineType==3) {
+  if ((Address & ~3)==0xfe34 && MachineType == Model::Master128) {
 	  return(ACCCON);
   }
   
-  if (((Address & ~0x1f)==0xfe80) && (MachineType!=3) && (NativeFDC)) {
+  if (((Address & ~0x1f)==0xfe80) && (MachineType!= Model::Master128 && (NativeFDC))) {
 	  return(Disc8271Read(Address & 0x7));
   }
   
@@ -437,7 +437,7 @@ int Value = 0xff;
     return(0xfe);  // if not enabled  
   }
   
-  if ((Address & ~0x1f)==0xfec0 && MachineType!=3) {
+  if ((Address & ~0x1f)==0xfec0 && MachineType!= Model::Master128) {
 	  SyncIO();
 	  Value = AtoDRead(Address & 0xf);
 	  AdjustForIORead();
@@ -468,12 +468,12 @@ int Value = 0xff;
 	  return(SASIRead(Address & 0x3));
   }
   
-  if ((MachineType!=3) && (Address>=EFDCAddr) && (Address<(EFDCAddr+4)) && (!NativeFDC)) {
+  if ((MachineType!= Model::Master128) && (Address>=EFDCAddr) && (Address<(EFDCAddr+4)) && (!NativeFDC)) {
 	  //MessageBox(GETHWND,"Read of 1770 Extension Board\n","BeebEm",MB_OK|MB_ICONERROR);
 	  return(Read1770Register(Address-EFDCAddr));
   }
 
-  if ((MachineType!=3) && (Address==EDCAddr) && (!NativeFDC)) {
+  if ((MachineType!= Model::Master128) && (Address==EDCAddr) && (!NativeFDC)) {
 	  return(mainWin->GetDriveControl());
   }
   
@@ -485,14 +485,14 @@ int Value = 0xff;
 static void DoRomChange(int NewBank) {
   ROMSEL=NewBank&0xf;
 
-  if (MachineType!=3) {
+  if (MachineType!= Model::Master128) {
     NewBank&=0xf; // strip top bit if Model B
     PagedRomReg=NewBank;
 	return;
   };
 
   // Master Specific stuff   
-  if (MachineType==3) {
+  if (MachineType == Model::Master128) {
 	  PagedRomReg=NewBank;
 	  PRAM=(PagedRomReg & 128);
   }
@@ -547,7 +547,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 /*  fprintf(stderr,"Write %x to 0x%x\n",Value,Address); */
 
 // BBC B Start
-    if (MachineType==0) {
+    if (MachineType == Model::B) {
 	 if (Address<0x8000) {
 		 WholeRam[Address]=Value;
 		 return;
@@ -563,7 +563,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 
 
 // BBC B Integra B Start
-    if (MachineType==1) {
+    if (MachineType == Model::IntegraB) {
 	 if (Address<0x3000) {
 		 WholeRam[Address]=Value;
 		 return;
@@ -664,7 +664,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 
 
 // BBC B+ Start
-    if (MachineType==2) {
+    if (MachineType == Model::BPlus) {
 	 if (Address<0x3000) {
 		 WholeRam[Address]=Value;
 		 return;
@@ -713,7 +713,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 // BBC B+ End
 
 // Master 128 Start
-	if (MachineType==3) {
+	if (MachineType == Model::Master128) {
 		if (Address < 0xfc00) {
 			switch ((Address&0xf000)>>12) {
 			case 0:
@@ -807,14 +807,14 @@ void BeebWriteMem(int Address, unsigned char Value) {
 	//Rob: econet NMI mask
 
 	if (EconetEnabled &&
-		((MachineType != 3 && (Address & ~3)==0xfe18) ||
-		 (MachineType == 3 && (Address & ~3)==0xfe38)) ) { 
+		((MachineType != Model::Master128 && (Address & ~3)==0xfe18) ||
+		 (MachineType == Model::Master128 && (Address & ~3)==0xfe38)) ) { 
 		if (DebugEnabled)
 			DebugDisplayTrace(DEBUG_ECONET, true, "Econet: INTOFF(w)");
 		EconetNMIenabled = INTOFF; 
 	}
 	
-	if ((Address & ~0x7)==0xfe18 && MachineType==3) {
+	if ((Address & ~0x7)==0xfe18 && MachineType == Model::Master128) {
 		AtoDWrite((Address & 0x7),Value);
 		return;
 	}
@@ -824,12 +824,12 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		return;
 	}
 	
-	if (Address==0xfe24 && MachineType==3) {
+	if (Address==0xfe24 && MachineType == Model::Master128) {
 		WriteFDCControlReg(Value);
 		return;
 	}
 	
-	if ((Address & ~0x7)==0xfe28 && MachineType==3) {
+	if ((Address & ~0x7)==0xfe28 && MachineType == Model::Master128) {
 		Write1770Register(Address & 7,Value);
 		return;
 	} 
@@ -841,12 +841,12 @@ void BeebWriteMem(int Address, unsigned char Value) {
 	
 	// In the Master at least, ROMSEL/ACCCON seem to be duplicated over a 4 byte block.
 	/*cerr << "Write *0x" << hex << Address << "=0x" << Value << dec << "\n"; */
-	if (Address>=0xfe34 && Address<0xfe38 && MachineType==3) {
+	if (Address>=0xfe34 && Address<0xfe38 && MachineType == Model::Master128) {
 		FiddleACCCON(Value);
 		return;
 	}
 	
-	if (((Address & ~0x1f)==0xfe80) && (MachineType!=3) && (NativeFDC)) {
+	if (((Address & ~0x1f)==0xfe80) && (MachineType!= Model::Master128) && (NativeFDC)) {
 		Disc8271Write((Address & 7),Value);
 		return;
 	}
@@ -857,7 +857,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		return;
 	}
 	
-	if ((Address & ~0x1f)==0xfec0 && MachineType!=3) {
+	if ((Address & ~0x1f)==0xfec0 && MachineType!= Model::Master128) {
 		SyncIO();
 		AdjustForIOWrite();
 		AtoDWrite((Address & 0xf),Value);
@@ -892,11 +892,11 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		return;
 	}
 	
-	if ((MachineType!=3) && (Address==EDCAddr) && (!NativeFDC)) {
+	if ((MachineType!= Model::Master128) && (Address==EDCAddr) && (!NativeFDC)) {
 		mainWin->SetDriveControl(Value);
 	}
 
-	if ((MachineType!=3) && (Address>=EFDCAddr) && (Address<(EFDCAddr+4)) && (!NativeFDC)) {
+	if ((MachineType!= Model::Master128) && (Address>=EFDCAddr) && (Address<(EFDCAddr+4)) && (!NativeFDC)) {
 		Write1770Register(Address-EFDCAddr,Value);
 	}
 	
@@ -967,11 +967,11 @@ void BeebReadRoms(void) {
  if (RomCfg!=NULL) {
 	 // CFG file open, proceed to read the roms.
 	 // if machinetype=1 (i.e. BBC B Integra B) we need to skip 17 lines in the file
-	 if (MachineType==1) for (romslot=0;romslot<17;romslot++) fgets(RomName,80,RomCfg);
+	 if (MachineType == Model::IntegraB) for (romslot=0;romslot<17;romslot++) fgets(RomName,80,RomCfg);
 	 // if machinetype=2 (i.e. BBC B+) we need to skip 34 lines in the file
-	 if (MachineType==2) for (romslot=0;romslot<34;romslot++) fgets(RomName,80,RomCfg);
+	 if (MachineType == Model::BPlus) for (romslot=0;romslot<34;romslot++) fgets(RomName,80,RomCfg);
 	 // if machinetype=3 (i.e. Master 128) we need to skip 51 lines in the file
-	 if (MachineType==3) for (romslot=0;romslot<51;romslot++) fgets(RomName,80,RomCfg);
+	 if (MachineType == Model::Master128) for (romslot=0;romslot<51;romslot++) fgets(RomName,80,RomCfg);
 	 // read OS ROM
 	 fgets(RomName,80,RomCfg);
 	 if (strchr(RomName, 13)) *strchr(RomName, 13) = 0;
@@ -1103,15 +1103,15 @@ void beebmem_dumpstate(void) {
 void SaveMemUEF(FILE *SUEF) {
 	unsigned char RAMCount;
 	switch (MachineType) {
-	case 0:
-	case 3:
+        case Model::B:
+        case Model::Master128:
 		fput16(0x0461,SUEF); // Memory Control State
 		fput32(2,SUEF);
 		fputc(PagedRomReg,SUEF);
 		fputc(ACCCON,SUEF);
 		break;
 
-	case 1:
+        case Model::IntegraB:
 		fput16(0x0461,SUEF); // Memory Control State
 		fput32(3,SUEF);
 		fputc(PagedRomReg|(MemSel<<7)|(PrvEn<<6),SUEF);
@@ -1119,53 +1119,59 @@ void SaveMemUEF(FILE *SUEF) {
 		fputc(HidAdd,SUEF);
 		break;
 
-	case 2:
+        case Model::BPlus:
 		fput16(0x0461,SUEF); // Memory Control State
 		fput32(2,SUEF);
 		fputc(PagedRomReg|(MemSel<<7),SUEF);
 		fputc((Sh_Display<<7),SUEF);
 		break;
-	}
+        case Model::Last:
+            break;
+    }
 
 	fput16(0x0462,SUEF); // Main Memory
 	fput32(32768,SUEF);
 	fwrite(WholeRam,1,32768,SUEF);
 
 	switch (MachineType) {
-	case 1:
-		fput16(0x0463,SUEF); // Shadow RAM
-		fput32(20480,SUEF);
-		fwrite(ShadowRam,1,20480,SUEF);
-		fput16(0x0464,SUEF); // Private RAM
-		fput32(12288,SUEF);
-		fwrite(Private,1,12288,SUEF);
-		fput16(0x046D,SUEF); // IntegraB Hidden RAM
-		fput32(256,SUEF);
-		fwrite(Hidden,1,256,SUEF);
-		break;
-
-	case 2:
-		fput16(0x0463,SUEF); // Shadow RAM
-		fput32(32768,SUEF);
-		fwrite(ShadowRAM,1,32768,SUEF);
-		fput16(0x0464,SUEF); // Private RAM
-		fput32(12288,SUEF);
-		fwrite(Private,1,12288,SUEF);
-		break;
-
-	case 3:
-		fput16(0x0463,SUEF); // Shadow RAM
-		fput32(32770,SUEF);
-		fput16(0,SUEF);
-		fwrite(ShadowRAM,1,32768,SUEF);
-		fput16(0x0464,SUEF); // Private RAM
-		fput32(4096,SUEF);
-		fwrite(PrivateRAM,1,4096,SUEF);
-		fput16(0x0465,SUEF); // Filing System RAM
-		fput32(8192,SUEF);
-		fwrite(FSRam,1,8192,SUEF);
-		break;
-	}
+        case Model::B:
+            break;
+        case Model::IntegraB:
+            fput16(0x0463,SUEF); // Shadow RAM
+            fput32(20480,SUEF);
+            fwrite(ShadowRam,1,20480,SUEF);
+            fput16(0x0464,SUEF); // Private RAM
+            fput32(12288,SUEF);
+            fwrite(Private,1,12288,SUEF);
+            fput16(0x046D,SUEF); // IntegraB Hidden RAM
+            fput32(256,SUEF);
+            fwrite(Hidden,1,256,SUEF);
+            break;
+            
+        case Model::BPlus:
+            fput16(0x0463,SUEF); // Shadow RAM
+            fput32(32768,SUEF);
+            fwrite(ShadowRAM,1,32768,SUEF);
+            fput16(0x0464,SUEF); // Private RAM
+            fput32(12288,SUEF);
+            fwrite(Private,1,12288,SUEF);
+            break;
+            
+        case Model::Master128:
+            fput16(0x0463,SUEF); // Shadow RAM
+            fput32(32770,SUEF);
+            fput16(0,SUEF);
+            fwrite(ShadowRAM,1,32768,SUEF);
+            fput16(0x0464,SUEF); // Private RAM
+            fput32(4096,SUEF);
+            fwrite(PrivateRAM,1,4096,SUEF);
+            fput16(0x0465,SUEF); // Filing System RAM
+            fput32(8192,SUEF);
+            fwrite(FSRam,1,8192,SUEF);
+            break;
+        case Model::Last:
+            break;
+    }
 	for (RAMCount=0;RAMCount<16;RAMCount++) {
 		if (RomWritable[RAMCount]) {
 			fput16(0x0466,SUEF); // ROM bank
@@ -1181,31 +1187,35 @@ void LoadRomRegsUEF(FILE *SUEF) {
 	ROMSEL=PagedRomReg & 0xf;
 	ACCCON=fgetc(SUEF);
 	switch (MachineType) {
-	case 1:
-		MemSel=(PagedRomReg >> 7) & 1;
-		PrvEn=(PagedRomReg >> 6) & 1;
-		PagedRomReg&=0xf;
-		ShEn=(ACCCON>>7) & 1;
-		Prvs8=(ACCCON>>6) & 1;
-		Prvs4=(ACCCON>>5) & 1;
-		Prvs1=(ACCCON>>4) & 1;
-		HidAdd=fgetc(SUEF);
-		break;
-
-	case 2:
-		MemSel=(PagedRomReg >> 7) & 1;
-		PagedRomReg&=0xf;
-		Sh_Display=(ACCCON>>7) & 1;
-		break;
-
-	case 3:
-		PRAM=PagedRomReg & 128;
-		Sh_Display=ACCCON & 1;
-		Sh_CPUX=ACCCON & 4;
-		Sh_CPUE=ACCCON & 2;
-		FRAM=ACCCON & 8;
-		break;
-	}
+        case Model::B:
+            break;
+        case Model::IntegraB:
+            MemSel=(PagedRomReg >> 7) & 1;
+            PrvEn=(PagedRomReg >> 6) & 1;
+            PagedRomReg&=0xf;
+            ShEn=(ACCCON>>7) & 1;
+            Prvs8=(ACCCON>>6) & 1;
+            Prvs4=(ACCCON>>5) & 1;
+            Prvs1=(ACCCON>>4) & 1;
+            HidAdd=fgetc(SUEF);
+            break;
+            
+        case Model::BPlus:
+            MemSel=(PagedRomReg >> 7) & 1;
+            PagedRomReg&=0xf;
+            Sh_Display=(ACCCON>>7) & 1;
+            break;
+            
+        case Model::Master128:
+            PRAM=PagedRomReg & 128;
+            Sh_Display=ACCCON & 1;
+            Sh_CPUX=ACCCON & 4;
+            Sh_CPUE=ACCCON & 2;
+            FRAM=ACCCON & 8;
+            break;
+        case Model::Last:
+            break;
+    }
 }
 
 void LoadMainMemUEF(FILE *SUEF) {
@@ -1215,31 +1225,39 @@ void LoadMainMemUEF(FILE *SUEF) {
 void LoadShadMemUEF(FILE *SUEF) {
 	int SAddr;
 	switch (MachineType) {
-	case 1:
-		fread(ShadowRam,1,20480,SUEF);
-		break;
-	case 2:
-		fread(ShadowRAM,1,32768,SUEF);
-		break;
-	case 3:
-		SAddr=fget16(SUEF);
-		fread(ShadowRAM+SAddr,1,32768,SUEF);
-		break;
-	}
+        case Model::B:
+            break;
+        case Model::IntegraB:
+            fread(ShadowRam,1,20480,SUEF);
+            break;
+        case Model::BPlus:
+            fread(ShadowRAM,1,32768,SUEF);
+            break;
+        case Model::Master128:
+            SAddr=fget16(SUEF);
+            fread(ShadowRAM+SAddr,1,32768,SUEF);
+            break;
+        case Model::Last:
+            break;
+    }
 }
 
 void LoadPrivMemUEF(FILE *SUEF) {
 	switch (MachineType) {
-	case 1:
-		fread(Private,1,12288,SUEF);
-		break;
-	case 2:
-		fread(Private,1,12288,SUEF);
-		break;
-	case 3:
-		fread(PrivateRAM,1,4096,SUEF);
-		break;
-	}
+        case Model::B:
+            break;
+        case Model::IntegraB:
+            fread(Private,1,12288,SUEF);
+            break;
+        case Model::BPlus:
+            fread(Private,1,12288,SUEF);
+            break;
+        case Model::Master128:
+            fread(PrivateRAM,1,4096,SUEF);
+            break;
+        case Model::Last:
+            break;
+    }
 }
 
 void LoadFileMemUEF(FILE *SUEF) {

@@ -1209,7 +1209,7 @@ int DebugDisassembleInstruction(int addr, bool host, char *opstr)
 		sprintf(opstr + strlen(opstr), "            ");
 	
 	// Deal with 65C02 instructions
-	if (!ip->c6502 || !host || MachineType==3)
+	if (!ip->c6502 || !host || MachineType == Model::Master128)
 	{
 		sprintf(opstr + strlen(opstr), "%s ", ip->opn);
 		addr++;
