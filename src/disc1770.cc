@@ -154,10 +154,10 @@ const int DRIVE_CONTROL_SELECT_DENSITY = 0x20;
 
 static bool CurrentDiscOpen(void)
 {
-    return CurrentDisc != NULL;
+    return CurrentDisc != nullptr;
 }
 
-// Read 1770 Register/ Note - NOT the FDC Control register at &FE24.
+// Read 1770 Register. Note - NOT the FDC Control register at &FE24.
 
 unsigned char Read1770Register(unsigned char Register) {
 	if (!Disc1770Enabled)
@@ -196,8 +196,8 @@ unsigned char Read1770Register(unsigned char Register) {
 	return 0;
 }
 
-void SetMotor(int Drive, bool State) {
-	if (Drive == 0) {
+static void SetMotor(int Drive, bool State) {
+    if (Drive == 0) {
         LEDs.Disc0 = State; 
     }
     else {
@@ -230,75 +230,64 @@ void Write1770Register(unsigned char Register, unsigned char Value) {
 	if (!Disc1770Enabled)
 		return;
 
-	// WriteLog("Disc1770: Write of %02X to Register %d\n", Value, Register);
+    // WriteLog("Disc1770: Write of %02X to Register %d\n", Value, Register);
 
-	if (Register == WD1770_CONTROL_REGISTER) {
-		NMIStatus &= ~(1 << nmi_floppy); // reset INTRQ
-		// Control Register - can only write if current drive is open
-		// Changed, now command returns errors if no disc inserted
-		const unsigned char ComBits = Value & 0xf0;
-		const unsigned char HComBits = Value & 0xe0;
+    if (Register == WD1770_CONTROL_REGISTER) {
+        NMIStatus &= ~(1 << nmi_floppy); // reset INTRQ
+        // Control Register - can only write if current drive is open
+        // Changed, now command returns errors if no disc inserted
+        const unsigned char ComBits = Value & 0xf0;
+        const unsigned char HComBits = Value & 0xe0;
 
-		if (HComBits < WD1770_COMMAND_READ_SECTOR) {
-			// Type 1 Command
-			Status |= WD1770_STATUS_BUSY;
-			Status &= ~(WD1770_STATUS_RECORD_NOT_FOUND |
-			            WD1770_STATUS_CRC_ERROR);
+        if (HComBits < WD1770_COMMAND_READ_SECTOR) {
+            // Type 1 Command
+            Status |= WD1770_STATUS_BUSY;
+            Status &= ~(WD1770_STATUS_RECORD_NOT_FOUND |
+                    WD1770_STATUS_CRC_ERROR);
 
-			if (HComBits == WD1770_COMMAND_STEP_IN) {
-				FDCommand = 4;
-				HeadDir = true;
-				UpdateTrack = (Value & WD1770_CMD_FLAGS_UPDATE_TRACK_REGISTER) != 0;
-			}
-			else if (HComBits == WD1770_COMMAND_STEP_OUT) {
-				FDCommand = 5;
-				HeadDir = false;
-				UpdateTrack = (Value & WD1770_CMD_FLAGS_UPDATE_TRACK_REGISTER) != 0;
-			}
-			else if (HComBits == WD1770_COMMAND_STEP) {
-				FDCommand = 3;
-				UpdateTrack = (Value & WD1770_CMD_FLAGS_UPDATE_TRACK_REGISTER) != 0;
-			}
-			else if (ComBits == WD1770_COMMAND_SEEK) {
-				FDCommand = 2; // Seek
-			}
-			else if (ComBits == WD1770_COMMAND_RESTORE) {
-				// Restore (Seek to Track 00)
-				FDCommand = 1;
-			}
+            if (HComBits == WD1770_COMMAND_STEP_IN) {
+                FDCommand = 4;
+                HeadDir = true;
+                UpdateTrack = (Value & WD1770_CMD_FLAGS_UPDATE_TRACK_REGISTER) != 0;
+            }
+            else if (HComBits == WD1770_COMMAND_STEP_OUT) {
+                FDCommand = 5;
+                HeadDir = false;
+                UpdateTrack = (Value & WD1770_CMD_FLAGS_UPDATE_TRACK_REGISTER) != 0;
+            }
+            else if (HComBits == WD1770_COMMAND_STEP) {
+                FDCommand = 3;
+                UpdateTrack = (Value & WD1770_CMD_FLAGS_UPDATE_TRACK_REGISTER) != 0;
+            }
+            else if (ComBits == WD1770_COMMAND_SEEK) {
+                FDCommand = 2; // Seek
+            }
+            else if (ComBits == WD1770_COMMAND_RESTORE) {
+                // Restore (Seek to Track 00)
+                FDCommand = 1;
+            }
 
-			if (FDCommand < 6) {
-				Status &= ~WD1770_STATUS_SPIN_UP_COMPLETE;
-				Status |= WD1770_STATUS_BUSY;
+            if (FDCommand < 6) {
+                Status &= ~WD1770_STATUS_SPIN_UP_COMPLETE;
+                Status |= WD1770_STATUS_BUSY;
 
-				// Now set some control bits for Type 1 Commands
-				SpinUp = (Value & WD1770_CMD_FLAGS_DISABLE_SPIN_UP) != 0;
-				Verify = (Value & WD1770_CMD_FLAGS_VERIFY) != 0;
-				StepRate = StepRates[Value & WD1770_CMD_FLAGS_STEP_RATE]; // Make sure the step rate time is added to the delay time.
+                // Now set some control bits for Type 1 Commands
+                SpinUp = (Value & WD1770_CMD_FLAGS_DISABLE_SPIN_UP) != 0;
+                Verify = (Value & WD1770_CMD_FLAGS_VERIFY) != 0;
+                StepRate = StepRates[Value & WD1770_CMD_FLAGS_STEP_RATE]; // Make sure the step rate time is added to the delay time.
 
-				if (!(Status & WD1770_STATUS_MOTOR_ON)) {
-					NextFDCommand = FDCommand;
-					FDCommand = 11; /* Spin-Up delay */
-					LoadingCycles = SPIN_UP_TIME;
-					//if (!SpinUp) LoadingCycles=ONE_REV_TIME;
-					SetMotor(CurrentDrive, true);
-				}
-				else {
-					LoadingCycles = ONE_REV_TIME;
-				}
-
-				if (DiskDensity[CurrentDrive] != SelectedDensity) {
-					// Density mismatch
-					FDCommand = 13; // "Confusion spin"
-					SetMotor(CurrentDrive, true);
-					Status &= ~(WD1770_STATUS_SPIN_UP_COMPLETE |
-					            WD1770_STATUS_RECORD_NOT_FOUND |
-					            WD1770_STATUS_CRC_ERROR);
-					Status |= WD1770_STATUS_BUSY;
-					LoadingCycles = ONE_REV_TIME; // Make it about 4 milliseconds
-				}
-			}
-		}
+                if (!(Status & WD1770_STATUS_MOTOR_ON)) {
+                    NextFDCommand = FDCommand;
+                    FDCommand = 11; /* Spin-Up delay */
+                    LoadingCycles = SPIN_UP_TIME;
+                    //if (!SpinUp) LoadingCycles=ONE_REV_TIME;
+                    SetMotor(CurrentDrive, true);
+                }
+                else {
+                    LoadingCycles = ONE_REV_TIME;
+                }
+            }
+        }
 
 		int SectorCycles = 0; // Number of cycles to wait for sector to come round
 
@@ -358,18 +347,29 @@ void Write1770Register(unsigned char Register, unsigned char Value) {
 		else if (ComBits == WD1770_COMMAND_READ_ADDRESS) {
 			FDCommand = 14;
 			Status |= WD1770_STATUS_BUSY;
-			dByteCount = 6;
-			if (!(Status & WD1770_STATUS_MOTOR_ON)) {
-				NextFDCommand = FDCommand;
-				FDCommand = 11; // Spin-Up delay
-				LoadingCycles = SPIN_UP_TIME;
-				//if (!SpinUp) LoadingCycles=ONE_REV_TIME; // Make it two seconds instead of one
-				SetMotor(CurrentDrive, true);
-			}
-			else {
-				LoadingCycles = SectorCycles;
-			}
-		}
+            dByteCount = 6;
+            if (!(Status & WD1770_STATUS_MOTOR_ON)) {
+                NextFDCommand = FDCommand;
+                FDCommand = 11; // Spin-Up delay
+                LoadingCycles = SPIN_UP_TIME;
+                //if (!SpinUp) LoadingCycles=ONE_REV_TIME; // Make it two seconds instead of one
+                SetMotor(CurrentDrive, true);
+            }
+            else {
+                LoadingCycles = SectorCycles;
+            }
+
+            if (DiskDensity[CurrentDrive] != SelectedDensity) {
+                // Density mismatch
+                FDCommand = 13; // "Confusion spin"
+                SetMotor(CurrentDrive, true);
+                Status &= ~(WD1770_STATUS_SPIN_UP_COMPLETE |
+                        WD1770_STATUS_RECORD_NOT_FOUND |
+                        WD1770_STATUS_CRC_ERROR);
+                Status |= WD1770_STATUS_BUSY;
+                LoadingCycles = ONE_REV_TIME;
+            }
+        }
 
 		if (FDCommand == 8 || FDCommand == 9) {
 			Status &= ~WD1770_STATUS_DATA_REQUEST;
@@ -1370,51 +1370,51 @@ void Load1770UEF(FILE *SUEF, int Version)
 	}
 
 	if (Loaded && !LoadFailed) {
-		Status = fgetc(SUEF);
-		Data = fgetc(SUEF);
-		Track = fgetc(SUEF);
-		ATrack = fgetc(SUEF);
-		Sector = fgetc(SUEF);
-		HeadDir = fgetc(SUEF);
-		FDCommand = fgetc(SUEF);
-		NextFDCommand = fgetc(SUEF);
+		Status = fget8(SUEF);
+		Data = fget8(SUEF);
+		Track = fget8(SUEF);
+		ATrack = fget8(SUEF);
+		Sector = fget8(SUEF);
+		HeadDir = fgetbool(SUEF);
+		FDCommand = fget8(SUEF);
+		NextFDCommand = fget8(SUEF);
 		LoadingCycles = fget32(SUEF);
 		SpinDown[0] = fget32(SUEF);
 		SpinDown[1] = fget32(SUEF);
-		UpdateTrack = fgetc(SUEF);
-		MultiSect = fgetc(SUEF);
-		StepRate = fgetc(SUEF);
-		SpinUp = fgetc(SUEF);
-		Verify = fgetc(SUEF);
-		LightsOn[0] = fgetc(SUEF);
-		LightsOn[1] = fgetc(SUEF);
+		UpdateTrack = fgetbool(SUEF);
+		MultiSect = fgetbool(SUEF);
+		StepRate = fget8(SUEF);
+		SpinUp = fgetbool(SUEF);
+		Verify = fgetbool(SUEF);
+		LightsOn[0] = fgetbool(SUEF);
+		LightsOn[1] = fgetbool(SUEF);
 		dByteCount = fget32(SUEF);
 		DataPos = fget32(SUEF);
-		ExtControl = fgetc(SUEF);
-		CurrentDrive=fgetc(SUEF);
+		ExtControl = fget8(SUEF);
+		CurrentDrive=fget8(SUEF);
 		HeadPos[0] = fget32(SUEF);
 		HeadPos[1] = fget32(SUEF);
-		CurrentHead[0] = fgetc(SUEF);
-		CurrentHead[1]=fgetc(SUEF);
+		CurrentHead[0] = fget8(SUEF);
+		CurrentHead[1]=fget8(SUEF);
 		DiscStep[0] = fget32(SUEF);
 		DiscStep[1] = fget32(SUEF);
 		DiscStrt[0] = fget32(SUEF);
 		DiscStrt[1] = fget32(SUEF);
-		MaxSects[0] = fgetc(SUEF);
-		MaxSects[1] = fgetc(SUEF);
+		MaxSects[0] = fget8(SUEF);
+		MaxSects[1] = fget8(SUEF);
 		DefStart[0] = fget32(SUEF);
 		DefStart[1] = fget32(SUEF);
 		TrkLen[0] = fget32(SUEF);
 		TrkLen[1] = fget32(SUEF);
-		DWriteable[0] = fgetc(SUEF);
-		DWriteable[1] = fgetc(SUEF);
-		DiskDensity[0] = fgetc(SUEF);
+		DWriteable[0] = fgetbool(SUEF);
+		DWriteable[1] = fgetbool(SUEF);
+		DiskDensity[0] = fgetbool(SUEF);
 		if (Version <= 9)
 			DiskDensity[1]=DiskDensity[0];
 		else
-			DiskDensity[1]=fgetc(SUEF);
-		SelectedDensity=fgetc(SUEF);
-		RotSect=fgetc(SUEF);
+			DiskDensity[1]=fgetbool(SUEF);
+		SelectedDensity=fgetbool(SUEF);
+		RotSect=fgetbool(SUEF);
 	}
 }
 
