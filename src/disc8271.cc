@@ -37,7 +37,7 @@ Boston, MA  02110-1301, USA.
 #include "beebsound.h"
 #include "sysvia.h"
 #include "tube.h"
-// #include "log.h"
+#include "log.h"
 
 extern Tube TubeType;
 

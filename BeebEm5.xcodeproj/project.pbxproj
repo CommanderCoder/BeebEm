@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B7A6B8D27707721002576FC /* Master512CoPro.cc */; };
+		8BC8CADA2770B24E006F0FAD /* log.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8BC8CAD92770B24E006F0FAD /* log.cc */; };
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
 		DC41118225A2222A00E59712 /* Bugs.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC41118125A2222A00E59712 /* Bugs.rtf */; };
 		DC41118525A226BC00E59712 /* diskimg in Resources */ = {isa = PBXBuildFile; fileRef = DC41118425A226BC00E59712 /* diskimg */; };
@@ -89,6 +90,8 @@
 		8B31157E276E9AAA00B23CD7 /* model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = model.h; path = src/model.h; sourceTree = "<group>"; };
 		8B7A6B8C27707709002576FC /* Master512CoPro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Master512CoPro.h; path = src/Master512CoPro.h; sourceTree = "<group>"; };
 		8B7A6B8D27707721002576FC /* Master512CoPro.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Master512CoPro.cc; path = src/Master512CoPro.cc; sourceTree = "<group>"; };
+		8BC8CAD92770B24E006F0FAD /* log.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cc; path = src/log.cc; sourceTree = "<group>"; };
+		8BC8CADC2770B25C006F0FAD /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = src/log.h; sourceTree = "<group>"; };
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 		DC10ACE22567BA1300DA8E32 /* create_dmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_dmg.sh; sourceTree = "<group>"; };
 		DC4106F226E54DAC000A1E37 /* BeebApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebApplication.swift; sourceTree = "<group>"; };
@@ -353,6 +356,7 @@
 		DCCCC2B524A33A3000840082 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				8BC8CAD92770B24E006F0FAD /* log.cc */,
 				8B7A6B8D27707721002576FC /* Master512CoPro.cc */,
 				DCE5E85F267B362C00F3CD34 /* z80_support.cc */,
 				DCE5E85C267B362B00F3CD34 /* z80.cc */,
@@ -408,6 +412,7 @@
 		DCD4ADE624A4D54A0000C40A /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				8BC8CADC2770B25C006F0FAD /* log.h */,
 				8B7A6B8C27707709002576FC /* Master512CoPro.h */,
 				8B31157E276E9AAA00B23CD7 /* model.h */,
 				DCD4ADFC24A4D56E0000C40A /* 6502core.h */,
@@ -589,6 +594,7 @@
 				DC70E77825A3AE6200A7FF3E /* printing.cc in Sources */,
 				DC70E77F25A3AE6200A7FF3E /* main.cc in Sources */,
 				DC70E76625A3AE6200A7FF3E /* beebsound.cc in Sources */,
+				8BC8CADA2770B24E006F0FAD /* log.cc in Sources */,
 				DC70E77125A3AE6200A7FF3E /* sysvia.cc in Sources */,
 				DCCCC30B24A3441800840082 /* Document.swift in Sources */,
 				DCE5E863267B362C00F3CD34 /* z80dis.cc in Sources */,
