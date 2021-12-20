@@ -32,12 +32,10 @@
 		DC70E77125A3AE6200A7FF3E /* sysvia.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CF24A33D3700840082 /* sysvia.cc */; };
 		DC70E77225A3AE6200A7FF3E /* discedit.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2B724A33D3600840082 /* discedit.cc */; };
 		DC70E77325A3AE6200A7FF3E /* serial.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D924A33D3700840082 /* serial.cc */; };
-		DC70E77425A3AE6200A7FF3E /* i386dasm.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BA24A33D3600840082 /* i386dasm.cc */; };
 		DC70E77525A3AE6200A7FF3E /* disc1770.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C124A33D3700840082 /* disc1770.cc */; };
 		DC70E77625A3AE6200A7FF3E /* uefstate.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CD24A33D3700840082 /* uefstate.cc */; };
 		DC70E77825A3AE6200A7FF3E /* printing.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C724A33D3700840082 /* printing.cc */; };
 		DC70E77B25A3AE6200A7FF3E /* via.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BD24A33D3600840082 /* via.cc */; };
-		DC70E77C25A3AE6200A7FF3E /* i86.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D124A33D3700840082 /* i86.cc */; };
 		DC70E77D25A3AE6200A7FF3E /* userkybd.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D024A33D3700840082 /* userkybd.cc */; };
 		DC70E77E25A3AE6200A7FF3E /* audev-macosx.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C424A33D3700840082 /* audev-macosx.cc */; };
 		DC70E77F25A3AE6200A7FF3E /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CB24A33D3700840082 /* main.cc */; };
@@ -132,7 +130,6 @@
 		DCCCC2B624A33D3600840082 /* BeebEm5-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BeebEm5-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCCCC2B724A33D3600840082 /* discedit.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = discedit.cc; path = src/discedit.cc; sourceTree = "<group>"; };
 		DCCCC2B924A33D3600840082 /* plist.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = plist.cc; path = src/plist.cc; sourceTree = "<group>"; };
-		DCCCC2BA24A33D3600840082 /* i386dasm.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = i386dasm.cc; path = src/i386dasm.cc; sourceTree = "<group>"; };
 		DCCCC2BB24A33D3600840082 /* speech.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speech.cc; path = src/speech.cc; sourceTree = "<group>"; };
 		DCCCC2BC24A33D3600840082 /* uservia.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uservia.cc; path = src/uservia.cc; sourceTree = "<group>"; };
 		DCCCC2BD24A33D3600840082 /* via.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = via.cc; path = src/via.cc; sourceTree = "<group>"; };
@@ -151,7 +148,6 @@
 		DCCCC2CE24A33D3700840082 /* disc8271.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = disc8271.cc; path = src/disc8271.cc; sourceTree = "<group>"; };
 		DCCCC2CF24A33D3700840082 /* sysvia.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sysvia.cc; path = src/sysvia.cc; sourceTree = "<group>"; };
 		DCCCC2D024A33D3700840082 /* userkybd.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = userkybd.cc; path = src/userkybd.cc; sourceTree = "<group>"; };
-		DCCCC2D124A33D3700840082 /* i86.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = i86.cc; path = src/i86.cc; sourceTree = "<group>"; };
 		DCCCC2D224A33D3700840082 /* atodconv.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = atodconv.cc; path = src/atodconv.cc; sourceTree = "<group>"; };
 		DCCCC2D324A33D3700840082 /* 6502core.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 6502core.cc; path = src/6502core.cc; sourceTree = "<group>"; };
 		DCCCC2D424A33D3700840082 /* beebsound.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebsound.cc; path = src/beebsound.cc; sourceTree = "<group>"; };
@@ -190,7 +186,6 @@
 		DCD4ADFE24A4D56E0000C40A /* scsi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scsi.h; path = src/scsi.h; sourceTree = "<group>"; };
 		DCD4ADFF24A4D56E0000C40A /* video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = video.h; path = src/video.h; sourceTree = "<group>"; };
 		DCD4AE0024A4D56F0000C40A /* beebsound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = beebsound.h; path = src/beebsound.h; sourceTree = "<group>"; };
-		DCD4AE0124A4D56F0000C40A /* i86.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = i86.h; path = src/i86.h; sourceTree = "<group>"; };
 		DCD4AE0224A4D56F0000C40A /* Arm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Arm.h; path = src/Arm.h; sourceTree = "<group>"; };
 		DCD4AE0324A4D56F0000C40A /* sasi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sasi.h; path = src/sasi.h; sourceTree = "<group>"; };
 		DCD4AE0424A4D56F0000C40A /* uservia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uservia.h; path = src/uservia.h; sourceTree = "<group>"; };
@@ -202,7 +197,6 @@
 		DCD4AE0A24A4D56F0000C40A /* sysvia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sysvia.h; path = src/sysvia.h; sourceTree = "<group>"; };
 		DCD4AE0B24A4D56F0000C40A /* TarmacGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TarmacGlobals.h; path = src/TarmacGlobals.h; sourceTree = "<group>"; };
 		DCD4AE0C24A4D56F0000C40A /* beebmem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = beebmem.h; path = src/beebmem.h; sourceTree = "<group>"; };
-		DCD4AE0E24A4D56F0000C40A /* instr86.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = instr86.h; path = src/instr86.h; sourceTree = "<group>"; };
 		DCD4AE0F24A4D5700000C40A /* viastate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = viastate.h; path = src/viastate.h; sourceTree = "<group>"; };
 		DCD4AE1224A4D5700000C40A /* mode7font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mode7font.h; path = src/mode7font.h; sourceTree = "<group>"; };
 		DCD5DC172565E7CC00FB151D /* BeebFile */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BeebFile; sourceTree = "<group>"; };
@@ -382,8 +376,6 @@
 				DCCCC2B724A33D3600840082 /* discedit.cc */,
 				DCCCC2DB24A33D3700840082 /* econet.cc */,
 				DCCCC2C224A33D3700840082 /* GetFile.cc */,
-				DCCCC2D124A33D3700840082 /* i86.cc */,
-				DCCCC2BA24A33D3600840082 /* i386dasm.cc */,
 				DCCCC2CB24A33D3700840082 /* main.cc */,
 				DCCCC2B924A33D3600840082 /* plist.cc */,
 				DCCCC2C724A33D3700840082 /* printing.cc */,
@@ -437,8 +429,6 @@
 				DCD4ADE824A4D56E0000C40A /* ea.h */,
 				DCD4ADEE24A4D56E0000C40A /* econet.h */,
 				DCD4ADF924A4D56E0000C40A /* GetFile.h */,
-				DCD4AE0124A4D56F0000C40A /* i86.h */,
-				DCD4AE0E24A4D56F0000C40A /* instr86.h */,
 				DCD4AE0524A4D56F0000C40A /* main.h */,
 				DCD4AE1224A4D5700000C40A /* mode7font.h */,
 				DCD4ADF024A4D56E0000C40A /* osd_cpu.h */,
@@ -590,7 +580,6 @@
 				DC70E78325A3AE6200A7FF3E /* uef.cc in Sources */,
 				DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */,
 				DCE5E85A267B360500F3CD34 /* debug.cc in Sources */,
-				DC70E77C25A3AE6200A7FF3E /* i86.cc in Sources */,
 				DC8716A224CC3A5900FA27DF /* BeebImageView.swift in Sources */,
 				8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */,
 				DC70E76025A3AE6200A7FF3E /* beebmem.cc in Sources */,
@@ -610,7 +599,6 @@
 				DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */,
 				DC70E76F25A3AE6200A7FF3E /* econet.cc in Sources */,
 				DC70E77325A3AE6200A7FF3E /* serial.cc in Sources */,
-				DC70E77425A3AE6200A7FF3E /* i386dasm.cc in Sources */,
 				DC70E76425A3AE6200A7FF3E /* disc8271.cc in Sources */,
 				DC70E76225A3AE6200A7FF3E /* atodconv.cc in Sources */,
 				DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */,

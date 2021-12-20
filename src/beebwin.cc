@@ -2037,7 +2037,7 @@ void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsign
 	BeebMemInit(LoadRoms,m_ShiftBooted);
 	Init6502core();
 	if (EnableTube) Init65C02core();
-	if (Tube186Enabled) i86_main();
+	if (Tube186Enabled) master512CoPro.Reset();
 	Enable_Z80 = 0;
 	if (TorchTube || AcornZ80)
 	{
@@ -4397,7 +4397,8 @@ OSStatus err = noErr;
 			
         case 'trac':
             fprintf(stderr, "trace186\n");
-            trace_186 = 1 - trace_186;
+            // TODO: Fix me
+            // trace_186 = 1 - trace_186;
             break;
 // AMX Mouse
 

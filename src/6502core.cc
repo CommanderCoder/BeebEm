@@ -50,9 +50,12 @@
 // #include "debug.h"
 #include "Arm.h"
 // #include "SprowCoPro.h"
-// #include "Master512CoPro.h"
+#include "Master512CoPro.h"
 
 #define INLINE inline
+
+extern Master512CoPro master512CoPro;
+
 
 int CPUDebug=0;
 int BeginDump=0;
@@ -1223,7 +1226,7 @@ void Exec6502Instruction(void) {
         }
 
         if (Tube186Enabled) {
-            i186_execute(12 * 4);
+            master512CoPro.Execute(12 * 4);
         }
 
         if (trace) {
@@ -1232,12 +1235,12 @@ void Exec6502Instruction(void) {
             WriteLog("%s\n", str);
             trace--;
         }
-
-        if (trace_186) {
-            char str[128];
-            Dis6502(str);
-            WriteLog("%s\n", str);
-        }
+// TODO: Fix Me
+//        if (trace_186) {
+//            char str[128];
+//            Dis6502(str);
+//            WriteLog("%s\n", str);
+//        }
 
 
         Branched = false;

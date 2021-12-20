@@ -56,6 +56,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Master512CoPro master512CoPro;
 
+extern char RomPath[512];
+
 extern unsigned char TubeintStatus;
 extern unsigned char TubeNMIStatus;
 
@@ -3762,6 +3764,7 @@ void Master512CoPro::LoadBIOS()
 
 	char path[256];
 	//strcpy(path, mainWin->GetUserDataPath());
+    strcpy(path,RomPath);
 	strcat(path, "BeebFile/bios.rom");
 
 	FILE* f = fopen(path, "rb");
@@ -3776,6 +3779,7 @@ void Master512CoPro::LoadBIOS()
 	}
 	else
 	{
+        fprintf(stderr, "Cannot load bios file");
 	//	mainWin->Report(MessageType::Error, "Could not open BIOS image file:\n %s", path);
 	}
 }
