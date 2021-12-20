@@ -58,7 +58,7 @@ EightUChars FastTable[256];
 SixteenUChars FastTableDWidth[256]; /* For mode 4,5,6 */
 bool FastTable_Valid = false;
 
-typedef void (*LineRoutinePtr)(void);
+typedef void (*LineRoutinePtr)();
 LineRoutinePtr LineRoutine;
 
 /* Translates middle bits of VideoULA_ControlReg to number of colours */
@@ -103,7 +103,7 @@ int ova,ovn; // mem ptr buffers
 
 /* CharLine counts from the 'reference point' - i.e. the point at which we reset the address pointer - NOT
    the point of the sync. If it is -ve its actually in the adjust time */
-typedef struct {
+struct VideoStateT {
     int Addr;       /* Address of start of next visible character line in beeb memory  - raw */
     int StartAddr;  /* Address of start of first character line in beeb memory  - raw */
     int PixmapLine; /* Current line in the pixmap */
@@ -122,7 +122,7 @@ typedef struct {
     bool IsNewTVFrame;  // Specifies the start of a new TV frame, following VSync (used so we only calibrate speed once per frame)
     bool InterlaceFrame;
     bool DoCA1Int;
-} VideoStateT;
+};
 
 static  VideoStateT VideoState;
 
@@ -187,13 +187,13 @@ bool BuildMode7Font(const char *filename)
         Mode7Font[2][Character-32][1] = 0;
 
         // Read 18 lines of 16 pixels each from the file.
-        for (int y = 0; y <= 17; y++)
+        for (int y = 2; y < 20; y++)
         {
             unsigned int Bitmap = fget16(TeletextFontFile);
 
-            Mode7Font[0][Character - 32][y+2] = Bitmap << 2; // Text  bank
-            Mode7Font[1][Character - 32][y+2] = Bitmap << 2; // Contiguous graphics bank
-            Mode7Font[2][Character - 32][y+2] = Bitmap << 2; // Separated graphics bank
+            Mode7Font[0][Character - 32][y] = Bitmap << 2; // Text  bank
+            Mode7Font[1][Character - 32][y] = Bitmap << 2; // Contiguous graphics bank
+            Mode7Font[2][Character - 32][y] = Bitmap << 2; // Separated graphics bank
         }
     }
 
