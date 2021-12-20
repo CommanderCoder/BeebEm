@@ -65,6 +65,10 @@
 #include "disctype.h"
 #include "disc1770.h"
 
+#include "Master512CoPro.h"
+
+extern Master512CoPro master512CoPro;
+
 // #include "keytable_2"
 
 #include<thread>
@@ -419,7 +423,7 @@ bool bit = false;
 		{ // Must do a reset!
 			Init6502core();
 			if ( (EnableTube) && (TubeEnabled) ) Init65C02core();
-			if (Tube186Enabled) i86_main();
+			if (Tube186Enabled) master512CoPro.Reset();
 			Enable_Z80 = 0;
 			if (TorchTube || AcornZ80)
 			{
