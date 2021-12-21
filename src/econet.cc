@@ -498,13 +498,13 @@ void EconetReset(void) {
     }
 
     // this call is what allows broadcast packets to be sent:
-    const char broadcast = '1';
-    if (setsockopt(SendSocket, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast)) == -1) {
-        sprintf(info, "Econet: Failed to set socket for broadcasts");
-        EconetError(info);
-        closesocket(ListenSocket);
-        return;
-    }
+//    const char broadcast = '1';
+//    if (setsockopt(SendSocket, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast)) == -1) {
+//        sprintf(info, "Econet: Failed to set socket for broadcasts");
+//        EconetError(info);
+//        closesocket(ListenSocket);
+//        return;
+//    }
 
     ReceiverSocketsOpen = true;
 
@@ -968,7 +968,7 @@ bool EconetPoll_real(void) {		//return NMI status
                     // (or one zero byte for broadcast)
                     sockaddr_in RecvAddr;
                     bool SendMe = false;
-                    int SendLen;
+                    int SendLen = 0;
                     unsigned int i = 0;
                     if (confAUNmode && (BeebTx.eh.deststn == 255 || BeebTx.eh.deststn ==  0)) { // broadcast!
                         // TODO something
