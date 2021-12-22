@@ -22,7 +22,6 @@
 // Econet support for BeebEm
 // Rob O'Donnell. robert@irrelevant.com, December 28th 2004.
 // Mike Wyatt - further development, Dec 2005
-
 // AUN by Rob Jun/Jul 2009
 //
 //
@@ -85,7 +84,7 @@ static unsigned int TimeBetweenBytes = 128;
 // to communicate with each other.  Note that you STILL need to have them
 // all listed in econet.cfg so each one knows where the other area.
 unsigned char EconetStationNumber = 0;	// default Station Number
-static unsigned int EconetListenPort = 0;		// default Listen port
+unsigned int EconetListenPort = 0;		// default Listen port
 static unsigned long EconetListenIP = 0x0100007f;
 // IP settings:
 static SOCKET ListenSocket = INVALID_SOCKET;		// Listen socket
@@ -356,7 +355,7 @@ void EconetReset(void) {
 
     //----------------------
     // Create a SOCKET for listening for incoming connection requests.
-    ListenSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    ListenSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (ListenSocket == INVALID_SOCKET) {
         sprintf(info, "Econet: Failed to open listening socket");
         EconetError(info);
@@ -498,13 +497,13 @@ void EconetReset(void) {
     }
 
     // this call is what allows broadcast packets to be sent:
-//    const char broadcast = '1';
-//    if (setsockopt(SendSocket, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast)) == -1) {
-//        sprintf(info, "Econet: Failed to set socket for broadcasts");
-//        EconetError(info);
-//        closesocket(ListenSocket);
-//        return;
-//    }
+    int broadcast = '1';
+    if (setsockopt(SendSocket, SOL_SOCKET, SO_BROADCAST, (void *) &broadcast, sizeof(broadcast)) == -1) {
+        sprintf(info, "Econet: Failed to set socket for broadcasts: %s\n", strerror(errno));
+        EconetError(info);
+        closesocket(ListenSocket);
+        return;
+    }
 
     ReceiverSocketsOpen = true;
 
