@@ -497,7 +497,7 @@ void EconetReset(void) {
     }
 
     // this call is what allows broadcast packets to be sent:
-    int broadcast = '1';
+    int broadcast = 1;
     if (setsockopt(SendSocket, SOL_SOCKET, SO_BROADCAST, (void *) &broadcast, sizeof(broadcast)) == -1) {
         sprintf(info, "Econet: Failed to set socket for broadcasts: %s\n", strerror(errno));
         EconetError(info);
