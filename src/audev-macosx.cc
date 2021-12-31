@@ -70,6 +70,7 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
   UInt32 propsize;
   UInt32 bytecount;
   struct AudioStreamBasicDescription streamdesc;
+
 #define LEN_DEVICE_NAME 128
   char devicename[LEN_DEVICE_NAME];
 
@@ -93,9 +94,19 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
     return FALSE;
   }
 
-  propsize = sizeof(audevice);
-  status = AudioHardwareGetProperty(kAudioHardwarePropertyDefaultOutputDevice,
-    &propsize, &audevice);
+  AudioObjectPropertyAddress theAddress = {
+      kAudioHardwarePropertyDefaultOutputDevice,
+      kAudioObjectPropertyScopeGlobal,
+      kAudioObjectPropertyElementMaster
+  };
+
+  status = AudioObjectGetPropertyData(kAudioObjectSystemObject,
+          &theAddress, 
+          0,
+          NULL,
+          &propsize,
+          &audevice);
+
   if (status) {
     fprintf(stderr, "Could not get audio default device.\n");
     return FALSE;
@@ -106,9 +117,25 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
     return FALSE;
   }
 
-  propsize = LEN_DEVICE_NAME * sizeof(char);
+  propsize = sizeof(devicename);
+
+//    theAddress.mSelector = kAudioObjectPropertyName;
+//    theAddress.mScope = kAudioObjectPropertyScopeGlobal;
+//    theAddress.mElement = kAudioObjectPropertyElementMaster;
+//    
+//    status = AudioObjectGetPropertyData(audevice,
+//          &theAddress,
+//          0,
+//          NULL,
+//          &propsize,
+//          &devicename);
+//
+
   status = AudioDeviceGetProperty(audevice, 1, 0,
-    kAudioDevicePropertyDeviceName, &propsize, devicename);
+       kAudioDevicePropertyDeviceName, &propsize, devicename);
+  // When using the correct code above (i.e. not this depreciated code
+  // we get the wrong default output device name - Don't know why
+
   if (status) {
     fprintf(stderr, "Could not get audio device name.\n");
     return FALSE;
@@ -120,14 +147,14 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
 
   if (ratewanted) {
 
-UInt32 theSize = sizeof(Float64);
-Float64 inSampleRate = (Float64) ratewanted;
+      UInt32 theSize = sizeof(Float64);
+      Float64 inSampleRate = (Float64) ratewanted;
 
-    status = AudioDeviceSetProperty(audevice, NULL, 0, 0,
-      kAudioDevicePropertyNominalSampleRate, theSize, &inSampleRate);
-    if (status) {
-      fprintf(stderr, "Could not set sample rate; continuing.\n");
-    }
+      status = AudioDeviceSetProperty(audevice, NULL, 0, 0,
+              kAudioDevicePropertyNominalSampleRate, theSize, &inSampleRate);
+      if (status) {
+          fprintf(stderr, "Could not set sample rate; continuing.\n");
+      }
   }
 
   bytecount = (unsigned int)fragsize;
@@ -135,88 +162,88 @@ Float64 inSampleRate = (Float64) ratewanted;
   propsize = sizeof(bytecount);
 
   status = AudioDeviceSetProperty(audevice, NULL, 0, 0,
-    kAudioDevicePropertyBufferSize, propsize, &bytecount);
+          kAudioDevicePropertyBufferSize, propsize, &bytecount);
   if (status) {
-    fprintf(stderr, "Could not set buffer size; continuing.\n");
+      fprintf(stderr, "Could not set buffer size; continuing.\n");
   }
 
-Float64 theAnswer = 0;
-UInt32 theSize = sizeof(Float64);
+  Float64 theAnswer = 0;
+  UInt32 theSize = sizeof(Float64);
 
   status = AudioDeviceGetProperty(audevice, 1, 0,
-    kAudioDevicePropertyNominalSampleRate, &theSize, &theAnswer);
+          kAudioDevicePropertyNominalSampleRate, &theSize, &theAnswer);
   if (status) {
-    fprintf(stderr, "Could not get nominal sample rate\n");
+      fprintf(stderr, "Could not get nominal sample rate\n");
   }
 
   fprintf(stderr, "Nominal sample rate = %f\n", theAnswer);
 
   theSize = 0;
-  
+
   AudioDeviceGetPropertyInfo(audevice, 1, 0, kAudioDevicePropertyAvailableNominalSampleRates, &theSize, NULL);
 
   fprintf(stderr, "There are %lu sample rates\n", theSize / sizeof(AudioValueRange));
 
 
   theSize = 10 * sizeof(AudioValueRange);
-AudioValueRange theRange[10];
-  
+  AudioValueRange theRange[10];
+
   status = AudioDeviceGetProperty(audevice, 1, 0,
-    kAudioDevicePropertyAvailableNominalSampleRates, &theSize, &theRange);
+          kAudioDevicePropertyAvailableNominalSampleRates, &theSize, &theRange);
 
   if (status) {
-    fprintf(stderr, "Could not get sample ratese\n");
+      fprintf(stderr, "Could not get sample ratese\n");
   }
 
   fprintf(stderr, "There are %lu sample rates\n", theSize / sizeof(AudioValueRange));
 
   for (int i = 0; i < theSize / sizeof(AudioValueRange); ++i)
   {
-	fprintf(stderr, "Min = %f, Max = %f\n", theRange[i].mMinimum, theRange[i].mMaximum);
+      fprintf(stderr, "Min = %f, Max = %f\n", theRange[i].mMinimum, theRange[i].mMaximum);
   }
 
 
   propsize = sizeof(struct AudioStreamBasicDescription);
   status = AudioDeviceGetProperty(audevice, 1, 0,
-    kAudioDevicePropertyStreamFormat, &propsize, &streamdesc);
+          kAudioDevicePropertyStreamFormat, &propsize, &streamdesc);
   if (status) {
-    fprintf(stderr, "Could not get audio device description.\n");
-    return FALSE;
+      fprintf(stderr, "Could not get audio device description.\n");
+      return FALSE;
   }
 
   fprintf(stderr, "mSampleRate = %f\n", streamdesc.mSampleRate);
-    fprintf(stderr, "mFormatID = %u\n", (unsigned int)streamdesc.mFormatID);
-    fprintf(stderr, "mFormatFlags = %u\n", (unsigned int)streamdesc.mFormatFlags);
-    fprintf(stderr, "mBytesPerPacket = %u\n", (unsigned int)streamdesc.mBytesPerPacket);
-    fprintf(stderr, "mFramesPerPacket = %u\n", (unsigned int)streamdesc.mFramesPerPacket);
-    fprintf(stderr, "mBytesPerFrame = %u\n", (unsigned int)streamdesc.mBytesPerFrame);
-    fprintf(stderr, "mChannelsPerFrame = %u\n", (unsigned int)streamdesc.mChannelsPerFrame);
-    fprintf(stderr, "mBitsPerChannel = %u\n", (unsigned int)streamdesc.mBitsPerChannel);
-  
+  fprintf(stderr, "mFormatID = %u\n", (unsigned int)streamdesc.mFormatID);
+  fprintf(stderr, "mFormatFlags = %u\n", (unsigned int)streamdesc.mFormatFlags);
+  fprintf(stderr, "mBytesPerPacket = %u\n", (unsigned int)streamdesc.mBytesPerPacket);
+  fprintf(stderr, "mFramesPerPacket = %u\n", (unsigned int)streamdesc.mFramesPerPacket);
+  fprintf(stderr, "mBytesPerFrame = %u\n", (unsigned int)streamdesc.mBytesPerFrame);
+  fprintf(stderr, "mChannelsPerFrame = %u\n", (unsigned int)streamdesc.mChannelsPerFrame);
+  fprintf(stderr, "mBitsPerChannel = %u\n", (unsigned int)streamdesc.mBitsPerChannel);
+
   rate = (long) streamdesc.mSampleRate;
 
   if (streamdesc.mFormatID != kAudioFormatLinearPCM) {
-    fprintf(stderr, "Audio device format is not LinearPCM; exiting.\n");
-    return FALSE;    
+      fprintf(stderr, "Audio device format is not LinearPCM; exiting.\n");
+      return FALSE;    
   }
 
   if (streamdesc.mChannelsPerFrame != 2) {
-    fprintf(stderr, "Audio device is not stereo; exiting.\n");
-    return FALSE;
+      fprintf(stderr, "Audio device is not stereo; exiting.\n");
+      return FALSE;
   }
   channels = 2;
 
   if (!(streamdesc.mFormatFlags & kLinearPCMFormatFlagIsFloat)) {
-    fprintf(stderr, "Audio device is not floating-point; exiting.\n");
-    return FALSE;
+      fprintf(stderr, "Audio device is not floating-point; exiting.\n");
+      return FALSE;
   }
 
   propsize = sizeof(bytecount);
   status = AudioDeviceGetProperty(audevice, 1, 0,
-    kAudioDevicePropertyBufferSize, &propsize, &bytecount);
+          kAudioDevicePropertyBufferSize, &propsize, &bytecount);
   if (status) {
-    fprintf(stderr, "Could not get audio device buffer size.\n");
-    return FALSE;
+      fprintf(stderr, "Could not get audio device buffer size.\n");
+      return FALSE;
   }
 
   fragsize = bytecount;
