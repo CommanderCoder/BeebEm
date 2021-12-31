@@ -6063,7 +6063,7 @@ void BeebWin::ExportDiscFiles(int menuId)
     else
         drive = 1;
     
-    if (MachineType != 3 && NativeFDC)
+    if (MachineType != Model::Master128 && NativeFDC)
     {
         // 8271 controller
         Get8271DiscInfo(drive, szDiscFile, &heads);
