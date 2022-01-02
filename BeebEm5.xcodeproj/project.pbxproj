@@ -120,8 +120,6 @@
 		DCABC09424BDFCFB00C0D754 /* make_distribution.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = make_distribution.sh; sourceTree = "<group>"; };
 		DCABC15924BDFE8600C0D754 /* beebem.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = beebem.png; path = src/beebem.png; sourceTree = "<group>"; };
 		DCABC15C24BDFEE800C0D754 /* beebem.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = beebem.icns; path = src/beebem.icns; sourceTree = "<group>"; };
-		DCABC15F24BDFF5B00C0D754 /* i86time.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = i86time.c; path = src/i86time.c; sourceTree = "<group>"; };
-		DCABC16024BDFF5B00C0D754 /* instr86.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = instr86.c; path = src/instr86.c; sourceTree = "<group>"; };
 		DCABC16124BDFF5C00C0D754 /* debug_org.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debug_org.cc; path = src/debug_org.cc; sourceTree = "<group>"; };
 		DCCCC29B24A338ED00840082 /* BeebEm5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeebEm5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCCCC29E24A338ED00840082 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -263,8 +261,6 @@
 			isa = PBXGroup;
 			children = (
 				DCABC16124BDFF5C00C0D754 /* debug_org.cc */,
-				DCABC15F24BDFF5B00C0D754 /* i86time.c */,
-				DCABC16024BDFF5B00C0D754 /* instr86.c */,
 			);
 			name = OtherSources;
 			sourceTree = "<group>";
