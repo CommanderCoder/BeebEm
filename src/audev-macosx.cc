@@ -100,13 +100,14 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
         kAudioObjectPropertyElementMaster
     };
 
-    propsize = sizeof(audevice);
+    UInt32 mypropsize;
+    status = AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &theAddress, 0, NULL, &mypropsize);
 
     status = AudioObjectGetPropertyData(kAudioObjectSystemObject,
             &theAddress, 
             0,
             NULL,
-            &propsize,
+            &mypropsize,
             &audevice);
 
     if (status) {
@@ -119,22 +120,27 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
         return FALSE;
     }
 
-    propsize = sizeof(devicename);
+    
+    UInt32 propertySize;
+    char mydevicename[128];
 
-    //    theAddress.mSelector = kAudioObjectPropertyName;
-    //    theAddress.mScope = kAudioObjectPropertyScopeGlobal;
-    //    theAddress.mElement = kAudioObjectPropertyElementMaster;
-    //    
-    //    status = AudioObjectGetPropertyData(audevice,
-    //          &theAddress,
-    //          0,
-    //          NULL,
-    //          &propsize,
-    //          &devicename);
-    //
+        theAddress.mSelector = kAudioObjectPropertyName;
+        theAddress.mScope = kAudioObjectPropertyScopeGlobal;
+        theAddress.mElement = kAudioObjectPropertyElementMaster;
+    
+        status = AudioObjectGetPropertyDataSize(audevice, &theAddress, 0, NULL, &propertySize);
+        
+        status = AudioObjectGetPropertyData(audevice,
+              &theAddress,
+              0,
+              NULL,
+              &propertySize,
+              mydevicename);
+    
 
-    status = AudioDeviceGetProperty(audevice, 1, 0,
-            kAudioDevicePropertyDeviceName, &propsize, devicename);
+//    propsize = sizeof(devicename);
+//    status = AudioDeviceGetProperty(audevice, 1, 0,
+//            kAudioDevicePropertyDeviceName, &propsize, devicename);
     // When using the correct code above (i.e. not this depreciated code
     // we get the wrong default output device name - Don't know why
 
