@@ -25,6 +25,8 @@ keyboard emulation - David Alan Gilbert 30/10/94 */
 #include <stdio.h>
 #include <time.h>
 
+#define SPEECH_ENABLED
+
 #include "6502core.h"
 #include "beebsound.h"
 #include "beebmem.h"
