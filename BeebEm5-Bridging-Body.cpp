@@ -20,6 +20,7 @@
 #include "tube.h"
 #include "uef.h"
 #include "csw.h"
+#include "uservia.h"
 
 int done = 0;
 extern OSStatus TCWindowCommandHandler(UInt32 cmdID);
@@ -40,20 +41,25 @@ extern "C" void beeb_autorun(char* path)
 extern "C" void beeb_handlemouse(long eventkind)
 {
   // here
+    fprintf(stderr, "eventKind is %ld\n", eventkind);
     switch (eventkind)
     {
-            // TODO: see main.cc for how it was done previously
+        // TODO: see main.cc for how it was done previously
         case mouseDown:
             fprintf(stderr, "Left Mouse button down\n");
+            AMXButtons |= AMX_LEFT_BUTTON;
             break;
         case mouseUp:
             fprintf(stderr, "Left Mouse button up\n");
+            AMXButtons &= ~AMX_LEFT_BUTTON;
             break;
-        case kCGEventRightMouseDown:
+        case 100:
             fprintf(stderr, "Right Mouse buttom down\n");
+            AMXButtons |= AMX_RIGHT_BUTTON;
             break;
-        case kCGEventRightMouseUp:
+        case 99:
             fprintf(stderr, "Right Mouse button up\n");
+            AMXButtons &= AMX_RIGHT_BUTTON;
             break;
             
     }
