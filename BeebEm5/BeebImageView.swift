@@ -76,11 +76,11 @@ class BeebImageView: NSImageView {
     }
     
     override func rightMouseUp(with event: NSEvent) {
-        beeb_handlemouse(kEventMouseUp);
+        beeb_handlemouse(99);
     }
     
     override func rightMouseDown(with event: NSEvent) {
-        beeb_handlemouse(kEventMouseDown);
+        beeb_handlemouse(100);
     }
     
     override func draw(_ dirtyRect: NSRect) {
