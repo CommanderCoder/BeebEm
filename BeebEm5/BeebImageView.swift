@@ -53,8 +53,15 @@ class BeebImageView: NSImageView {
     override func mouseMoved(with event: NSEvent) {
         // Mouse Stuff Here
         // TODO: Fix this
-        let x: UInt32 = UInt32(self.mouseLocation.x)
-        let y: UInt32 = UInt32(self.mouseLocation.y)
+        var x: UInt32 = 0;
+        var y: UInt32 = 0;
+        if ((self.mouseLocation.x) >= 0) {
+            x = UInt32(self.mouseLocation.x)
+        }
+        if ((self.mouseLocation.y) >= 0) {
+            y = UInt32(self.mouseLocation.y)
+        }
+
         beeb_SetAMXPosition(x,y);
         // dont need debug stuff for the moment
         //print(String(format: "%.0f, %.0f", self.mouseLocation.x, self.mouseLocation.y))
