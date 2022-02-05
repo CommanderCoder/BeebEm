@@ -59,7 +59,7 @@ extern "C" void beeb_handlemouse(long eventkind)
             break;
         case 99:
             fprintf(stderr, "Right Mouse button up\n");
-            AMXButtons &= AMX_RIGHT_BUTTON;
+            AMXButtons &= ~AMX_RIGHT_BUTTON;
             break;
             
     }
