@@ -2036,10 +2036,13 @@ void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsign
 	MachineType=NewModelType;
 	BeebMemInit(LoadRoms,m_ShiftBooted);
 	Init6502core();
-	if (EnableTube) Init65C02core();
-	if (Tube186Enabled) master512CoPro.Reset();
+    if (TubeType == Tube::Acorn65C02) Init65C02core();
+//	if (EnableTube) Init65C02core();
+    if (TubeType == Tube::Master512CoPro) master512CoPro.Reset();
+//	if (Tube186Enabled) master512CoPro.Reset();
 	Enable_Z80 = 0;
-	if (TorchTube || AcornZ80)
+//	if (TorchTube || AcornZ80)
+    if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80)
 	{
 		R1Status = 0;
 		ResetTube();
@@ -2047,7 +2050,8 @@ void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsign
 		Enable_Z80 = 1;
 	}
 	Enable_Arm = 0;
-	if (ArmTube)
+//	if (ArmTube)
+    if (TubeType == Tube::AcornArm)
 	{
 		R1Status = 0;
 		ResetTube();
@@ -3796,6 +3800,11 @@ OSStatus err = noErr;
         case 'tube':
             fprintf(stderr, "Tube selected\n");
 			TubeEnabled = 1 - TubeEnabled;
+            if (TubeEnabled == 1) {
+                TubeType = Tube::Acorn65C02;
+                } else {
+                TubeType = Tube::None;
+                }
 			Tube186Enabled = 0;
 			TorchTube = 0;
 			AcornZ80 = 0;
@@ -3810,6 +3819,11 @@ OSStatus err = noErr;
         case 't186':
             fprintf(stderr, "Tube 80186 selected\n");
 			Tube186Enabled = 1 - Tube186Enabled;
+            if (Tube186Enabled == 1) {
+                TubeType = Tube::Master512CoPro;
+            } else {
+                TubeType = Tube::None;
+            }
 			TubeEnabled = 0;
 			TorchTube = 0;
 			ArmTube = 0;
@@ -3824,6 +3838,11 @@ OSStatus err = noErr;
         case 'tz80':
             fprintf(stderr, "Torch Z80 Tube selected\n");
 			TorchTube = 1 - TorchTube;
+            if (TorchTube == 1) {
+                TubeType = Tube::TorchZ80;
+            } else {
+                TubeType = Tube::None;
+            }
 			Tube186Enabled = 0;
 			TubeEnabled = 0;
 			ArmTube = 0;
@@ -3838,6 +3857,11 @@ OSStatus err = noErr;
         case 'tarm':
             fprintf(stderr, "Arm Tube selected\n");
 			ArmTube = 1 - ArmTube;
+            if (ArmTube == 1) {
+                TubeType = Tube::AcornArm;
+            } else {
+                TubeType = Tube::None;
+            }
 			Tube186Enabled = 0;
 			TubeEnabled = 0;
 			AcornZ80 = 0;
@@ -3852,7 +3876,12 @@ OSStatus err = noErr;
         case 'az80':
             fprintf(stderr, "Acorn Z80 Tube selected\n");
 			AcornZ80 = 1 - AcornZ80;
-			Tube186Enabled = 0;
+            if (AcornZ80 == 1) {
+                TubeType = Tube::AcornZ80;
+            } else {
+                TubeType = Tube::None;
+            }
+            Tube186Enabled = 0;
 			TubeEnabled = 0;
 			TorchTube = 0;
 			ArmTube = 0;
