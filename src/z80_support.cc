@@ -29,7 +29,8 @@ unsigned char ReadZ80Mem(int pc)
 {
 unsigned char t;
 
-	if (AcornZ80)
+//	if (AcornZ80)
+    if (TubeType == Tube::AcornZ80)
 	{
 		if (pc >= 0x8000) inROM = 0;
 	}
@@ -150,32 +151,33 @@ int tmp;
 
     addr &= 255;
 
-	if (AcornZ80)
-	{
+//	if (AcornZ80)
+    if (TubeType == Tube::AcornZ80)
+    {
         value = ReadTubeFromParasiteSide(addr);
-	}
-	else
-	{
-		if ( (addr == 0x05) || (addr == 0x01) )
-		{
-			value = ReadTorchTubeFromParasiteSide(1);        // Data Port
-
-		}
-
-		if ( (addr == 0x06) || (addr == 0x02) )
-		{
-			value = ReadTorchTubeFromParasiteSide(0);        // Status Port
-			tmp = 0x00;
-			if (value & 128) tmp |= 2;      // Tube data available
-			if (value & 64) tmp |= 128;     // Tube not full
-			value = tmp;
-		}
-
-		if (addr == 0x02) inROM = 1;
-
-		if (addr == 0x06) inROM = 0;
     }
-	
+    else
+    {
+        if ( (addr == 0x05) || (addr == 0x01) )
+        {
+            value = ReadTorchTubeFromParasiteSide(1);        // Data Port
+
+        }
+
+        if ( (addr == 0x06) || (addr == 0x02) )
+        {
+            value = ReadTorchTubeFromParasiteSide(0);        // Status Port
+            tmp = 0x00;
+            if (value & 128) tmp |= 2;      // Tube data available
+            if (value & 64) tmp |= 128;     // Tube not full
+            value = tmp;
+        }
+
+        if (addr == 0x02) inROM = 1;
+
+        if (addr == 0x06) inROM = 0;
+    }
+
     return value;
 }
 
@@ -184,7 +186,8 @@ void out(unsigned int addr, unsigned char value)
 {
     addr &= 255;
     
-	if (AcornZ80)
+//	if (AcornZ80)
+    if (TubeType == Tube::AcornZ80)
 	{
         WriteTubeFromParasiteSide(addr, value);
 	}
@@ -214,7 +217,8 @@ void z80_execute()
 		
 		pc = simz80(pc);
 
-		if (AcornZ80)
+//		if (AcornZ80)
+        if (TubeType == Tube::AcornZ80)
 		{
 			if (TubeintStatus & (1<<R1))
 				set_Z80_irq_line(1);
@@ -234,44 +238,44 @@ void z80_execute()
 }
 
 void init_z80()
-
 {
-char path[256];
-FILE *f;
+    char path[256];
+    FILE *f;
 
     WriteLog("init_z80()\n");
 
-	if (AcornZ80)
-	{
-		strcpy(path, RomPath);
-		strcat(path, "/BeebFile/Z80.ROM");
-		
-		f = fopen(path, "rb");
-		if (f != NULL)
-		{
-			fread(z80_rom, 4096, 1, f);
-			fclose(f);
-		}
-	}
-	else
-	{
-		strcpy(path, RomPath);
-		strcat(path, "/BeebFile/CCPN102.ROM");
+    //	if (AcornZ80)
+    if (TubeType == Tube::AcornZ80)
+    {
+        strcpy(path, RomPath);
+        strcat(path, "/BeebFile/Z80.ROM");
 
-		f = fopen(path, "rb");
-		if (f != NULL)
-		{
-			fread(z80_rom, 8192, 1, f);
-			fclose(f);
-		}
-	}
-	
+        f = fopen(path, "rb");
+        if (f != NULL)
+        {
+            fread(z80_rom, 4096, 1, f);
+            fclose(f);
+        }
+    }
+    else
+    {
+        strcpy(path, RomPath);
+        strcat(path, "/BeebFile/CCPN102.ROM");
+
+        f = fopen(path, "rb");
+        if (f != NULL)
+        {
+            fread(z80_rom, 8192, 1, f);
+            fclose(f);
+        }
+    }
+
     inROM = 1;
 
     sp = 0x00;
     pc = 0x00;
-    
-/* Clear all registers, PC and SP have already been set			*/
+
+    /* Clear all registers, PC and SP have already been set			*/
     af[0]=0; regs[0].bc=0; regs[0].de=0; regs[0].hl=0;
     af[1]=0; regs[1].bc=0; regs[1].de=0; regs[1].hl=0;
     ix=0; iy=0; ir=0; regs_sel = 0;

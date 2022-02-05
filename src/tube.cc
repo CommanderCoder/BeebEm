@@ -1,23 +1,25 @@
-/****************************************************************************/
-/*              Beebem - (c) David Alan Gilbert 1994                        */
-/*              ------------------------------------                        */
-/* This program may be distributed freely within the following restrictions:*/
-/*                                                                          */
-/* 1) You may not charge for this program or for any part of it.            */
-/* 2) This copyright message must be distributed with all copies.           */
-/* 3) This program must be distributed complete with source code.  Binary   */
-/*    only distribution is not permitted.                                   */
-/* 4) The author offers no warrenties, or guarentees etc. - you use it at   */
-/*    your own risk.  If it messes something up or destroys your computer   */
-/*    thats YOUR problem.                                                   */
-/* 5) You may use small sections of code from this program in your own      */
-/*    applications - but you must acknowledge its use.  If you plan to use  */
-/*    large sections then please ask the author.                            */
-/*                                                                          */
-/* If you do not agree with any of the above then please do not use this    */
-/* program.                                                                 */
-/* Please report any problems to the author at beebem@treblig.org           */
-/****************************************************************************/
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 1994  David Alan Gilbert
+Copyright (C) 1997  Mike Wyatt
+Copyright (C) 2001  Richard Gellman
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 /* 6502 core - 6502 emulator core - David Alan Gilbert 16/10/94 */
 /* Mike Wyatt 7/6/97 - Added undocumented instructions */
 /* Copied for 65C02 Tube core - 13/04/01 */
@@ -61,7 +63,7 @@ Tube TubeType;
 
 extern int DumpAfterEach;
 unsigned char TubeEnabled,Tube186Enabled,AcornZ80,EnableTube;
-unsigned char TubeMachineType=3;
+//unsigned char TubeMachineType=3;
 
 CycleCountT TotalTubeCycles=0;  
 
@@ -83,8 +85,8 @@ static int Accumulator,XReg,YReg;
 static unsigned char StackReg,PSR;
 static unsigned char IRQCycles;
 
-unsigned char TubeintStatus=0; // bit set (nums in IRQ_Nums) if interrupt being caused */
-unsigned char TubeNMIStatus=0; // bit set (nums in NMI_Nums) if NMI being caused */
+unsigned char TubeintStatus = 0; // bit set (nums in IRQ_Nums) if interrupt being caused */
+unsigned char TubeNMIStatus = 0; // bit set (nums in NMI_Nums) if NMI being caused */
 static bool TubeNMILock = false; // Well I think NMI's are maskable - to stop repeated NMI's - the lock is released when an RTI is done 
 
 // typedef int int16;
@@ -126,7 +128,7 @@ static const int TubeCyclesTable[] = {
    allow fernangling by memory subsystem */
 unsigned int TubeCycles;
 
-static bool Branched; // Branched - true if the instruction branched
+static bool Branched; // true if the instruction branched
 
 /* A macro to speed up writes - uses a local variable called 'tmpaddr' */
 #define TUBEREADMEM_FAST(a) ((a<0xfef8)?TubeRam[a]:TubeReadMem(a))
@@ -212,7 +214,6 @@ void UpdateHostR4Interrupt(void) {
 		intStatus&=~(1<<tube);
 }
 
-
 /*-------------------------------------------------------------------*/
 // Torch tube memory/io handling functions
 
@@ -237,6 +238,7 @@ unsigned char TmpData = 0xff;
 	case 0:
 		TmpData=R1HStatus | R1Status;
 		break;
+
 	case 1:
 		TmpData=R1PHData[0];
 		R1HStatus&=~TubeDataAv;
@@ -324,8 +326,6 @@ void WriteTorchTubeFromHostSide(unsigned char IOAddr,unsigned char IOData)
 		if (IOData == 0xaa)
 		{
 			init_z80();
-            // TODO: Remove the line below
-            //	Enable_Z80 = 1;
 		}
 		break;
 		
@@ -387,12 +387,8 @@ void WriteTorchTubeFromParasiteSide(unsigned char IOAddr,unsigned char IOData)
 unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
 	unsigned char TmpData=0,TmpCntr;
 
-    //TODO replace below when complete
-    // if (TubeType == Tube::None)
-    // return MachineType == Model::Master128 ? 0xff : 0xfe;
-
-	if (! (EnableTube || Tube186Enabled || AcornZ80 || ArmTube) ) 
-		return(MachineType == Model::Master128 ? 0xff : 0xfe); // return ff for master else return fe
+    if (TubeType == Tube::None)
+    return MachineType == Model::Master128 ? 0xff : 0xfe;
 
 	switch (IOAddr) {
 	case 0:
@@ -458,12 +454,8 @@ unsigned char ReadTubeFromHostSide(unsigned char IOAddr) {
 
 void WriteTubeFromHostSide(unsigned char IOAddr,unsigned char IOData) {
 
-    // TODO change lines below when avail
-    //    if (TubeType == Tube::None)
-    //    return;
-
-	if (! (EnableTube || Tube186Enabled || AcornZ80 || ArmTube) ) 
-		return;
+    if (TubeType == Tube::None)
+    return;
 
 	if (DebugEnabled) {
 		char info[200];
@@ -533,12 +525,8 @@ void WriteTubeFromHostSide(unsigned char IOAddr,unsigned char IOData) {
 unsigned char ReadTubeFromParasiteSide(unsigned char IOAddr) {
 	unsigned char TmpData=0;
 
-    // TODO replace when able 
-    // if (TubeType == Tube::TorchZ80)
-    // return ReadTorchTubeFromHostSide(IOAddr);
-
-	if (TorchTube) 
-		return ReadTorchTubeFromHostSide(IOAddr);
+    if (TubeType == Tube::TorchZ80)
+    return ReadTorchTubeFromHostSide(IOAddr);
 
 	switch (IOAddr) {
 	case 0:
@@ -616,10 +604,7 @@ unsigned char ReadTubeFromParasiteSide(unsigned char IOAddr) {
 
 void WriteTubeFromParasiteSide(unsigned char IOAddr,unsigned char IOData) 
 {
-    // TODO remove below when able 
-    // if (TubeType == Tube::TorchZ80)
-
-	if (TorchTube) 
+    if (TubeType == Tube::TorchZ80)
 	{
 		WriteTorchTubeFromParasiteSide(IOAddr, IOData);
 		return;
@@ -2564,42 +2549,42 @@ void Save65C02MemUEF(FILE *SUEF) {
 }
 
 void LoadTubeUEF(FILE *SUEF) {
-	R1Status=fgetc(SUEF);
+	R1Status = fget8(SUEF);
 	fread(R1PHData,1,TubeBufferLength,SUEF);
-	R1PHPtr=fgetc(SUEF);
-	R1HStatus=fgetc(SUEF);
-	R1HPData=fgetc(SUEF);
-	R1PStatus=fgetc(SUEF);
-	R2PHData=fgetc(SUEF);
-	R2HStatus=fgetc(SUEF);
-	R2HPData=fgetc(SUEF);
-	R2PStatus=fgetc(SUEF);
-	R3PHData[0]=fgetc(SUEF);
-	R3PHData[1]=fgetc(SUEF);
-	R3PHPtr=fgetc(SUEF);
-	R3HStatus=fgetc(SUEF);
-	R3HPData[0]=fgetc(SUEF);
-	R3HPData[1]=fgetc(SUEF);
-	R3HPPtr=fgetc(SUEF);
-	R3PStatus=fgetc(SUEF);
-	R4PHData=fgetc(SUEF);
-	R4HStatus=fgetc(SUEF);
-	R4HPData=fgetc(SUEF);
-	R4PStatus=fgetc(SUEF);
+	R1PHPtr = fget8(SUEF);
+	R1HStatus = fget8(SUEF);
+	R1HPData = fget8(SUEF);
+	R1PStatus = fget8(SUEF);
+	R2PHData = fget8(SUEF);
+	R2HStatus = fget8(SUEF);
+	R2HPData = fget8(SUEF);
+	R2PStatus = fget8(SUEF);
+	R3PHData[0] = fget8(SUEF);
+	R3PHData[1] = fget8(SUEF);
+	R3PHPtr = fget8(SUEF);
+	R3HStatus = fget8(SUEF);
+	R3HPData[0] = fget8(SUEF);
+	R3HPData[1] = fget8(SUEF);
+	R3HPPtr = fget8(SUEF);
+	R3PStatus = fget8(SUEF);
+	R4PHData = fget8(SUEF);
+	R4HStatus = fget8(SUEF);
+	R4HPData = fget8(SUEF);
+	R4PStatus = fget8(SUEF);
 }
 
 void Load65C02UEF(FILE *SUEF) {
-	TubeProgramCounter=fget16(SUEF);
-	Accumulator=fgetc(SUEF);
-	XReg=fgetc(SUEF);
-	YReg=fgetc(SUEF);
-	StackReg=fgetc(SUEF);
-	PSR=fgetc(SUEF);
-	//TotalTubeCycles=fget32(SUEF);
-	int Dlong=fget32(SUEF);
-	TubeintStatus=fgetc(SUEF);
-	TubeNMIStatus=fgetc(SUEF);
-	TubeNMILock=fgetc(SUEF);
+	TubeProgramCounter = fget16(SUEF);
+	Accumulator = fget8(SUEF);
+	XReg = fget8(SUEF);
+	YReg = fget8(SUEF);
+	StackReg = fget8(SUEF);
+	PSR = fget8(SUEF);
+	//TotalTubeCycles = fget32(SUEF);
+	int Dlong = fget32(SUEF);
+	TubeintStatus = fget8(SUEF);
+	TubeNMIStatus = fget8(SUEF);
+	TubeNMILock = fgetbool(SUEF);
 }
 
 void Load65C02MemUEF(FILE *SUEF) {

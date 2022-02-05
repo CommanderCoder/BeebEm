@@ -842,7 +842,8 @@ bool DebugDisassembler(int addr, int Accumulator, int XReg, int YReg, int PSR, b
 	if (!DebugOn)
 		return(TRUE);
 	
-	if ( (TorchTube || AcornZ80) && !host)
+//	if ( (TorchTube || AcornZ80) && !host)
+    if ((TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80) && !host)
 	{
 		if (DebugOS == false && addr >= 0xf800 && addr <= 0xffff)
 		{
@@ -884,38 +885,40 @@ bool DebugDisassembler(int addr, int Accumulator, int XReg, int YReg, int PSR, b
 	if (host && InstCount == 0)
 		return(FALSE);
 	
-	if ((TorchTube || AcornZ80) && !host)
-	{
-		char buff[128];
-		Z80_Disassemble(addr, buff);
+//	if ((TorchTube || AcornZ80) && !host)
 
-		Disp_RegSet1(str);
-		sprintf(str + strlen(str), " %s", buff);
-				
-		DebugDisplayInfo(str);
-		Disp_RegSet2(str);
+    if ((TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80) && !host)
+    {
+        char buff[128];
+        Z80_Disassemble(addr, buff);
 
-	}
-	else
-	{
-		
-		DebugDisassembleInstruction(addr, host, str);
-	
-		sprintf(str + strlen(str), "%02X %02X %02X ", Accumulator, XReg, YReg);
-	
-		sprintf(str + strlen(str), (PSR & FlagC) ? "C" : ".");
-		sprintf(str + strlen(str), (PSR & FlagZ) ? "Z" : ".");
-		sprintf(str + strlen(str), (PSR & FlagI) ? "I" : ".");
-		sprintf(str + strlen(str), (PSR & FlagD) ? "D" : ".");
-		sprintf(str + strlen(str), (PSR & FlagB) ? "B" : ".");
-		sprintf(str + strlen(str), (PSR & FlagV) ? "V" : ".");
-		sprintf(str + strlen(str), (PSR & FlagN) ? "N" : ".");
-	
-		if (!host)
-			sprintf(str + strlen(str), "  Parasite");
-	
-	}
-	
+        Disp_RegSet1(str);
+        sprintf(str + strlen(str), " %s", buff);
+
+        DebugDisplayInfo(str);
+        Disp_RegSet2(str);
+
+    }
+    else
+    {
+
+        DebugDisassembleInstruction(addr, host, str);
+
+        sprintf(str + strlen(str), "%02X %02X %02X ", Accumulator, XReg, YReg);
+
+        sprintf(str + strlen(str), (PSR & FlagC) ? "C" : ".");
+        sprintf(str + strlen(str), (PSR & FlagZ) ? "Z" : ".");
+        sprintf(str + strlen(str), (PSR & FlagI) ? "I" : ".");
+        sprintf(str + strlen(str), (PSR & FlagD) ? "D" : ".");
+        sprintf(str + strlen(str), (PSR & FlagB) ? "B" : ".");
+        sprintf(str + strlen(str), (PSR & FlagV) ? "V" : ".");
+        sprintf(str + strlen(str), (PSR & FlagN) ? "N" : ".");
+
+        if (!host)
+            sprintf(str + strlen(str), "  Parasite");
+
+    }
+
 	DebugDisplayInfo(str);
 	
 	// If host debug is enable then only count host instructions
@@ -1160,7 +1163,8 @@ int DebugReadMem(int addr, bool host)
 {
 	if (host)
 		return BeebReadMem(addr);
-	if ((TorchTube || AcornZ80))
+//	if ((TorchTube || AcornZ80))
+    if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80)
 		return ReadZ80Mem(addr);
 	return TubeReadMem(addr);
 }
@@ -1171,7 +1175,8 @@ void DebugWriteMem(int addr, int data, bool host)
 		BeebWriteMem(addr, data);
 		return;
 	}
-	if ((TorchTube || AcornZ80)) {
+//	if ((TorchTube || AcornZ80)) {
+    if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80) {
 		WriteZ80Mem(addr, data);
 		return;
 	}
@@ -1299,7 +1304,8 @@ int DebugDisassembleCommand(int addr, int count, bool host)
 	
 	while (count > 0 && addr <= 0xffff)
 	{
-		if ((TorchTube || AcornZ80) && !host)
+//		if ((TorchTube || AcornZ80) && !host)
+        if ((TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80) && !host)
 		{
 			int l;
 			char *s;
@@ -1365,7 +1371,7 @@ void DebugMemoryDump(int addr, int count, bool host)
 		{
 			for (b = 0; b < 16; ++b)
 			{
-				if (!host && (a+b) >= 0xfef8 && (a+b) < 0xff00 && !(TorchTube || AcornZ80))
+				if (!host && (a+b) >= 0xfef8 && (a+b) < 0xff00 && !(TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80))
 					sprintf(info+strlen(info), "IO ");
 				else
 					sprintf(info+strlen(info), "%02X ", DebugReadMem(a+b, host));

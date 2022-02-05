@@ -2861,7 +2861,7 @@ void Exec6502Instruction(void) {
         }
         OldNMIStatus = NMIStatus;
 
-        if ((EnableTube) && (TubeEnabled))
+        if ((EnableTube) && (TubeType == Tube::Acorn65C02))
             SyncTubeProcessor();
     }
 } /* Exec6502Instruction */
@@ -2894,7 +2894,7 @@ void PollHardware(unsigned int nCycles) {
         AdjustTrigger(TapeTrigger);
         AdjustTrigger(EconetTrigger);
         AdjustTrigger(EconetFlagFillTimeoutTrigger);
-        if ( (EnableTube) && (TubeEnabled) )
+        if ( (EnableTube) && (TubeType == Tube::Acorn65C02) )
             WrapTubeCycles();
     }
 

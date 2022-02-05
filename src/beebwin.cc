@@ -422,10 +422,10 @@ bool bit = false;
 		if(row==-2)
 		{ // Must do a reset!
 			Init6502core();
-			if ( (EnableTube) && (TubeEnabled) ) Init65C02core();
-			if (Tube186Enabled) master512CoPro.Reset();
+			if ( (EnableTube) && (TubeType == Tube::Acorn65C02) ) Init65C02core();
+			if (TubeType == Tube::Master512CoPro) master512CoPro.Reset();
 			Enable_Z80 = 0;
-			if (TorchTube || AcornZ80)
+            if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80)
 			{
 				R1Status = 0;
 				ResetTube();
@@ -433,7 +433,7 @@ bool bit = false;
 				Enable_Z80 = 1;
 			}
 			Enable_Arm = 0;
-			if (ArmTube)
+            if (TubeType == Tube::AcornArm)
 			{
 				R1Status = 0;
 				ResetTube();
@@ -2037,11 +2037,8 @@ void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsign
 	BeebMemInit(LoadRoms,m_ShiftBooted);
 	Init6502core();
     if (TubeType == Tube::Acorn65C02) Init65C02core();
-//	if (EnableTube) Init65C02core();
     if (TubeType == Tube::Master512CoPro) master512CoPro.Reset();
-//	if (Tube186Enabled) master512CoPro.Reset();
 	Enable_Z80 = 0;
-//	if (TorchTube || AcornZ80)
     if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80)
 	{
 		R1Status = 0;
@@ -2050,7 +2047,6 @@ void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsign
 		Enable_Z80 = 1;
 	}
 	Enable_Arm = 0;
-//	if (ArmTube)
     if (TubeType == Tube::AcornArm)
 	{
 		R1Status = 0;
