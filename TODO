@@ -1,0 +1,4 @@
+Add load, clear and RAM like windows BEEBMEM
+Have a submenu from the rom menu to allow the user to choose af file 
+to load, or clear, or set to RAM.
+
