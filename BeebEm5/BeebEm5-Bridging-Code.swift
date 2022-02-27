@@ -16,6 +16,7 @@ import Cocoa
     case UEF
     case IFD
     case KEYBOARD
+    case ROM
 }
 
 enum CBridge {
@@ -43,6 +44,8 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
         dialog.allowedFileTypes        = ["ssd", "dsd", "inf"];
     case .KEYBOARD:
         dialog.allowedFileTypes        = ["kmap"];
+    case .ROM:
+        dialog.allowedFileTypes        = ["rom"];
     }
 
     if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {

@@ -68,6 +68,7 @@
 #include "Master512CoPro.h"
 
 extern Master512CoPro master512CoPro;
+extern unsigned char Roms[16][16384];
 
 // #include "keytable_2"
 
@@ -141,7 +142,7 @@ DiscType CDiscType[2]; // Current disc types
 static const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
 
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, ROM };
 
 extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
 extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
@@ -2015,12 +2016,17 @@ OSStatus		err;
         {
             fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
         }
+        // New load rom menu - had to use rona 5 digit codes don't work
+        err = swift_SetMenuItemTextWithCString('rona' + i, Title);
+        if (err)
+        {
+            fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
+        }
 #endif
 		
 		SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
 	}
 }
-
 
 void BeebWin::SetSoundMenu(void) {
 }
@@ -3066,6 +3072,34 @@ char path[256];
 	if (err) return;
 	LoadDisc(drive, path);
 }
+
+// Test steve - SAI
+void BeebWin::MReadRom(int rom)
+{
+    OSErr err = noErr;
+    char path[256];
+
+    err = swift_GetOneFileWithPreview(path, 256 , ROM);
+    if (err) return;
+    MLoadRom(rom, path);
+    SetRomMenu();
+}
+
+void BeebWin::MLoadRom(int rom, char *path)
+{
+    FILE *InFile;
+
+    InFile=fopen(path ,"rb");
+    
+    if	(InFile!=NULL) { fread(Roms[rom],1,16384,InFile); fclose(InFile); }
+    else {
+        fprintf(stderr, "Cannot open specified ROM: %s\n",path);
+    }
+
+}
+
+// End of test
+
 
 
 void BeebWin::LoadTape()
@@ -4265,6 +4299,28 @@ OSStatus err = noErr;
             fprintf(stderr, "Allow Rom Writed %1x selected\n", i);
 			RomWritable[i] = 1 - RomWritable[i];
 			SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
+            break;
+
+// test SAI
+        case 'rona':
+        case 'ronb':
+        case 'ronc':
+        case 'rond':
+        case 'rone':
+        case 'ronf':
+        case 'rong':
+        case 'ronh':
+        case 'roni':
+        case 'ronj':
+        case 'ronk':
+        case 'ronl':
+        case 'ronm':
+        case 'ronn':
+        case 'rono':
+        case 'ronp':
+            i = cmdID - 'rona';
+            fprintf(stderr, "Read Rom %1x selected\n", i);
+            MReadRom(i);
             break;
 
 // LED's
