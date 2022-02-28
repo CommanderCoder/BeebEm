@@ -2022,6 +2022,13 @@ OSStatus		err;
         {
             fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
         }
+
+        err = swift_SetMenuItemTextWithCString('roca' + i, Title);
+        if (err)
+        {
+            fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
+        }
+#
 #endif
 		
 		SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
@@ -3096,6 +3103,17 @@ void BeebWin::MLoadRom(int rom, char *path)
         fprintf(stderr, "Cannot open specified ROM: %s\n",path);
     }
 
+}
+
+void BeebWin::MClearRom(int rom)
+{
+    char Title[19];
+
+    for (int i=1; i < 16385; i++) {
+        Roms[rom][i] = 0;
+    }
+		ReadRomTitle(rom, &Title[2], sizeof (Title) - 3);
+			strcpy(&Title[2], "Empty");
 }
 
 // End of test
@@ -4322,6 +4340,28 @@ OSStatus err = noErr;
             fprintf(stderr, "Read Rom %1x selected\n", i);
             MReadRom(i);
             break;
+
+        case 'roca':
+        case 'rocb':
+        case 'rocc':
+        case 'rocd':
+        case 'roce':
+        case 'rocf':
+        case 'rocg':
+        case 'roch':
+        case 'roci':
+        case 'rocj':
+        case 'rock':
+        case 'rocl':
+        case 'rocm':
+        case 'rocn':
+        case 'roco':
+        case 'rocp':
+            i = cmdID - 'roca';
+            fprintf(stderr, "Clear Rom %1x selected\n", i);
+            MClearRom(i);
+            break;
+
 
 // LED's
 

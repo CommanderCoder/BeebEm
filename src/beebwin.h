@@ -162,6 +162,7 @@ public:
 	void LoadDisc(int drive, char *path);
     void MReadRom(int rom);
     void MLoadRom(int rom, char *path);
+    void MClearRom(int rom);
 	void LoadTapeFromPath(char *path);
 	OSStatus HandleCommand(UInt32 cmdID);
 	void SetMenuCommandIDCheck(UInt32 commandID, bool check);
