@@ -1781,7 +1781,7 @@ void VideoGetText(char *text, int line)
             else if (c == '#')
             {
                 //c = '�';
-                c = '\xA3';
+                c = 0xa3;
             }
             else if (c == '`')
                 c = '_';
