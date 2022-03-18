@@ -49,6 +49,8 @@ static OSStatus PlaybackIOProc(AudioDeviceID inDevice,
         const AudioTimeStamp *inOutputTime,
         void *inClientData);
 
+static AudioDeviceIOProc procId;
+
 /*
 
    void SetNominalSampleRate(Float64 inSampleRate)
@@ -136,13 +138,6 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
               NULL,
               &propertySize,
               mydevicename);
-    
-
-//    propsize = sizeof(devicename);
-//    status = AudioDeviceGetProperty(audevice, 1, 0,
-//            kAudioDevicePropertyDeviceName, &propsize, devicename);
-    // When using the correct code above (i.e. not this depreciated code
-    // we get the wrong default output device name - Don't know why
 
     if (status) {
         fprintf(stderr, "Could not get audio device name.\n");
@@ -162,15 +157,6 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
         theAddress.mScope = kAudioObjectPropertyScopeGlobal;
         theAddress.mElement = kAudioObjectPropertyElementMaster;
 
-        //      status = AudioDeviceSetProperty(audevice,
-        //              NULL,
-        //              0,
-        //              0,
-        //              kAudioDevicePropertyNominalSampleRate, 
-        //              theSize, 
-        //              &inSampleRate);
-        //
-
         status = AudioObjectSetPropertyData(audevice,
                 &theAddress,
                 0,
@@ -185,9 +171,6 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
 
     bytecount = (unsigned int)fragsize;
     propsize = sizeof(bytecount);
-
-    //  status = AudioDeviceSetProperty(audevice, NULL, 0, 0,
-    //          kAudioDevicePropertyBufferSize, propsize, &bytecount);
 
     theAddress.mSelector = kAudioDevicePropertyBufferSize;
     theAddress.mScope = kAudioObjectPropertyScopeGlobal;
@@ -207,10 +190,7 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
     Float64 theAnswer = 0;
     UInt32 theSize = sizeof(Float64);
 
-    //  status = AudioDeviceGetProperty(audevice, 1, 0,
-    //          kAudioDevicePropertyNominalSampleRate, &theSize, &theAnswer);
-    //
-    theAddress.mSelector = kAudioDevicePropertyNominalSampleRate;
+   theAddress.mSelector = kAudioDevicePropertyNominalSampleRate;
     theAddress.mScope = kAudioObjectPropertyScopeGlobal;
     theAddress.mElement = kAudioObjectPropertyElementMaster;
 
@@ -229,8 +209,6 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
 
     theSize = 0;
 
-    //  AudioDeviceGetPropertyInfo(audevice, 1, 0, kAudioDevicePropertyAvailableNominalSampleRates, &theSize, NULL);
-
     theAddress.mSelector = kAudioDevicePropertyAvailableNominalSampleRates;
     theAddress.mScope = kAudioObjectPropertyScopeGlobal;
     theAddress.mElement = kAudioObjectPropertyElementMaster;
@@ -248,9 +226,6 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
 
     theSize = 10 * sizeof(AudioValueRange);
     AudioValueRange theRange[10];
-
-    //  status = AudioDeviceGetProperty(audevice, 1, 0,
-    //          kAudioDevicePropertyAvailableNominalSampleRates, &theSize, &theRange);
 
     theAddress.mSelector = kAudioDevicePropertyAvailableNominalSampleRates;
     theAddress.mScope = kAudioObjectPropertyScopeGlobal;
@@ -276,9 +251,7 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
 
 
     propsize = sizeof(struct AudioStreamBasicDescription);
-    //  status = AudioDeviceGetProperty(audevice, 1, 0,
-    //          kAudioDevicePropertyStreamFormat, &propsize, &streamdesc);
-    //
+
     theAddress.mSelector = kAudioDevicePropertyStreamFormat;
     theAddress.mScope = kAudioObjectPropertyScopeGlobal;
     theAddress.mElement = kAudioObjectPropertyElementMaster;
@@ -323,9 +296,7 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
     }
 
     propsize = sizeof(bytecount);
-    //  status = AudioDeviceGetProperty(audevice, 1, 0,
-    //          kAudioDevicePropertyBufferSize, &propsize, &bytecount);
-    //
+
     theAddress.mSelector = kAudioDevicePropertyBufferSize;
     theAddress.mScope = kAudioObjectPropertyScopeGlobal;
     theAddress.mElement = kAudioObjectPropertyElementMaster;
@@ -410,7 +381,7 @@ int audev_init_device(char *dummydevname, long ratewanted, int verbose, extraopt
 
     }
 
-    status = AudioDeviceAddIOProc(audevice, PlaybackIOProc, (void *)1);
+    status = AudioDeviceCreateIOProcID( audevice, PlaybackIOProc, (void *)1, &procId); 
 
     if (status) {
         fprintf(stderr, "Could not add IOProc to device.\n");
@@ -454,8 +425,9 @@ void audev_close_device()
         fprintf(stderr, "Could not stop audio device; continuing.\n");
     }
 
-    status = AudioDeviceRemoveIOProc(audevice, PlaybackIOProc);
-    if (status) {
+     status = AudioDeviceDestroyIOProcID( audevice, procId);
+
+     if (status) {
         fprintf(stderr, "Could not remove IOProc from device.\n");
     }
 
