@@ -43,7 +43,9 @@ static void strip_trailing_spaces(char *str)
 }
 
 static void dfs_get_files_from_cat(
-	unsigned char *sect0, unsigned char *sect1, int numFiles, DFS_FILE_ATTR *attrs)
+	const unsigned char *sect0, 
+    const unsigned char *sect1,
+     int numFiles, DFS_FILE_ATTR *attrs)
 {
 	int i;
 	int offset;
