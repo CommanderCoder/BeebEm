@@ -1476,6 +1476,12 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="wKz-jA-ne4"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="IDE Drive On/Off" identifier="idre" id="g4A-0C-frC">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="6Wa-nQ-ByX"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="oa0-Ea-k4g"/>
                                         <menuItem title="User Port Breakout box" identifier="upbo" id="pal-E8-XOQ">
                                             <modifierMask key="keyEquivalentModifierMask"/>

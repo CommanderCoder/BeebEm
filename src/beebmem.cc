@@ -44,6 +44,7 @@
 #include "econet.h"
 #include "debug.h"
 #include "teletext.h"
+#include "ide.h"
 
 extern int trace;
 
@@ -458,6 +459,10 @@ int Value = 0xff;
   
   if ((Address & ~0x3)==0xfc40) {
 	  return(SCSIRead(Address & 0x3));
+  }
+
+  if ((Address & ~0x7)==0xfc40) {
+      if (IDEDriveEnabled) return(IDERead(Address & 0x7));
   }
   
   if ((Address & ~0x1)==0xfc50) {
@@ -881,11 +886,16 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		SCSIWrite((Address & 0x3),Value);
 		return;
 	}
-	
-	if (Address == 0xfc50) {
-		mainWin->CopyKey(Value);
-		return;
-	}
+
+    if ((Address & ~0x7)==0xfc40) {
+        IDEWrite((Address & 0x7),Value);
+        return;
+    }
+
+    if (Address == 0xfc50) {
+        mainWin->CopyKey(Value);
+        return;
+    }
 
 	if ((Address & ~0x3)==0xfdf0) {
 		SASIWrite((Address & 0x3),Value);

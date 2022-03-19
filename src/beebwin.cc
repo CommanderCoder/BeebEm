@@ -64,6 +64,7 @@
 #include "discedit.h"
 #include "disctype.h"
 #include "disc1770.h"
+#include "ide.h"
 
 #include "Master512CoPro.h"
 
@@ -447,6 +448,7 @@ bool bit = false;
 			if (EconetEnabled) EconetReset();
             if (SCSIDriveEnabled) SCSIReset();
             if (SCSIDriveEnabled) SASIReset();
+            if (IDEDriveEnabled) IDEReset();
 			if (TeleTextAdapterEnabled) TeleTextInit();
 
 			//SoundChipReset();
@@ -2083,6 +2085,7 @@ void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsign
 	Close1770Disc(1);
     if (SCSIDriveEnabled) SCSIReset();
     if (SCSIDriveEnabled) SASIReset();
+    if (IDEDriveEnabled) IDEReset();
     if (TeleTextAdapterEnabled) TeleTextInit();
 	if (MachineType == Model::Master128) InvertTR00=false;
 	if ((MachineType!= Model::Master128) && (NativeFDC)) {
@@ -2293,6 +2296,7 @@ CFStringRef pTitle;
 	AddDictNum(dict, CFSTR("TeleTextData"), TeleTextData);
 	AddDictNum(dict, CFSTR("TeleTextServer"), TeleTextServer);
     AddDictNum(dict, CFSTR("HardDriveEnabled"), SCSIDriveEnabled);
+    AddDictNum(dict, CFSTR("IDEDriveEnabled"), IDEDriveEnabled);
 	AddDictNum(dict, CFSTR("SerialPortEnabled"), SerialPortEnabled);
 	AddDictNum(dict, CFSTR("EthernetPortEnabled"), EthernetPortEnabled);
 	AddDictNum(dict, CFSTR("TouchScreenEnabled"), TouchScreenEnabled);
@@ -2475,6 +2479,7 @@ int LEDByte;
 	TeleTextData = GetDictNum(dict, CFSTR("TeleTextData"), 0);
 	TeleTextServer = GetDictNum(dict, CFSTR("TeleTextServer"), 0);
     SCSIDriveEnabled = GetDictNum(dict, CFSTR("HardDriveEnabled"), 0);
+    IDEDriveEnabled = GetDictNum(dict, CFSTR("IDEDriveEnabled"), 0);
 	TubeEnabled = GetDictNum(dict, CFSTR("TubeEnabled"), 0);
 	Tube186Enabled = GetDictNum(dict, CFSTR("Tube186Enabled"), 0);
 	TorchTube = GetDictNum(dict, CFSTR("TorchTube"), 0);
@@ -3487,6 +3492,7 @@ void BeebWin::InitMenu(void)
 	SetMenuCommandIDCheck('txtd', (TeleTextData) ? true : false);
 	SetMenuCommandIDCheck('txts', (TeleTextServer) ? true : false);
     SetMenuCommandIDCheck('hdre', (SCSIDriveEnabled) ? true : false);
+    SetMenuCommandIDCheck('idre', (IDEDriveEnabled) ? true : false);
 	SetMenuCommandIDCheck('invb', (m_Invert) ? true : false);
 	
 	SetMenuCommandIDCheck('tpso', TapeSoundEnabled ? true : false);
@@ -4950,8 +4956,19 @@ OSStatus err = noErr;
 		case 'hdre':
             fprintf(stderr, "Hard Drive On/Off selected\n");
             SCSIDriveEnabled = 1 - SCSIDriveEnabled;
+            if (SCSIDriveEnabled) IDEDriveEnabled = 0; // Turn off IDE when SCSI/SASI is enabled
 			SCSIReset();
 			SASIReset();
+            SetMenuCommandIDCheck('hdre', (SCSIDriveEnabled) ? true : false);
+            SetMenuCommandIDCheck('idre', (IDEDriveEnabled) ? true : false);
+            break;
+
+			case 'idre':
+            fprintf(stderr, "IDE Drive On/Off selected\n");
+            IDEDriveEnabled = 1 - IDEDriveEnabled;
+            if (IDEDriveEnabled) SCSIDriveEnabled = 0; // Turn off SCSI/SASI when IDE is enabled
+            IDEReset();
+            SetMenuCommandIDCheck('idre', (IDEDriveEnabled) ? true : false);
             SetMenuCommandIDCheck('hdre', (SCSIDriveEnabled) ? true : false);
             break;
 		

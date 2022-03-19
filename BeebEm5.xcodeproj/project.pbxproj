@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B2705EC27E5F71E00AFA82E /* ide.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B2705EB27E5F71D00AFA82E /* ide.cc */; };
 		8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B7A6B8D27707721002576FC /* Master512CoPro.cc */; };
 		8BC8CADA2770B24E006F0FAD /* log.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8BC8CAD92770B24E006F0FAD /* log.cc */; };
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
@@ -87,6 +88,8 @@
 
 /* Begin PBXFileReference section */
 		8B268E3926DD09DE006CD26F /* disctype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = disctype.h; path = src/disctype.h; sourceTree = "<group>"; };
+		8B2705EB27E5F71D00AFA82E /* ide.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ide.cc; path = src/ide.cc; sourceTree = "<group>"; };
+		8B2705EE27E5F74700AFA82E /* ide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ide.h; path = src/ide.h; sourceTree = "<group>"; };
 		8B31157E276E9AAA00B23CD7 /* model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = model.h; path = src/model.h; sourceTree = "<group>"; };
 		8B7A6B8C27707709002576FC /* Master512CoPro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Master512CoPro.h; path = src/Master512CoPro.h; sourceTree = "<group>"; };
 		8B7A6B8D27707721002576FC /* Master512CoPro.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Master512CoPro.cc; path = src/Master512CoPro.cc; sourceTree = "<group>"; };
@@ -352,6 +355,7 @@
 		DCCCC2B524A33A3000840082 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				8B2705EB27E5F71D00AFA82E /* ide.cc */,
 				8BC8CAD92770B24E006F0FAD /* log.cc */,
 				8B7A6B8D27707721002576FC /* Master512CoPro.cc */,
 				DCE5E85F267B362C00F3CD34 /* z80_support.cc */,
@@ -408,6 +412,7 @@
 		DCD4ADE624A4D54A0000C40A /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				8B2705EE27E5F74700AFA82E /* ide.h */,
 				8BC8CADC2770B25C006F0FAD /* log.h */,
 				8B7A6B8C27707709002576FC /* Master512CoPro.h */,
 				8B31157E276E9AAA00B23CD7 /* model.h */,
@@ -571,6 +576,7 @@
 				DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */,
 				DC907FDD24B52C8200B99036 /* TapeControlViewController.swift in Sources */,
 				DCE5E861267B362C00F3CD34 /* z80.cc in Sources */,
+				8B2705EC27E5F71E00AFA82E /* ide.cc in Sources */,
 				DC70E78425A3AE6200A7FF3E /* scsi.cc in Sources */,
 				DC70E76925A3AE6200A7FF3E /* speech.cc in Sources */,
 				DC70E78025A3AE6200A7FF3E /* uservia.cc in Sources */,
