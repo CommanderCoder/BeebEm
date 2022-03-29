@@ -1,24 +1,31 @@
-/****************************************************************************/
-/*              Beebem - (c) David Alan Gilbert 1994                        */
-/*              ------------------------------------                        */
-/* This program may be distributed freely within the following restrictions:*/
-/*                                                                          */
-/* 1) You may not charge for this program or for any part of it.            */
-/* 2) This copyright message must be distributed with all copies.           */
-/* 3) This program must be distributed complete with source code.  Binary   */
-/*    only distribution is not permitted.                                   */
-/* 4) The author offers no warrenties, or guarentees etc. - you use it at   */
-/*    your own risk.  If it messes something up or destroys your computer   */
-/*    thats YOUR problem.                                                   */
-/* 5) You may use small sections of code from this program in your own      */
-/*    applications - but you must acknowledge its use.  If you plan to use  */
-/*    large sections then please ask the author.                            */
-/*                                                                          */
-/* If you do not agree with any of the above then please do not use this    */
-/* program.                                                                 */
-/* Please report any problems to the author at beebem@treblig.org           */
-/****************************************************************************/
-/* Beebemulator - memory subsystem - David Alan Gilbert 16/10/94 */
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 1994  David Alan Gilbert
+Copyright (C) 1997  Mike Wyatt
+Copyright (C) 2001  Richard Gellman
+Copyright (C) 2004  Ken Lowe
+Copyright (C) 2004  Rob O'Donnell
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
+// Beebemulator - memory subsystem - David Alan Gilbert 16/10/1994
+// Econet emulation: Rob O'Donnell robert@irrelevant.com 28/12/2004
+// IDE Interface: JGH jgh@mdfs.net 25/12/2011
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,21 +56,29 @@
 extern int trace;
 
 /* Each Rom now has a Ram/Rom flag */
-int RomWritable[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+bool RomWritable[16] = {true,true,true,true,true,true,true,true,
+                        true,true,true,true,true,true,true,true};
 
-int PagedRomReg;
+BankType RomBankType[16] = {
+    BankType::Empty, BankType::Empty, BankType::Empty, BankType::Empty,
+    BankType::Empty, BankType::Empty, BankType::Empty, BankType::Empty,
+    BankType::Empty, BankType::Empty, BankType::Empty, BankType::Empty,
+    BankType::Empty, BankType::Empty, BankType::Empty, BankType::Empty
+};
+
+unsigned char PagedRomReg;
 
 /* Computech (&B+) Specific Stuff Added by K.Lowe 18/08/03 */
 struct tm;
 time_t long_time; // Define Clock for Computech Integra-B
 
-int MemSel=0; /* Shadow/Main RAM Toggle */
-int PrvEn=0; /* Private RAM Enable */
-int ShEn=0; /* Shadow RAM Enable */
-int Prvs1=0; /* Private RAM 1K Area */
-int Prvs4=0; /* Private RAM 4K Area */
-int Prvs8=0; /* Private RAM 8K Area */
-int HidAdd=0;
+bool MemSel = false; /* Shadow/Main RAM Toggle */
+bool PrvEn = false; /* Private RAM Enable */
+bool ShEn = false; /* Shadow RAM Enable */
+bool Prvs1 = false; /* Private RAM 1K Area */
+bool Prvs4 = false; /* Private RAM 4K Area */
+bool Prvs8 = false; /* Private RAM 8K Area */
+int HidAdd = 0;
 /* End of Computech (&B+) Specific Stuff */
 
 unsigned char WholeRam[65536];
@@ -73,8 +88,22 @@ unsigned char Roms[16][16384];
 unsigned char Hidden[256];
 unsigned char Private[12288];
 unsigned char ShadowRam[20480];
-unsigned char HiddenDefault[31] = {0,0,0,0,0,0,2,1,1,0,0xe0,0x8e,0,0,0,0,0,0,0,
-						0xef,0xff,0xff,0x78,0,0x17,0x23,0x19,5,0x0a,0x2d,0xa0 }; 
+unsigned char HiddenDefault[31] = {0,0,0,0,0,0,2,1,1,0,0xe0,0x8e,0,
+    0,0,0,0,0,0,
+    0xed,0xff,0xff,0x78,0,0x17,0x20,0x19,5,0x0a,0x2d,0xa1 }; 
+//Addresses 0x0 thru 0xD:        RTC Data: Sec, SecAlm, Min, MinAlm, Hr, HrAlm, Day, Date, Month, Year, Registers A, B, C & D
+//Addresses 0xE thru 0x12:    ?
+//Address 0x13: 0xED        LANGUAGE in bank E. FILE SYSTEM in bank D. ROMS.cfg should match this, but IBOS reset will correct if wrong
+//Address 0x14: 0xFF        *INSERT status for ROMS &0F to &08. Default: &FF (All 8 ROMS enabled)
+//Address 0x15: 0xFF        *INSERT status for ROMS &07 to &00. Default: &FF (All 8 ROMS enabled)
+//Address 0x18: 0x17        0-2: MODE / 3: SHADOW / 4: TV Interlace / 5-7: TV screen shift.
+//Address 0x19: 0x20        0-2: FDRIVE / 3-5: CAPS. Default was &23. Changed to &20
+//Address 0x1A: 0x19        0-7: Keyboard Delay
+//Address 0x1B: 0x05        0-7: Keyboard Repeat
+//Address 0x1C: 0x0A        0-7: Printer Ignore
+//Address 0x1D: 0x2D        0: Tube / 2-4: BAUD / 5-7: Printer
+//Address 0x1E: 0xA1        0: File system / 4: Boot / 5-7: Data. Default was &A0. Changed to &A1/* End of Computech (&B+) Specific Stuff */
+
 /* End of Computech (&B+) Specific Stuff */
 
 unsigned char ROMSEL;
@@ -86,7 +115,9 @@ unsigned char CMOSDefault[64]={0,0,0,0,0,0xc9,0xff,0xfe,0x32,0,7,0xc1,0x1e,5,0,0
 unsigned char ShadowRAM[32768]; // 20K Shadow RAM
 unsigned char ACCCON; // ACCess CONtrol register
 struct CMOSType CMOS;
-unsigned char Sh_Display,Sh_CPUX,Sh_CPUE,PRAM,FRAM;
+bool Sh_Display;
+static bool PRAM, FRAM;
+static bool Sh_CPUX, Sh_CPUE;
 /* End of Master 128 Specific Stuff, note initilised anyway regardless of Model Type in use */
 char RomPath[512];
 // FDD Extension board variables
@@ -96,17 +127,20 @@ bool NativeFDC; // TRUE for 8271, FALSE for DLL extension
 int FDCType;
 
 // Econet NMI enable signals. Decoded from address bus and latched by IC97
-#define INTON	TRUE
-#define INTOFF	FALSE
+#define INTON	true
+#define INTOFF	false
 
 /*----------------------------------------------------------------------------*/
 /* Perform hardware address wrap around */
-static unsigned int WrapAddr(int in) {
-  unsigned int offsets[]={0x4000,0x6000,0x3000,0x5800}; // page 419 of AUG is wrong
-  if (in<0x8000) return(in);
-  in+=offsets[(IC32State & 0x30)>>4];
-  in&=0x7fff;
-  return(in);
+static int WrapAddr(int Address) {
+  static const int offsets[]={0x4000,0x6000,0x3000,0x5800}; // page 419 of AUG is wrong
+  if (Address<0x8000) {
+      return(Address);
+  }
+
+  Address += offsets[(IC32State & 0x30)>>4];
+  Address &= 0x7fff;
+  return(Address);
 }; /* WrapAddr */
 
 /*----------------------------------------------------------------------------*/
@@ -127,9 +161,9 @@ const unsigned char *BeebMemPtrWithWrap(int Address, int Length) {
   int EndAddress = WrapAddr(Address + Length -1);
 
   // On Master the FSRam area is displayed if start addr below shadow area
-  if ( (MachineType == Model::Master128) && (Address <=EndAddress) && 
+  if ( (MachineType == Model::Master128) && (Address <= EndAddress) && 
       (Sh_Display) && (Address < 0x3000) ) {
-    if (0x3000- Address < Length) {
+    if (0x3000 - Address < Length) {
       int toCopy = 0x3000 - Address;
       if (toCopy>Length) toCopy=Length;
       if (toCopy>0) memcpy(tmpBuf,FSRam+0x2000-toCopy,toCopy);
@@ -139,19 +173,19 @@ const unsigned char *BeebMemPtrWithWrap(int Address, int Length) {
       return(tmpBuf);
 	}
     else if (Address<0x1000) {
-      return((unsigned char *)FSRam); // Should probably be PrivateRAM?
+      return FSRam; // Should probably be PrivateRAM?
     }
     else {
-      return((unsigned char *)FSRam+Address-0x1000);
+      return FSRam + Address - 0x1000;
     }
   }
 
-  if (Address<=EndAddress) {
+  if (Address <= EndAddress) {
       if  (Sh_Display) {
-          return(unsigned char *)ShadowRAM + Address;
+          return ShadowRAM + Address;
       }
       else {
-          return(unsigned char *)WholeRam + Address;
+          return WholeRam + Address;
       }
   }
 
@@ -173,7 +207,7 @@ const unsigned char *BeebMemPtrWithWrap(int Address, int Length) {
 
   if (toCopy>0) { 
       if ( Sh_Display) {
-          memcpy(tmpBufPtr,ShadowRam+EndAddress-(toCopy-1),toCopy);
+          memcpy(tmpBufPtr,ShadowRAM+EndAddress-(toCopy-1),toCopy);
       }
       else {
           memcpy(tmpBufPtr,WholeRam+EndAddress-(toCopy-1),toCopy);
@@ -206,7 +240,7 @@ const unsigned char *BeebMemPtrWithWrap(int Address, int Length) {
 
 static unsigned int WrapAddrMo7(int Address) {
     if (MachineType == Model::B || MachineType == Model::IntegraB) {
-        return (Address & 0x8000) << 3 | 0x3c00 | (Address & 0x3ff);
+        return (Address & 0x800) << 3 | 0x3c00 | (Address & 0x3ff);
     }
     else {
         return 0x7c00 | (Address & 0x3ff);
@@ -231,7 +265,7 @@ const unsigned char *BeebMemPtrWithWrapMode7(int Address, int Length) {
 
 
 /*----------------------------------------------------------------------------*/
-int BeebReadMem(int Address) {
+unsigned char BeebReadMem(int Address) {
 
 int Value = 0xff;
 	
@@ -1074,7 +1108,7 @@ void BeebReadFont(void) {
 
 }
 /*----------------------------------------------------------------------------*/
-void BeebMemInit(unsigned char LoadRoms,unsigned char SkipIntegraBConfig) {
+void BeebMemInit(bool LoadRoms,bool SkipIntegraBConfig) {
   /* Remove the non-win32 stuff here, soz, im not gonna do multi-platform master128 upgrades
   u want for linux? u do yourself! ;P - Richard Gellman */
   
@@ -1313,9 +1347,16 @@ void LoadIntegraBHiddenMemUEF(FILE *SUEF) {
 	fread(Hidden,1,256,SUEF);
 }
 
-void LoadSWRMMemUEF(FILE *SUEF) {
+void LoadSWRomMemUEF(FILE *SUEF) {
 	int Rom;
 	Rom=fgetc(SUEF);
 	RomWritable[Rom]=1;
 	fread(Roms[Rom],1,16384,SUEF);
+}
+
+void LoadSWRamMemUEF(FILE *SUEF) {
+    int Rom;
+    Rom=fgetc(SUEF);
+    RomWritable[Rom]=1;
+    fread(Roms[Rom],1,16384,SUEF);
 }

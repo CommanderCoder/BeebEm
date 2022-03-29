@@ -100,7 +100,7 @@ UEFStateResult SaveUEFState(const char *StateName) {
 			Save8271UEF(UEFState);
 		else
 			Save1770UEF(UEFState);
-		if (EnableTube) {
+		if (TubeType == Tube::Acorn65C02) {
 			SaveTubeUEF(UEFState); // TODO: Save Tube state for all co-pros?
 			Save65C02UEF(UEFState);
 			Save65C02MemUEF(UEFState);
@@ -120,6 +120,7 @@ UEFStateResult SaveUEFState(const char *StateName) {
 
 UEFStateResult LoadUEFState(const char *StateName) {
 	char UEFId[10];
+    // int CompletionBits = 0; // These bits should be filled in
 	long RPos=0,FLength,CPos;
 	unsigned int Block,Length;
 	int Version;
@@ -156,7 +157,7 @@ UEFStateResult LoadUEFState(const char *StateName) {
 			if (Block==0x0463) LoadShadMemUEF(UEFState);
 			if (Block==0x0464) LoadPrivMemUEF(UEFState);
 			if (Block==0x0465) LoadFileMemUEF(UEFState);
-            if (Block==0x0466) LoadSWRMMemUEF(UEFState);
+            if (Block==0x0466) LoadSWRamMemUEF(UEFState);
 			if (Block==0x0467) LoadViaUEF(UEFState);
 			if (Block==0x0468) LoadVideoUEF(UEFState, Version);
 			if (Block==0x046D) LoadIntegraBHiddenMemUEF(UEFState);
@@ -167,7 +168,7 @@ UEFStateResult LoadUEFState(const char *StateName) {
 			if (Block==0x0472) Load65C02MemUEF(UEFState);
 			if (Block==0x0473) LoadSerialUEF(UEFState);
             if (Block==0x0474) LoadAtoDUEF(UEFState);
-            if (Block==0x0475) LoadSWRMMemUEF(UEFState);
+            if (Block==0x0475) LoadSWRomMemUEF(UEFState);
 //            if (Block==0x0476) LoadMusic5000JIMPageRefUEF(UEFState);
 //            if (Block==0x0477) LoadMusic5000UEF(UEFState, Version);
 			fseek(UEFState,CPos+Length,SEEK_SET); // Skip unrecognised blocks (and over any gaps)
