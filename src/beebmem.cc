@@ -238,7 +238,7 @@ const unsigned char *BeebMemPtrWithWrap(int Address, int Length) {
 // memory from 0x3c00 to 0x3fff then 0x7c00 to 0x7fff giving a 2K linear
 // buffer.
 
-static unsigned int WrapAddrMo7(int Address) {
+static int WrapAddrMo7(int Address) {
     if (MachineType == Model::B || MachineType == Model::IntegraB) {
         return (Address & 0x800) << 3 | 0x3c00 | (Address & 0x3ff);
     }
@@ -267,107 +267,111 @@ const unsigned char *BeebMemPtrWithWrapMode7(int Address, int Length) {
 /*----------------------------------------------------------------------------*/
 unsigned char BeebReadMem(int Address) {
 
-int Value = 0xff;
+unsigned char Value = 0xff;
 	
-// BBC B Start
-  if (MachineType == Model::B) {
-	  if (Address>=0x8000 && Address<0xc000) return(Roms[ROMSEL][Address-0x8000]);
-	  if (Address<0xfc00) return(WholeRam[Address]);
-	  if (Address>=0xff00) return(WholeRam[Address]);
-  }
-// BBC B End
+if (MachineType == Model::B) {
+    if (Address >= 0x8000 && Address < 0xc000) return Roms[ROMSEL][Address-0x8000];
+    if (Address < 0xfc00) return WholeRam[Address];
+    if (Address >= 0xff00) return WholeRam[Address];
+}
+else if (MachineType == Model::IntegraB) {
+    if (Address < 0x3000) return WholeRam[Address];
+    if (Address >= 0x8000 && Address < 0x8400 && Prvs8 && PrvEn) return Private[Address-0x8000];
+    if (Address >= 0x8000 && Address < 0x9000 && Prvs4 && PrvEn) return Private[Address-0x8000];
+    if (Address >= 0x9000 && Address < 0xb000 && Prvs1 && PrvEn) return Private[Address-0x8000];
+    if (Address<0x8000) {
+        if (ShEn) {
+            if (MemSel) {
+                return WholeRam[Address];
+            }
+            else {
+                return ShadowRam[Address - 0x3000];
+            }
+        }
+        else {
+            return WholeRam[Address];
+        }
+    }
 
+    if (Address >= 0x8000 && Address < 0xc000) return Roms[ROMSEL][Address-0x8000];
+    if (Address < 0xfc00) return WholeRam[Address];
+    if (Address >= 0xff00) return WholeRam[Address];
 
-//BBC B Integra B Start
-  if (MachineType == Model::IntegraB) {
-	    if (Address<0x3000) return(WholeRam[Address]);
-		if ((Address>=0x8000) && (Address<0x8400) && (Prvs8==1) && (PrvEn==1)) return(Private[Address-0x8000]);
-		if ((Address>=0x8000) && (Address<0x9000) && (Prvs4==1) && (PrvEn==1)) return(Private[Address-0x8000]);
-		if ((Address>=0x9000) && (Address<0xb000) && (Prvs1==1) && (PrvEn==1)) return(Private[Address-0x8000]);
-		if ((Address<0x8000) && (ShEn==1) && (MemSel==0)) return(ShadowRam[Address-0x3000]);
-		if ((Address<0x8000) && (ShEn==0)) return(WholeRam[Address]);
-		if ((Address<0x8000) && (ShEn==1) && (MemSel==1)) return(WholeRam[Address]);
-		if (Address>=0x8000 && Address<0xc000) return(Roms[ROMSEL][Address-0x8000]);
-		if (Address<0xfc00) return(WholeRam[Address]);
-		if (Address>=0xff00) return(WholeRam[Address]);
-
-		if (Address==0xfe3c) {
-			time( &long_time );
-			if (HidAdd==0) return(localtime(&long_time)->tm_sec);
-			if (HidAdd==2) return(localtime(&long_time)->tm_min);
-			if (HidAdd==4) return(localtime(&long_time)->tm_hour);
-			if (HidAdd==6) return((localtime(&long_time)->tm_wday)+1);
-			if (HidAdd==7) return(localtime(&long_time)->tm_mday);
-			if (HidAdd==8) return((localtime(&long_time)->tm_mon)+1);
-			if (HidAdd==9) return((localtime(&long_time)->tm_year)-10);
-			if (HidAdd==0xa) return(0x0);
-			return(Hidden[HidAdd]);
-		}
-	}
-//BBC B Integra B End
-
-//BBC B+ Start
-  if (MachineType == Model::BPlus) {
-	    if (Address<0x3000) return(WholeRam[Address]);
-		if ((Address<0x8000) && (Sh_Display==1) && (PrePC>=0xC000) && (PrePC<0xE000)) return(ShadowRAM[Address]);
-		if ((Address<0x8000) && (Sh_Display==1) && (MemSel==1) && (PrePC>=0xA000) && (PrePC<0xB000)) return(ShadowRAM[Address]);
-		if (Address<0x8000) return(WholeRam[Address]);
-		if ((Address<0xB000) && (MemSel==1)) return(Private[Address-0x8000]);
-		if (Address>=0x8000 && Address<0xc000) return(Roms[ROMSEL][Address-0x8000]);
-		if (Address<0xfc00) return(WholeRam[Address]);
-		if (Address>=0xff00) return(WholeRam[Address]);
-  }
-//BBC B+ End
-
-
-// Master 128 Start
-	if (MachineType == Model::Master128) {
-		switch ((Address&0xf000)>>12) {
-		case 0:
-		case 1:
-		case 2:
-			return(WholeRam[Address]); // Low memory - not paged.
-			break;
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-			if ((!Sh_CPUX) && (!Sh_CPUE)) return(WholeRam[Address]);
-			if (Sh_CPUX) return(ShadowRAM[Address]);
-			if ((Sh_CPUE)  && (!Sh_CPUX)) {
-				if ((PrePC>=0xc000) && (PrePC<0xe000)) return(ShadowRAM[Address]); else return(WholeRam[Address]);
-			}
-			break;
-		case 8:
-			if (PRAM>0) { 
-				return(PrivateRAM[Address-0x8000]); 
-			} else { 
-				return(Roms[ROMSEL][Address-0x8000]);
-			}
-			break;
-		case 9:
-		case 0xa:
-		case 0xb:
-			return(Roms[ROMSEL][Address-0x8000]);
-			break;
-		case 0xc:
-		case 0xd:
-			if (FRAM) return(FSRam[Address-0xc000]); else return(WholeRam[Address]);
-			break;
-		case 0xe:
-			return(WholeRam[Address]);
-			break;
-		case 0xf:
-			if (Address<0xfc00 || Address>=0xff00) { return(WholeRam[Address]); }
-			if ((ACCCON & 0x40) && Address>=0xfc00 && Address<0xff00) {
-				return WholeRam[Address];
-			}
-			break;
-		default:
-			return(0);
-		}
-	}
+    if (Address==0xfe3c) {
+        time( &long_time );
+        if (HidAdd==0) return(localtime(&long_time)->tm_sec);
+        if (HidAdd==2) return(localtime(&long_time)->tm_min);
+        if (HidAdd==4) return(localtime(&long_time)->tm_hour);
+        if (HidAdd==6) return((localtime(&long_time)->tm_wday)+1);
+        if (HidAdd==7) return(localtime(&long_time)->tm_mday);
+        if (HidAdd==8) return((localtime(&long_time)->tm_mon)+1);
+        if (HidAdd==9) return((localtime(&long_time)->tm_year)-10);
+        if (HidAdd==0xa) return(0x0);
+        return(Hidden[HidAdd]);
+    }
+}
+else if (MachineType == Model::BPlus) {
+    if (Address < 0x3000) return WholeRam[Address];
+    if (Address < 0x8000 && Sh_Display && PrePC >= 0xc000 && PrePC<0xe000) return ShadowRAM[Address];
+    if (Address < 0x8000 && Sh_Display && MemSel && PrePC >= 0xa000 && PrePC < 0xb000) return ShadowRAM[Address];
+    if (Address < 0x8000) return WholeRam[Address];
+    if (Address < 0xB000 && MemSel) return Private[Address-0x8000];
+    if (Address >= 0x8000 && Address < 0xc000) return Roms[ROMSEL][Address-0x8000];
+    if (Address < 0xfc00) return WholeRam[Address];
+    if (Address >= 0xff00) return WholeRam[Address];
+}
+else if (MachineType == Model::Master128) {
+    switch ((Address&0xf000)>>12) {
+        case 0:
+        case 1:
+        case 2:
+            return(WholeRam[Address]); // Low memory - not paged.
+            break;
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            if (!Sh_CPUX && !Sh_CPUE) return WholeRam[Address];
+            if (Sh_CPUX) return ShadowRAM[Address];
+            if (Sh_CPUE  && !Sh_CPUX) {
+                if (PrePC >= 0xc000 && PrePC<0xe000) {
+                    return ShadowRAM[Address];
+                }
+                else {
+                    return WholeRam[Address];
+                }
+            }
+            break;
+        case 8:
+            if (PRAM) { 
+                return(PrivateRAM[Address-0x8000]); 
+            } else { 
+                return(Roms[ROMSEL][Address-0x8000]);
+            }
+            break;
+        case 9:
+        case 0xa:
+        case 0xb:
+            return(Roms[ROMSEL][Address-0x8000]);
+            break;
+        case 0xc:
+        case 0xd:
+            if (FRAM) return(FSRam[Address-0xc000]); else return(WholeRam[Address]);
+            break;
+        case 0xe:
+            return(WholeRam[Address]);
+            break;
+        case 0xf:
+            if (Address<0xfc00 || Address>=0xff00) { return(WholeRam[Address]); }
+            if ((ACCCON & 0x40) && Address>=0xfc00 && Address<0xff00) {
+                return WholeRam[Address];
+            }
+            break;
+        default:
+            return(0);
+    }
+}
 // Master 128 End
 
   if (Address>=0xff00)
@@ -554,7 +558,7 @@ static void DoRomChange(int NewBank) {
   // Master Specific stuff   
   if (MachineType == Model::Master128) {
 	  PagedRomReg=NewBank;
-	  PRAM=(PagedRomReg & 128);
+	  PRAM=(PagedRomReg & 128) != 0;
   }
 
 }; /* DoRomChange */
@@ -563,16 +567,15 @@ static void FiddleACCCON(unsigned char newValue) {
 	// Master specific, should only execute in Master128 mode
 	// ignore bits TST (6) IFJ (5) and ITU (4)
 //	newValue&=143;
-	unsigned char oldshd;
 //	if ((newValue & 128)==128) DoInterrupt();
 	ACCCON=newValue & 127; // mask out the IRR bit so that interrupts dont occur repeatedly
 	if (newValue & 128) intStatus|=128; else intStatus&=127;
-	oldshd=Sh_Display;
-	Sh_Display=ACCCON & 1;
+    bool oldshd=Sh_Display;
+	Sh_Display=(ACCCON & 1) != 0;
 	if (Sh_Display!=oldshd) RedoMPTR();
-	Sh_CPUX=ACCCON & 4;
-	Sh_CPUE=ACCCON & 2;
-	FRAM=ACCCON & 8;
+	Sh_CPUX = (ACCCON & 4) != 0;
+	Sh_CPUE = (ACCCON & 2) != 0;
+	FRAM = (ACCCON & 8) != 0;
 }
 
 /*----------------------------------------------------------------------------*/
