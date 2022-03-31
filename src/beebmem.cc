@@ -298,14 +298,17 @@ else if (MachineType == Model::IntegraB) {
     if (Address >= 0xff00) return WholeRam[Address];
 
     if (Address==0xfe3c) {
+        time_t long_time; // Clock for Computech Integra-B
         time( &long_time );
-        if (HidAdd==0) return(localtime(&long_time)->tm_sec);
-        if (HidAdd==2) return(localtime(&long_time)->tm_min);
-        if (HidAdd==4) return(localtime(&long_time)->tm_hour);
-        if (HidAdd==6) return((localtime(&long_time)->tm_wday)+1);
-        if (HidAdd==7) return(localtime(&long_time)->tm_mday);
-        if (HidAdd==8) return((localtime(&long_time)->tm_mon)+1);
-        if (HidAdd==9) return((localtime(&long_time)->tm_year)-10);
+        struct tm* time = localtime(&long_time);
+
+        if (HidAdd==0) return (unsigned char)time->tm_sec;
+        if (HidAdd==2) return (unsigned char)time->tm_min;
+        if (HidAdd==4) return (unsigned char)time->tm_hour;
+        if (HidAdd==6) return (unsigned char)(time->tm_wday + 1);
+        if (HidAdd==7) return (unsigned char)(time->tm_mday);
+        if (HidAdd==8) return (unsigned char)(time->tm_mon + 1);
+        if (HidAdd==9) return (unsigned char)(time->tm_year % 100);
         if (HidAdd==0xa) return(0x0);
         return(Hidden[HidAdd]);
     }
@@ -580,11 +583,8 @@ static void FiddleACCCON(unsigned char newValue) {
 
 /*----------------------------------------------------------------------------*/
 static void RomWriteThrough(int Address, unsigned char Value) {
-//	int bank = 0;
+int bank = 0;
 
-	return;
-	
-/*
  // SW RAM board - bank to write to is selected by User Via
 	if (SWRAMBoardEnabled)
 	{
@@ -601,80 +601,74 @@ static void RomWriteThrough(int Address, unsigned char Value) {
 	
 	if (bank < 16)
 		Roms[bank][Address-0x8000]=Value;
-*/
 }
 
 /*----------------------------------------------------------------------------*/
 void BeebWriteMem(int Address, unsigned char Value) {
-  	unsigned char oldshd;
-/*  fprintf(stderr,"Write %x to 0x%x\n",Value,Address); */
+    unsigned char oldshd;
+    /*  fprintf(stderr,"Write %x to 0x%x\n",Value,Address); */
 
-// BBC B Start
     if (MachineType == Model::B) {
-	 if (Address<0x8000) {
-		 WholeRam[Address]=Value;
+        if (Address<0x8000) {
+            WholeRam[Address]=Value;
+            return;
+        }
+
+        if (Address < 0xc000 && Address >= 0x8000) {
+            if (!SWRAMBoardEnabled && RomWritable[ROMSEL]) Roms[ROMSEL][Address-0x8000] = Value;
+            else RomWriteThrough(Address, Value);
+            return;
+        }
+    }
+    else if (MachineType == Model::IntegraB) {
+        if (Address<0x3000) {
+            WholeRam[Address]=Value;
+            return;
+        }
+
+        if (Address<0x8000) {
+            if (ShEn && !MemSel) {
+                ShadowRam[Address-0x3000]=Value;
+                return;
+            } else {
+                WholeRam[Address]=Value;
+                return;
+            }
+        }
+
+	 if (Address >= 0x8000 && Address < 0x8400 && Prvs8 && PrvEn)  {
+		 Private[Address-0x8000]=Value;
 		 return;
 	 }
 
-	 if ((Address<0xc000) && (Address>=0x8000)) {
+	 if (Address >= 0x8000 && Address < 0x9000 && Prvs4 && PrvEn) {
+		 Private[Address-0x8000] = Value;
+		 return;
+	 }
+
+	 if (Address >= 0x9000 && Address < 0xb000 && Prvs1 && PrvEn) {
+		 Private[Address-0x8000]=Value;
+		 return;
+	 }
+
+	 if (Address < 0xc000 && Address >= 0x8000) {
 		if (RomWritable[ROMSEL]) Roms[ROMSEL][Address-0x8000]=Value;
-		else RomWriteThrough(Address, Value);
-		return;
-	 }
-	}
-// BBC B End
-
-
-// BBC B Integra B Start
-    if (MachineType == Model::IntegraB) {
-	 if (Address<0x3000) {
-		 WholeRam[Address]=Value;
-		 return;
-	 }
-
-	 if (Address<0x8000) {
-		 if ((ShEn==1) && (MemSel==0)) {
-			 ShadowRam[Address-0x3000]=Value;
-			 return;
-		 } else {
-			 WholeRam[Address]=Value;
-			 return;
-		 }
-	 }
-
-	 if ((Address>=0x8000) && (Address<0x8400) && (Prvs8==1) && (PrvEn==1)) {
-		 Private[Address-0x8000]=Value;
-		 return;
-	 }
-
-	 if ((Address>=0x8000) && (Address<0x9000) && (Prvs4==1) && (PrvEn==1)) {
-		 Private[Address-0x8000]=Value;
-		 return;
-	 }
-
-	 if ((Address>=0x9000) && (Address<0xb000) && (Prvs1==1) && (PrvEn==1)) {
-		 Private[Address-0x8000]=Value;
-		 return;
-	 }
-
-	 if ((Address<0xc000) && (Address>=0x8000)) {
-		if (RomWritable[ROMSEL]) Roms[ROMSEL][Address-0x8000]=Value;
-		else RomWriteThrough(Address, Value);
+		// else RomWriteThrough(Address, Value); // Not Supported on Integra-B
 		return;
 	 }
 
 	 if (Address==0xfe30) {
 		 DoRomChange(Value);
-		 MemSel = ((Value & 0x80)/0x80);
-		 PrvEn = ((Value & 0x40)/0x40);
+		 MemSel = (Value & 0x80) != 0;
+		 PrvEn = (Value & 0x40) != 0;
 		 return;
 	 }
 	 
 	 if (Address==0xfe34) {
-		 ShEn=((Value &0x80)/0x80);
-		 Prvs1=((Value &0x10)/0x10);
-		 Prvs4=((Value &0x20)/0x20);
-		 Prvs8=((Value &0x40)/0x40);
+		 ShEn=(Value &0x80) != 0;
+		 Prvs1=(Value &0x10) != 0;
+		 Prvs4=(Value &0x20) != 0;
+		 Prvs8=(Value &0x40) != 0;
 		 return;
 	 }
 
@@ -723,32 +717,26 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		 return;
 	 }
   }
-// BBC B Integra B End
-
-
-// BBC B+ Start
-    if (MachineType == Model::BPlus) {
+    else if (MachineType == Model::BPlus) {
 	 if (Address<0x3000) {
 		 WholeRam[Address]=Value;
 		 return;
 	 }
 
-	 if (Address<0x8000) {
-		 if ((Sh_Display==1) && (PrePC>=0xC000) && (PrePC<0xE000)) {
-			 ShadowRAM[Address]=Value;
-			 return;
-		 } else
+     if (Address<0x8000) {
+         if (Sh_Display && PrePC >= 0xC000 && PrePC < 0xE000) {
+             ShadowRAM[Address]=Value;
+             return;
+         } else if (Sh_Display && MemSel && PrePC >= 0xA000 && PrePC < 0xB000) {
+             ShadowRAM[Address]=Value;
+             return;
+         } else {
+             WholeRam[Address]=Value;
+             return;
+         }
+     }
 
-		 if ((Sh_Display==1) && (MemSel==1) && (PrePC>=0xA000) && (PrePC<0xB000)) {
-			 ShadowRAM[Address]=Value;
-			 return;
-		 } else {
-			 WholeRam[Address]=Value;
-			 return;
-		 }
-	 }
-
-	 if ((Address<0xb000) && (MemSel==1)) {
+	 if (Address < 0xb000 && MemSel) {
 		 Private[Address-0x8000]=Value;
 		 return;
 	 }
@@ -756,27 +744,24 @@ void BeebWriteMem(int Address, unsigned char Value) {
 
 	 if ((Address<0xc000) && (Address>=0x8000)) {
 		if (RomWritable[ROMSEL]) Roms[ROMSEL][Address-0x8000]=Value;
-		else RomWriteThrough(Address, Value);
+		//else RomWriteThrough(Address, Value); // Not supported on B+
 		return;
 	 }
 
 	 if (Address>=0xfe30 && Address<0xfe34) {
 		 DoRomChange(Value);
-		 MemSel = ((Value & 0x80)/0x80);
+		 MemSel = (Value & 0x80) != 0;
 		 return;
 	 }
 	 
 	 if (Address>=0xfe34 && Address<0xfe38) {
-		 oldshd=Sh_Display;
-		 Sh_Display=((Value &0x80)/0x80);
+		 bool oldshd = Sh_Display;
+		 Sh_Display = (Value &0x80) != 0;
 		 if (Sh_Display!=oldshd) RedoMPTR();
 		 return;
 	 }
 	}
-// BBC B+ End
-
-// Master 128 Start
-	if (MachineType == Model::Master128) {
+	else if (MachineType == Model::Master128) {
 		if (Address < 0xfc00) {
 			switch ((Address&0xf000)>>12) {
 			case 0:
@@ -789,9 +774,9 @@ void BeebWriteMem(int Address, unsigned char Value) {
 			case 5:
 			case 6:
 			case 7:
-				if ((!Sh_CPUX) && (!Sh_CPUE)) WholeRam[Address]=Value;
+				if (!Sh_CPUX && !Sh_CPUE) WholeRam[Address] = Value;
 				if (Sh_CPUX) ShadowRAM[Address]=Value;
-				if ((Sh_CPUE) && (!Sh_CPUX)) { 
+				if (Sh_CPUE && !Sh_CPUX) { 
 					if ((PrePC>=0xc000) && (PrePC<0xe000)) ShadowRAM[Address]=Value; else WholeRam[Address]=Value;
 				} 
 				break;
@@ -799,14 +784,14 @@ void BeebWriteMem(int Address, unsigned char Value) {
 				if (PRAM) { PrivateRAM[Address-0x8000]=Value; }
 				else {
 					if (RomWritable[ROMSEL]) Roms[ROMSEL][Address-0x8000]=Value;
-					else RomWriteThrough(Address, Value);
+					//else RomWriteThrough(Address, Value); // Not supported on Master
 				}
 				break;
 			case 9:
 			case 0xa:
 			case 0xb:
 				if (RomWritable[ROMSEL]) Roms[ROMSEL][Address-0x8000]=Value;
-				else RomWriteThrough(Address, Value);
+				//else RomWriteThrough(Address, Value); // Not supported on Master
 				break;
 			case 0xc:
 			case 0xd:
@@ -915,7 +900,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 	}
 	
 	//Rob: add econet
-	if (Address>=0xfeA0 && Address<0xfebf && (EconetEnabled) ) {
+	if (Address >= 0xfea0 && Address < 0xfebf && EconetEnabled ) {
 		WriteEconetRegister((Address & 3), Value);
 		return;
 	}
@@ -929,7 +914,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 	
 	if ((Address&~0xf)==0xfee0)
 	{
-		if (TorchTube) 
+		if (TubeType == Tube::TorchZ80) 
 			WriteTorchTubeFromHostSide(Address&0xf,Value);
 		else
 			WriteTubeFromHostSide(Address&7,Value);
@@ -940,14 +925,18 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		return;
 	}
 
-	if ((Address & ~0x3)==0xfc40) {
-		SCSIWrite((Address & 0x3),Value);
-		return;
-	}
+    if ((Address & ~0x3)==0xfc40) {
+        if (SCSIDriveEnabled) {
+            SCSIWrite((Address & 0x3),Value);
+            return;
+        }
+    }
 
     if ((Address & ~0x7)==0xfc40) {
-        IDEWrite((Address & 0x7),Value);
-        return;
+        if (IDEDriveEnabled) {
+            IDEWrite((Address & 0x7),Value);
+            return;
+        }
     }
 
     if (Address == 0xfc50) {
@@ -960,11 +949,11 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		return;
 	}
 	
-	if ((MachineType!= Model::Master128) && (Address==EDCAddr) && (!NativeFDC)) {
+	if (MachineType!= Model::Master128 && Address==EDCAddr && !NativeFDC) {
 		mainWin->SetDriveControl(Value);
 	}
 
-	if ((MachineType!= Model::Master128) && (Address>=EFDCAddr) && (Address<(EFDCAddr+4)) && (!NativeFDC)) {
+	if (MachineType!= Model::Master128 && Address>=EFDCAddr && Address<(EFDCAddr+4) && !NativeFDC) {
 		Write1770Register(Address-EFDCAddr,Value);
 	}
 	
