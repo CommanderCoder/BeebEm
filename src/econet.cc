@@ -1255,7 +1255,7 @@ bool EconetPoll_real(void) {		//return NMI status
                             // Read the packet
                             int sizRcvAdr = sizeof(RecvAddr);
                             if (confAUNmode) {
-                                RetVal = recvfrom(ListenSocket, (char *) EconetRx.raw, sizeof(EconetRx), 0, (struct sockaddr *)&RecvAddr, (unsigned int *) &sizRcvAdr);
+                                RetVal = recvfrom(ListenSocket, (char *) EconetRx.raw, sizeof(EconetRx.buff), 0, (struct sockaddr *)&RecvAddr, (unsigned int *) &sizRcvAdr);
                                 EconetRx.BytesInBuffer = RetVal;
                             } else {
                                 RetVal = recvfrom(ListenSocket, (char *) BeebRx.buff, sizeof(BeebRx.buff), 0, (sockaddr *) &RecvAddr, (unsigned int *) &sizRcvAdr);
