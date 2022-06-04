@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8B2705EC27E5F71E00AFA82E /* ide.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B2705EB27E5F71D00AFA82E /* ide.cc */; };
 		8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B7A6B8D27707721002576FC /* Master512CoPro.cc */; };
+		8B92DC2A283FA427007E9581 /* AUNMap in Resources */ = {isa = PBXBuildFile; fileRef = 8B92DC29283FA427007E9581 /* AUNMap */; };
 		8BC8CADA2770B24E006F0FAD /* log.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8BC8CAD92770B24E006F0FAD /* log.cc */; };
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
 		DC41118225A2222A00E59712 /* Bugs.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC41118125A2222A00E59712 /* Bugs.rtf */; };
@@ -91,8 +92,10 @@
 		8B2705EB27E5F71D00AFA82E /* ide.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ide.cc; path = src/ide.cc; sourceTree = "<group>"; };
 		8B2705EE27E5F74700AFA82E /* ide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ide.h; path = src/ide.h; sourceTree = "<group>"; };
 		8B31157E276E9AAA00B23CD7 /* model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = model.h; path = src/model.h; sourceTree = "<group>"; };
+		8B54204A2844224D00E50140 /* BeebEm5.profdata */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeebEm5.profdata; sourceTree = "<group>"; };
 		8B7A6B8C27707709002576FC /* Master512CoPro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Master512CoPro.h; path = src/Master512CoPro.h; sourceTree = "<group>"; };
 		8B7A6B8D27707721002576FC /* Master512CoPro.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Master512CoPro.cc; path = src/Master512CoPro.cc; sourceTree = "<group>"; };
+		8B92DC29283FA427007E9581 /* AUNMap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AUNMap; sourceTree = "<group>"; };
 		8BC8CAD92770B24E006F0FAD /* log.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cc; path = src/log.cc; sourceTree = "<group>"; };
 		8BC8CADC2770B25C006F0FAD /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = src/log.h; sourceTree = "<group>"; };
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
@@ -240,6 +243,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8B5420492844224D00E50140 /* OptimizationProfiles */ = {
+			isa = PBXGroup;
+			children = (
+				8B54204A2844224D00E50140 /* BeebEm5.profdata */,
+			);
+			path = OptimizationProfiles;
+			sourceTree = "<group>";
+		};
 		DC6A476724A54540007E4276 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -292,6 +303,7 @@
 				DCCCC29D24A338ED00840082 /* BeebEm5 */,
 				DCCCC29C24A338ED00840082 /* Products */,
 				DC6A476724A54540007E4276 /* Frameworks */,
+				8B5420492844224D00E50140 /* OptimizationProfiles */,
 			);
 			sourceTree = "<group>";
 		};
@@ -327,6 +339,7 @@
 		DCCCC2B024A338FB00840082 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8B92DC29283FA427007E9581 /* AUNMap */,
 				DC41118425A226BC00E59712 /* diskimg */,
 				DCD5DC1A2565E7EF00FB151D /* beebstate */,
 				DCD5DC172565E7CC00FB151D /* BeebFile */,
@@ -531,6 +544,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B92DC2A283FA427007E9581 /* AUNMap in Resources */,
 				DCD5DC432565EE9700FB151D /* teletext.fnt in Resources */,
 				DCD5DC342565E8E000FB151D /* Econet.cfg in Resources */,
 				DCD5DC352565E8E000FB151D /* Phroms.cfg in Resources */,
@@ -689,7 +703,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -745,6 +759,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -757,6 +772,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = BeebEm5/BeebEm5.entitlements;
 				CODE_SIGN_IDENTITY = "-";
@@ -786,6 +802,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = BeebEm5/BeebEm5.entitlements;
 				CODE_SIGN_IDENTITY = "-";
