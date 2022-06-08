@@ -217,9 +217,10 @@ static EthernetPacket EconetTx;
 
 struct EconetPacket
 {
-    unsigned char buff[ETHERNET_BUFFER_SIZE + 12];
-    LongEconetPacket eh;
-    // llvm union workaround
+    union {
+        LongEconetPacket eh;
+        unsigned char buff[ETHERNET_BUFFER_SIZE + 12];
+    };
     volatile unsigned int Pointer;
     volatile unsigned int BytesInBuffer;
 };
