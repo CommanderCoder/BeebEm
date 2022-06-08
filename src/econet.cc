@@ -43,6 +43,7 @@
 #include "debug.h"
 #include "6502core.h"
 #include "sysvia.h"
+#include "video.h"
 
 // Configuration Options.
 // These, among others, are overridden in econet.cfg (see ReadNetwork() )
@@ -183,21 +184,30 @@ const int ETHERNET_BUFFER_SIZE = 65536;
 
 struct EthernetPacket
 {
-    union {
-        unsigned char raw[8];
-        AUNHeader ah;
-    } ;
-    union {
-        unsigned char buff[ETHERNET_BUFFER_SIZE];
-        ShorEeconetHeader eh;
-    };
+    // Union does not seem to work in LLVM it justs creates a struct instead with each
+    // variable concatenated to the end of the previous instead of reusing the same space
+    // so lets just assume raw and buff and then populate the ah and eh seperately (if we can)
+    unsigned char raw[8];
+    unsigned char buff[ETHERNET_BUFFER_SIZE];
+
     volatile unsigned int Pointer;
     volatile unsigned int BytesInBuffer;
     unsigned long inet_addr;
     unsigned int port;
     unsigned int deststn;
     unsigned int destnet;
+    AUNHeader ah;
+    ShorEeconetHeader eh;
 };
+
+// Little Endian
+
+// 0A0B0C0D
+//  | | | |
+//  | | | +-> 0D   a
+//  | | +---> 0C   a+1 
+//  | +-----> 0B   a+2 
+//  +-------> 0A   a+3
 
 // buffers used to construct packets for sending out via UDP
 static EthernetPacket EconetRx;
@@ -207,10 +217,9 @@ static EthernetPacket EconetTx;
 
 struct EconetPacket
 {
-    union {
-        LongEconetPacket eh;
-        unsigned char buff[ETHERNET_BUFFER_SIZE + 12];
-    };
+    unsigned char buff[ETHERNET_BUFFER_SIZE + 12];
+    LongEconetPacket eh;
+    // llvm union workaround
     volatile unsigned int Pointer;
     volatile unsigned int BytesInBuffer;
 };
@@ -1084,6 +1093,14 @@ bool EconetPoll_real(void) {		//return NMI status
                                 EconetTx.ah.port = (unsigned int) (BeebTx.eh.port);
                                 EconetTx.ah.pad = 0;
                                 EconetTx.ah.handle = (ec_sequence+=4);
+                                // LLVM workaround
+                                EconetTx.raw[1] = EconetTx.ah.port;
+                                EconetTx.raw[2] = EconetTx.ah.cb;
+                                EconetTx.raw[3] = EconetTx.ah.pad;
+                                EconetTx.raw[4] = (unsigned int) EconetTx.ah.handle & 0x000000ff;
+                                EconetTx.raw[5] = (unsigned int) EconetTx.ah.handle & 0x0000ff00; 
+                                EconetTx.raw[6] = (unsigned int) EconetTx.ah.handle & 0x00ff0000;
+                                EconetTx.raw[7] = (unsigned int) EconetTx.ah.handle & 0xff000000;
 
                                 EconetTx.destnet = BeebTx.eh.destnet | outmask; //30JUN
                                 EconetTx.deststn = BeebTx.eh.deststn;
@@ -1097,18 +1114,24 @@ bool EconetPoll_real(void) {		//return NMI status
 
                                 if (EconetTx.deststn == 255 || EconetTx.deststn == 0) {
                                     EconetTx.ah.type = AUNType::Broadcast;
+                                    // llvm workaround
+                                    EconetTx.raw[0] = (unsigned int) EconetTx.ah.type;
                                     fourwaystage = FourWayStage::WaitForIdle; // no response to broadcasts...
                                     if (DebugEnabled) DebugDisplayTrace(DEBUG_ECONET, true, "Econet: Set FWS_WAIT4IDLE (broadcast snt)");
                                     SendMe = true; // send packet ...
                                     SendLen = sizeof(EconetTx.ah) + 8;
                                 } else if (EconetTx.ah.port == 0 ) {
                                     EconetTx.ah.type = AUNType::Immediate;
+                                    // llvm workaround
+                                    EconetTx.raw[0] = (unsigned int) EconetTx.ah.type;
                                     fourwaystage = FourWayStage::ImmediateSent;
                                     if (DebugEnabled) DebugDisplayTrace(DEBUG_ECONET, true, "Econet: Set FWS_IMMSENT");
                                     SendMe = true; // send packet ...
                                     SendLen = sizeof(EconetTx.ah) + EconetTx.Pointer;
                                 } else {
                                     EconetTx.ah.type = AUNType::Unicast;
+                                    // llvm workaround
+                                    EconetTx.raw[0] = (unsigned int) EconetTx.ah.type;
                                     fourwaystage = FourWayStage::ScoutSent;
                                     if (DebugEnabled) DebugDisplayTrace(DEBUG_ECONET, true, "Econet: Set FWS_SCOUTSENT");
                                     // dont send anything but set wait anyway
@@ -1133,6 +1156,15 @@ bool EconetPoll_real(void) {		//return NMI status
                                 SendLen = sizeof(EconetRx.ah);
                                 EconetTx.ah = EconetRx.ah;
                                 EconetTx.ah.type = AUNType::Ack;
+                                // llvm workaround
+                                EconetTx.raw[0] = (unsigned int) EconetTx.ah.type;
+                                EconetTx.raw[1] = EconetTx.ah.port;
+                                EconetTx.raw[2] = EconetTx.ah.cb;
+                                EconetTx.raw[3] = EconetTx.ah.pad;
+                                EconetTx.raw[4] = (unsigned int) EconetTx.ah.handle & 0x000000ff;
+                                EconetTx.raw[5] = (unsigned int) EconetTx.ah.handle & 0x0000ff00;
+                                EconetTx.raw[6] = (unsigned int) EconetTx.ah.handle & 0x00ff0000;
+                                EconetTx.raw[7] = (unsigned int) EconetTx.ah.handle & 0xff000000;
                                 SendMe = true;
                                 /*                            if (sendto(SendSocket, (char *) &EconetTx.ah, SendLen, 0, 
                                                               (SOCKADDR *) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR) {
@@ -1159,6 +1191,15 @@ bool EconetPoll_real(void) {		//return NMI status
                                 EconetTx.Pointer = j;
                                 EconetTx.ah = EconetRx.ah;
                                 EconetTx.ah.type = AUNType::ImmReply;
+                                // llvm workaround
+                                EconetTx.raw[0] = (unsigned int) EconetTx.ah.type;
+                                EconetTx.raw[1] = EconetTx.ah.port;
+                                EconetTx.raw[2] = EconetTx.ah.cb;
+                                EconetTx.raw[3] = EconetTx.ah.pad;
+                                EconetTx.raw[4] = (unsigned int) EconetTx.ah.handle & 0x000000ff;
+                                EconetTx.raw[5] = (unsigned int) EconetTx.ah.handle & 0x0000ff00;
+                                EconetTx.raw[6] = (unsigned int) EconetTx.ah.handle & 0x00ff0000;
+                                EconetTx.raw[7] = (unsigned int) EconetTx.ah.handle & 0xff000000;
                                 SendMe = true;
                                 SendLen = sizeof(EconetTx.ah) + EconetTx.Pointer;
                                 break;
@@ -1256,7 +1297,14 @@ bool EconetPoll_real(void) {		//return NMI status
                             int sizRcvAdr = sizeof(RecvAddr);
                             if (confAUNmode) {
                                 RetVal = recvfrom(ListenSocket, (char *) EconetRx.raw, sizeof(EconetRx.buff), 0, (struct sockaddr *)&RecvAddr, (unsigned int *) &sizRcvAdr);
+                                fprintf(stderr, "EconetRx: bytes in buffer will be %d\n", RetVal);
                                 EconetRx.BytesInBuffer = RetVal;
+                                // llvm workaround
+                                EconetRx.ah.type = (AUNType) EconetRx.raw[0];
+                                EconetRx.ah.port = EconetRx.raw[1];
+                                EconetRx.ah.cb = EconetRx.raw[2];
+                                EconetRx.ah.pad = EconetRx.raw[3];
+                                EconetRx.ah.handle = EconetRx.raw[4] | EconetRx.raw[5] << 8 | EconetRx.raw[6] << 16 | EconetRx.raw[7] << 24; 
                             } else {
                                 RetVal = recvfrom(ListenSocket, (char *) BeebRx.buff, sizeof(BeebRx.buff), 0, (sockaddr *) &RecvAddr, (unsigned int *) &sizRcvAdr);
                             }
@@ -1389,7 +1437,7 @@ bool EconetPoll_real(void) {		//return NMI status
                                                 // BeebRx.eh.destnet = EconetRx.eh.destnet & inmask ; // 30jun was 0
 
                                                 j=4;
-                                                for (unsigned int i=0; i<RetVal-sizeof(EconetRx.ah); i++) {
+                                                for (unsigned int i=0; i<sizeof(EconetRx.ah)-RetVal; i++) {
                                                     BeebRx.buff[j] = EconetRx.buff[i];
                                                     j++;
                                                 }
@@ -1484,8 +1532,11 @@ bool EconetPoll_real(void) {		//return NMI status
 
                                 BeebRx.eh.srcstn = EconetTx.deststn;  //30jun dont think this is right..
                                 BeebRx.eh.srcnet = EconetTx.destnet & inmask;
+                                fprintf(stderr, "EconetRx: Bytes in Buffer %d, size %lu\n", EconetRx.BytesInBuffer, sizeof(EconetRx.ah));
                                 j=4;
-                                for (unsigned int i=0; i<EconetRx.BytesInBuffer - sizeof(EconetRx.ah); i++) {
+                                //for (unsigned int i=0; i< EconetRx.BytesInBuffer - sizeof(EconetRx.ah); i++) {
+                                for (unsigned int i=0; i< EconetRx.BytesInBuffer -8 ; i++) {   // 8 in place of size of EconetRx.ah
+                                    // Crash here
                                     BeebRx.buff[j] = EconetRx.buff[i];
                                     j++;
                                 }
@@ -1494,6 +1545,8 @@ bool EconetPoll_real(void) {		//return NMI status
                                 fourwaystage = FourWayStage::DataReceived;
                                 if (DebugEnabled) DebugDisplayTrace(DEBUG_ECONET, true, "Econet: Set FWS_DATARCVD");
                                 break;
+                            default:
+                            break;    
                         }
                     }
                 }
