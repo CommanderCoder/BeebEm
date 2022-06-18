@@ -2485,7 +2485,7 @@ int LEDByte;
 	TorchTube = GetDictNum(dict, CFSTR("TorchTube"), 0);
 	ArmTube = GetDictNum(dict, CFSTR("ArmTube"), 0);
 	AcornZ80 = GetDictNum(dict, CFSTR("AcornZ80"), 0);
-	OpCodes = GetDictNum(dict, CFSTR("OpCodes"), 2);
+	OpCodes = GetDictNum(dict, CFSTR("OpCodes"), 3);
 	BHardware = GetDictNum(dict, CFSTR("BasicHardware"), 0);
 	THalfMode = GetDictNum(dict, CFSTR("TeletextHalfMode"), 0);
 	SBSize = GetDictNum(dict, CFSTR("SoundBlockSize"), 0);

@@ -98,5 +98,7 @@ void AdjustForIOWrite(void);
 int i186_execute(int num_cycles);
 extern int SwitchOnCycles; // Reset delay
 extern int OpCodes;
-extern int BHardware;
+extern bool BHardware;
+
+void WriteInstructionCounts(const char* Filename);
 #endif
