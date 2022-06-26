@@ -116,10 +116,10 @@ enum class AUNType : unsigned char {
 struct AUNHeader
 {
     AUNType type; // AUN magic protocol byte
-    unsigned char port;        // dest port
-    unsigned char cb;        // flag
+    unsigned char port;       // dest port
+    unsigned char cb;         // flag
     unsigned char pad;        // retrans
-    unsigned long handle;    // 4 byte sequence little-endian.
+    uint32_t handle;          // 4 byte sequence little-endian.
 };
 
 // #define EC_PORT_FS 0x99
@@ -218,11 +218,13 @@ static EthernetPacket EconetTx;
 struct EconetPacket
 {
     union {
-        LongEconetPacket eh;
-        unsigned char buff[ETHERNET_BUFFER_SIZE + 12];
+    LongEconetPacket eh;
+    unsigned char buff[ETHERNET_BUFFER_SIZE + 12];
     };
     volatile unsigned int Pointer;
     volatile unsigned int BytesInBuffer;
+
+
 };
 
 static EconetPacket BeebTx;
@@ -1120,7 +1122,7 @@ bool EconetPoll_real(void) {		//return NMI status
                                     fourwaystage = FourWayStage::WaitForIdle; // no response to broadcasts...
                                     if (DebugEnabled) DebugDisplayTrace(DEBUG_ECONET, true, "Econet: Set FWS_WAIT4IDLE (broadcast snt)");
                                     SendMe = true; // send packet ...
-                                    SendLen = sizeof(EconetTx.ah) + 8;
+                                    SendLen = sizeof(EconetTx.ah);
                                 } else if (EconetTx.ah.port == 0 ) {
                                     EconetTx.ah.type = AUNType::Immediate;
                                     // llvm workaround
@@ -1298,7 +1300,8 @@ bool EconetPoll_real(void) {		//return NMI status
                             int sizRcvAdr = sizeof(RecvAddr);
                             if (confAUNmode) {
                                 RetVal = recvfrom(ListenSocket, (char *) EconetRx.raw, sizeof(EconetRx.buff), 0, (struct sockaddr *)&RecvAddr, (unsigned int *) &sizRcvAdr);
-                                fprintf(stderr, "EconetRx: bytes in buffer will be %d\n", RetVal);
+                                fprintf(stderr, "E
+                                        conetRx: bytes in buffer will be %d\n", RetVal);
                                 EconetRx.BytesInBuffer = RetVal;
                                 // llvm workaround
                                 EconetRx.ah.type = (AUNType) EconetRx.raw[0];
@@ -1381,16 +1384,25 @@ bool EconetPoll_real(void) {		//return NMI status
 
                                                 BeebRx.eh.deststn = EconetStationNumber; // must be for us.
                                                 BeebRx.eh.destnet = 0;
-                                                // BeebRx.eh.deststn = EconetRx.eh.deststn ; // 30jun was EconetStationNumber; // must be for us.
-                                                // BeebRx.eh.destnet = EconetRx.eh.destnet & inmask ; // 30jun was 0
+                                                // llvm workaround
+//                                                BeebRx.buff[2] = BeebRx.eh.srcstn;
+//                                                BeebRx.buff[3] = BeebRx.eh.srcnet;
+//                                                BeebRx.buff[0] = BeebRx.eh.deststn;
+//                                                BeebRx.buff[1] = BeebRx.eh.destnet;
 
                                                 BeebRx.eh.cb = EconetRx.ah.cb | 128;
                                                 BeebRx.eh.port = EconetRx.ah.port;
+                                                // llvm workaround
+//                                                BeebRx.buff[4] = BeebRx.eh.cb;
+//                                                BeebRx.buff[5] = BeebRx.eh.port;
                                                 switch (EconetRx.ah.type) 
                                                 {
                                                     case AUNType::Broadcast:
                                                         BeebRx.eh.deststn = 255;    // wasn't just for us..
                                                         BeebRx.eh.destnet = 0;        // TODO check if not net 0.. does it make a difference?
+                                                        // llvm workaround
+//                                                        BeebRx.buff[0] = BeebRx.eh.deststn;
+//                                                        BeebRx.buff[1] = BeebRx.eh.destnet;
                                                         j=6;
                                                         for (unsigned int i=0; i<RetVal-sizeof(EconetRx.ah); i++) {
                                                             BeebRx.buff[j] = EconetRx.buff[i];
@@ -1434,11 +1446,14 @@ bool EconetPoll_real(void) {		//return NMI status
                                                 BeebRx.eh.srcnet = network[hostno].network;
                                                 BeebRx.eh.deststn = EconetStationNumber; // must be for us.
                                                 BeebRx.eh.destnet = 0;
-                                                // BeebRx.eh.deststn = EconetRx.eh.deststn ; // 30jun was EconetStationNumber; // must be for us.
-                                                // BeebRx.eh.destnet = EconetRx.eh.destnet & inmask ; // 30jun was 0
+                                                // llvm workaround 
+//                                                BeebRx.buff[2] = BeebRx.eh.srcstn;
+//                                                BeebRx.buff[3] = BeebRx.eh.srcnet;
+//                                                BeebRx.buff[0] = BeebRx.eh.deststn;
+//                                                BeebRx.buff[1] = BeebRx.eh.destnet;
 
                                                 j=4;
-                                                for (unsigned int i=0; i<sizeof(EconetRx.ah)-RetVal; i++) {
+                                                for (unsigned int i=0; i<RetVal - sizeof(EconetRx.ah); i++) {
                                                     BeebRx.buff[j] = EconetRx.buff[i];
                                                     j++;
                                                 }
@@ -1458,8 +1473,11 @@ bool EconetPoll_real(void) {		//return NMI status
                                                     BeebRx.eh.srcnet = network[hostno].network;
                                                     BeebRx.eh.deststn = EconetStationNumber; // must be for us.
                                                     BeebRx.eh.destnet = 0;
-                                                    // BeebRx.eh.deststn = EconetRx.eh.deststn ; // 30jun was EconetStationNumber; // must be for us.
-                                                    // BeebRx.eh.destnet = EconetRx.eh.destnet & inmask ; // 30jun was 0
+                                                    // llvm workaround 
+//                                                    BeebRx.buff[2] = BeebRx.eh.srcstn;
+//                                                    BeebRx.buff[3] = BeebRx.eh.srcnet;
+//                                                    BeebRx.buff[0] = BeebRx.eh.deststn;
+//                                                    BeebRx.buff[1] = BeebRx.eh.destnet;
 
                                                     BeebRx.BytesInBuffer = 4;
                                                     BeebRx.Pointer = 0;
@@ -1518,6 +1536,12 @@ bool EconetPoll_real(void) {		//return NMI status
                                 BeebRx.eh.srcstn = EconetTx.deststn; // use scout's dest as source of ack.
                                 BeebRx.eh.srcnet = EconetTx.destnet; // & inmask; //30jun
 
+                                // llvm workaround 
+//                                BeebRx.buff[2] = BeebRx.eh.srcstn;
+//                                BeebRx.buff[3] = BeebRx.eh.srcnet;
+//                                BeebRx.buff[0] = BeebRx.eh.deststn;
+//                                BeebRx.buff[1] = BeebRx.eh.destnet;
+
                                 BeebRx.BytesInBuffer = 4;
                                 BeebRx.Pointer = 0;
                                 fourwaystage = FourWayStage::ScoutAckReceived;
@@ -1533,10 +1557,17 @@ bool EconetPoll_real(void) {		//return NMI status
 
                                 BeebRx.eh.srcstn = EconetTx.deststn;  //30jun dont think this is right..
                                 BeebRx.eh.srcnet = EconetTx.destnet & inmask;
+
+                                 // llvm workaround 
+//                                BeebRx.buff[2] = BeebRx.eh.srcstn;
+//                                BeebRx.buff[3] = BeebRx.eh.srcnet;
+//                                BeebRx.buff[0] = BeebRx.eh.deststn;
+//                                BeebRx.buff[1] = BeebRx.eh.destnet;
+
                                 fprintf(stderr, "EconetRx: Bytes in Buffer %d, size %lu\n", EconetRx.BytesInBuffer, sizeof(EconetRx.ah));
                                 j=4;
                                 //for (unsigned int i=0; i< EconetRx.BytesInBuffer - sizeof(EconetRx.ah); i++) {
-                                for (unsigned int i=0; i< EconetRx.BytesInBuffer -8 ; i++) {   // 8 in place of size of EconetRx.ah
+                                for (unsigned int i=0; i< EconetRx.BytesInBuffer; i++) {   // 8 in place of size of EconetRx.ah
                                     // Crash here
                                     BeebRx.buff[j] = EconetRx.buff[i];
                                     j++;
