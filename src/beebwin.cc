@@ -3234,10 +3234,12 @@ void BeebWin::DisplayTiming(void)
 CFStringRef pTitle;
     #endif
 
+    char MachineName[4][50] = {"BBC Model B","BBC Model B + Integra-B","BBC Model B Plus","BBC Master 128"};
+
 	if (m_ShowSpeedAndFPS && !m_isFullScreen)
 	{
-		sprintf(m_szTitle, "%s  Speed: %2.2f  fps: %2d",
-				WindowTitle, m_RelativeSpeed, (int)m_FramesPerSecond);
+		sprintf(m_szTitle, "BeebEm - %s emulator - Speed: %2.2f - fps: %2d",
+                MachineName[MachineType], m_RelativeSpeed, (int)m_FramesPerSecond);
 
 #if 0 //ACH - title (DONE)
 		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, m_szTitle, kCFStringEncodingASCII);
