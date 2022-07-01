@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19529"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -1431,16 +1431,16 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Z9c-aS-8PV">
-                                <rect key="frame" x="10" y="5" width="248" height="430"/>
+                                <rect key="frame" x="14" y="5" width="240" height="430"/>
                                 <subviews>
                                     <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9I4-Yf-xHc">
                                         <rect key="frame" x="0.0" y="36" width="240" height="394"/>
                                         <clipView key="contentView" id="bxb-nq-r68">
-                                            <rect key="frame" x="1" y="0.0" width="238" height="393"/>
+                                            <rect key="frame" x="1" y="1" width="238" height="392"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" rowSizeStyle="automatic" headerView="Ghv-5L-cAi" viewBased="YES" id="o6K-RA-peU">
-                                                    <rect key="frame" x="0.0" y="0.0" width="238" height="368"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="238" height="367"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1459,11 +1459,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="upp-7c-lhu">
-                                                                    <rect key="frame" x="1" y="1" width="100" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="105" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="k3C-f7-Sk5">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="100" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="105" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="DJP-ja-yWj">
                                                                                 <font key="font" metaFont="system"/>
@@ -1491,7 +1491,7 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="eE8-AA-waO">
-                                                                    <rect key="frame" x="104" y="1" width="47" height="17"/>
+                                                                    <rect key="frame" x="109" y="1" width="47" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5fe-H1-wPI">
@@ -1510,7 +1510,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="LENG" width="64" minWidth="10" maxWidth="3.4028234663852886e+38" id="Yf9-S8-ZYi" userLabel="Length">
+                                                        <tableColumn identifier="LENG" width="35" minWidth="10" maxWidth="3.4028234663852886e+38" id="Yf9-S8-ZYi" userLabel="Length">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Length">
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1523,11 +1523,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="EWX-Zl-Tw2">
-                                                                    <rect key="frame" x="154" y="1" width="64" height="17"/>
+                                                                    <rect key="frame" x="159" y="1" width="39" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b9D-R5-OPq">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="64" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="39" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="EtW-RM-fZP">
                                                                                 <font key="font" metaFont="system"/>
@@ -1554,19 +1554,19 @@
                                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <tableHeaderView key="headerView" id="Ghv-5L-cAi">
+                                        <tableHeaderView key="headerView" wantsLayer="YES" id="Ghv-5L-cAi">
                                             <rect key="frame" x="0.0" y="0.0" width="238" height="25"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="47" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eVa-Xz-rUt">
-                                        <rect key="frame" x="0.0" y="0.0" width="248" height="36"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="224" height="36"/>
                                         <subviews>
                                             <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="3" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4ZH-xh-W8A">
-                                                <rect key="frame" x="0.0" y="5" width="248" height="26"/>
+                                                <rect key="frame" x="0.0" y="5" width="224" height="26"/>
                                                 <subviews>
                                                     <button identifier="tppl" verticalHuggingPriority="750" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="oKo-CY-Tv1">
-                                                        <rect key="frame" x="-6" y="-2" width="64" height="32"/>
+                                                        <rect key="frame" x="-7" y="-1" width="66" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="52" id="ghg-jX-KLa"/>
                                                         </constraints>
@@ -1579,7 +1579,7 @@
                                                         </connections>
                                                     </button>
                                                     <button identifier="tpst" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wl4-rq-D1Q">
-                                                        <rect key="frame" x="49" y="-2" width="69" height="32"/>
+                                                        <rect key="frame" x="48" y="-1" width="63" height="32"/>
                                                         <buttonCell key="cell" type="push" title="Stop" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Y4J-fH-eGg">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
@@ -1589,7 +1589,7 @@
                                                         </connections>
                                                     </button>
                                                     <button identifier="tpej" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tv8-we-Rzw">
-                                                        <rect key="frame" x="109" y="-2" width="71" height="32"/>
+                                                        <rect key="frame" x="100" y="-1" width="65" height="32"/>
                                                         <buttonCell key="cell" type="push" title="Eject" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CTI-xm-flE">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
@@ -1599,7 +1599,7 @@
                                                         </connections>
                                                     </button>
                                                     <button identifier="tprc" verticalHuggingPriority="750" horizontalCompressionResistancePriority="751" translatesAutoresizingMaskIntoConstraints="NO" id="9m2-F2-WDy">
-                                                        <rect key="frame" x="171" y="-2" width="83" height="32"/>
+                                                        <rect key="frame" x="154" y="-1" width="77" height="32"/>
                                                         <buttonCell key="cell" type="push" title="Record" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="216-dx-mJV">
                                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                             <font key="font" metaFont="system"/>
@@ -1744,83 +1744,83 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <stackView distribution="fillEqually" orientation="vertical" alignment="centerX" spacing="4" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qLV-Ji-3mE">
-                                <rect key="frame" x="20" y="98" width="550" height="164"/>
+                                <rect key="frame" x="20" y="110" width="550" height="152"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hb8-TX-XaB" userLabel="row1">
-                                        <rect key="frame" x="99" y="140" width="352" height="24"/>
+                                        <rect key="frame" x="99" y="130" width="352" height="22"/>
                                         <subviews>
                                             <button identifier="F0" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="I5p-NM-mnQ">
-                                                <rect key="frame" x="0.0" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f0" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="OAp-xE-czk">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F1" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gMJ-V5-JHg">
-                                                <rect key="frame" x="31" y="0.0" width="21" height="24"/>
+                                                <rect key="frame" x="31" y="0.0" width="21" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f1" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sgh-0G-rnI">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F2" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fGv-TY-GrM">
-                                                <rect key="frame" x="60" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="60" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f2" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ctd-Bk-u0H">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F3" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dhO-pL-Uz4">
-                                                <rect key="frame" x="91" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="91" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f3" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rcJ-sz-9tW">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F4" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hE4-TB-kfF">
-                                                <rect key="frame" x="122" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="122" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f4" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6Gt-ua-0Me">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F5" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pm4-DO-CET">
-                                                <rect key="frame" x="153" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="153" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f5" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Uuk-WZ-RdY">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F6  " verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ZCv-pe-r9b">
-                                                <rect key="frame" x="184" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="184" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f6" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="l8y-zK-ewJ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F7  " verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="blC-dl-azp">
-                                                <rect key="frame" x="215" y="0.0" width="22" height="24"/>
+                                                <rect key="frame" x="215" y="0.0" width="22" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f7" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wue-ge-RU5">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F8  " verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dvs-sn-Hmt">
-                                                <rect key="frame" x="245" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="245" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f8" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="hDP-oN-o9j">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F9  " verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rjW-Jo-eOe">
-                                                <rect key="frame" x="276" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="276" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="f9" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3kV-Xl-dVQ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="BRK" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="J19-WD-xfD">
-                                                <rect key="frame" x="307" y="0.0" width="45" height="24"/>
+                                                <rect key="frame" x="307" y="0.0" width="45" height="22"/>
                                                 <buttonCell key="cell" type="square" title="Break" bezelStyle="shadowlessSquare" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cga-m7-bfl">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -1856,115 +1856,115 @@
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OHb-fU-fN8" userLabel="row2">
-                                        <rect key="frame" x="0.0" y="112" width="550" height="24"/>
+                                        <rect key="frame" x="0.0" y="104" width="550" height="22"/>
                                         <subviews>
                                             <button identifier="ESC" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rvm-hJ-CGc">
-                                                <rect key="frame" x="0.0" y="0.0" width="36" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="36" height="22"/>
                                                 <buttonCell key="cell" type="square" title="ESC" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="XuJ-DS-JjT">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="1" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="lvS-4a-9e9">
-                                                <rect key="frame" x="42" y="0.0" width="24" height="24"/>
+                                                <rect key="frame" x="42" y="0.0" width="24" height="22"/>
                                                 <buttonCell key="cell" type="square" title="1 !" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Gnv-Mj-Ozo">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="2" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XNc-fl-GLS">
-                                                <rect key="frame" x="72" y="0.0" width="27" height="24"/>
+                                                <rect key="frame" x="72" y="0.0" width="28" height="22"/>
                                                 <buttonCell key="cell" type="square" title="2 &quot;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oh8-Ig-HR1">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="3" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="a9y-xc-ime">
-                                                <rect key="frame" x="105" y="0.0" width="30" height="24"/>
+                                                <rect key="frame" x="106" y="0.0" width="30" height="22"/>
                                                 <buttonCell key="cell" type="square" title="3 #" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="F3M-b8-51K">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="4" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SBb-Jz-j0w">
-                                                <rect key="frame" x="141" y="0.0" width="31" height="24"/>
+                                                <rect key="frame" x="142" y="0.0" width="30" height="22"/>
                                                 <buttonCell key="cell" type="square" title="4 $" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="NHO-8B-rFZ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="5" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DQm-C4-yEj">
-                                                <rect key="frame" x="178" y="0.0" width="33" height="24"/>
+                                                <rect key="frame" x="178" y="0.0" width="34" height="22"/>
                                                 <buttonCell key="cell" type="square" title="5 %" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sbE-3E-mbA">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="6" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DSx-em-0mi">
-                                                <rect key="frame" x="217" y="0.0" width="31" height="24"/>
+                                                <rect key="frame" x="218" y="0.0" width="31" height="22"/>
                                                 <buttonCell key="cell" type="square" title="6 &amp;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="t85-ij-3WQ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="7" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="can-qz-JEm">
-                                                <rect key="frame" x="254" y="0.0" width="25" height="24"/>
+                                                <rect key="frame" x="255" y="0.0" width="25" height="22"/>
                                                 <buttonCell key="cell" type="square" title="7 '" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="EiC-vy-l4e">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="8" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DPw-Ma-S0b">
-                                                <rect key="frame" x="285" y="0.0" width="27" height="24"/>
+                                                <rect key="frame" x="286" y="0.0" width="27" height="22"/>
                                                 <buttonCell key="cell" type="square" title="8 (" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="GyJ-l4-MFS">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="9" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="rgw-sa-unN">
-                                                <rect key="frame" x="318" y="0.0" width="27" height="24"/>
+                                                <rect key="frame" x="319" y="0.0" width="27" height="22"/>
                                                 <buttonCell key="cell" type="square" title="9 )" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="jV8-tc-ala">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="0" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hAd-lk-KPH">
-                                                <rect key="frame" x="351" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="352" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="0" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="EhU-56-U7N">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="-=" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BpA-dR-fM6">
-                                                <rect key="frame" x="376" y="0.0" width="29" height="24"/>
+                                                <rect key="frame" x="377" y="0.0" width="28" height="22"/>
                                                 <buttonCell key="cell" type="square" title="- =" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" identifier="-=" imageScaling="proportionallyDown" inset="2" id="kii-du-hsD">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="^~" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BWn-eS-Ba1">
-                                                <rect key="frame" x="411" y="0.0" width="28" height="24"/>
+                                                <rect key="frame" x="411" y="0.0" width="30" height="22"/>
                                                 <buttonCell key="cell" type="square" title="^ ~" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ByK-wv-r7U">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="\|  " verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QFk-xJ-gfg">
-                                                <rect key="frame" x="445" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="447" y="0.0" width="21" height="22"/>
                                                 <buttonCell key="cell" type="square" title="\ |" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qqq-62-osJ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="LFT" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IQT-0y-9Y5">
-                                                <rect key="frame" x="474" y="0.0" width="33" height="24"/>
+                                                <rect key="frame" x="474" y="0.0" width="33" height="22"/>
                                                 <buttonCell key="cell" type="square" title="LFT" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Qax-a4-BBm">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="RGT" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="U2O-fc-4iv">
-                                                <rect key="frame" x="513" y="0.0" width="37" height="24"/>
+                                                <rect key="frame" x="513" y="0.0" width="37" height="22"/>
                                                 <buttonCell key="cell" type="square" title="RGT" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Nsw-lr-3HS">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -2009,115 +2009,115 @@
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yef-dt-QWg" userLabel="row3">
-                                        <rect key="frame" x="52" y="84" width="447" height="24"/>
+                                        <rect key="frame" x="51" y="78" width="449" height="22"/>
                                         <subviews>
                                             <button identifier="TAB" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FHv-tz-2s8">
-                                                <rect key="frame" x="0.0" y="0.0" width="35" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="35" height="22"/>
                                                 <buttonCell key="cell" type="square" title="TAB" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rc7-xt-jq2">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="Q" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wKf-al-Lcu">
-                                                <rect key="frame" x="41" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="41" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="Q" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8xK-4E-6Vc">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="W" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aEO-1f-6hx">
-                                                <rect key="frame" x="67" y="0.0" width="23" height="24"/>
+                                                <rect key="frame" x="67" y="0.0" width="23" height="22"/>
                                                 <buttonCell key="cell" type="square" title="W" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ATz-b1-Lyw">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="E" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jlA-75-TTa">
-                                                <rect key="frame" x="96" y="0.0" width="18" height="24"/>
+                                                <rect key="frame" x="96" y="0.0" width="18" height="22"/>
                                                 <buttonCell key="cell" type="square" title="E" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="UqY-gO-rGt">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="R" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mEm-dk-ZRw">
-                                                <rect key="frame" x="120" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="120" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="R" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="S1M-go-vSS">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="T" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="RuH-yB-xZE">
-                                                <rect key="frame" x="145" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="145" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="T" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="4iU-br-RGT">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="Y" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="l8J-m9-Z36">
-                                                <rect key="frame" x="170" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="170" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="Y" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qhY-5w-abE">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="U" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wz1-b8-e2D">
-                                                <rect key="frame" x="195" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="195" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="U" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="T7k-yw-fFz">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="I" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NBV-Gq-OJq">
-                                                <rect key="frame" x="221" y="0.0" width="14" height="24"/>
+                                                <rect key="frame" x="221" y="0.0" width="14" height="22"/>
                                                 <buttonCell key="cell" type="square" title="I" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="kIW-10-HUh">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="O" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DE8-9a-47y">
-                                                <rect key="frame" x="241" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="241" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="O" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="u86-X6-nAC">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="P" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WVe-ht-9oF">
-                                                <rect key="frame" x="267" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="267" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="P" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="6iY-wD-yKe">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="@" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QPS-N5-xxh">
-                                                <rect key="frame" x="292" y="0.0" width="22" height="24"/>
+                                                <rect key="frame" x="292" y="0.0" width="22" height="22"/>
                                                 <buttonCell key="cell" type="square" title="@" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oYa-Xl-AMX">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="[{" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QUZ-SM-Ukc">
-                                                <rect key="frame" x="320" y="0.0" width="24" height="24"/>
+                                                <rect key="frame" x="320" y="0.0" width="24" height="22"/>
                                                 <buttonCell key="cell" type="square" title="[ {" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="a7i-UA-HUb">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="_£" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JjT-du-3Ja">
-                                                <rect key="frame" x="350" y="0.0" width="28" height="24"/>
+                                                <rect key="frame" x="350" y="0.0" width="30" height="22"/>
                                                 <buttonCell key="cell" type="square" title="_ £" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Hcg-Ih-bAt">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="UP" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HOS-Hf-8LZ">
-                                                <rect key="frame" x="384" y="0.0" width="28" height="24"/>
+                                                <rect key="frame" x="386" y="0.0" width="28" height="22"/>
                                                 <buttonCell key="cell" type="square" title="UP" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="JdD-1Q-5Se">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="DN" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6P7-wj-CGF">
-                                                <rect key="frame" x="418" y="0.0" width="29" height="24"/>
+                                                <rect key="frame" x="420" y="0.0" width="29" height="22"/>
                                                 <buttonCell key="cell" type="square" title="DN" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xh4-1b-bCa">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -2162,108 +2162,108 @@
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kmw-RP-mUX" userLabel="row4">
-                                        <rect key="frame" x="36" y="56" width="478" height="24"/>
+                                        <rect key="frame" x="36" y="52" width="478" height="22"/>
                                         <subviews>
                                             <button identifier="CAPS" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="w4M-wN-Azl">
-                                                <rect key="frame" x="0.0" y="0.0" width="45" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="45" height="22"/>
                                                 <buttonCell key="cell" type="square" title="CAPS" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5jz-wZ-ssF">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="CTRL" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="aIz-7p-mVS">
-                                                <rect key="frame" x="51" y="0.0" width="43" height="24"/>
+                                                <rect key="frame" x="51" y="0.0" width="43" height="22"/>
                                                 <buttonCell key="cell" type="square" title="CTRL" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oWS-q7-Kfz">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="A" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wie-4w-Lja">
-                                                <rect key="frame" x="100" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="100" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="A" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="YOP-2O-WN1">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="S" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="sra-bt-Hdz">
-                                                <rect key="frame" x="125" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="125" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="S" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dFH-zp-3hg">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="D" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fzr-bM-sEx">
-                                                <rect key="frame" x="150" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="150" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="D" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vwJ-og-FlV">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="F" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zRs-K1-bhz">
-                                                <rect key="frame" x="176" y="0.0" width="18" height="24"/>
+                                                <rect key="frame" x="176" y="0.0" width="18" height="22"/>
                                                 <buttonCell key="cell" type="square" title="F" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ghS-Xv-UwF">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="G" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bXh-Ml-bj2">
-                                                <rect key="frame" x="200" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="200" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="G" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="g6h-Sf-sGl">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="H" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dgK-gv-qmh">
-                                                <rect key="frame" x="226" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="226" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="H" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bNg-VL-zqM">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="J" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NUO-Cf-l7S">
-                                                <rect key="frame" x="252" y="0.0" width="17" height="24"/>
+                                                <rect key="frame" x="252" y="0.0" width="17" height="22"/>
                                                 <buttonCell key="cell" type="square" title="J" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="AQW-FV-vmo">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="K" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ckA-bS-jd3">
-                                                <rect key="frame" x="275" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="275" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="K" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="dem-1V-9rZ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="L" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IGz-oi-7Em">
-                                                <rect key="frame" x="300" y="0.0" width="18" height="24"/>
+                                                <rect key="frame" x="300" y="0.0" width="18" height="22"/>
                                                 <buttonCell key="cell" type="square" title="L" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="04X-kJ-mUg">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier=";+" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0By-yb-GaQ">
-                                                <rect key="frame" x="324" y="0.0" width="26" height="24"/>
+                                                <rect key="frame" x="324" y="0.0" width="26" height="22"/>
                                                 <buttonCell key="cell" type="square" title="; +" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="vwH-OG-stq">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier=":*" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fLe-In-I0F">
-                                                <rect key="frame" x="356" y="0.0" width="24" height="24"/>
+                                                <rect key="frame" x="356" y="0.0" width="24" height="22"/>
                                                 <buttonCell key="cell" type="square" title=": *" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Jep-Mc-84O">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="]}" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="eeF-67-Qqx">
-                                                <rect key="frame" x="386" y="0.0" width="24" height="24"/>
+                                                <rect key="frame" x="386" y="0.0" width="24" height="22"/>
                                                 <buttonCell key="cell" type="square" title="] }" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="fff-3I-KWr">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="RET" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="52a-cT-Yj8">
-                                                <rect key="frame" x="416" y="0.0" width="62" height="24"/>
+                                                <rect key="frame" x="416" y="0.0" width="62" height="22"/>
                                                 <buttonCell key="cell" type="square" title="RETURN" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sJR-b9-2qW">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -2306,108 +2306,108 @@
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HvN-Q2-xDS" userLabel="row5">
-                                        <rect key="frame" x="5" y="28" width="541" height="24"/>
+                                        <rect key="frame" x="5" y="26" width="541" height="22"/>
                                         <subviews>
                                             <button identifier="SLCK" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="cDu-01-vAc">
-                                                <rect key="frame" x="0.0" y="0.0" width="67" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="67" height="22"/>
                                                 <buttonCell key="cell" type="square" title="SHIFT LK" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="465-Hl-QyQ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="LSFT" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kQh-8G-ZVP">
-                                                <rect key="frame" x="73" y="0.0" width="47" height="24"/>
+                                                <rect key="frame" x="73" y="0.0" width="47" height="22"/>
                                                 <buttonCell key="cell" type="square" title="SHIFT" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="SBJ-Re-BRj">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="Z" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wuQ-RQ-jEW">
-                                                <rect key="frame" x="126" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="126" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="Z" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="1Sw-kk-zSf">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="X" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="od7-bM-rdd">
-                                                <rect key="frame" x="151" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="151" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="X" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ykw-Y6-cOd">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="C" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="211-pq-nzS">
-                                                <rect key="frame" x="176" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="176" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="C" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Sxv-Ou-fac">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="V" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="b6I-Yy-W0L">
-                                                <rect key="frame" x="202" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="202" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="V" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="rIY-gC-eSy">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="B" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Fp8-31-2gS">
-                                                <rect key="frame" x="227" y="0.0" width="19" height="24"/>
+                                                <rect key="frame" x="227" y="0.0" width="19" height="22"/>
                                                 <buttonCell key="cell" type="square" title="B" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="d8J-CD-EGf">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="N" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="d0p-lH-qO7">
-                                                <rect key="frame" x="252" y="0.0" width="20" height="24"/>
+                                                <rect key="frame" x="252" y="0.0" width="20" height="22"/>
                                                 <buttonCell key="cell" type="square" title="N" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="MUn-6O-NZe">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="M" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iIP-GG-vCi">
-                                                <rect key="frame" x="278" y="0.0" width="22" height="24"/>
+                                                <rect key="frame" x="278" y="0.0" width="22" height="22"/>
                                                 <buttonCell key="cell" type="square" title="M" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5EP-dZ-dgr">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier=",&lt;" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="N38-R0-UNJ">
-                                                <rect key="frame" x="306" y="0.0" width="26" height="24"/>
+                                                <rect key="frame" x="306" y="0.0" width="26" height="22"/>
                                                 <buttonCell key="cell" type="square" title=", &lt;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="BO8-Ja-ea4">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier=".&gt;" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WGi-lQ-vZ5">
-                                                <rect key="frame" x="338" y="0.0" width="26" height="24"/>
+                                                <rect key="frame" x="338" y="0.0" width="26" height="22"/>
                                                 <buttonCell key="cell" type="square" title=". &gt;" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="B7f-ha-xgs">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="/?" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PVm-hG-Kj0">
-                                                <rect key="frame" x="370" y="0.0" width="25" height="24"/>
+                                                <rect key="frame" x="370" y="0.0" width="25" height="22"/>
                                                 <buttonCell key="cell" type="square" title="/ ?" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3YN-d5-ImJ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="RSHT" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="jw4-Y2-Z7u">
-                                                <rect key="frame" x="401" y="0.0" width="47" height="24"/>
+                                                <rect key="frame" x="401" y="0.0" width="47" height="22"/>
                                                 <buttonCell key="cell" type="square" title="SHIFT" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="UJd-gv-TBu">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="DEL" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WsU-wd-KFg">
-                                                <rect key="frame" x="454" y="0.0" width="35" height="24"/>
+                                                <rect key="frame" x="454" y="0.0" width="35" height="22"/>
                                                 <buttonCell key="cell" type="square" title="DEL" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="53B-Aj-TJd">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
                                             <button identifier="COPY" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xZO-IC-3W0">
-                                                <rect key="frame" x="495" y="0.0" width="46" height="24"/>
+                                                <rect key="frame" x="495" y="0.0" width="46" height="22"/>
                                                 <buttonCell key="cell" type="square" title="COPY" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oqh-VC-TCH">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -2450,10 +2450,10 @@
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7KB-m9-H35" userLabel="row6">
-                                        <rect key="frame" x="242" y="0.0" width="67" height="24"/>
+                                        <rect key="frame" x="242" y="0.0" width="67" height="22"/>
                                         <subviews>
                                             <button identifier="SPC" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YkW-la-vwC" userLabel="Spacebar">
-                                                <rect key="frame" x="0.0" y="0.0" width="67" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="67" height="22"/>
                                                 <buttonCell key="cell" type="square" title="spacebar" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="QuS-S5-BSN">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -2573,34 +2573,34 @@ DQ
         <scene sceneID="hIz-AP-VOD">
             <objects>
                 <viewController id="5gI-5U-AMq" userLabel="BeebEm View Controller" customClass="BeebViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" misplaced="YES" id="ERx-hH-rdd">
-                        <rect key="frame" x="0.0" y="0.0" width="700" height="605"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <view key="view" id="ERx-hH-rdd">
+                        <rect key="frame" x="0.0" y="0.0" width="641" height="600"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <subviews>
-                            <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2kC-QC-Xw0" userLabel="KB">
-                                <rect key="frame" x="20" y="2" width="146" height="94"/>
+                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="25" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2kC-QC-Xw0" userLabel="KB">
+                                <rect key="frame" x="7" y="4" width="180" height="89"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="vertical" alignment="centerX" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I7R-gx-0rT" userLabel="cass">
-                                        <rect key="frame" x="0.0" y="0.0" width="58" height="94"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="58" height="89"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="7wS-dO-Plx" userLabel="Cass Motor Label">
-                                                <rect key="frame" x="-2" y="62" width="62" height="32"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="cassette motor" id="1Oe-DE-BhZ">
+                                            <textField verticalHuggingPriority="650" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="650" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="7wS-dO-Plx" userLabel="Cass Motor Label">
+                                                <rect key="frame" x="-2" y="57" width="62" height="32"/>
+                                                <textFieldCell key="cell" alignment="center" title="cassette motor" id="1Oe-DE-BhZ">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="6VH-RC-Gd2" userLabel="masterPowerOn">
-                                                <rect key="frame" x="5" y="22" width="49" height="32"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="power on" id="gP7-Ub-tHh" userLabel="power on">
+                                            <textField verticalHuggingPriority="650" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="650" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="6VH-RC-Gd2" userLabel="masterPowerOn">
+                                                <rect key="frame" x="5" y="17" width="49" height="32"/>
+                                                <textFieldCell key="cell" alignment="center" title="power on" id="gP7-Ub-tHh" userLabel="power on">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="motor" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="NIz-pI-Kem" userLabel="motor">
-                                                <rect key="frame" x="22" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="22" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSFollowLinkFreestandingTemplate" id="ZYW-gY-djj"/>
                                                 <color key="contentTintColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2617,18 +2617,18 @@ DQ
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="vertical" alignment="centerX" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Gxn-O8-MNG" userLabel="caps">
-                                        <rect key="frame" x="66" y="40" width="37" height="54"/>
+                                        <rect key="frame" x="83" y="40" width="37" height="49"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="40" translatesAutoresizingMaskIntoConstraints="NO" id="N3Z-yc-Tur">
-                                                <rect key="frame" x="-2" y="22" width="41" height="32"/>
-                                                <textFieldCell key="cell" selectable="YES" alignment="center" title="caps lock" id="de1-jk-8Wf">
+                                            <textField verticalHuggingPriority="700" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="700" preferredMaxLayoutWidth="40" translatesAutoresizingMaskIntoConstraints="NO" id="N3Z-yc-Tur">
+                                                <rect key="frame" x="-2" y="17" width="41" height="32"/>
+                                                <textFieldCell key="cell" alignment="center" title="caps lock" id="de1-jk-8Wf">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="capslock" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="t43-t0-IER" userLabel="capslock">
-                                                <rect key="frame" x="12" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="11" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSFollowLinkFreestandingTemplate" id="YCP-gV-AFQ"/>
                                                 <color key="contentTintColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2643,18 +2643,18 @@ DQ
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="vertical" alignment="centerX" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uih-id-20c" userLabel="shift">
-                                        <rect key="frame" x="111" y="40" width="35" height="54"/>
+                                        <rect key="frame" x="145" y="40" width="35" height="49"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="40" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RQI-0a-MQm">
-                                                <rect key="frame" x="-2" y="22" width="39" height="32"/>
+                                            <textField verticalHuggingPriority="650" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="650" preferredMaxLayoutWidth="40" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RQI-0a-MQm">
+                                                <rect key="frame" x="-2" y="17" width="39" height="32"/>
                                                 <textFieldCell key="cell" enabled="NO" allowsUndo="NO" alignment="center" title="shift lock" id="4jt-iz-JhS">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <imageView identifier="shiftlock" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="dkd-pO-eRA" userLabel="shiftlock">
-                                                <rect key="frame" x="11" y="0.0" width="14" height="14"/>
+                                            <imageView identifier="shiftlock" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="700" translatesAutoresizingMaskIntoConstraints="NO" id="dkd-pO-eRA" userLabel="shiftlock">
+                                                <rect key="frame" x="10" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSFollowLinkFreestandingTemplate" id="khW-U5-rUA"/>
                                                 <color key="contentTintColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2680,35 +2680,22 @@ DQ
                                     <real value="3.4028234663852886e+38"/>
                                 </customSpacing>
                             </stackView>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" id="KAZ-Fy-G48">
-                                <rect key="frame" x="207" y="2" width="272" height="48"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                                <textFieldCell key="cell" refusesFirstResponder="YES" allowsUndo="NO" borderStyle="border" alignment="center" title="Work In Progress" drawsBackground="YES" id="hzH-UM-YpH">
-                                    <font key="font" metaFont="system"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <imageView focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YzP-hI-f4u" userLabel="BeebScreen" customClass="BeebImageView" customModule="BeebEm5" customModuleProvider="target">
-                                <rect key="frame" x="21" y="95" width="644" height="503"/>
-                                <imageCell key="cell" selectable="YES" editable="YES" focusRingType="none" alignment="left" imageScaling="proportionallyUpOrDown" imageFrameStyle="grayBezel" id="uaH-1o-jh5"/>
-                            </imageView>
-                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" misplaced="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nHZ-ef-vPG" userLabel="Disc">
-                                <rect key="frame" x="508" y="24" width="163" height="38"/>
+                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="10" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nHZ-ef-vPG" userLabel="Disc">
+                                <rect key="frame" x="426" y="4" width="208" height="33"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ijy-eb-7St">
-                                        <rect key="frame" x="0.0" y="0.0" width="28" height="38"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="28" height="33"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="p2m-N8-Bhy" userLabel="HD0Label">
-                                                <rect key="frame" x="-2" y="22" width="32" height="16"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="hd0" id="OCJ-TD-ITx">
+                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p2m-N8-Bhy" userLabel="HD0Label">
+                                                <rect key="frame" x="-2" y="17" width="32" height="16"/>
+                                                <textFieldCell key="cell" enabled="NO" alignment="center" title="hd0" id="OCJ-TD-ITx">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="hdisc0" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="D0Y-Kw-0a8" userLabel="hdisc0">
-                                                <rect key="frame" x="0.0" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="0.0" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="gIX-TM-h5k"/>
                                                 <color key="contentTintColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2723,18 +2710,18 @@ DQ
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hgL-Eh-hsg">
-                                        <rect key="frame" x="29" y="0.0" width="26" height="38"/>
+                                        <rect key="frame" x="38" y="0.0" width="26" height="33"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="tgM-an-TEO" userLabel="HD0Label">
-                                                <rect key="frame" x="-2" y="22" width="30" height="16"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="hd1" id="Yhp-br-5wd">
+                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tgM-an-TEO" userLabel="HD0Label">
+                                                <rect key="frame" x="-2" y="17" width="30" height="16"/>
+                                                <textFieldCell key="cell" enabled="NO" alignment="center" title="hd1" id="Yhp-br-5wd">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="hdisc1" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="USV-EZ-ZYh" userLabel="hdisc1">
-                                                <rect key="frame" x="0.0" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="0.0" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="vR7-9n-tTy"/>
                                                 <color key="contentTintColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2749,18 +2736,18 @@ DQ
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kg8-Nf-vul">
-                                        <rect key="frame" x="56" y="0.0" width="28" height="38"/>
+                                        <rect key="frame" x="74" y="0.0" width="28" height="33"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="VlZ-Pz-mEg" userLabel="HD0Label">
-                                                <rect key="frame" x="-2" y="22" width="32" height="16"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="hd2" id="1hH-jJ-9qp">
+                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VlZ-Pz-mEg" userLabel="HD0Label">
+                                                <rect key="frame" x="-2" y="17" width="32" height="16"/>
+                                                <textFieldCell key="cell" enabled="NO" alignment="center" title="hd2" id="1hH-jJ-9qp">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="hdisc2" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="dLe-hp-mZ5" userLabel="hdisc2">
-                                                <rect key="frame" x="0.0" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="0.0" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="UUo-9m-koJ"/>
                                                 <color key="contentTintColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2775,18 +2762,18 @@ DQ
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jxG-jo-Yip">
-                                        <rect key="frame" x="85" y="0.0" width="28" height="38"/>
+                                        <rect key="frame" x="112" y="0.0" width="28" height="33"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="xao-Ye-Cfa" userLabel="HD0Label">
-                                                <rect key="frame" x="-2" y="22" width="32" height="16"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="hd3" id="zma-dL-TNj">
+                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xao-Ye-Cfa" userLabel="HD0Label">
+                                                <rect key="frame" x="-2" y="17" width="32" height="16"/>
+                                                <textFieldCell key="cell" enabled="NO" alignment="center" title="hd3" id="zma-dL-TNj">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="hdisc3" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="wqV-ta-K7T" userLabel="hdisc3">
-                                                <rect key="frame" x="0.0" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="0.0" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="2Lt-qK-SVa"/>
                                                 <color key="contentTintColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2801,18 +2788,18 @@ DQ
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DxA-WJ-Q4I">
-                                        <rect key="frame" x="114" y="0.0" width="25" height="38"/>
+                                        <rect key="frame" x="150" y="0.0" width="25" height="33"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="VtE-m8-YPH" userLabel="HD0Label">
-                                                <rect key="frame" x="-2" y="22" width="29" height="16"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="fd0" id="IEu-rf-10t">
+                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VtE-m8-YPH" userLabel="HD0Label">
+                                                <rect key="frame" x="-2" y="17" width="29" height="16"/>
+                                                <textFieldCell key="cell" enabled="NO" alignment="center" title="fd0" id="IEu-rf-10t">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="disc0" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="okK-QQ-18H" userLabel="disc0">
-                                                <rect key="frame" x="0.0" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="0.0" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="fz9-GQ-PyM"/>
                                                 <color key="contentTintColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2827,18 +2814,18 @@ DQ
                                         </customSpacing>
                                     </stackView>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yPv-QC-Q2j">
-                                        <rect key="frame" x="140" y="0.0" width="23" height="38"/>
+                                        <rect key="frame" x="185" y="0.0" width="23" height="33"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" translatesAutoresizingMaskIntoConstraints="NO" id="r7Z-Su-ZHt" userLabel="HD0Label">
-                                                <rect key="frame" x="-2" y="22" width="27" height="16"/>
-                                                <textFieldCell key="cell" selectable="YES" enabled="NO" alignment="center" title="fd1" id="YQO-QV-kCF">
+                                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" preferredMaxLayoutWidth="58" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r7Z-Su-ZHt" userLabel="HD0Label">
+                                                <rect key="frame" x="-2" y="17" width="27" height="16"/>
+                                                <textFieldCell key="cell" enabled="NO" alignment="center" title="fd1" id="YQO-QV-kCF">
                                                     <font key="font" usesAppearanceFont="YES"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
                                             <imageView identifier="disc1" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="xXW-Fg-tiK" userLabel="disc1">
-                                                <rect key="frame" x="0.0" y="0.0" width="14" height="14"/>
+                                                <rect key="frame" x="0.0" y="-3" width="15" height="15"/>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="P3T-Vz-KLP"/>
                                                 <color key="contentTintColor" name="systemYellowColor" catalog="System" colorSpace="catalog"/>
                                             </imageView>
@@ -2870,18 +2857,30 @@ DQ
                                     <real value="3.4028234663852886e+38"/>
                                 </customSpacing>
                             </stackView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="DU3-gu-y6b" userLabel="BeebView" customClass="BeebSKView" customModule="BeebEm5" customModuleProvider="target">
+                                <rect key="frame" x="7" y="130" width="627" height="470"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="DU3-gu-y6b" secondAttribute="height" multiplier="4:3" id="KLh-bC-Je7"/>
+                                </constraints>
+                            </customView>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" id="KAZ-Fy-G48">
+                                <rect key="frame" x="214" y="4" width="213" height="48"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <textFieldCell key="cell" refusesFirstResponder="YES" allowsUndo="NO" borderStyle="border" alignment="center" title="Work In Progress" drawsBackground="YES" id="hzH-UM-YpH">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="bottom" secondItem="KAZ-Fy-G48" secondAttribute="bottom" constant="2" id="3mi-Cq-ZPU"/>
-                            <constraint firstItem="YzP-hI-f4u" firstAttribute="centerX" secondItem="KAZ-Fy-G48" secondAttribute="centerX" id="IVY-XF-d21"/>
-                            <constraint firstItem="2kC-QC-Xw0" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" constant="20" symbolic="YES" id="LqF-pg-6Fq"/>
-                            <constraint firstItem="KAZ-Fy-G48" firstAttribute="centerX" secondItem="ERx-hH-rdd" secondAttribute="centerX" id="VnY-pY-3uo"/>
-                            <constraint firstItem="2kC-QC-Xw0" firstAttribute="top" secondItem="YzP-hI-f4u" secondAttribute="bottom" constant="2" id="dsr-fu-JRQ"/>
-                            <constraint firstAttribute="bottom" secondItem="nHZ-ef-vPG" secondAttribute="bottom" constant="2" id="gAK-yi-hO3"/>
-                            <constraint firstAttribute="bottom" secondItem="2kC-QC-Xw0" secondAttribute="bottom" constant="2" id="jNe-5r-R10"/>
-                            <constraint firstItem="YzP-hI-f4u" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" constant="24" id="lCn-8A-2cW"/>
-                            <constraint firstAttribute="trailing" secondItem="nHZ-ef-vPG" secondAttribute="trailing" constant="10" id="lGY-YH-x9L"/>
-                            <constraint firstItem="YzP-hI-f4u" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" constant="10" id="obk-AK-BOP"/>
+                            <constraint firstAttribute="bottom" secondItem="nHZ-ef-vPG" secondAttribute="bottom" constant="4" id="1CS-9E-FjN"/>
+                            <constraint firstItem="2kC-QC-Xw0" firstAttribute="leading" secondItem="ERx-hH-rdd" secondAttribute="leading" constant="7" id="1hN-kP-eFw"/>
+                            <constraint firstAttribute="bottom" secondItem="2kC-QC-Xw0" secondAttribute="bottom" constant="4" id="IUG-c7-VJz"/>
+                            <constraint firstItem="DU3-gu-y6b" firstAttribute="centerX" secondItem="ERx-hH-rdd" secondAttribute="centerX" id="IwM-Vi-2Gz"/>
+                            <constraint firstAttribute="bottom" secondItem="DU3-gu-y6b" secondAttribute="bottom" constant="130" id="YiS-0i-E4C"/>
+                            <constraint firstAttribute="trailing" secondItem="nHZ-ef-vPG" secondAttribute="trailing" constant="7" id="lOF-u0-3hd"/>
+                            <constraint firstItem="DU3-gu-y6b" firstAttribute="top" secondItem="ERx-hH-rdd" secondAttribute="top" id="oud-uz-ujK"/>
                         </constraints>
                     </view>
                     <connections>
@@ -2897,16 +2896,16 @@ DQ
                         <outlet property="MasterPowerOnLabel" destination="6VH-RC-Gd2" id="lvt-he-yxX"/>
                         <outlet property="ShiftLED" destination="dkd-pO-eRA" id="TaC-QI-uX6"/>
                         <outlet property="WIPlabel" destination="KAZ-Fy-G48" id="0z2-gB-k0T"/>
-                        <outlet property="imageView" destination="YzP-hI-f4u" id="6Ow-nD-3hv"/>
+                        <outlet property="spriteView" destination="DU3-gu-y6b" id="4zS-Sm-mTV"/>
                     </connections>
                 </viewController>
                 <customObject id="2Tp-Fl-jBw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-78" y="1126.5"/>
+            <point key="canvasLocation" x="-60" y="1160"/>
         </scene>
     </scenes>
     <resources>
-        <image name="NSActionTemplate" width="14" height="14"/>
-        <image name="NSFollowLinkFreestandingTemplate" width="14" height="14"/>
+        <image name="NSActionTemplate" width="15" height="15"/>
+        <image name="NSFollowLinkFreestandingTemplate" width="15" height="15"/>
     </resources>
 </document>

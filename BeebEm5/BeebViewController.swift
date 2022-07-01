@@ -8,6 +8,7 @@
 
 import Cocoa
 import Carbon
+import SpriteKit
 
 //10 T% = TIME
 //20 REPEAT
@@ -28,31 +29,37 @@ import Carbon
 
 class BeebViewController: NSViewController {
 
-    @IBOutlet var imageView: BeebImageView!
+    @IBOutlet weak var spriteView: SKView!
+    var skimage: SKSpriteNode = SKSpriteNode()
     
     var displayLink : CVDisplayLink?
+    
+//    var timer: Timer = Timer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
         
- 
+        // two options NSTimer or CVDisplayLink
+
         // create a callback for the DisplayLink to the update() method of this class
         let displayLinkOutputCallback: CVDisplayLinkOutputCallback = {
-            (displayLink: CVDisplayLink, inNow: UnsafePointer<CVTimeStamp>, inOutputTime: UnsafePointer<CVTimeStamp>, flagsIn: CVOptionFlags, flagsOut: UnsafeMutablePointer<CVOptionFlags>, displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
+            (displayLink: CVDisplayLink,
+             inNow: UnsafePointer<CVTimeStamp>,
+             inOutputTime: UnsafePointer<CVTimeStamp>,
+             flagsIn: CVOptionFlags,
+             flagsOut: UnsafeMutablePointer<CVOptionFlags>,
+             displayLinkContext: UnsafeMutableRawPointer?) -> CVReturn in
 
             // need to typecast the context from pointer to self.
             let view = unsafeBitCast(displayLinkContext, to: BeebViewController.self)
 
             // Make an asynchronous call to the cpu update
-            DispatchQueue.main.async {
-              // the use of 'imageView' variable must occur on the main thread
-              view.update(displayLink)
-            }
-            
+            DispatchQueue.main.async {              view.update()            }
+
             return kCVReturnSuccess
         }
-                
+
         CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
         // need to convert 'self' to unsafe pointer
         CVDisplayLinkSetOutputCallback(displayLink!,
@@ -60,20 +67,47 @@ class BeebViewController: NSViewController {
                                        UnsafeMutableRawPointer(
                                         Unmanaged.passUnretained(self).toOpaque()))
         CVDisplayLinkStart(displayLink!)
+
+        
+        
+        
+        if let sview = spriteView {
+            // scene is not optional
+            let scene = SKScene(size: sview.bounds.size)
+            scene.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+
+            // load an image to new node
+            skimage = SKSpriteNode(texture: SKTexture(), size: sview.bounds.size)
+            scene.addChild(skimage)
+
+            // Present the scene
+            sview.presentScene(scene)
+        }
+        
         
         setupBeeb()
+        
+        // two options NSTimer or CVDisplayLink
+//        timer = Timer.scheduledTimer(withTimeInterval: 1/120, repeats: true) { timer in
+//            self.update()
+//        }
+//
+        
+        // avoid problems with heavy UIs
+//        RunLoop.current.add(timer, forMode: .common)
 
+        
     }
 
     
-    func update(_ displayLink: CVDisplayLink) {
-        
+    func update() {
         // draw to the renderer bitmap and then put that image
         // onto the imageview
         var renderer = Renderer(width: 640, height: 512)
         renderer.draw()
         
-            imageView?.image = NSImage(bitmap: renderer.bitmap)
+        guard let bmImage = NSImage(bitmap: renderer.bitmap) else { return  }
+        skimage.texture = SKTexture(image: bmImage)
 
         // update the CPU
         update_cpu()
@@ -84,8 +118,12 @@ class BeebViewController: NSViewController {
         //  Stop the display link.  A better place to stop the link is in
         //  the viewController or windowController within functions such as
         //  windowWillClose(_:)
+        
+        
         CVDisplayLinkStop(displayLink!)
 
+//        timer.invalidate()
+        
         end_cpu()
 
     }

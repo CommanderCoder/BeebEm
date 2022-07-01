@@ -1,24 +1,26 @@
 //
-//  BeebImageView.swift
+//  BeebSKView.swift
 //  BeebEm5
 //
-//  Created by Commander Coder on 25/07/2020.
-//  Copyright © 2020 Andrew Hague. All rights reserved.
+//  Created by Commander Coder on 30/06/2022.
+//  Copyright © 2022 Andrew Hague. All rights reserved.
 //
 
-import Cocoa
+import SpriteKit
 import Carbon
 
-class BeebImageView: NSImageView {
-    
+class BeebSKView: SKView {
+
     override func draw(_ dirtyRect: NSRect) {
-                NSGraphicsContext.current?.imageInterpolation = .none
-        
+
+        NSGraphicsContext.current?.imageInterpolation = .none
+
         super.draw(dirtyRect)
-        
-        
+
         // Drawing code here.
     }
+ 
+    
     
     // allow key detection
     override var acceptsFirstResponder: Bool { return true }
@@ -42,7 +44,9 @@ class BeebImageView: NSImageView {
     }
     
     
+    
 }
+
 
 
 /* NSEvent keycode values
