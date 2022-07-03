@@ -363,3 +363,9 @@ public func swift_buttonSetControlValue(_ cmd: UInt32, _ state: Int)
     kbViewControllerInstance?.buttonSetControlValue(cmdSTR, state);
 }
 
+@_cdecl("swift_saveScreen")
+public func swift_saveScreen( text: UnsafePointer<CChar>)
+{
+    print("\(#function) \(text)")
+    beebViewControllerInstance?.screenFilename = String(cString: text);
+}

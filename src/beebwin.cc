@@ -77,6 +77,8 @@ long beeb_now() // milliseconds
 }
 
 extern "C" void swift_sleepCPU(unsigned long microseconds);
+extern "C" void swift_saveScreen(const char * filename);
+
 
 // direct usleep replacement - however calling this on the main thread will
 // cause the UI to freeze up so best to not do this and use
@@ -1658,16 +1660,8 @@ void BeebWin::updateLines(int starty, int nlines)
 
         if (m_PrintScreen)
         {
+            swift_saveScreen("BeebEm.png");
 
-            if (TeletextEnabled)
-            {
-                DumpScreen(0);
-            }
-            else
-            {
-                DumpScreen(starty);
-            }
-            
             m_PrintScreen = false;
         }
 

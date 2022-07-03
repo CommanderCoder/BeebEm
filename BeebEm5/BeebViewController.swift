@@ -27,6 +27,7 @@ import SpriteKit
 // AND
 // https://stackoverflow.com/questions/25981553/cvdisplaylink-with-swift
 
+weak var beebViewControllerInstance : BeebViewController?
 class BeebViewController: NSViewController {
 
     @IBOutlet weak var spriteView: SKView!
@@ -34,10 +35,14 @@ class BeebViewController: NSViewController {
     
     var displayLink : CVDisplayLink?
     
+    var screenFilename : String?
 //    var timer: Timer = Timer()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+                
+        beebViewControllerInstance = self
+        
         // Do view setup here.
         
         // two options NSTimer or CVDisplayLink
@@ -107,10 +112,33 @@ class BeebViewController: NSViewController {
         renderer.draw()
         
         guard let bmImage = NSImage(bitmap: renderer.bitmap) else { return  }
+        // save screen if filename is set
+        if (screenFilename != nil)
+        {
+            savePNG(image: bmImage, filepath: screenFilename ?? "beebem.png");
+            screenFilename = nil;
+        }
+        
         skimage.texture = SKTexture(image: bmImage)
 
         // update the CPU
         update_cpu()
+    }
+
+    func savePNG(image: NSImage, filepath:String) {
+        let patharray = FileManager.default.urls(for: .picturesDirectory,
+                                            in: .userDomainMask)
+        var currentTimeStamp = String(Int(NSDate().timeIntervalSince1970))
+        let path = patharray[0].appendingPathComponent(currentTimeStamp+filepath)
+
+        let imageRep = NSBitmapImageRep(data: image.tiffRepresentation!)
+        let pngData = imageRep?.representation(using: .png, properties: [:])
+        do {
+            try pngData!.write(to: path)
+        } catch {
+            print("Error info: \(error)")
+        }
+        
     }
 
 
