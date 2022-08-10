@@ -1,7 +1,7 @@
 # BeebEm
 Port of BeebEm4 by Jon Welch (https://www.g7jjf.com/download.htm) to make it will work on Mac Catalina and beyond.  Source code is also available from Stardot.org on github (https://github.com/stardot/beebem-mac) 
 
-To futureproof the emulator I took the liberty of wrapping it in a Swift harness (not painful at all!) so it will appear a little different to normal and some features are still unavailable.  Create an issue here if you want a specific feature to be implemented.
+To futureproof the emulator I took the liberty of wrapping it in a Swift harness (not painful at all!) so it will appear a little different to normal and some features are still unavailable.  Create an issue here (https://github.com/CommanderCoder/BeebEm/issues) if you want a specific feature to be implemented.
 
 Apple DMG (installer) of the emulator 
 https://github.com/CommanderCoder/BeebEm/blob/master/Install/BeebEm5.dmg
