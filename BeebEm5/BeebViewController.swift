@@ -128,7 +128,7 @@ class BeebViewController: NSViewController {
     func savePNG(image: NSImage, filepath:String) {
         let patharray = FileManager.default.urls(for: .picturesDirectory,
                                             in: .userDomainMask)
-        var currentTimeStamp = String(Int(NSDate().timeIntervalSince1970))
+        let currentTimeStamp = String(Int(NSDate().timeIntervalSince1970))
         let path = patharray[0].appendingPathComponent(currentTimeStamp+filepath)
 
         let imageRep = NSBitmapImageRep(data: image.tiffRepresentation!)

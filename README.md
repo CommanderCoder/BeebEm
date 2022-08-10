@@ -1,40 +1,42 @@
 # BeebEm
-Port of BeebEm4 by Jon Welch (https://www.g7jjf.com/download.htm) to make it will work on Mac Catalina and beyond.  I took the liberty of wrapping the emulator in a Swift harness (not painful at all!) so it will appear a little different to normal and some features are still unavailable.  Let me know if you want a specific feature reimplimenting.
+Port of BeebEm4 by Jon Welch (https://www.g7jjf.com/download.htm) to make it will work on Mac Catalina and beyond.  Source code is also available from Stardot.org on github (https://github.com/stardot/beebem-mac) 
+
+To futureproof the emulator I took the liberty of wrapping it in a Swift harness (not painful at all!) so it will appear a little different to normal and some features are still unavailable.  Create an issue here if you want a specific feature to be implemented.
 
 Apple DMG (installer) of the emulator 
-https://github.com/CommanderCoder/BeebEm/blob/master/Install/BeebEm5_DMG/BeebEm5.dmg
+https://github.com/CommanderCoder/BeebEm/blob/master/Install/BeebEm5.dmg
 
-Zip File of the DMG contents
-https://github.com/CommanderCoder/BeebEm/raw/master/Install/beebem5-distribution.zip
+Zip file of the DMG contents
+https://github.com/CommanderCoder/BeebEm/raw/master/Install/BeebEm5.zip
 
-Some people have reported that it doesn't work out of the 'zip' because of attributes associated with the files. This doesn't (shouldn't) happen with the  installation DMG.  If you double click on the BeebEm and nothing seems to happen, open a terminal window to run this command on the beebem5-distribution folder.
+
+#### Building
+Some people have reported that it doesn't work out of the 'zip' because of attributes associated with the files. This doesn't (shouldn't) happen with the installation DMG.  If you double click on the BeebEm.app file and nothing seems to happen, open a terminal window to run this command on the ```BeebEm5-files``` folder after unzipping.
 
 ```zsh
-$ xattr -crv beebem5-distribution
+$ xattr -crv BeebEm5-files
 ```
 
 ## Building
 
-This version has been built using XCode 11.4.1.   You need to install this version (or later) to build, debug and otherwise work on the project. At the time of writing
-the compiler emits A LOT of warnings, most of which are purely semantic and can be ignored. These
-may be "fixed" in a future release.
+This version has been built using XCode 13.2.1. You need to install this version (or later) to build, debug and otherwise work on the project. At the time of writing
+the compiler emits A LOT of warnings, most of which are purely semantic and can be ignored. I;I'll get around to removing these in a future release.
 
-At this point if the build fails something is wrong, most likely in your build settings / targets or
-perhaps I have missed something in this document.
+If the build fails, something other than the code will be wrong.  Most likely this will be in your build settings / targets.  Although, I may have missed something.
 
-The app will not run in XCode unless you set the working directory to a folder containing the .ini files and ROM images.  These can be found in this repository.  The working directory setting (for debug) is found in the XCode Scheme.  Select the menu Product->Scheme->Edit Scheme...   In the 'Run' settings, select the 'Options' tab, and then locate the Working Directory tickbox.  Select it and give the working directory where 'beebem.ini' can be found.
+The app will not run in XCode unless you set the working directory to a folder containing the ```.ini``` files and ROM images.  These can be found in this repository.  The working directory setting (for debug) is found in the XCode Scheme.  Select the menu ```Product->Scheme->Edit Scheme...```   In the 'Run' settings, select the 'Options' tab, and then locate the Working Directory tick box.  Select it and give the working directory where 'beebem.ini' can be found.
 
 ## Creating The Installer
 
 Creating a release is a two-step process. Firstly you must create and export an archive of the application
-bundle (the .app folder), then you need to either:
-- create a zip file to copy or
-- create the DMG for distribution.
+bundle (the .app folder), then you need to run the distribution script to create both:
+- a zip file to copy and
+- the DMG for distribution.
 
 
 ### Creating and exporting the archive (for copying)
 
-There is more than one way to go about this and in the future it may be automated but for now take
+Take
 the following steps:
 
 - If you do not yet have an archive to export go to 'Archive' from the 'Project' menu. This will build your project and open the Organiser at the Archives tab
@@ -44,53 +46,21 @@ the following steps:
 - Select a location to save the app.  It should automatically offer a suitable location but put this into the "Install" directory
 - Xcode will create the app bundle and a couple of supporting files in this folder.
 - Open a terminal
-- Change directory (cd) to the Install directory inside BeebEm5
-- Execute ./make_distribution.sh with the name of the BeebEm archive folder (the one just created inside Install) as the 1st parameter.
+- Change directory (cd) to the ```Install``` directory inside BeebEm5
+- Execute ./create-distribution.zsh with the name of the BeebEm archive folder (the one just created inside Install) as the 1st parameter.
 e.g 
 ```zsh
-    ./make_distribution.sh "BeebEm5 2020-07-14 15-21-10"
+    ./create_distribution.zsh "BeebEm5 2020-07-14 15-21-10"
 ```
 
-You will have a zip file call beebem5-distribution which can be copied and unzipped to other Macs.
+Now you have a zip file called ```BeebEm5.zip``` which can be copied and unzipped to other Macs.
 
+You also have a DMG file called ```BeebEm5.dmg``` which doesn't need to be unzipped. It will mount a drive with the app.
 
-
-
-
-
-
-### Creating and exporting the archive (for distributing using a DMG)
-
-**(IGNORE THIS SECTION ..  it ends with..)**
-
-Code signing for the **Application** is now complete - we will sign the entire DMG in the next step.
-
-### Building the DMG installer
-
-**(IGNORE THIS SECTION)**
-
-For this final step there is a somewhat crude bash script supplied with the project. Open a terminal
-and navigate to the Install folder. From there simply execute:
-
-```zsh
-./create_dmg.sh
-```
-
-The script will take the template disk image from the install folder, decompress it, mount it, add
-the new application to it along with the sources and other user data files, unmount the image, re-compress
-it and finally sign it for distribution. The resulting DMG file will be located in the folder
-
-```zsh
-'~/tmp/BeebEmMac_BUILD'
-```
-
-Before running the script again you must ensure the image is not mounted and that it has been deleted
-from this folder or the script will abort and / or fail.
-
-The resulting DMG can be zipped and used for distribution. Note that the application cannot be submitted
-to the App Store in it's current state for multiple reasons but all being well the end user should
+Note that the application cannot be submitted
+to the App Store in its current state for multiple reasons but all being well the end user should
 not receive any scary warnings when installing the application. Sadly the "This application was
 downloaded from the internet" and the "This application needs to be updated" cannot be avoided at this
 time but the user should be fairly familier with those messages.
 
-[GO TO TOP](#building-beebem-for-mac)
+[GO TO TOP](#building)

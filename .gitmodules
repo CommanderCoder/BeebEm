@@ -1,0 +1,4 @@
+[submodule "Install/create-dmg"]
+	path = Install/create-dmg
+	url = git@github.com:create-dmg/create-dmg.git
+	branch = master
