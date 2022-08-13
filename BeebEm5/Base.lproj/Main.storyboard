@@ -1949,7 +1949,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button identifier="\|  " verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QFk-xJ-gfg">
+                                            <button identifier="bkpi" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QFk-xJ-gfg">
                                                 <rect key="frame" x="447" y="0.0" width="21" height="22"/>
                                                 <buttonCell key="cell" type="square" title="\ |" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qqq-62-osJ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2102,7 +2102,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button identifier="_£" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JjT-du-3Ja">
+                                            <button identifier="uspd" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JjT-du-3Ja">
                                                 <rect key="frame" x="350" y="0.0" width="30" height="22"/>
                                                 <buttonCell key="cell" type="square" title="_ £" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Hcg-Ih-bAt">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2248,7 +2248,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button identifier=":*" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fLe-In-I0F">
+                                            <button identifier="cnst" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fLe-In-I0F">
                                                 <rect key="frame" x="356" y="0.0" width="24" height="22"/>
                                                 <buttonCell key="cell" type="square" title=": *" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Jep-Mc-84O">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2385,7 +2385,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button identifier="/?" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PVm-hG-Kj0">
+                                            <button identifier="slqy" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PVm-hG-Kj0">
                                                 <rect key="frame" x="370" y="0.0" width="25" height="22"/>
                                                 <buttonCell key="cell" type="square" title="/ ?" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="3YN-d5-ImJ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2485,7 +2485,7 @@
                                     <real value="3.4028234663852886e+38"/>
                                 </customSpacing>
                             </stackView>
-                            <button identifier="rest" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXq-t9-maU">
+                            <button identifier="reset" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXq-t9-maU">
                                 <rect key="frame" x="366" y="15" width="140" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="Reset To Default" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sh0-Ua-RgR">

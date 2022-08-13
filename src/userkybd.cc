@@ -683,14 +683,25 @@ void SetRowCol( int ctrlID )
 	case ',<  ': BBCRow = 6; BBCCol = 6; break;
 	case '^~  ': BBCRow = 1; BBCCol = 8; break;
 	case '.>  ': BBCRow = 6; BBCCol = 7; break;
-	case '/?  ': BBCRow = 6; BBCCol = 8; break;
-	case ':*  ': BBCRow = 4; BBCCol = 8; break;
-	case '[{  ': BBCRow = 3; BBCCol = 8; break;
-	case '\\|  ': BBCRow = 7; BBCCol = 8; break;
+//	case '/?  ': BBCRow = 6; BBCCol = 8; break;
+//	case ':*  ': BBCRow = 4; BBCCol = 8; break;
+//	case '[{  ': BBCRow = 3; BBCCol = 8; break;
+//	case '\\|  ': BBCRow = 7; BBCCol = 8; break;
+    case 'slqy': BBCRow = 6; BBCCol = 8; break;
+    case 'cnst': BBCRow = 4; BBCCol = 8; break;
+    case '[{  ': BBCRow = 3; BBCCol = 8; break;
+    case 'bkpi': BBCRow = 7; BBCCol = 8; break;
 	case ']}  ': BBCRow = 5; BBCCol = 8; break;
 	case '@   ': BBCRow = 4; BBCCol = 7; break;
-	case '_£  ': BBCRow = 2; BBCCol = 8; break;
-	
+            // The standard for C files does not allow character from
+            // extended ASCII codes ; ie. byte value > 127
+            // £ is 0xA3 (163)
+            // _ is 0x5f (95)
+            // <space> is 0x20 (32)
+//    case '_£  ': BBCRow = 2; BBCCol = 8; break;
+//	case 0x5fa32020: BBCRow = 2; BBCCol = 8; break;
+    case 'uspd': BBCRow = 2; BBCCol = 8; break;
+
 	default:
 		BBCRow = 0; BBCCol = 0;
 	}

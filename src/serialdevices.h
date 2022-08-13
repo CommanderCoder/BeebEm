@@ -13,8 +13,8 @@ extern unsigned char EthernetPortEnabled;
 #if 0 //ACH - serial/ethernet windows
 extern WindowRef mSerialPortWindow;
 extern WindowRef mEthernetPortWindow;
-#endif
 extern int mSerialHandle;
+#endif
 extern int mEthernetHandle;
 
 void EthernetPortOpenDialog();
@@ -40,16 +40,16 @@ unsigned char TouchScreenRead(void);
 void TouchScreenStore(unsigned char data);
 void TouchScreenReadScreen(bool check);
 
+#if 0 //ACH - serial thread
 void SerialPortOpenDialog();
 void SerialPortCloseDialog();
 int OpenSerialPort(const char *bsdPath);
 void CloseSerialPort(int fileDescriptor);
-#if 0 //ACH - serial thread
 OSStatus MySerialReadThread(void *parameter);
 OSStatus MySerialStatusThread(void *parameter);
-#endif
 void SetSerialPortFormat(int Data_Bits, int Stop_Bits, int Parity, int RTS);
 void SetSerialPortBaud(int Tx_Rate, int Rx_Rate);
 void SerialPortWrite(unsigned char TDR);
 unsigned char SerialPortGetChar(void);
 int SerialPortIsChar(void);
+#endif

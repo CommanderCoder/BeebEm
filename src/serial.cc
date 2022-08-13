@@ -155,10 +155,13 @@ void Write_ACIA_Control(unsigned char CReg) {
 		SetACIAStatus(7);
 	}
 
+#if 0 // ACH - serial port
 	// Change serial port settings
 	if ((SerialChannel==RS423) && (SerialPortEnabled) && (mSerialHandle != -1) ) {
 		SetSerialPortFormat(Data_Bits, Stop_Bits, Parity, RTS);
 	}
+#endif
+    
 }
 
 void Write_ACIA_Tx_Data(unsigned char Data) {
@@ -187,7 +190,8 @@ void Write_ACIA_Tx_Data(unsigned char Data) {
 	}
 
 
-	if ((SerialChannel==RS423) && (SerialPortEnabled))
+#if 0 // ACH - serial port
+    if ((SerialChannel==RS423) && (SerialPortEnabled))
 	{
 		
 		if (mSerialHandle != -1)
@@ -220,10 +224,10 @@ void Write_ACIA_Tx_Data(unsigned char Data) {
 			}
 		}
 	}
+#endif
 }
 
 void Write_SERPROC(unsigned char Data) {
-	int HigherRate;
 	
 	if (DebugEnabled) {
 		char info[200];
@@ -246,6 +250,9 @@ void Write_SERPROC(unsigned char Data) {
 	Tx_Rate=Baud_Rates[(Data & 7)];
 	Rx_Rate=Baud_Rates[(Data & 56)>>3];
 
+#if 0 // ACH - serial port
+    int HigherRate;
+
 	// Note, the PC serial port (or at least win32) does not allow different transmit/receive rates
 	// So we will use the higher of the two
 	if ( (SerialChannel==RS423) && (mSerialHandle != -1) ) {
@@ -253,6 +260,8 @@ void Write_SERPROC(unsigned char Data) {
 		if (Rx_Rate>Tx_Rate) HigherRate=Rx_Rate;
 		SetSerialPortBaud(Tx_Rate, Rx_Rate);
 	}
+#endif
+    
 }
 
 unsigned char Read_ACIA_Status(void) {
@@ -322,8 +331,6 @@ unsigned char Read_SERPROC(void) {
 void Serial_Poll(void)
 {
 
-static bool wait_for_tx = false;
-static int delay = 0;
 	if ((SerialChannel==RS423) && (SerialPortEnabled) && (TouchScreenEnabled) )
 	{
 		if (TouchScreenPoll() == true)
@@ -343,7 +350,10 @@ static int delay = 0;
 		}
 	}
 	
-	
+#if 0 // ACH - serial port
+    static bool wait_for_tx = false;
+    static int delay = 0;
+
 	if ((SerialChannel==RS423) && (SerialPortEnabled) && (mSerialHandle != -1) )
 	{
 		if (TxD > 0)
@@ -378,6 +388,7 @@ static int delay = 0;
 		}
 		
 	}
+#endif
     
 	if (SerialChannel==CASSETTE)
 	{

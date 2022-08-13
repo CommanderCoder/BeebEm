@@ -915,6 +915,7 @@ static int last_x = -1, last_y = -1, last_m = -1;
 	}
 }
 
+#if 0 //ACH - serialportcommandhandler
 
 // Stuff for proper serial port
 
@@ -931,7 +932,6 @@ int RXHead = 0;
 int RXTail = 0;
 int RXLen = 0;
 
-#if 0 //ACH - serialportcommandhandler
 //*******************************************************************
 
 OSStatus SerialPortWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
@@ -1153,7 +1153,6 @@ void SerialPortCloseDialog()
 	}
 	mSerialPortWindow = NULL;
 }
-#endif
 
 // Given the path to a serial device, open the device and configure it.
 // Return the file descriptor associated with the device.
@@ -1538,3 +1537,4 @@ int SerialPortIsChar(void)
 {
 	return RXLen;
 }
+#endif
