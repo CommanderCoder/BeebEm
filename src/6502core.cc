@@ -105,7 +105,7 @@ bool BHardware = false;
 typedef void (*InstrHandlerFuncType)(int16 Operand);
 typedef int16 (*AddrModeHandlerFuncType)(int WantsAddr);
 
-static int CyclesTable6502[]={
+static const int CyclesTable6502[]={
 /*0 1 2 3 4 5 6 7 8 9 a b c d e f */
   7,6,1,8,3,3,5,5,3,2,2,2,4,4,6,6, /* 0 */
   2,5,1,8,4,4,6,6,2,4,2,7,4,4,7,7, /* 1 */
@@ -123,7 +123,7 @@ static int CyclesTable6502[]={
   2,5,1,8,4,4,6,6,2,4,2,7,4,4,7,7, /* d */
   2,6,2,8,3,3,5,5,2,2,2,2,4,4,6,6, /* e */
   2,5,1,8,4,4,6,6,2,4,2,7,4,4,7,7  /* f */
-}; /* CyclesTable6502 */
+};
 
 static const int CyclesTable65C02[] = {
 /*0 1 2 3 4 5 6 7 8 9 a b c d e f */
@@ -169,6 +169,7 @@ static const int CyclesToMemRead6502[]={
 };
 
 static const int CyclesToMemRead65C02[] = {
+  /*0 1 2 3 4 5 6 7 8 9 a b c d e f */
     0,5,0,0,0,2,2,0,0,0,0,0,0,3,3,0, /* 0 */
     0,4,0,0,0,3,3,0,0,3,0,0,0,3,4,0, /* 1 */
     0,5,0,0,0,2,2,0,0,0,0,0,3,3,3,0, /* 2 */
@@ -297,6 +298,8 @@ static INLINE void Carried()
              CurrentInstruction == 0x3c ||
              CurrentInstruction == 0x5c ||
              CurrentInstruction == 0x7c ||
+             CurrentInstruction == 0xb3 ||
+             CurrentInstruction == 0xbb ||
              CurrentInstruction == 0xbc ||
              CurrentInstruction == 0xbe ||
              CurrentInstruction == 0xbf ||
@@ -458,10 +461,10 @@ INLINE static int16 PopWord() {
 INLINE static int16 RelAddrModeHandler_Data(void) {
   /* For branches - is this correct - i.e. is the program counter incremented
      at the correct time? */
-  int EffectiveAddress = SignExtendByte((signed char)ReadPaged(ProgramCounter++));
+  int EffectiveAddress = (signed char)ReadPaged(ProgramCounter++);
   EffectiveAddress += ProgramCounter;
 
-  return(EffectiveAddress);
+  return EffectiveAddress;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -475,9 +478,9 @@ INLINE static void ADCInstrHandler(int16 operand) {
         Accumulator==0,0,0,0,((Accumulator & 128)>0) ^ (TmpResultV<0),
         (Accumulator & 128));
   } else {
-      /* Z flag determiend from 2's compl result, not BCD result! */
+      /* Z flag determined from 2's compl result, not BCD result! */
     int TmpResult=Accumulator + operand + GETCFLAG;
-    int ZFlag = ((TmpResult & 0xff) == 0);
+    int ZFlag = (TmpResult & 0xff) == 0;
 
     int ln=(Accumulator & 0xf) + (operand & 0xf) + GETCFLAG;
 
@@ -488,6 +491,7 @@ INLINE static void ADCInstrHandler(int16 operand) {
       ln &= 0xf;
       TmpCarry = 0x10;
     }
+
     int hn=(Accumulator & 0xf0)+(operand & 0xf0) + TmpCarry;
     /* N and V flags are determined before high nibble is adjusted.
        NOTE: V is not always correct */
@@ -505,8 +509,8 @@ INLINE static void ADCInstrHandler(int16 operand) {
     Accumulator=hn|ln;
 
     if (MachineType == Model::Master128) {
-        ZFlag = (Accumulator == 0);
-        NFlag = (Accumulator & 128);
+        ZFlag = Accumulator == 0;
+        NFlag = Accumulator & 128;
     }
 
     SetPSR(FlagC | FlagZ | FlagV | FlagN,CFlag,ZFlag,0,0,0,VFlag,NFlag);
@@ -611,14 +615,9 @@ INLINE static void BPLInstrHandler(void) {
     ProgramCounter=RelAddrModeHandler_Data();
     Branched = true;
   } else ProgramCounter++;
-}; /* BPLInstrHandler */
+};
 
 INLINE static void BRKInstrHandler(void) {
-  if (CPUDebug) {
-  fprintf(stderr,"BRK Instruction at 0x%04x after %i instructions. ACCON: 0x%02x ROMSEL: 0x%02x",ProgramCounter,InstrCount,ACCCON,PagedRomReg);
-  //fclose(InstrLog);
-  exit(1);
-  }
   PushWord(ProgramCounter+1);
   SetPSR(FlagB,0,0,0,0,1,0,0); /* Set B before pushing */
   Push(PSR);
@@ -651,17 +650,17 @@ INLINE static void CMPInstrHandler(int16 operand) {
   unsigned char CFlag;
   CFlag=0; if (Accumulator>=operand) CFlag=FlagC;
   SetPSRCZN(CFlag,Accumulator==operand,result & 128);
-} /* CMPInstrHandler */
+} 
 
 INLINE static void CPXInstrHandler(int16 operand) {
   unsigned char result = static_cast<unsigned char>(XReg - operand);
   SetPSRCZN(XReg>=operand,XReg==operand,result & 128);
-} /* CPXInstrHandler */
+}
 
 INLINE static void CPYInstrHandler(int16 operand) {
   unsigned char result=static_cast<unsigned char>(YReg - operand);
   SetPSRCZN(YReg>=operand,YReg==operand,result & 128);
-} /* CPYInstrHandler */
+}
 
 INLINE static void DECInstrHandler(int16 address) {
     unsigned char val;
@@ -846,6 +845,8 @@ INLINE static void SBCInstrHandler(int16 operand) {
       int ZFlag = (Accumulator == 0);
 
       SetPSR(FlagC | FlagZ | FlagV | FlagN, CFlag, ZFlag, 0, 0, 0, VFlag, NFlag);
+
+      Cycles++;
     } else {
       /* Z flag determined from 2's compl result, not BCD result! */
       int TmpResult = Accumulator - operand - (1 - GETCFLAG);
@@ -896,6 +897,51 @@ INLINE static void STXInstrHandler(int16 address) {
 INLINE static void STYInstrHandler(int16 address) {
   WritePaged(address,YReg);
 } /* STYInstrHandler */
+
+// ARR instruction hander.
+// See http://www.zimmers.net/anonftp/pub/cbm/documents/chipdata/64doc
+
+INLINE static void ARRInstrHandler(int Operand)
+{
+    if (GETDFLAG)
+    {
+        const int Temp = Accumulator & Operand;
+        const int HighBits = Temp >> 4;
+        const int LowBits  = Temp & 0x0f;
+
+        Accumulator = (Temp >> 1) | (GETCFLAG << 7); // ROR
+        SetPSRZN(Accumulator);
+
+        PSR &= ~(FlagC | FlagV);
+
+        PSR |= (((Accumulator ^ Temp) & 0x40) != 0) << 6; // VFlag
+
+        if (LowBits + (LowBits & 1) > 5)
+        {
+            Accumulator = (Accumulator & 0xf0) | ((Accumulator + 6) & 0x0f);
+        }
+
+        // Update carry flag
+        PSR |= (HighBits + (HighBits & 1)) > 5;
+
+        if (GETCFLAG)
+        {
+            Accumulator = (Accumulator + 0x60) & 0xff;
+        }
+    }
+    else
+    {
+        Accumulator &= Operand;
+        RORInstrHandler_Acc();
+
+        const int Bit6 = (Accumulator & 0x40) != 0;
+        const int Bit5 = (Accumulator & 0x20) != 0;
+
+        PSR &= ~(FlagC | FlagV);
+        PSR |= Bit6; // FlagC
+        PSR |= (Bit6 ^ Bit5) << 6; // FlagV
+    }
+}
 
 // KIL (Halt) instruction handler.
 
@@ -953,8 +999,8 @@ INLINE static int16 IndXAddrModeHandler_Address(void) {
   unsigned char ZeroPageAddress=(ReadPaged(ProgramCounter++) + XReg) & 0xff;
   int EffectiveAddress=WholeRam[ZeroPageAddress] | (WholeRam[ZeroPageAddress+1]<<8);
 
-  return(EffectiveAddress);
-} /* IndXAddrModeHandler_Address */
+  return EffectiveAddress;
+} 
 
 /*-------------------------------------------------------------------------*/
 /* Indexed with Y postinc addressing mode handler                          */
@@ -1148,9 +1194,7 @@ void Init6502core(void) {
     intStatus = 0;
     NMIStatus = 0;
     NMILock = false;
-} /* Init6502core */
-
-// #include "via.h"
+}
 
 /*-------------------------------------------------------------------------*/
 void DoInterrupt(void) {
@@ -1297,7 +1341,7 @@ void Exec6502Instruction(void) {
                     // NOP immediate
                     ReadPaged(ProgramCounter++);
                 } else {
-                    // Undocumented Instruction: KIL
+                    // Undocumented instruction: KIL
                     KILInstrHandler();
                 }
                 break;
@@ -2094,8 +2138,8 @@ void Exec6502Instruction(void) {
                     // NOP
                 } else {
                     // Undocumented instruction: SAX (zp,x)
-                    WritePaged(IndXAddrModeHandler_Address() ,
-                        Accumulator & XReg);
+                    AdvanceCyclesForMemWrite();
+                    WritePaged(IndXAddrModeHandler_Address(), Accumulator & XReg);
                 }
                 break;
             case 0x84:
@@ -2106,8 +2150,7 @@ void Exec6502Instruction(void) {
             case 0x85:
                 // STA zp
                 AdvanceCyclesForMemWrite();
-                BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(),
-                    Accumulator);
+                BEEBWRITEMEM_DIRECT(ZeroPgAddrModeHandler_Address(), Accumulator);
                 /* STA */
                 break;
             case 0x86:
@@ -2131,7 +2174,7 @@ void Exec6502Instruction(void) {
                 YReg = (YReg - 1) & 255; /* DEY */
                 SetPSRZN(YReg);
                 break;
-            case 0x89: /* BIT Immediate */
+            case 0x89: 
                 if (MachineType == Model::Master128) {
                     // BIT imm
                     BITImmedInstrHandler(ReadPaged(ProgramCounter++));
@@ -2713,7 +2756,8 @@ void Exec6502Instruction(void) {
                 if (MachineType == Model::Master128) {
                     // NOP
                 } else {
-                    // TODO: SBC imm
+                    // SBC imm
+                    SBCInstrHandler(ReadPaged(ProgramCounter++));
                 }
                 break;
             case 0xec:
