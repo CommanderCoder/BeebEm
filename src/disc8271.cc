@@ -1748,21 +1748,21 @@ void Load8271UEF(FILE *SUEF)
 		if (Disc8271Trigger != CycleCountTMax)
 			Disc8271Trigger+=TotalCycles;
 
-		ResultReg=fgetc(SUEF);
-		StatusReg=fgetc(SUEF);
-		DataReg=fgetc(SUEF);
-		Internal_Scan_SectorNum=fgetc(SUEF);
-		Internal_Scan_Count=fget32(SUEF);
-		Internal_ModeReg=fgetc(SUEF);
-		Internal_CurrentTrack[0]=fgetc(SUEF);
-		Internal_CurrentTrack[1]=fgetc(SUEF);
-		Internal_DriveControlOutputPort=fgetc(SUEF);
-		Internal_DriveControlInputPort=fgetc(SUEF);
-		Internal_BadTracks[0][0]=fgetc(SUEF);
-		Internal_BadTracks[0][1]=fgetc(SUEF);
-		Internal_BadTracks[1][0]=fgetc(SUEF);
-		Internal_BadTracks[1][1]=fgetc(SUEF);
-		ThisCommand=fget32(SUEF);
+		ResultReg = fget8(SUEF);
+		StatusReg = fget8(SUEF);
+		DataReg = fget8(SUEF);
+		Internal_Scan_SectorNum = fget8(SUEF);
+		Internal_Scan_Count = fget32(SUEF);
+		Internal_ModeReg = fget8(SUEF);
+		Internal_CurrentTrack[0] = fget8(SUEF);
+		Internal_CurrentTrack[1] = fget8(SUEF);
+		Internal_DriveControlOutputPort = fget8(SUEF);
+		Internal_DriveControlInputPort = fget8(SUEF);
+		Internal_BadTracks[0][0] = fget8(SUEF);
+		Internal_BadTracks[0][1] = fget8(SUEF);
+		Internal_BadTracks[1][0] = fget8(SUEF);
+		Internal_BadTracks[1][1] = fget8(SUEF);
+		ThisCommand = fget32(SUEF);
 		NParamsInThisCommand=fget32(SUEF);
 		PresentParam=fget32(SUEF);
 		fread(Params,1,16,SUEF);

@@ -1,8 +1,26 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 #include <stdio.h>
 #include <string.h>
 #include "memory.h"
 #include "tube.h"
-
 #include "z80mem.h"
 #include "z80.h"
 
@@ -15,11 +33,11 @@ int Z80_Disassemble(int adr, char *s)
 UBYTE			a = ReadZ80Mem(adr);
 UBYTE			d = (a >> 3) & 7;
 UBYTE			e = a & 7;
-const char *reg[8] = {"B","C","D","E","H","L","(HL)","A"};
-const char *dreg[4] = {"BC","DE","HL","SP"};
-const char *cond[8] = {"NZ","Z","NC","C","PO","PE","P","M"};
-const char *arith[8] = {"ADD\tA,","ADC\tA,","SUB\t","SBC\tA,","AND\t","XOR\t","OR\t","CP\t"};
-CHAR			stemp[80];		// temp.String für sprintf()
+static const char* const reg[8] = {"B", "C", "D", "E", "H", "L", "(HL)", "A"};
+static const char* const dreg[4] = {"BC", "DE", "HL", "SP"};
+static const char* const cond[8] = {"NZ", "Z", "NC", "C", "PO", "PE", "P", "M"};
+static const char* const arith[8] = {"ADD\tA,", "ADC\tA,", "SUB\t", "SBC\tA,", "AND\t", "XOR\t", "OR\t", "CP\t"};
+CHAR			stemp[80];		// temp.String for sprintf()
 CHAR			ireg[3];		// temp.Indexregister
 int             size = 1;
 
@@ -129,7 +147,7 @@ int             size = 1;
 			break;
 		case 0x07:
 			{
-			const char *str[8] = {"RLCA","RRCA","RLA","RRA","DAA","CPL","SCF","CCF"};
+			static const char* const str[8] = {"RLCA","RRCA","RLA","RRA","DAA","CPL","SCF","CCF"};
 			strcpy(s,str[d]);
 			}
 			break;
@@ -201,7 +219,7 @@ int             size = 1;
 				switch(a & 0xC0) {
 				case 0x00:
 					{
-					const char *str[8] = {"RLC","RRC","RL","RR","SLA","SRA","???","SRL"};
+					static const char* const str[8] = {"RLC","RRC","RL","RR","SLA","SRA","???","SRL"};
 					strcpy(s,str[d]);
 					}
 					strcat(s,"\t");
@@ -337,12 +355,14 @@ int             size = 1;
 						break;
 					case 0x80:
 						{
-						const char *str[32] = {"LDI","CPI","INI","OUTI","???","???","???","???",
-											  "LDD","CPD","IND","OUTD","???","???","???","???",
-											  "LDIR","CPIR","INIR","OTIR","???","???","???","???",
-											  "LDDR","CPDR","INDR","OTDR","???","???","???","???"};
-						strcpy(s,str[a & 0x1F]);
-						}
+                            static const char* const str[32] = {
+                                "LDI","CPI","INI","OUTI","???","???","???","???",
+                                "LDD","CPD","IND","OUTD","???","???","???","???",
+                                "LDIR","CPIR","INIR","OTIR","???","???","???","???",
+                                "LDDR","CPDR","INDR","OTDR","???","???","???","???"
+                                };
+                            strcpy(s,str[a & 0x1F]);
+                        }
 						break;
 					}
 					break;
@@ -557,7 +577,9 @@ int             size = 1;
 						switch(a & 0xC0) {
 						case 0x00:
 							{
-							const char *str[8] = {"RLC","RRC","RL","RR","SLA","SRA","???","SRL"};
+							static const char* const str[8] = {
+                                "RLC","RRC","RL","RR","SLA","SRA","???","SRL"
+                                };
 							strcpy(s,str[d]);
 							}
 							strcat(s,"\t");
