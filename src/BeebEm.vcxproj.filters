@@ -1,0 +1,629 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\ARMulator">
+      <UniqueIdentifier>{907f08fd-6e8c-4872-89b8-9c2bd92fc8ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ARMulator">
+      <UniqueIdentifier>{7e7d31fc-0dbe-457f-854e-2c4bb8f1216e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Help Files">
+      <UniqueIdentifier>{2c6e9544-5499-4544-b881-236d1aba643a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Documents">
+      <UniqueIdentifier>{4459d047-6d52-4030-8bc7-6af92e18bdc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\zlib">
+      <UniqueIdentifier>{89a12afe-1839-4d54-928b-89cb3d3131d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\zlib">
+      <UniqueIdentifier>{22d01859-7df5-4fb9-a1ad-0ccb885e0b0d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="6502core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Arm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArmDisassembler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="atodconv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="avi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="beebmem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="beebsound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="beebwin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="beebwindx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="beebwinio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="beebwinprefs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="beebwinspeech.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="csw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugTrace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectSoundStreamer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="disc1770.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="disc8271.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="discedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="econet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filedialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FolderSelectDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ide.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Master512CoPro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="music5000.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="preferences.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="romconfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sasi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scsi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SelectKeyDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="serial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="serialdevices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundStreamer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SprowCoPro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StringUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sysvia.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TapeMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="teletext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uefstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="userkybd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UserPortBreakoutBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uservia.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="via.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="video.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XAudio2Streamer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="z80.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="z80_support.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="z80dis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ARMulator\armdis.cpp">
+      <Filter>Source Files\ARMulator</Filter>
+    </ClCompile>
+    <ClCompile Include="ARMulator\armemu.c">
+      <Filter>Source Files\ARMulator</Filter>
+    </ClCompile>
+    <ClCompile Include="ARMulator\arminit.c">
+      <Filter>Source Files\ARMulator</Filter>
+    </ClCompile>
+    <ClCompile Include="ARMulator\armsupp.c">
+      <Filter>Source Files\ARMulator</Filter>
+    </ClCompile>
+    <ClCompile Include="ARMulator\bag.c">
+      <Filter>Source Files\ARMulator</Filter>
+    </ClCompile>
+    <ClCompile Include="ARMulator\thumbemu.c">
+      <Filter>Source Files\ARMulator</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\adler32.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\crc32.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\deflate.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzclose.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzlib.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzread.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\gzwrite.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inffast.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inflate.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inftrees.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\trees.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\uncompr.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\zutil.c">
+      <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="6502core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Arm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArmDisassembler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="atodconv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="avi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="beebemrc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="beebmem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="beebsound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="beebwin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="csw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTrace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectSoundStreamer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="disc1770.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="disc8271.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="discedit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="disctype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="econet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ext1770.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="filedialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FolderSelectDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ide.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Master512CoPro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Messages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ml675001.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="music5000.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="port.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="preferences.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sasi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scsi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectKeyDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="serial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="serialdevices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundStreamer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SprowCoPro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sysvia.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TapeMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TarmacGlobals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="teletext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="uef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="uefstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="userkybd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UserPortBreakoutBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="uservia.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="via.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="video.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XAudio2Streamer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="z80.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="z80mem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\acconfig.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\ansidecl.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\armdefs.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\armdis.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\armemu.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\armfpe.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\armopts.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\armos.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\bag.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\config.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\dbg_conf.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\dbg_cp.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\dbg_hif.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\dbg_rdi.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\gdbhost.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="ARMulator\iwmmxt.h">
+      <Filter>Header Files\ARMulator</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\crc32.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\deflate.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\gzguts.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inffast.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inffixed.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inflate.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\inftrees.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\trees.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zconf.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zlib.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zutil.h">
+      <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="BeebEm.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Help\bbcmicro.png">
+      <Filter>Help Files</Filter>
+    </Image>
+    <Image Include="..\Help\beeb.gif">
+      <Filter>Help Files</Filter>
+    </Image>
+    <Image Include="..\Help\keyboard.jpg">
+      <Filter>Help Files</Filter>
+    </Image>
+    <Image Include="..\Help\startup.jpg">
+      <Filter>Help Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="BeebEm.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Help\65c02copro.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\accessiblity.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\armcopro.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\commandline.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\contents.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\debugger.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\disks.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\econet.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\emulation.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\faq.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\gettingstarted.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\harddisks.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\index.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\keyboard.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\m5000.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\mastercopro.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\menus.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\roms.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\rtc.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\serial.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\sources.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\speech.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\state.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\tapes.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\teletext.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\troubleshooting.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\uninstall.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\z80copro.html">
+      <Filter>Help Files</Filter>
+    </None>
+    <None Include="..\Help\z80torch.html">
+      <Filter>Help Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\CHANGES.txt">
+      <Filter>Documents</Filter>
+    </Text>
+    <Text Include="..\COPYRIGHT.txt">
+      <Filter>Documents</Filter>
+    </Text>
+    <Text Include="..\README.txt">
+      <Filter>Documents</Filter>
+    </Text>
+    <Text Include="..\README-SPROW.txt">
+      <Filter>Documents</Filter>
+    </Text>
+    <Text Include="README_UNIX.txt">
+      <Filter>Documents</Filter>
+    </Text>
+    <Text Include="README_WINDOWS.txt">
+      <Filter>Documents</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

@@ -3,7 +3,7 @@
 //
 
 
-// BEEBEM
+// BEEBEM - THIS SHOULD BE IN A SEPARATE HEADER WITH THE OTHER ONE!
 struct CColour{
     unsigned char r;
     unsigned char g;
@@ -27,7 +27,6 @@ void beeb_TapeControlCloseDialog();
 long beeb_getTableRowsCount(const char* tablename);
 const char* beeb_getTableCellData(unsigned int property, long itemID);
 
-
 long beeb_UKHandleCommand(unsigned int cmdID);
 
 int beeb_autorun(char *path);
@@ -36,3 +35,5 @@ int beeb_autorun(char *path);
 void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode);
 
 void beeb_uksetasstitle(const char* title);
+
+void WriteLog(const char *fmt, ...);

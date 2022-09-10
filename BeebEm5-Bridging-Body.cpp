@@ -26,21 +26,33 @@ extern OSStatus TCWindowCommandHandler(UInt32 cmdID);
 extern FILE *tlog;
 extern unsigned char UEFOpen;
 
+struct CColour{
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+};
+
 
 extern OSStatus UKWindowCommandHandler(UInt32 cmdID);
 
 extern BeebWin *mainWin;
 
+#ifdef OLDMAC
 extern char AutoRunPath[];
 extern void AutoRunFromPath();
+#endif
 
 extern "C" void beeb_autorun(char* path)
 {
+#ifdef OLDMAC
     strcpy(AutoRunPath, path);
+#endif
 }
 
 extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charCode)
 {
+#ifdef OLDMAC
      static int ctrl = 0x0000;
      int LastShift, LastCtrl, LastCaps, LastCmd;
      int NewShift, NewCtrl=0, NewCaps;
@@ -146,6 +158,7 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
             ctrl = keycode;
             break;
     }
+#endif
 }
 
 
@@ -160,6 +173,7 @@ extern "C" void beeb_MainCpuLoop()
     else
 #endif
     {
+#ifdef OLDMAC
         int c;
         c = 20;
 
@@ -172,6 +186,7 @@ extern "C" void beeb_MainCpuLoop()
         
         for (int i = 0; i < c; ++i)
             Exec6502Instruction();
+#endif
     }
 }
 
@@ -207,7 +222,9 @@ int i;
 
     // NEED TO TURN OFF SANDBOXING IN ENTITLEMENTS FILE TO GET LOCAL FOLDERS TO WORK
     
+#ifdef OLDMAC
   fprintf(stderr, "Version: %s %s\n", Version, VersionDate);
+#endif
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
         printf("Current working dir: %s\n", cwd);
@@ -220,7 +237,9 @@ int i;
   for (i = 0; i < argc; ++i)
     fprintf(stderr, "Arg %d = %s\n", i, argv[i]);
 
+#ifdef OLDMAC
   mainWin=new BeebWin();
+#endif
 #if 0 //ACH - main init hotkey
 
   atexit(AtExitHandler);
@@ -237,14 +256,16 @@ int i;
     
   done = 0;
   
-  mainWin->Initialise(argv[0]);
-
+#ifdef OLDMAC
+    mainWin->Initialise(argv[0]);
+    
 //  SoundReset();
-  if (SoundEnabled) SoundInit();
   if (SpeechDefault) tms5220_start();
+  if (SoundEnabled) SoundInit();
   mainWin->ResetBeebSystem(MachineType,TubeEnabled,1);
   mainWin->SetRomMenu();
   mainWin->SetSoundMenu();
+#endif
 #if 0 //ACH - main init events
 
   EventTypeSpec    eventTypes[7];
@@ -298,9 +319,10 @@ int i;
   RunApplicationEventLoopWithCooperativeThreadSupport();
 #endif
     
+#ifdef OLDMAC
     // autorun if a filepath was set
     AutoRunFromPath();
-
+#endif
     return(0);
 }
 
@@ -309,9 +331,11 @@ extern "C" int beeb_end()
 {
   fprintf(stderr, "Shutting Down ...\n");
   
+#ifdef OLDMAC
   if (tlog) fclose(tlog);
-
+    
   SoundReset();
+#endif
 
 #if 0 //ACH - symbolic hotkey
   if (PopSymbolicHotKeyMode != NULL)
@@ -327,36 +351,55 @@ extern "C" int beeb_end()
 
 extern "C" void beeb_TapeControlOpenDialog()
 {
+#ifdef OLDMAC
     TapeControlOpenDialog();
+#endif
 }
 
 
 extern "C" void beeb_TapeControlCloseDialog()
 {
+#ifdef OLDMAC
     TapeControlCloseDialog();
+#endif
 }
 
 
 extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
 {
+#ifdef OLDMAC
     char* cmdCHR = (char*)&cmdID;
     printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
     return TCWindowCommandHandler(cmdID);
+#else
+    return 0L;
+#endif
 }
     
 // user keyboard
 extern "C" long beeb_UKHandleCommand(unsigned int cmdID)
 {
+#ifdef OLDMAC
+
     char* cmdCHR = (char*)&cmdID;
     printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
     return UKWindowCommandHandler(cmdID);
+#else
+    return 0L;
+#endif
+
 }
 
 extern "C" long beeb_getTableRowsCount(const char* tablename)
 {
+#ifdef OLDMAC
+
     if (UEFOpen)
         return map_lines;
+#endif
     return 0;
+
+
 }
 
 char temp[256];
@@ -367,6 +410,8 @@ extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
 
 //    printf("%c%c%c%c data %ld", propertyCHR[3], propertyCHR[2], propertyCHR[1], propertyCHR[0], itemID);
     
+#ifdef OLDMAC
+
     switch(property)
     {
         case 'NAME' :
@@ -407,5 +452,44 @@ extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
             }
             break;
     }
+#endif
     return temp;
+}
+
+
+
+extern "C" void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode)
+{
+#ifdef OLDMAC
+  switch (eventkind)
+  {
+      case kEventRawKeyDown:
+
+          fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+          if (LastButton != 0)
+          {
+              SetBBCKeyForVKEY(keycode);
+              ShowKey(LastButton);
+          }
+  }
+#endif
+
+}
+
+
+extern "C" int beeb_HandleCommand(unsigned int cmdID)
+{
+#ifdef OLDMAC
+    char* cmdCHR = (char*)&cmdID;
+    printf("HANDLECMD %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+    return mainWin->HandleCommand(cmdID);
+#else
+    return 0;
+#endif
+    
+}
+
+
+extern "C" void WriteLog(const char *fmt, ...)
+{
 }

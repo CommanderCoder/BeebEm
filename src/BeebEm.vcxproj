@@ -1,0 +1,468 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DFAD47ED-5BDD-4ED8-B868-E03ACC223303}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>BeebEm</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)BeebEm.user.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)BeebEm.user.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)BeebEm.user.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)BeebEm.user.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(DXSDK_DIR)\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>MODET;MODE32;BEEBEM;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/source-charset:windows-1252 /execution-charset:windows-1252 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>Comctl32.lib;d3d9.lib;dsound.lib;Gdiplus.lib;Shlwapi.lib;Vfw32.lib;winmm.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>MODET;MODE32;BEEBEM;WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Comctl32.lib;d3d9.lib;dsound.lib;Gdiplus.lib;Shlwapi.lib;Vfw32.lib;winmm.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>MODET;MODE32;BEEBEM;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/source-charset:windows-1252 /execution-charset:windows-1252 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>Comctl32.lib;d3d9.lib;dsound.lib;Gdiplus.lib;Shlwapi.lib;Vfw32.lib;winmm.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>MODET;MODE32;BEEBEM;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Comctl32.lib;d3d9.lib;dsound.lib;Gdiplus.lib;Shlwapi.lib;Vfw32.lib;winmm.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="6502core.cpp" />
+    <ClCompile Include="Arm.cpp" />
+    <ClCompile Include="ArmDisassembler.cpp" />
+    <ClCompile Include="ARMulator\armdis.cpp" />
+    <ClCompile Include="ARMulator\armemu.c" />
+    <ClCompile Include="ARMulator\arminit.c" />
+    <ClCompile Include="ARMulator\armsupp.c" />
+    <ClCompile Include="ARMulator\bag.c" />
+    <ClCompile Include="ARMulator\thumbemu.c" />
+    <ClCompile Include="atodconv.cpp" />
+    <ClCompile Include="avi.cpp" />
+    <ClCompile Include="beebmem.cpp" />
+    <ClCompile Include="beebsound.cpp" />
+    <ClCompile Include="beebwin.cpp" />
+    <ClCompile Include="beebwindx.cpp" />
+    <ClCompile Include="beebwinio.cpp" />
+    <ClCompile Include="beebwinprefs.cpp" />
+    <ClCompile Include="beebwinspeech.cpp" />
+    <ClCompile Include="csw.cpp" />
+    <ClCompile Include="debug.cpp" />
+    <ClCompile Include="DebugTrace.cpp" />
+    <ClCompile Include="DirectSoundStreamer.cpp" />
+    <ClCompile Include="disc1770.cpp" />
+    <ClCompile Include="disc8271.cpp" />
+    <ClCompile Include="discedit.cpp" />
+    <ClCompile Include="econet.cpp" />
+    <ClCompile Include="filedialog.cpp" />
+    <ClCompile Include="FolderSelectDialog.cpp" />
+    <ClCompile Include="ide.cpp" />
+    <ClCompile Include="log.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Master512CoPro.cpp" />
+    <ClCompile Include="music5000.cpp" />
+    <ClCompile Include="preferences.cpp" />
+    <ClCompile Include="romconfig.cpp" />
+    <ClCompile Include="sasi.cpp" />
+    <ClCompile Include="scsi.cpp" />
+    <ClCompile Include="SelectKeyDialog.cpp" />
+    <ClCompile Include="serial.cpp" />
+    <ClCompile Include="serialdevices.cpp" />
+    <ClCompile Include="SoundStreamer.cpp" />
+    <ClCompile Include="SprowCoPro.cpp" />
+    <ClCompile Include="StringUtils.cpp" />
+    <ClCompile Include="sysvia.cpp" />
+    <ClCompile Include="TapeMap.cpp" />
+    <ClCompile Include="teletext.cpp" />
+    <ClCompile Include="tube.cpp" />
+    <ClCompile Include="uef.cpp" />
+    <ClCompile Include="uefstate.cpp" />
+    <ClCompile Include="userkybd.cpp" />
+    <ClCompile Include="UserPortBreakoutBox.cpp" />
+    <ClCompile Include="uservia.cpp" />
+    <ClCompile Include="via.cpp" />
+    <ClCompile Include="video.cpp" />
+    <ClCompile Include="XAudio2Streamer.cpp" />
+    <ClCompile Include="z80.cpp" />
+    <ClCompile Include="z80dis.cpp" />
+    <ClCompile Include="z80_support.cpp" />
+    <ClCompile Include="zlib\adler32.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\crc32.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\deflate.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\gzclose.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\gzlib.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\gzread.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\gzwrite.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\inffast.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\inflate.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\inftrees.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\trees.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\uncompr.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="zlib\zutil.c">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4131</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4131</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="6502core.h" />
+    <ClInclude Include="Arm.h" />
+    <ClInclude Include="ArmDisassembler.h" />
+    <ClInclude Include="ARMulator\acconfig.h" />
+    <ClInclude Include="ARMulator\ansidecl.h" />
+    <ClInclude Include="ARMulator\armdefs.h" />
+    <ClInclude Include="ARMulator\armdis.h" />
+    <ClInclude Include="ARMulator\armemu.h" />
+    <ClInclude Include="ARMulator\armfpe.h" />
+    <ClInclude Include="ARMulator\armopts.h" />
+    <ClInclude Include="ARMulator\armos.h" />
+    <ClInclude Include="ARMulator\bag.h" />
+    <ClInclude Include="ARMulator\config.h" />
+    <ClInclude Include="ARMulator\dbg_conf.h" />
+    <ClInclude Include="ARMulator\dbg_cp.h" />
+    <ClInclude Include="ARMulator\dbg_hif.h" />
+    <ClInclude Include="ARMulator\dbg_rdi.h" />
+    <ClInclude Include="ARMulator\gdbhost.h" />
+    <ClInclude Include="ARMulator\iwmmxt.h" />
+    <ClInclude Include="atodconv.h" />
+    <ClInclude Include="avi.h" />
+    <ClInclude Include="beebemrc.h" />
+    <ClInclude Include="beebmem.h" />
+    <ClInclude Include="beebsound.h" />
+    <ClInclude Include="beebwin.h" />
+    <ClInclude Include="csw.h" />
+    <ClInclude Include="debug.h" />
+    <ClInclude Include="DebugTrace.h" />
+    <ClInclude Include="DirectSoundStreamer.h" />
+    <ClInclude Include="disc1770.h" />
+    <ClInclude Include="disc8271.h" />
+    <ClInclude Include="discedit.h" />
+    <ClInclude Include="disctype.h" />
+    <ClInclude Include="econet.h" />
+    <ClInclude Include="ext1770.h" />
+    <ClInclude Include="filedialog.h" />
+    <ClInclude Include="FolderSelectDialog.h" />
+    <ClInclude Include="Master512CoPro.h" />
+    <ClInclude Include="ide.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="Messages.h" />
+    <ClInclude Include="ml675001.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="music5000.h" />
+    <ClInclude Include="port.h" />
+    <ClInclude Include="preferences.h" />
+    <ClInclude Include="sasi.h" />
+    <ClInclude Include="scsi.h" />
+    <ClInclude Include="SelectKeyDialog.h" />
+    <ClInclude Include="serial.h" />
+    <ClInclude Include="serialdevices.h" />
+    <ClInclude Include="SoundStreamer.h" />
+    <ClInclude Include="SprowCoPro.h" />
+    <ClInclude Include="StringUtils.h" />
+    <ClInclude Include="sysvia.h" />
+    <ClInclude Include="TapeMap.h" />
+    <ClInclude Include="TarmacGlobals.h" />
+    <ClInclude Include="teletext.h" />
+    <ClInclude Include="tube.h" />
+    <ClInclude Include="uef.h" />
+    <ClInclude Include="uefstate.h" />
+    <ClInclude Include="userkybd.h" />
+    <ClInclude Include="UserPortBreakoutBox.h" />
+    <ClInclude Include="uservia.h" />
+    <ClInclude Include="version.h" />
+    <ClInclude Include="via.h" />
+    <ClInclude Include="video.h" />
+    <ClInclude Include="XAudio2Streamer.h" />
+    <ClInclude Include="z80.h" />
+    <ClInclude Include="z80mem.h" />
+    <ClInclude Include="zlib\crc32.h" />
+    <ClInclude Include="zlib\deflate.h" />
+    <ClInclude Include="zlib\gzguts.h" />
+    <ClInclude Include="zlib\inffast.h" />
+    <ClInclude Include="zlib\inffixed.h" />
+    <ClInclude Include="zlib\inflate.h" />
+    <ClInclude Include="zlib\inftrees.h" />
+    <ClInclude Include="zlib\trees.h" />
+    <ClInclude Include="zlib\zconf.h" />
+    <ClInclude Include="zlib\zlib.h" />
+    <ClInclude Include="zlib\zutil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Help\bbcmicro.png" />
+    <Image Include="..\Help\beeb.gif" />
+    <Image Include="..\Help\keyboard.jpg" />
+    <Image Include="..\Help\startup.jpg" />
+    <Image Include="BeebEm.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="BeebEm.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\DriveMotor.snd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\HeadLoad.snd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\HeadSeek.snd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\HeadStep.snd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\HeadUnload.snd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\RelayOff.snd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\RelayOn.snd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Teletext.fnt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Help\65c02copro.html" />
+    <None Include="..\Help\accessiblity.html" />
+    <None Include="..\Help\armcopro.html" />
+    <None Include="..\Help\commandline.html" />
+    <None Include="..\Help\contents.html" />
+    <None Include="..\Help\debugger.html" />
+    <None Include="..\Help\disks.html" />
+    <None Include="..\Help\econet.html" />
+    <None Include="..\Help\emulation.html" />
+    <None Include="..\Help\faq.html" />
+    <None Include="..\Help\gettingstarted.html" />
+    <None Include="..\Help\harddisks.html" />
+    <None Include="..\Help\index.html" />
+    <None Include="..\Help\keyboard.html" />
+    <None Include="..\Help\m5000.html" />
+    <None Include="..\Help\mastercopro.html" />
+    <None Include="..\Help\menus.html" />
+    <None Include="..\Help\roms.html" />
+    <None Include="..\Help\rtc.html" />
+    <None Include="..\Help\serial.html" />
+    <None Include="..\Help\sources.html" />
+    <None Include="..\Help\speech.html" />
+    <None Include="..\Help\state.html" />
+    <None Include="..\Help\tapes.html" />
+    <None Include="..\Help\teletext.html" />
+    <None Include="..\Help\troubleshooting.html" />
+    <None Include="..\Help\uninstall.html" />
+    <None Include="..\Help\z80copro.html" />
+    <None Include="..\Help\z80torch.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\CHANGES.txt" />
+    <Text Include="..\COPYRIGHT.txt" />
+    <Text Include="..\README-SPROW.txt" />
+    <Text Include="..\README.txt" />
+    <Text Include="README_UNIX.txt" />
+    <Text Include="README_WINDOWS.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
