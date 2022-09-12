@@ -1,37 +1,35 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2006  Jon Welch
+Copyright (C) 2009  Rob O'Donnell
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 /*
  *  serialdevices.h
  *  BeebEm3
  *
  *  Created by Jon Welch on 28/08/2006.
- *  Copyright 2006 __MyCompanyName__. All rights reserved.
- *
  */
 
-extern unsigned char TouchScreenEnabled;
-extern unsigned char EthernetPortEnabled;
+#ifndef SERIALDEVICES_HEADER
+#define SERIALDEVICES_HEADER
 
-#if 0 //ACH - serial/ethernet windows
-extern WindowRef mSerialPortWindow;
-extern WindowRef mEthernetPortWindow;
-extern int mSerialHandle;
-#endif
-extern int mEthernetHandle;
-
-void EthernetPortOpenDialog();
-void EthernetPortCloseDialog();
-#if 0 //ACH - ethernet thread
-OSStatus MyEthernetPortStatusThread(void *parameter);
-OSStatus MyEthernetPortReadThread(void *parameter);
-OSStatus MyListenThread(void *parameter);
-#endif
-void EthernetPortOpen(void);
-bool EthernetPortPoll(void);
-void EthernetPortClose(void);
-void EthernetPortWrite(unsigned char data);
-unsigned char EthernetPortRead(void);
-void EthernetPortStore(unsigned char data);
-unsigned char EthernetPortGet(void);
-
+extern bool TouchScreenEnabled;
 void TouchScreenOpen(void);
 bool TouchScreenPoll(void);
 void TouchScreenClose(void);
@@ -40,16 +38,23 @@ unsigned char TouchScreenRead(void);
 void TouchScreenStore(unsigned char data);
 void TouchScreenReadScreen(bool check);
 
-#if 0 //ACH - serial thread
-void SerialPortOpenDialog();
-void SerialPortCloseDialog();
-int OpenSerialPort(const char *bsdPath);
-void CloseSerialPort(int fileDescriptor);
-OSStatus MySerialReadThread(void *parameter);
-OSStatus MySerialStatusThread(void *parameter);
-void SetSerialPortFormat(int Data_Bits, int Stop_Bits, int Parity, int RTS);
-void SetSerialPortBaud(int Tx_Rate, int Rx_Rate);
-void SerialPortWrite(unsigned char TDR);
-unsigned char SerialPortGetChar(void);
-int SerialPortIsChar(void);
+extern bool EthernetPortEnabled;
+extern bool IP232localhost;
+extern bool IP232custom;
+extern bool IP232mode;
+extern bool IP232raw;
+extern unsigned int IP232customport;
+extern char IP232customip [20];
+
+bool IP232Open(void);
+bool IP232Poll(void);
+void IP232Close(void);
+void IP232Write(unsigned char data);
+unsigned char IP232Read(void);
+extern char IPAddress[256];
+extern int PortNo;
+
+unsigned char EthernetPortGet(void);
+void EthernetPortStore(unsigned char data);
+
 #endif

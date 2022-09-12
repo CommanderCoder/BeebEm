@@ -1,3 +1,23 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2001  David Sharp
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public 
+License along with this program; if not, write to the Free 
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 //////////////////////////////////////////////////////////////////////
 // Arm.h: declarations for the CArm class.
 // Part of Tarmac
@@ -10,95 +30,70 @@
 // define constants
 
 // PSR flags
-#define N_FLAG		(1<<31)	// negative
-#define Z_FLAG		(1<<30)	// zero
-#define C_FLAG		(1<<29)	// carry
-#define V_FLAG		(1<<28)	// overflow
-#define I_FLAG		(1<<27)	// interrupt disable
-#define F_FLAG		(1<<26)	// fast interrupt disable
-#define M1_FLAG		(1<<1)	// processor mode (bit 1)
-#define M2_FLAG		(1<<0)	// processor mode (bit 2)
+constexpr unsigned int N_FLAG  = 1U << 31; // negative
+constexpr unsigned int Z_FLAG  = 1U << 30; // zero
+constexpr unsigned int C_FLAG  = 1U << 29; // carry
+constexpr unsigned int V_FLAG  = 1U << 28; // overflow
+constexpr unsigned int I_FLAG  = 1U << 27; // interrupt disable
+constexpr unsigned int F_FLAG  = 1U << 26; // fast interrupt disable
+constexpr unsigned int M1_FLAG = 1U << 1;  // processor mode (bit 1)
+constexpr unsigned int M2_FLAG = 1U << 0;  // processor mode (bit 2)
 
 // masks for PSR
-#define PSR_MASK	(N_FLAG | Z_FLAG | C_FLAG | V_FLAG | I_FLAG | F_FLAG | M1_FLAG | M2_FLAG)
-#define PC_MASK		(~PSR_MASK)
+constexpr unsigned int MODE_FLAGS = M1_FLAG | M2_FLAG;
+constexpr unsigned int INTR_FLAGS = I_FLAG | F_FLAG;
+
+constexpr unsigned int PSR_MASK = N_FLAG | Z_FLAG | C_FLAG | V_FLAG | INTR_FLAGS | MODE_FLAGS;
+constexpr unsigned int PC_MASK  = ~PSR_MASK;
 
 // processor modes for bits 0-1 of PSR
-#define USR_MODE	0		// user
-#define FIQ_MODE	1		// fast interrupt request
-#define IRQ_MODE	2		// interrupt request
-#define SVC_MODE	3		// supervisor
+constexpr int USR_MODE = 0; // user
+constexpr int FIQ_MODE = 1; // fast interrupt request
+constexpr int IRQ_MODE = 2; // interrupt request
+constexpr int SVC_MODE = 3; // supervisor
 
 // hardware vector addresses
-#define RESET_VECTOR					0x0000000
-#define UNDEFINED_INSTRUCTION_VECTOR	0x0000004
-#define SOFTWARE_INTERRUPT_VECTOR		0x0000008
-#define PREFETCH_ABORT_VECTOR			0x000000c
-#define DATA_ABORT_VECTOR				0x0000010
-#define ADDRESS_EXCEPTION_VECTOR		0x0000014
-#define INTERRUPT_REQUEST_VECTOR		0x0000018
-#define FAST_INTERRUPT_REQUEST_VECTOR	0x000001c
+constexpr unsigned int RESET_VECTOR                  = 0x00;
+constexpr unsigned int UNDEFINED_INSTRUCTION_VECTOR  = 0x04;
+constexpr unsigned int SOFTWARE_INTERRUPT_VECTOR     = 0x08;
+constexpr unsigned int PREFETCH_ABORT_VECTOR         = 0x0c;
+constexpr unsigned int DATA_ABORT_VECTOR             = 0x10;
+constexpr unsigned int ADDRESS_EXCEPTION_VECTOR      = 0x14;
+constexpr unsigned int INTERRUPT_REQUEST_VECTOR      = 0x18;
+constexpr unsigned int FAST_INTERRUPT_REQUEST_VECTOR = 0x1c;
 
 // ARM shift types operand fields
-#define LSL			0
-#define LSR			1
-#define ASR			2
-#define ROR			3
+constexpr int LSL = 0;
+constexpr int LSR = 1;
+constexpr int ASR = 2;
+constexpr int ROR = 3;
 
 typedef unsigned int Reg;
 typedef unsigned int Word;
 typedef unsigned char Byte;
-#define MODEFLAGS	(M1_FLAG | M2_FLAG)
-#define INTRFLAGS	(I_FLAG | F_FLAG)
-#define PSRMASK		(N_FLAG|Z_FLAG|C_FLAG|V_FLAG | MODEFLAGS | INTRFLAGS)
-#define PCMASK		(~PSRMASK)
 
-// signals are a block of flags for RedSquirrel to allow IOC to adjust/examine interrupts
-// "Each device can call IOC.irqa_interrupt(mask), IOC.irqb_interrupt(mask) or
-// IOC.firq_interrupt(mask) to tell IOC which interrupt has occurred. IOC then calls
-// ARM.signal_fast_interrupt(state) or ARM.signal_interrupt(state) as appropriate which
-// sets or clears a bit in signals word (iff that interrupt is enabled). If any signal is
-// set the arm will handle the interrupt at the end of the current instruction." - GB
+// dynamic profiling options
+constexpr bool dynamicProfilingExceptionFreq = false;
+constexpr bool dynamicProfilingRegisterUse = false;
+constexpr bool dynamicProfilingConditionalExecution = false;
+constexpr bool dynamicProfilingCoprocessorUse = true;
 
-union Signals
+class CArm
 {
-	uint32 all;
-	struct
-	{
-		uint8 step_once;			// UI wants to stop
-		uint8 interrupt;			// interrupt may have occurred
-		uint8 fast_interrupt;		// fast interrupt may have occurred
-		uint8 unused;			
+public:
+	enum class InitResult {
+		Success,
+		FileNotFound
 	};
-};
-
-extern int Enable_Arm;
-extern int ArmTube;
-
-class CArm 
-{
-
-	void outputSomeNonsenseCPP();
 
 // functions
 public:
-	int GetMode();
-	Reg GetUserRegister(unsigned int reg);
-	void SetMode(int mode);
-	Reg GetUserReg(int reg);
-	Reg GetFirqReg(int reg);
-	Reg GetIrqReg(int reg);
-	Reg GetSvcReg(int reg);
-	Reg GetReg(int reg);
-	void set_stepping(bool state);
-	Word current_pc();
-	void stop_at(Word address);
-	void ResetState();
-	void signal_fast_interrupt(bool state);
-	void signal_interrupt(bool state);
-	
+	void dynamicProfilingCoprocessorUsage(uint32 currentInstruction);
+	void dynamicProfilingExceptionFrequencyReport();
+	void dynamicProfilingExceptionFrequency(char *exceptionName, uint32& counter);
+
 	uint32 pc;
-	inline void performBranch();	
+	inline void performBranch();
 
 	// logic
 	inline uint32 eorOperator(uint32 operand1, uint32 operand2);
@@ -199,6 +194,7 @@ public:
 	inline void exceptionDataAbort();
 
 	// control
+	InitResult init(const char *ROMPath);
 	void exec(int count);
 	void run(void);
 	void reset();
@@ -211,16 +207,13 @@ public:
 	// construct / destruct
 	CArm();
 	virtual ~CArm();
-	
-	// variables
-	Signals signals;
-	bool pending_interrupt;
-	bool pending_fast_interrupt;
-	int instr_count;
-	Word stop_address;
-	
+
 private:
 	uint32 lastCopro;				// num of instructions executed since last copro instruction profiled
+	void dynamicProfilingConditionalExe(uint32 currentInstruction);
+	void dynamicProfilingConditionalExeReport();
+	void dynamicProfilingRegisterUsageReport();
+	void dynamicProfilingRegisterUsage(uint regNumber, bool get);
 	
 	// variables
 	uint processorMode;				// in bits 0-1
@@ -249,10 +242,22 @@ private:
 	bool keepRunning;				// keep calling run()
 //	CArmDecoder decoder;			// create instance of disassembler
 	uint32 executionCount;
+	uint32 executionCountThresh;	// executionCount value to start dumping diss at
 	uint32 previousProcessorMode;
 	uint32 modeCounter;
 	uint32 modeTotal[4];
-	int iocounter;
+	uint32 resetCounter;
+	uint32 undefCounter;
+	uint32 swiCounter;
+	uint32 prefAbortCounter;
+	uint32 dataAbortCounter;
+	uint32 addrExcepCounter;
+	uint32 irqCounter;
+	uint32 fiqCounter;
+	uint32 exceptionLastExecutionCount;
+	uint32 registerSetCounter[16];
+	uint32 registerGotCounter[16];
+	uint32 conditionallyExecuted[16];
+	uint32 conditionallyNotExecuted[16];
 	// END OF TEST ENVIRONMENT VARIABLES
-
 };

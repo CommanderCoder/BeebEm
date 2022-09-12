@@ -1,3 +1,23 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2001  David Sharp
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public 
+License along with this program; if not, write to the Free 
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 //////////////////////////////////////////////////////////////////////
 // ArmDisassembler.cpp: implementation of the CArmDisassembler class.
 // Part of Tarmac
@@ -45,14 +65,11 @@ char *decodeMultiplyOrDataProcessing(uint32 address, uint32 instruction, char *b
 		// multiply
 		return decodeMultiply(address, instruction, buff);
 	}
-//	else
-//	{
-    // data processing
-    return decodeDataProcessing(address, instruction, buff);
-//	}
-
-//	strcpy(buff, "ERROR DISASSEMBLING IN decodeMultiplyOrDataProcessing()");
-//	return buff;
+	else
+	{
+		// data processing
+		return decodeDataProcessing(address, instruction, buff);
+	}
 }
 
 char *decodeSingleDataSwapOrDataProcessing(uint32 address, uint32 instruction, char *buff)
@@ -63,20 +80,17 @@ char *decodeSingleDataSwapOrDataProcessing(uint32 address, uint32 instruction, c
 		// single data swap
 		return decodeSingleDataSwap(address, instruction, buff);
 	}
-//	else
-//	{
+	else
+	{
 		// data processing
 		return decodeDataProcessing(address, instruction, buff);
-//	}
-//
-//	strcpy(buff, "ERROR DISASSEMBLING IN decodeSingleDataSwapOrDataProcessing()");
-//	return buff;
+	}
 }
 
-char *decodeDataProcessing(uint32 address, uint32 instruction, char *buff)
+char *decodeDataProcessing(uint32 /* address */, uint32 instruction, char *buff)
 {
 	// table of opcode names
-	const char *opcodeNames[16] =
+	static const char* const opcodeNames[16] =
 	{
 		"and", "eor", "sub", "rsb",
 		"add", "adc", "sbc", "rsc",
@@ -84,20 +98,20 @@ char *decodeDataProcessing(uint32 address, uint32 instruction, char *buff)
 		"orr", "mov", "bic", "mvn"
 	};
 
-	bool useRd[16] =
+	static const bool useRd[16] =
 	{
-		TRUE, TRUE, TRUE, TRUE,
-		TRUE, TRUE, TRUE, TRUE,
-		FALSE, FALSE, FALSE, FALSE,
-		TRUE, TRUE, TRUE, TRUE
+		true,  true,  true,  true,
+		true,  true,  true,  true,
+		false, false, false, false,
+		true,  true,  true,  true
 	};
 
-	bool useRn[16] =
+	static const bool useRn[16] =
 	{
-		TRUE, TRUE, TRUE, TRUE,
-		TRUE, TRUE, TRUE, TRUE,
-		TRUE, TRUE, TRUE, TRUE,
-		TRUE, FALSE, TRUE, FALSE
+		true,  true,  true,  true,
+		true,  true,  true,  true,
+		true,  true,  true,  true,
+		true,  false, true,  false
 	};
 
 	// deduce opcode for specific data processing instruction
@@ -110,12 +124,12 @@ char *decodeDataProcessing(uint32 address, uint32 instruction, char *buff)
 
 	// table of which flags don't need explicit S adding
 	// so that S is not added for tst, teq, cmp and cmn
-	bool opcodeSetsFlagsExplicitly[16] =
+	static const bool opcodeSetsFlagsExplicitly[16] =
 	{
-		TRUE, TRUE, TRUE, TRUE,
-		TRUE, TRUE, TRUE, TRUE,
-		FALSE, FALSE, FALSE, FALSE,
-		TRUE, TRUE, TRUE, TRUE
+		true,  true,  true,  true,
+		true,  true,  true,  true,
+		false, false, false, false,
+		true,  true,  true,  true,
 	};
 
 	// test S flag (set PSR flags), based on bit 20 and whether this is implicit in the opcode
@@ -189,7 +203,7 @@ char *decodeDataProcessing(uint32 address, uint32 instruction, char *buff)
 			strcat(buff, ",");
 
 			// table of shift mnemonics
-			const char *shiftMnemonic[4] =
+			static const char* const shiftMnemonic[4] =
 			{
 				"lsl", "lsr", "asr", "ror"
 			};
@@ -226,7 +240,7 @@ char *decodeDataProcessing(uint32 address, uint32 instruction, char *buff)
 	return buff;
 }
 
-char *decodeSingleDTImmOffsetPostIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeSingleDTImmOffsetPostIndex(uint32 /* address */, uint32 instruction, char *buff)
 {
 	
 	// decode whether load or store from bit 20
@@ -286,7 +300,7 @@ char *decodeSingleDTImmOffsetPostIndex(uint32 address, uint32 instruction, char 
 	return buff;
 }
 
-char *decodeSingleDTImmOffsetPreIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeSingleDTImmOffsetPreIndex(uint32 /* address */, uint32 instruction, char *buff)
 {
 	// decode whether load or store from bit 20
 	if( getBit(instruction, 20) )
@@ -348,7 +362,7 @@ char *decodeSingleDTImmOffsetPreIndex(uint32 address, uint32 instruction, char *
 	return buff;
 }
 
-char *decodeSingleDTRegOffsetPostIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeSingleDTRegOffsetPostIndex(uint32 /* address */, uint32 instruction, char *buff)
 {
 	// decode whether load or store from bit 20
 	if( getBit(instruction, 20) )
@@ -402,7 +416,7 @@ char *decodeSingleDTRegOffsetPostIndex(uint32 address, uint32 instruction, char 
 	uint32 imm = getField(instruction, 7,11);
 
 	// table of shift mnemonics
-	const char *shiftMnemonic[4] =
+	static const char* const shiftMnemonic[4] =
 	{
 		"lsl", "lsr", "asr", "ror"
 	};
@@ -431,7 +445,7 @@ char *decodeSingleDTRegOffsetPostIndex(uint32 address, uint32 instruction, char 
 	return buff;
 }
 
-char *decodeSingleDTRegOffsetPreIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeSingleDTRegOffsetPreIndex(uint32 /* address */, uint32 instruction, char *buff)
 {
 	// decode whether load or store from bit 20
 	if( getBit(instruction, 20) )
@@ -481,12 +495,12 @@ char *decodeSingleDTRegOffsetPreIndex(uint32 address, uint32 instruction, char *
 	uint32 imm = getField(instruction, 7,11);
 
 	// table of shift mnemonics
-	const char *shiftMnemonic[4] =
+	char *shiftMnemonic[4] =
 	{
 		"lsl", "lsr", "asr", "ror"
 	};
 
-	const char *shiftType = shiftMnemonic[ getField(instruction, 5,6) ];
+	char *shiftType = shiftMnemonic[ getField(instruction, 5,6) ];
 
 	// if not LSL #0
 	if( !( (strcmp(shiftType, "lsl") == 0) && imm == 0) )
@@ -520,7 +534,7 @@ char *decodeSingleDTRegOffsetPreIndex(uint32 address, uint32 instruction, char *
 	return buff;
 }
 
-char *decodeBlockDTPostIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeBlockDTPostIndex(uint32 /* address */, uint32 instruction, char *buff)
 {
 	
 	// decode whether to load from or store to memory from bit 20
@@ -585,7 +599,7 @@ char *decodeBlockDTPostIndex(uint32 address, uint32 instruction, char *buff)
 	return buff;
 }
 
-char *decodeBlockDTPreIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeBlockDTPreIndex(uint32 /* address */, uint32 instruction, char *buff)
 {
 	// decode whether to load from or store to memory from bit 20
 	if( getBit(instruction, 20) )
@@ -656,13 +670,12 @@ char *decodeRegisterList(uint32 instruction)
 	uint8 run = 0;
 	char registerNumber[12];
 
-	bool commaNeeded = FALSE;	// comman not needed
+	bool commaNeeded = false;	// comma not needed
 	strcpy(registerList, "");
 	
 	// for each of the 16 registers, r0 to r15
 	for(uint8 regNumber=0; regNumber<16; regNumber++)
 	{
-
 		if(run)
 		{
 			if(getBit(instruction, regNumber) )
@@ -686,7 +699,7 @@ char *decodeRegisterList(uint32 instruction)
 					sprintf(registerNumber, "r%d",regNumber);
 					strcat(registerList, registerNumber);
 
-					commaNeeded = TRUE;
+					commaNeeded = true;
 					run = 0;
 				}
 			}
@@ -696,7 +709,7 @@ char *decodeRegisterList(uint32 instruction)
 				sprintf(registerNumber, "r%d",regNumber);
 				strcat(registerList, registerNumber);
 				run = 0;
-				commaNeeded =TRUE;
+				commaNeeded = true;
 			}
 		}
 		else
@@ -727,7 +740,7 @@ char *decodeRegisterList(uint32 instruction)
 					strcat(registerList, registerNumber);
 					
 					run = 0;
-					commaNeeded = TRUE;
+					commaNeeded = true;
 				}
 			}
 		}
@@ -801,30 +814,30 @@ char *decodeBranchWithLink(uint32 address, uint32 instruction, char *buff)
 	return buff;
 }
 
-char *decodeCoProDTPreIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeCoProDTPreIndex(uint32 /* address */, uint32 /* instruction */, char * buff)
 {
 	strcpy(buff, "CO PRO DATA TRANSFER PRE INDEX");
 	return buff;
 }
 
-char *decodeCoProDTPostIndex(uint32 address, uint32 instruction, char *buff)
+char *decodeCoProDTPostIndex(uint32 /* address */, uint32 /* instruction */, char * buff)
 {
 	strcpy(buff, "CO PRO DATA TRANSFER POST INDEX");
 	return buff;
 }
 
-char *decodeCoProRegTransferOrDataOperation(uint32 address, uint32 instruction, char *buff)
+char *decodeCoProRegTransferOrDataOperation(uint32 /* address */, uint32 /* instruction */, char * buff)
 {
 	strcpy(buff, "CO PRO REG TRANSFER OR DATA OP");
 	return buff;
 }
 
-char *decodeSoftwareInterrupt(uint32 address, uint32 instruction, char *buff)
+char *decodeSoftwareInterrupt(uint32 /* address */, uint32 instruction, char *buff)
 {
 	strcpy(buff, "swi");
 	strcat(buff, decodeConditionCode(instruction));
 	
-	const char *swiList[] = { "WriteC", "WriteS", "Write0", "NewLine", "ReadC", "CLI", "Byte",
+	char *swiList[] = { "WriteC", "WriteS", "Write0", "NewLine", "ReadC", "CLI", "Byte",
 					   "Word", "File", "Args", "BGet", "BPut", "Multiple", "Open",
 					   "ReadLine", "Control", "GetEnv", "Exit", "SetEnv",
 					   "IntOn", "IntOff", "CallBack", "EnterOS", "BreakPT",
@@ -860,16 +873,16 @@ char *decodeSoftwareInterrupt(uint32 address, uint32 instruction, char *buff)
 	return buff;
 }
 
-char *decodeMultiply(uint32 address, uint32 instruction, char *buff)
+char *decodeMultiply(uint32 /* address */, uint32 instruction, char *buff)
 {
-	bool accumulate = FALSE;
+	bool accumulate = false;
 
 	// decide whether additional accumulate function from bit 21
 	if( getBit(instruction, 21) )
 	{
 		// multiply and accumulate
 		strcpy(buff, "mla");
-		accumulate = TRUE;		
+		accumulate = true;
 	}
 	else
 	{
@@ -917,7 +930,7 @@ char *decodeMultiply(uint32 address, uint32 instruction, char *buff)
 	return buff;
 }
 
-char *decodeSingleDataSwap(uint32 address, uint32 instruction, char *buff)
+char *decodeSingleDataSwap(uint32 /* address */, uint32 instruction, char *buff)
 {
 	// word or byte quantity, byte if bit 22 set
 	if(getBit(instruction,22))
@@ -953,10 +966,10 @@ char *decodeSingleDataSwap(uint32 address, uint32 instruction, char *buff)
 	return buff;
 }
 
-const char *decodeConditionCode(uint32 instruction)
+char *decodeConditionCode(uint32 instruction)
 {
 	// table of condition code meanings, note that as convention dictates, AL is blank
-	const char *conditionCodes[16] =
+	char *conditionCodes[16] =
 	{
 		"eq", "ne", "cs", "cc",
 		"mi", "pl", "vs", "vc",

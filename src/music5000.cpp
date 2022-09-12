@@ -24,7 +24,14 @@ Boston, MA  02110-1301, USA.
 // Mike Wyatt - Jan 2016
 //
 
+#ifdef BEEBWIN
 #include <windows.h>
+#else
+#define UINT8 uint8_t
+#define INT16 int16_t
+#define INT int32_t //maybe
+#define UINT32 uint32_t
+#endif
 #include <stdio.h>
 #include "SoundStreamer.h"
 #include "music5000.h"

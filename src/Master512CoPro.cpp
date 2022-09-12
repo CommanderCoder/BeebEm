@@ -3761,7 +3761,9 @@ void Master512CoPro::LoadBIOS()
 	memset(m_Memory, 0, 0x100000);
 
 	char path[256];
-	strcpy(path, mainWin->GetUserDataPath());
+#ifdef BEEBWIN
+    strcpy(path, mainWin->GetUserDataPath());
+#endif
 	strcat(path, "BeebFile/bios.rom");
 
 	FILE* f = fopen(path, "rb");
@@ -3776,8 +3778,11 @@ void Master512CoPro::LoadBIOS()
 	}
 	else
 	{
+#ifdef BEEBWIN
 		mainWin->Report(MessageType::Error, "Could not open BIOS image file:\n %s", path);
-	}
+#endif
+        
+    }
 }
 
 void Master512CoPro::DoDMA()

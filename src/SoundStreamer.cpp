@@ -23,8 +23,10 @@ Boston, MA  02110-1301, USA.
 
 #include "SoundStreamer.h"
 #include "main.h"
+#ifdef BEEBWIN
 #include "DirectSoundStreamer.h"
 #include "XAudio2Streamer.h"
+#endif
 
 std::list<SoundStreamer*> SoundStreamer::m_streamers;
 
@@ -54,6 +56,7 @@ void SoundStreamer::PauseAll()
 
 SoundStreamer *CreateSoundStreamer(int samplerate, int bits_per_sample, int channels)
 {
+#ifdef BEEBWIN
 	if (SoundConfig::Selection == SoundConfig::XAudio2)
 	{
 		SoundStreamer *pSoundStreamer = new XAudio2Streamer();
@@ -86,4 +89,7 @@ SoundStreamer *CreateSoundStreamer(int samplerate, int bits_per_sample, int chan
 
 		return nullptr;
 	}
+#else
+    return nullptr;
+#endif
 }

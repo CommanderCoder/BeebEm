@@ -1,1230 +1,1318 @@
-/*
-Serial/Cassette Support for BeebEm
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2001  Richard Gellman
+Copyright (C) 2004  Mike Wyatt
 
-Written by Richard Gellman - March 2001
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
-You may not distribute this entire file separate from the whole BeebEm distribution.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You may use sections or all of this code for your own uses, provided that:
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
 
-1) It is not a separate file in itself.
-2) This copyright message is included
-3) Acknowledgement is made to the author, and any aubsequent authors of additional code.
-
-The code may be modified as required, and freely distributed as such authors see fit,
-provided that:
-
-1) Acknowledgement is made to the author, and any subsequent authors of additional code
-2) Indication is made of modification.
-
-Absolutely no warranties/guarantees are made by using this code. You use and/or run this code
-at your own risk. The code is classed by the author as "unlikely to cause problems as far as
-can be determined under normal use".
-
--- end of legal crap - Richard Gellman :) */
-
+// Serial/Cassette Support for BeebEm
+// Written by Richard Gellman - March 2001
+//
 // P.S. If anybody knows how to emulate this, do tell me - 16/03/2001 - Richard Gellman
+//
+// See https://beebwiki.mdfs.net/Acorn_cassette_format
+// and http://electrem.emuunlim.com/UEFSpecs.html
 
-// Need to comment out uef calls and remove uef.lib from project in
-// order to use VC profiling.
-//#define PROFILING
-
+#ifdef BEEBWIN
+#include <windows.h>
+#include <process.h>
+#else
+#define EVENPARITY 1
+#define ODDPARITY 0
+#define NOPARITY 2
+#endif
 #include <stdio.h>
+
+#include <algorithm>
+#include <string>
+
 #include "6502core.h"
 #include "uef.h"
 #include "main.h"
 #include "serial.h"
 #include "beebsound.h"
 #include "beebwin.h"
+#include "beebemrc.h"
 #include "debug.h"
 #include "uefstate.h"
 #include "csw.h"
 #include "serialdevices.h"
+#include "debug.h"
+#include "log.h"
+#include "TapeMap.h"
 
-#define CASSETTE 0  // Device in 
-#define RS423 1		// use defines
+// MC6850 control register bits
+constexpr unsigned char MC6850_CONTROL_COUNTER_DIVIDE   = 0x03;
+constexpr unsigned char MC6850_CONTROL_MASTER_RESET     = 0x03;
+constexpr unsigned char MC6850_CONTROL_WORD_SELECT      = 0x1c;
+constexpr unsigned char MC6850_CONTROL_TRANSMIT_CONTROL = 0x60;
+constexpr unsigned char MC6850_CONTROL_RIE              = 0x80;
 
-unsigned char Cass_Relay=0; // Cassette Relay state
-unsigned char SerialChannel=CASSETTE; // Device in use
+enum class SerialDevice : unsigned char {
+	Cassette,
+	RS423
+};
 
-unsigned char RDR,TDR; // Receive and Transmit Data Registers
-unsigned char RDSR,TDSR; // Receive and Transmit Data Shift Registers (buffers)
+static bool CassetteRelay = false; // Cassette Relay state
+static SerialDevice SerialChannel = SerialDevice::Cassette; // Device in use
+
+static unsigned char RDR, TDR; // Receive and Transmit Data Registers
+static unsigned char RDSR, TDSR; // Receive and Transmit Data Shift Registers (buffers)
 unsigned int Tx_Rate=1200,Rx_Rate=1200; // Recieve and Transmit baud rates.
 unsigned char Clk_Divide=1; // Clock divide rate
 
-unsigned char ACIA_Status,ACIA_Control; // 6850 ACIA Status.& Control
-unsigned char SP_Control; // SERPROC Control;
+unsigned char ACIA_Status, ACIA_Control; // 6850 ACIA Status & Control
+static unsigned char SerialULAControl; // Serial ULA / SERPROC control register;
 
-unsigned char CTS,RTS,FirstReset=1;
-unsigned char DCD=0,DCDI=1,ODCDI=1,DCDClear=0; // count to clear DCD bit
+static bool RTS;
+static bool FirstReset = true;
+static bool DCD = false;
+static bool DCDI = true;
+static bool ODCDI = true;
+static unsigned char DCDClear = 0; // count to clear DCD bit
 
-unsigned char Parity,Stop_Bits,Data_Bits,RIE,TIE; // Receive Intterrupt Enable
-												  // and Transmit Interrupt Enable
+static unsigned char Parity, StopBits, DataBits;
+
+bool RIE, TIE; // Receive Interrupt Enable and Transmit Interrupt Enable
+
 unsigned char TxD,RxD; // Transmit and Receive destinations (data or shift register)
 
-char UEFTapeName[256]; // Filename of current tape file
-unsigned char UEFOpen=0;
+static UEFFileWriter UEFWriter;
+static char TapeFileName[256]; // Filename of current tape file
 
-unsigned int Baud_Rates[8]={19200,1200,4800,150,9600,300,2400,75};
+static UEFFileReader UEFReader;
+static bool UEFFileOpen = false;
 
-unsigned char OldRelayState=0;
+struct WordSelectBits
+{
+	unsigned char DataBits;
+	unsigned char Parity;
+	unsigned char StopBits;
+};
+
+static const WordSelectBits WordSelect[8] =
+{
+	{ 7, EVENPARITY, 2 },
+	{ 7, ODDPARITY,  2 },
+	{ 7, EVENPARITY, 1 },
+	{ 7, ODDPARITY,  1 },
+	{ 8, NOPARITY,   2 },
+	{ 8, NOPARITY,   1 },
+	{ 8, EVENPARITY, 1 },
+	{ 8, ODDPARITY,  1 },
+};
+
+struct TransmitterControlBits
+{
+	bool RTS;
+	bool TIE;
+};
+
+static const TransmitterControlBits TransmitterControl[8] =
+{
+	{ false, false },
+	{ false, true  },
+	{ true,  false },
+	{ false, false },
+};
+
+static const unsigned int Baud_Rates[8] = {
+	19200, 1200, 4800, 150, 9600, 300, 2400, 75
+};
+
+bool OldRelayState = false;
 CycleCountT TapeTrigger=CycleCountTMax;
-#define TAPECYCLES 357 // 2000000/5600 - 5600 is normal tape speed
+constexpr int TAPECYCLES = 2000000 / 5600; // 5600 is normal tape speed
 
-int UEF_BUF=0,NEW_UEF_BUF=0;
-int TapeClock=0,OldClock=0;
+static int UEF_BUF=0,NEW_UEF_BUF=0;
+int TapeClock = 0;
+int OldClock = 0;
 int TapeClockSpeed = 5600;
-int UnlockTape=1;
+bool UnlockTape = true;
 
-// Tape control variables
-int map_lines;
-char map_desc[MAX_MAP_LINES][40];
-int map_time[MAX_MAP_LINES];
+// Tape control dialog box variables
+static std::vector<TapeMapEntry> TapeMap;
 bool TapeControlEnabled = false;
 bool TapePlaying = true;
 bool TapeRecording = false;
-void TapeControlOpenFile(char *file_name);
-void TapeControlUpdateCounter(int tape_time);
-void TapeControlStopRecording(bool RefreshControl);
+#ifdef BEEBWIN
+static HWND hwndTapeControl;
+static HWND hwndMap;
+#endif
+static void TapeControlUpdateCounter(int tape_time);
+static void TapeControlRecord();
+static void TapeControlStopRecording(bool RefreshControl);
 
 // This bit is the Serial Port stuff
-unsigned char SerialPortEnabled;
+bool SerialPortEnabled;
 unsigned char SerialPort;
-unsigned char SerialPortOpen;
-unsigned int SerialBuffer = 0, SerialWriteBuffer = 0;
 
-FILE *serlog;
-
-
-extern "C" void swift_SelectItem(const char* tableid, long numberOfSelections, DataBrowserItemID *listOfSelections);
-extern "C" void swift_UEFNewFile(const char* filename);
-extern "C" long swift_Alert(const char* line1, const char* line2, bool hasCancel);
-extern "C" void swift_UpdateItem(const char* menu, long numberOfItems);
-
-WindowRef mTCWindow = NULL; 
-
-void SetACIAStatus(unsigned char bit) {
-	ACIA_Status|=1<<bit;
-}
-
-void ResetACIAStatus(unsigned char bit) {
-	ACIA_Status&=~(1<<bit);
-}
-
-void Write_ACIA_Control(unsigned char CReg) {
-	unsigned char bit;
-	if (DebugEnabled) {
-		char info[200];
-		sprintf(info, "Serial: Write ACIA control %02X", (int)CReg);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
-	}
-
-	ACIA_Control=CReg; // This is done for safe keeping
-	// Master reset
-	if ((CReg & 3)==3) {
-		ACIA_Status&=8; ResetACIAStatus(7); SetACIAStatus(2);
-		intStatus&=~(1<<serial); // Master reset clears IRQ
-		if (FirstReset==1) { 
-			CTS=1; SetACIAStatus(3);
-			FirstReset=0; RTS=1; 
-		} // RTS High on first Master reset.
-		ResetACIAStatus(2); DCD=0; DCDI=0; DCDClear=0;
-		SetACIAStatus(1); // Xmit data register empty
-		TapeTrigger=TotalCycles+TAPECYCLES;
-	}
-	// Clock Divide
-	if ((CReg & 3)==0) Clk_Divide=1;
-	if ((CReg & 3)==1) Clk_Divide=16;
-	if ((CReg & 3)==2) Clk_Divide=64;
-
-	// Parity, Data, and Stop Bits.
-	Parity=2-((CReg & 4)>>2);
-	Stop_Bits=2-((CReg & 8)>>3);
-	Data_Bits=7+((CReg & 16)>>4);
-	if ((CReg & 28)==16) { Stop_Bits=2; Parity=0; }
-	if ((CReg & 28)==20) { Stop_Bits=1; Parity=0; }
-	// Transmission control
-	TIE=(CReg & 32)>>5;
-	RTS=(CReg & 64)>>6;
-	RIE=(CReg & 128)>>7;
-	bit=(CReg & 96)>>5;
-	if (bit==3) { RTS=0; TIE=0; }
-	// Seem to need an interrupt immediately for tape writing when TIE set
-	if ( (SerialChannel == CASSETTE) && TIE && (Cass_Relay == 1) ) {
-		intStatus|=1<<serial;
-		SetACIAStatus(7);
-	}
-
-#if 0 // ACH - serial port
-	// Change serial port settings
-	if ((SerialChannel==RS423) && (SerialPortEnabled) && (mSerialHandle != -1) ) {
-		SetSerialPortFormat(Data_Bits, Stop_Bits, Parity, RTS);
-	}
+#ifdef BEEBWIN
+static HANDLE hSerialThread = nullptr;
+static HANDLE hStatThread = nullptr;
+static HANDLE hSerialPort = INVALID_HANDLE_VALUE; // Serial port handle
 #endif
-    
-}
 
-void Write_ACIA_Tx_Data(unsigned char Data) {
-	if (DebugEnabled) {
-		char info[200];
-		sprintf(info, "Serial: Write ACIA Tx %02X", (int)Data);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
-	}
+static char nSerialPort[5]; // Serial port name
+static const char *pnSerialPort = nSerialPort;
+bool SerialPortOpen = false; // Indicates status of serial port (on the host)
+static unsigned int SerialBuffer=0,SerialWriteBuffer=0;
+static DWORD BytesIn,BytesOut;
+static DWORD dwCommEvent;
+#ifdef BEEBWIN
+//https://docs.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-overlapped
+static OVERLAPPED olSerialPort={0},olSerialWrite={0},olStatus={0};
+#endif
+volatile bool bSerialStateChanged = false;
+static volatile bool bWaitingForData = false;
+static volatile bool bWaitingForStat = false;
+static volatile bool bCharReady = false;
 
-	intStatus&=~(1<<serial);
-	ResetACIAStatus(7);
-	
-/*
- * 10/09/06
- * JW - A bug in swarm loader overwrites the rs423 output buffer counter
- * Unless we do something with the data, the loader hangs so just swallow it (see below)
- */
-
-	if ( (SerialChannel==CASSETTE) || ((SerialChannel==RS423) && (!SerialPortEnabled)) )
-    {
-		ResetACIAStatus(1);
-		TDR=Data;
-		TxD=1;
-		int baud = Tx_Rate * ((Clk_Divide==1) ? 64 : (Clk_Divide==64) ? 1 : 4);
-		TapeTrigger=TotalCycles + 2000000/(baud/8) * TapeClockSpeed/5600;
-	}
-
-
-#if 0 // ACH - serial port
-    if ((SerialChannel==RS423) && (SerialPortEnabled))
+void SerialACIAWriteControl(unsigned char Value)
+{
+	if (DebugEnabled)
 	{
-		
-		if (mSerialHandle != -1)
-		{
-			ResetACIAStatus(1);
-			TDR = Data;
-			TxD = 1;
-			int baud = Tx_Rate * ((Clk_Divide==1) ? 64 : (Clk_Divide==64) ? 1 : 4);
-			TapeTrigger=TotalCycles + 2000000/(baud/8) * TapeClockSpeed/5600;
-//			fprintf(stderr, "Waiting %f cycles\n", 2000000/(baud/8) * TapeClockSpeed/5600.0);
-		}
-		else
-		{
-			if (ACIA_Status & 2) 
-			{
-				ResetACIAStatus(1);
-				SerialWriteBuffer=Data;
-
-				if (TouchScreenEnabled)
-				{
-					TouchScreenWrite(Data);
-				}
-
-				if (EthernetPortEnabled)
-				{
-					EthernetPortWrite(Data);
-				}
-				
-				SetACIAStatus(1);
-			}
-		}
+		DebugDisplayTraceF(DebugType::Serial, true,
+		                   "Serial: Write ACIA control %02X", (int)Value);
 	}
+
+	ACIA_Control = Value; // This is done for safe keeping
+
+	// Master reset - clear all bits in the status register, except for
+	// external conditions on CTS and DCD.
+	if ((Value & MC6850_CONTROL_COUNTER_DIVIDE) == MC6850_CONTROL_MASTER_RESET)
+	{
+		ACIA_Status &= MC6850_STATUS_CTS;
+		ACIA_Status |= MC6850_STATUS_DCD;
+
+		// Master reset clears IRQ
+		ACIA_Status &= ~MC6850_STATUS_IRQ;
+		intStatus &= ~(1 << serial);
+
+		if (FirstReset)
+		{
+			// RTS High on first Master reset.
+			ACIA_Status |= MC6850_STATUS_CTS;
+			FirstReset = false;
+			RTS = true;
+		}
+
+		ACIA_Status &= ~MC6850_STATUS_DCD;
+		DCD = false;
+		DCDI = false;
+		DCDClear = 0;
+
+		TxD = 0;
+		ACIA_Status |= MC6850_STATUS_TDRE; // Transmit data register empty
+
+		SetTrigger(TAPECYCLES, TapeTrigger);
+	}
+
+	// Clock Divide
+	if ((Value & MC6850_CONTROL_COUNTER_DIVIDE) == 0x00) Clk_Divide = 1;
+	if ((Value & MC6850_CONTROL_COUNTER_DIVIDE) == 0x01) Clk_Divide = 16;
+	if ((Value & MC6850_CONTROL_COUNTER_DIVIDE) == 0x02) Clk_Divide = 64;
+
+	// Word select
+	Parity   = WordSelect[(Value & MC6850_CONTROL_WORD_SELECT) >> 2].Parity;
+	StopBits = WordSelect[(Value & MC6850_CONTROL_WORD_SELECT) >> 2].StopBits;
+	DataBits = WordSelect[(Value & MC6850_CONTROL_WORD_SELECT) >> 2].DataBits;
+
+	// Transmitter control
+	RTS = TransmitterControl[(Value & MC6850_CONTROL_TRANSMIT_CONTROL) >> 5].RTS;
+	TIE = TransmitterControl[(Value & MC6850_CONTROL_TRANSMIT_CONTROL) >> 5].TIE;
+	RIE = (Value & MC6850_CONTROL_RIE) != 0;
+
+	// Seem to need an interrupt immediately for tape writing when TIE set
+	if (SerialChannel == SerialDevice::Cassette && TIE && CassetteRelay)
+	{
+		ACIA_Status |= MC6850_STATUS_IRQ;
+		intStatus |= 1 << serial;
+	}
+
+	// Change serial port settings
+	if (SerialChannel == SerialDevice::RS423 && SerialPortEnabled && !TouchScreenEnabled && !EthernetPortEnabled)
+	{
+#ifdef BEEBWIN
+		DCB dcbSerialPort{}; // Serial port device control block
+		dcbSerialPort.DCBlength = sizeof(dcbSerialPort);
+
+		GetCommState(hSerialPort, &dcbSerialPort);
+
+		dcbSerialPort.ByteSize  = DataBits;
+		dcbSerialPort.StopBits  = (StopBits == 1) ? ONESTOPBIT : TWOSTOPBITS;
+		dcbSerialPort.Parity    = Parity;
+		dcbSerialPort.DCBlength = sizeof(dcbSerialPort);
+
+		SetCommState(hSerialPort, &dcbSerialPort);
+
+		// Check RTS
+		EscapeCommFunction(hSerialPort, RTS ? CLRRTS : SETRTS);
 #endif
+        
+    }
 }
 
-void Write_SERPROC(unsigned char Data) {
-	
-	if (DebugEnabled) {
-		char info[200];
-		sprintf(info, "Serial: Write serial ULA %02X", (int)Data);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+void SerialACIAWriteTxData(unsigned char Data)
+{
+	if (DebugEnabled)
+	{
+		DebugDisplayTraceF(DebugType::Serial, true,
+		                   "Serial: Write ACIA Tx %02X", (int)Data);
 	}
-	SP_Control=Data;
+
+//	WriteLog("Serial: Write ACIA Tx %02X, SerialChannel = %d\n", (int)Data, SerialChannel);
+
+	ACIA_Status &= ~MC6850_STATUS_IRQ;
+	intStatus &= ~(1 << serial);
+
+	// 10/09/06
+	// JW - A bug in swarm loader overwrites the rs423 output buffer counter
+	// Unless we do something with the data, the loader hangs so just swallow it (see below)
+
+	if (SerialChannel == SerialDevice::Cassette || (SerialChannel == SerialDevice::RS423 && !SerialPortEnabled))
+	{
+		TDR = Data;
+		TxD = 1;
+		ACIA_Status &= ~MC6850_STATUS_TDRE;
+		int baud = Tx_Rate * ((Clk_Divide == 1) ? 64 : (Clk_Divide==64) ? 1 : 4);
+
+		SetTrigger(2000000 / (baud / 8) * TapeClockSpeed / 5600, TapeTrigger);
+	}
+
+	if (SerialChannel == SerialDevice::RS423 && SerialPortEnabled)
+	{
+		if (ACIA_Status & MC6850_STATUS_TDRE)
+		{
+			ACIA_Status &= ~MC6850_STATUS_TDRE;
+			SerialWriteBuffer = Data;
+
+			if (TouchScreenEnabled)
+			{
+				TouchScreenWrite(Data);
+			}
+			else if (EthernetPortEnabled)
+			{
+				// if (Data_Bits == 7) {
+				//	IP232Write(Data & 127);
+				// } else {
+					IP232Write(Data);
+					if (!IP232raw && Data == 255) IP232Write(Data);
+				// }
+			}
+			else
+			{
+#ifdef BEEBWIN
+				WriteFile(hSerialPort, &SerialWriteBuffer, 1, &BytesOut, &olSerialWrite);
+#endif
+                
+            }
+
+			ACIA_Status |= MC6850_STATUS_TDRE;
+		}
+	}
+}
+
+// The Serial ULA control register controls the cassette motor relay,
+// transmit and receive baud rates, and RS423/cassette switch
+
+void SerialULAWrite(unsigned char Value)
+{
+	if (DebugEnabled)
+	{
+		DebugDisplayTraceF(DebugType::Serial, true,
+		                   "Serial: Write serial ULA %02X", (int)Value);
+	}
+
+	SerialULAControl = Value;
+
 	// Slightly easier this time.
 	// just the Rx and Tx baud rates, and the selectors.
-	Cass_Relay=(Data & 128)>>7;
-	TapeAudio.Enabled=(Cass_Relay && (TapePlaying||TapeRecording))?TRUE:FALSE;
-	LEDs.Motor=(Cass_Relay==1);
-	if (Cass_Relay)
-		TapeTrigger=TotalCycles+TAPECYCLES;
-	if (Cass_Relay!=OldRelayState) {
-		OldRelayState=Cass_Relay;
-		ClickRelay(Cass_Relay);
-	}
-	SerialChannel=(Data & 64)>>6;
-	Tx_Rate=Baud_Rates[(Data & 7)];
-	Rx_Rate=Baud_Rates[(Data & 56)>>3];
-
-#if 0 // ACH - serial port
-    int HigherRate;
-
-	// Note, the PC serial port (or at least win32) does not allow different transmit/receive rates
-	// So we will use the higher of the two
-	if ( (SerialChannel==RS423) && (mSerialHandle != -1) ) {
-		HigherRate=Tx_Rate;
-		if (Rx_Rate>Tx_Rate) HigherRate=Rx_Rate;
-		SetSerialPortBaud(Tx_Rate, Rx_Rate);
-	}
+	CassetteRelay = (Value & 0x80) != 0;
+	TapeAudio.Enabled = CassetteRelay && (TapePlaying || TapeRecording);
+#ifdef BEEBWIN
+	LEDs.Motor = CassetteRelay;
 #endif
     
-}
-
-unsigned char Read_ACIA_Status(void) {
-//	if (DCDI==0 && DCD!=0)
-//	{
-//		DCDClear++;
-//		if (DCDClear > 1) {
-//			DCD=0; ResetACIAStatus(2);
-//			DCDClear=0;
-//		}
-//	}
-	if (DebugEnabled) {
-		char info[200];
-		sprintf(info, "Serial: Read ACIA status %02X", (int)ACIA_Status);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+	if (CassetteRelay)
+	{
+		SetTrigger(TAPECYCLES, TapeTrigger);
 	}
 
-	return(ACIA_Status);
-}
-
-void HandleData(unsigned char AData) {
-	//fprintf(serlog,"%d %02X\n",RxD,AData);
-	// This proc has to dump data into the serial chip's registers
-	if (RxD==0) { RDR=AData; SetACIAStatus(0); } // Rx Reg full
-	if (RxD==1) { RDSR=AData; SetACIAStatus(0); }
-	ResetACIAStatus(5);
-	if (RxD==2) { RDR=RDSR; RDSR=AData; SetACIAStatus(5); } // overrun
-	if (RIE) { intStatus|=1<<serial; SetACIAStatus(7); } // interrupt on receive/overun
-	if (RxD<2) RxD++; 	
-}
-
-
-unsigned char Read_ACIA_Rx_Data(void) {
-	unsigned char TData;
-//	if (DCDI==0 && DCD!=0)
-//	{
-//		DCDClear++;
-//		if (DCDClear > 1) {
-//			DCD=0; ResetACIAStatus(2);
-//			DCDClear=0;
-//		}
-//	}
-	intStatus&=~(1<<serial);
-	ResetACIAStatus(7);
-	TData=RDR; RDR=RDSR; RDSR=0;
-	if (RxD>0) RxD--; 
-	if (RxD==0) ResetACIAStatus(0);
-	if ((RxD>0) && (RIE)) { intStatus|=1<<serial; SetACIAStatus(7); }
-	if (Data_Bits==7) TData&=127;
-	if (DebugEnabled) {
-		char info[200];
-		sprintf(info, "Serial: Read ACIA Rx %02X", (int)TData);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+	if (CassetteRelay != OldRelayState)
+	{
+		OldRelayState = CassetteRelay;
+		ClickRelay(CassetteRelay);
 	}
-	return(TData);
-}
 
-unsigned char Read_SERPROC(void) {
-	if (DebugEnabled) {
-		char info[200];
-		sprintf(info, "Serial: Read serial ULA %02X", (int)SP_Control);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+	SerialChannel = (Value & 0x40) != 0 ? SerialDevice::RS423 : SerialDevice::Cassette;
+	Tx_Rate = Baud_Rates[(Value & 0x07)];
+	Rx_Rate = Baud_Rates[(Value & 0x38) >> 3];
+
+	// Note, the PC serial port (or at least win32) does not allow different
+	// transmit/receive rates So we will use the higher of the two
+
+	if (SerialChannel == SerialDevice::RS423)
+	{
+		unsigned int HigherRate = std::max(Rx_Rate, Tx_Rate);
+
+#ifdef BEEBWIN
+        DCB dcbSerialPort{}; // Serial port device control block
+		dcbSerialPort.DCBlength = sizeof(dcbSerialPort);
+
+		GetCommState(hSerialPort, &dcbSerialPort);
+		dcbSerialPort.BaudRate  = HigherRate;
+		dcbSerialPort.DCBlength = sizeof(dcbSerialPort);
+		SetCommState(hSerialPort, &dcbSerialPort);
+#endif
 	}
-	return(SP_Control);
 }
 
-void Serial_Poll(void)
+unsigned char SerialULARead()
 {
-
-	if ((SerialChannel==RS423) && (SerialPortEnabled) && (TouchScreenEnabled) )
+	if (DebugEnabled)
 	{
-		if (TouchScreenPoll() == true)
-		{
-			if (RxD<2)
-				HandleData(TouchScreenRead());
-		}
+		DebugDisplayTraceF(DebugType::Serial, true,
+		                   "Serial: Read serial ULA %02X", (int)SerialULAControl);
 	}
 
-	if ((SerialChannel==RS423) && (SerialPortEnabled) && (EthernetPortEnabled) )
-	{
+	return SerialULAControl;
+}
 
-		if (EthernetPortPoll() == true)
-		{
-			if (RxD<2)
-				HandleData(EthernetPortRead());
-		}
-	}
-	
-#if 0 // ACH - serial port
-    static bool wait_for_tx = false;
-    static int delay = 0;
-
-	if ((SerialChannel==RS423) && (SerialPortEnabled) && (mSerialHandle != -1) )
-	{
-		if (TxD > 0)
-		{
-			SerialPortWrite(TDR);
-			TxD = 0;
-			wait_for_tx = true;			// Wait a bit until set transmitter empty interrupt
-			delay = 1;
-		}
-		
-		if (delay > 0)
-		{
-			delay--;
-			if (delay == 0)
-			{
-				SetACIAStatus(1);
-			}
-		}
-		
-//		if (wait_for_tx == true)
-//		{
-//			if (TotalCycles >= TapeTrigger)
-//			{
-//				SetACIAStatus(1);
-//				wait_for_tx = false;
-//			}
+unsigned char SerialACIAReadStatus()
+{
+//	if (!DCDI && DCD)
+//	{
+//		DCDClear++;
+//		if (DCDClear > 1) {
+//			DCD = false;
+//			ACIA_Status &= ~(1 << MC6850_STATUS_DCS);
+//			DCDClear = 0;
 //		}
-
-		if ( (SerialPortIsChar() > 0) && (RxD < 2) )
-		{
-			HandleData(SerialPortGetChar());
-		}
-		
+//	}
+	if (DebugEnabled)
+	{
+		DebugDisplayTraceF(DebugType::Serial, true,
+		                   "Serial: Read ACIA status %02X", (int)ACIA_Status);
 	}
-#endif
-    
-	if (SerialChannel==CASSETTE)
+
+	// WriteLog("Serial: Read ACIA status %02X\n", (int)ACIA_Status);
+
+	// See https://github.com/stardot/beebem-windows/issues/47
+	return ACIA_Status;
+}
+
+void HandleData(unsigned char Data)
+{
+	// This proc has to dump data into the serial chip's registers
+
+	ACIA_Status &= ~MC6850_STATUS_OVRN;
+
+	if (RxD == 0)
+	{
+		RDR = Data;
+		ACIA_Status |= MC6850_STATUS_RDRF; // Rx Reg full
+		RxD++;
+	}
+	else if (RxD == 1)
+	{
+		RDSR = Data;
+		ACIA_Status |= MC6850_STATUS_RDRF;
+		RxD++;
+	}
+	else if (RxD == 2)
+	{
+		RDR = RDSR;
+		RDSR = Data;
+		ACIA_Status |= MC6850_STATUS_OVRN;
+	}
+
+	if (RIE)
+	{
+		// interrupt on receive/overun
+		ACIA_Status |= MC6850_STATUS_IRQ;
+		intStatus |= 1 << serial;
+	}
+}
+
+unsigned char SerialACIAReadRxData()
+{
+	unsigned char TData;
+//	if (!DCDI && DCD)
+//	{
+//		DCDClear++;
+//		if (DCDClear > 1) {
+//			DCD = false;
+//			ACIA_Status &= ~(1 << MC6850_STATUS_DCS);
+//			DCDClear = 0;
+//		}
+//	}
+	ACIA_Status &= ~MC6850_STATUS_IRQ;
+	intStatus &= ~(1 << serial);
+
+	TData=RDR; RDR=RDSR; RDSR=0;
+	if (RxD > 0) RxD--;
+	if (RxD == 0) ACIA_Status &= ~MC6850_STATUS_RDRF;
+	if (RxD > 0 && RIE)
+	{
+		ACIA_Status |= MC6850_STATUS_IRQ;
+		intStatus |= 1 << serial;
+	}
+
+	if (DataBits == 7) TData &= 127;
+
+	if (DebugEnabled)
+	{
+		DebugDisplayTraceF(DebugType::Serial, true,
+		                   "Serial: Read ACIA Rx %02X", (int)TData);
+	}
+
+//	WriteLog("Serial: Read ACIA Rx %02X, ACIA_Status = %02x\n", (int)TData, (int) ACIA_Status);
+
+	return TData;
+}
+
+void SerialPoll()
+{
+	if (SerialChannel == SerialDevice::Cassette)
 	{
 		if (TapeRecording)
 		{
-			if (Cass_Relay==1 && UEFOpen && TotalCycles >= TapeTrigger)
+			if (CassetteRelay && UEFFileOpen && TotalCycles >= TapeTrigger)
 			{
 				if (TxD > 0)
 				{
 					// Writing data
-					if (!uef_putdata(TDR|UEF_DATA, TapeClock))
+					if (UEFWriter.PutData(TDR | UEF_DATA, TapeClock) != UEFResult::Success)
 					{
-						char errstr[256];
-						sprintf(errstr, "Error writing to UEF file:\n  %s", UEFTapeName);
-//						MessageBox(GETHWND,errstr,"BeebEm",MB_ICONERROR|MB_OK);
-						TapeControlStopRecording(true);
+#ifdef BEEBWIN
+						mainWin->Report(MessageType::Error,
+						                "Error writing to UEF file:\n  %s", TapeFileName);
+
+#endif
+                        TapeControlStopRecording(true);
 					}
-					TxD=0;
-					SetACIAStatus(1);
+
+					TxD = 0;
+					ACIA_Status |= MC6850_STATUS_TDRE;
+
 					if (TIE)
 					{
-						intStatus|=1<<serial;
-						SetACIAStatus(7);
+						ACIA_Status |= MC6850_STATUS_IRQ;
+						intStatus |= 1 << serial;
 					}
-					TapeAudio.Data=(TDR<<1)|1;
-					TapeAudio.BytePos=1;
-					TapeAudio.CurrentBit=0;
-					TapeAudio.Signal=1;
-					TapeAudio.ByteCount=3;
+
+					TapeAudio.Data       = (TDR << 1) | 1;
+					TapeAudio.BytePos    = 1;
+					TapeAudio.CurrentBit = 0;
+					TapeAudio.Signal     = 1;
+					TapeAudio.ByteCount  = 3;
 				}
 				else
 				{
 					// Tone
-					if (!uef_putdata(UEF_HTONE, TapeClock))
+					if (UEFWriter.PutData(UEF_CARRIER_TONE, TapeClock) != UEFResult::Success)
 					{
-						char errstr[256];
-						sprintf(errstr, "Error writing to UEF file:\n  %s", UEFTapeName);
-//						MessageBox(GETHWND,errstr,"BeebEm",MB_ICONERROR|MB_OK);
+#ifdef BEEBWIN
+						mainWin->Report(MessageType::Error,
+						                "Error writing to UEF file:\n  %s", TapeFileName);
+#endif
 						TapeControlStopRecording(true);
 					}
-					TapeAudio.Signal=2;
-					TapeAudio.BytePos=11;
 
+					TapeAudio.Signal  = 2;
+					TapeAudio.BytePos = 11;
 				}
 
-				TapeTrigger=TotalCycles+TAPECYCLES;
+				SetTrigger(TAPECYCLES, TapeTrigger);
 				TapeClock++;
 			}
 		}
 		else // Playing or stopped
 		{
+			// 10/09/06
+			// JW - If trying to write data when not recording, just ignore
 
-/*
- * 10/09/06
- * JW - If trying to write data when not recording, just ignore
- */
-			
-			if ( (TxD > 0) && (TotalCycles >= TapeTrigger) )
+			if (TxD > 0 && TotalCycles >= TapeTrigger)
 			{
-				
-				//				WriteLog("Ignoring Writes\n");
-				
-				TxD=0;
-				SetACIAStatus(1);
+				// WriteLog("Ignoring Writes\n");
+
+				TxD = 0;
+				ACIA_Status |= MC6850_STATUS_TDRE;
+
 				if (TIE)
 				{
-					intStatus|=1<<serial;
-					SetACIAStatus(7);
+					ACIA_Status |= MC6850_STATUS_IRQ;
+					intStatus |= 1 << serial;
 				}
 			}
-			
-			
-			if (Cass_Relay==1 && UEFOpen && TapeClock!=OldClock)
+
+			if (CassetteRelay && UEFFileOpen && TapeClock != OldClock)
 			{
-				NEW_UEF_BUF=uef_getdata(TapeClock);
-				OldClock=TapeClock;
+				NEW_UEF_BUF = UEFReader.GetData(TapeClock);
+				OldClock = TapeClock;
 			}
 
-			if ((NEW_UEF_BUF!=UEF_BUF || UEFRES_TYPE(NEW_UEF_BUF)==UEF_HTONE || UEFRES_TYPE(NEW_UEF_BUF)==UEF_GAP) &&
-				(Cass_Relay==1) && (UEFOpen))
+			if ((NEW_UEF_BUF != UEF_BUF || UEFRES_TYPE(NEW_UEF_BUF) == UEF_CARRIER_TONE || UEFRES_TYPE(NEW_UEF_BUF) == UEF_GAP) &&
+			    CassetteRelay && UEFFileOpen)
 			{
+#ifdef BEEBWIN
 				if (UEFRES_TYPE(UEF_BUF) != UEFRES_TYPE(NEW_UEF_BUF))
 					TapeControlUpdateCounter(TapeClock);
-		
-				UEF_BUF=NEW_UEF_BUF;
+#endif
+                
+				UEF_BUF = NEW_UEF_BUF;
 
 				// New data read in, so do something about it
-				if (UEFRES_TYPE(UEF_BUF) == UEF_HTONE)
+				if (UEFRES_TYPE(UEF_BUF) == UEF_CARRIER_TONE)
 				{
-					DCDI=1;
-					TapeAudio.Signal=2;
-					//TapeAudio.Samples=0;
-					TapeAudio.BytePos=11;
+					DCDI = true;
+					TapeAudio.Signal = 2;
+					// TapeAudio.Samples = 0;
+					TapeAudio.BytePos = 11;
 				}
+
 				if (UEFRES_TYPE(UEF_BUF) == UEF_GAP)
 				{
-					DCDI=1;
-					TapeAudio.Signal=0;
+					DCDI = true;
+					TapeAudio.Signal = 0;
 				}
+
 				if (UEFRES_TYPE(UEF_BUF) == UEF_DATA)
 				{
-					DCDI=0;
+					DCDI = false;
 					HandleData(UEFRES_BYTE(UEF_BUF));
-					TapeAudio.Data=(UEFRES_BYTE(UEF_BUF)<<1)|1;
-					TapeAudio.BytePos=1;
-					TapeAudio.CurrentBit=0;
-					TapeAudio.Signal=1;
-					TapeAudio.ByteCount=3;
+					TapeAudio.Data       = (UEFRES_BYTE(UEF_BUF) << 1) | 1;
+					TapeAudio.BytePos    = 1;
+					TapeAudio.CurrentBit = 0;
+					TapeAudio.Signal     = 1;
+					TapeAudio.ByteCount  = 3;
 				}
 			}
-			if ((Cass_Relay==1) && (RxD<2) && UEFOpen)
+
+			if (CassetteRelay && RxD < 2 && UEFFileOpen)
 			{
 				if (TotalCycles >= TapeTrigger)
 				{
 					if (TapePlaying)
 						TapeClock++;
-					TapeTrigger=TotalCycles+TAPECYCLES;
+
+					SetTrigger(TAPECYCLES, TapeTrigger);
 				}
 			}
 
-// CSW stuff			
+			// CSW stuff
 
-			if (Cass_Relay == 1 && CSWOpen && TapeClock != OldClock)
+			if (CassetteRelay && CSWFileOpen && TapeClock != OldClock)
 			{
-				int last_state = csw_state;
-				
-				CSW_BUF = csw_poll(TapeClock);
+				CSWState last_state = csw_state;
+
+				int Data = CSWPoll();
 				OldClock = TapeClock;
-			
+
+#ifdef BEEBWIN
 				if (last_state != csw_state)
 					TapeControlUpdateCounter(csw_ptr);
-
-				if (csw_state == 0)		// Waiting for tone
+#endif
+                
+				if (csw_state == CSWState::WaitingForTone)
 				{
-					DCDI=1;
-					TapeAudio.Signal=0;
+					DCDI = true;
+					TapeAudio.Signal = 0;
 				}
-				
+
 				// New data read in, so do something about it
-				if (csw_state == 1)		// In tone
+				if (csw_state == CSWState::Tone)
 				{
-					DCDI=1;
-					TapeAudio.Signal=2;
-					TapeAudio.BytePos=11;
+					DCDI = true;
+					TapeAudio.Signal  = 2;
+					TapeAudio.BytePos = 11;
 				}
 
-				if ( (CSW_BUF >= 0) && (csw_state == 2) )
+				if (Data >= 0 && csw_state == CSWState::Data)
 				{
-					DCDI=0;
-					HandleData(CSW_BUF);
-					TapeAudio.Data=(CSW_BUF<<1)|1;
-					TapeAudio.BytePos=1;
-					TapeAudio.CurrentBit=0;
-					TapeAudio.Signal=1;
-					TapeAudio.ByteCount=3;
+					DCDI = false;
+					HandleData((unsigned char)Data);
+					TapeAudio.Data       = (Data << 1) | 1;
+					TapeAudio.BytePos    = 1;
+					TapeAudio.CurrentBit = 0;
+					TapeAudio.Signal     = 1;
+					TapeAudio.ByteCount  = 3;
 				}
 			}
-			if ((Cass_Relay==1) && (RxD<2) && CSWOpen)
+
+			if (CassetteRelay && RxD < 2 && CSWFileOpen)
 			{
 				if (TotalCycles >= TapeTrigger)
 				{
 					if (TapePlaying)
 						TapeClock++;
-					
-					TapeTrigger = TotalCycles + CSW_CYCLES;
-					
+
+					SetTrigger(CSWPollCycles, TapeTrigger);
 				}
 			}
-			
-			if (DCDI==1 && ODCDI==0)
+
+			if (DCDI && !ODCDI)
 			{
 				// low to high transition on the DCD line
 				if (RIE)
 				{
-					intStatus|=1<<serial;
-					SetACIAStatus(7);
+					ACIA_Status |= MC6850_STATUS_IRQ;
+					intStatus |= 1 << serial;
 				}
-				DCD=1; SetACIAStatus(2); //ResetACIAStatus(0);
-				DCDClear=0;
+
+				DCD = true;
+				ACIA_Status |= MC6850_STATUS_DCD; // ACIA_Status &= ~MC6850_STATUS_RDRF;
+				DCDClear = 0;
 			}
-			if (DCDI==0 && ODCDI==1)
+
+			if (!DCDI && ODCDI)
 			{
-				DCD=0; ResetACIAStatus(2);
-				DCDClear=0;
+				DCD = false;
+				ACIA_Status &= ~MC6850_STATUS_DCD;
+				DCDClear = 0;
 			}
-			if (DCDI!=ODCDI)
-				ODCDI=DCDI;
+
+			if (DCDI != ODCDI)
+			{
+				ODCDI = DCDI;
+			}
 		}
 	}
 
-}
-
-void CloseUEF(void) {
-	if (UEFOpen) {
-		TapeControlStopRecording(false);
-		uef_close();
-		UEFOpen=0;
-		TxD=0;
-		RxD=0;
-		if (TapeControlEnabled)
+	if (SerialChannel == SerialDevice::RS423 && SerialPortEnabled)
+	{
+		if (TouchScreenEnabled)
 		{
-#if 0 //ACH - tape close (DONE)
-			const ControlID dbControlID = { 'SLST', 0 };
-			ControlRef dbControl;
-			
-			GetControlByID (mTCWindow, &dbControlID, &dbControl);
-			RemoveDataBrowserItems(dbControl, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
-#else
-            swift_UpdateItem("clearallitems", 0);
+			if (TouchScreenPoll())
+			{
+				if (RxD<2)
+					HandleData(TouchScreenRead());
+			}
+		}
+		else if (EthernetPortEnabled)
+		{
+			if (IP232Poll())
+			{
+				if (RxD<2)
+					HandleData(IP232Read());
+			}
+		}
+		else
+		{
+#ifdef BEEBWIN
+			if (!bWaitingForStat && !bSerialStateChanged)
+			{
+				WaitCommEvent(hSerialPort, &dwCommEvent, &olStatus);
+				bWaitingForStat = true;
+			}
+
+			if (!bSerialStateChanged && bCharReady && !bWaitingForData && RxD < 2)
+			{
+				if (!ReadFile(hSerialPort, &SerialBuffer, 1, &BytesIn, &olSerialPort))
+				{
+					if (GetLastError() == ERROR_IO_PENDING)
+					{
+						bWaitingForData = true;
+					}
+					else
+					{
+#ifdef BEEBWIN
+						mainWin->Report(MessageType::Error, "Serial Port Error");
 #endif
-            
-        }
-		
+                        
+                    }
+				}
+				else
+				{
+					if (BytesIn > 0)
+					{
+						HandleData((unsigned char)SerialBuffer);
+					}
+					else
+					{
+						DWORD CommError;
+						ClearCommError(hSerialPort, &CommError, nullptr);
+                        bCharReady = false;
+					}
+				}
+			}
+#endif
+		}
 	}
 }
 
-void Kill_Serial(void) {
-	CloseUEF();
-	CloseCSW();
+static void InitThreads()
+{
+#ifdef BEEBWIN
+	if (hSerialPort != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(hSerialPort);
+		hSerialPort = INVALID_HANDLE_VALUE;
+	}
+#endif
+    
+	bWaitingForData = false;
+	bWaitingForStat = false;
 
-//	if (SerialPortOpen)
-//		CloseHandle(hSerialPort);
+	if (SerialPortEnabled && SerialPort > 0)
+	{
+		InitSerialPort(); // Set up the serial port if its enabled.
 
+#ifdef BEEBWIN
+		if (olSerialPort.hEvent)
+		{
+			CloseHandle(olSerialPort.hEvent);
+			olSerialPort.hEvent = nullptr;
+		}
+
+		olSerialPort.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr); // Create the serial port event signal
+        
+		if (olSerialWrite.hEvent)
+		{
+			CloseHandle(olSerialWrite.hEvent);
+			olSerialWrite.hEvent = nullptr;
+		}
+
+		olSerialWrite.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr); // Write event, not actually used.
+
+		if (olStatus.hEvent)
+		{
+			CloseHandle(olStatus.hEvent);
+			olStatus.hEvent = nullptr;
+		}
+
+		olStatus.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr); // Status event, for WaitCommEvent
+#endif
+	}
+
+	bSerialStateChanged = false;
 }
 
+static unsigned int __stdcall StatThread(void * /* lpParam */)
+{
+	DWORD dwOvRes = 0;
 
-void LoadUEF(char *UEFName) {
-	CloseUEF();
+#ifdef BEEBWIN
+    do {
+		if (!TouchScreenEnabled && !EthernetPortEnabled &&
+		    (WaitForSingleObject(olStatus.hEvent, 10) == WAIT_OBJECT_0) && SerialPortEnabled)
+		{
+			if (GetOverlappedResult(hSerialPort, &olStatus, &dwOvRes, FALSE))
+			{
+				// Event waiting in dwCommEvent
+				if ((dwCommEvent & EV_RXCHAR) && !bWaitingForData)
+				{
+					bCharReady = true;
+				}
 
-	strcpy(UEFTapeName, UEFName);
+				if (dwCommEvent & EV_CTS)
+				{
+					// CTS line change
+					DWORD LineStat;
+					GetCommModemStatus(hSerialPort, &LineStat);
 
-	if (TapeControlEnabled)
-		TapeControlOpenFile(UEFName);
+					// Invert for CTS bit, Keep for TDRE bit
+					if (LineStat & MS_CTS_ON)
+					{
+						ACIA_Status &= ~MC6850_STATUS_CTS;
+						ACIA_Status |= MC6850_STATUS_TDRE;
+					}
+					else
+					{
+						ACIA_Status |= MC6850_STATUS_CTS;
+						ACIA_Status &= ~MC6850_STATUS_TDRE;
+					}
+				}
+			}
+
+			bWaitingForStat = false;
+		}
+		else
+		{
+			Sleep(100); // Don't hog CPU if nothing happening
+		}
+
+		if (bSerialStateChanged && !bWaitingForData)
+		{
+			// Shut off serial port, and re-initialise
+			InitThreads();
+			bSerialStateChanged = false;
+		}
+
+		Sleep(0);
+	} while(1);
+#endif
+    
+	return 0;
+}
+
+static unsigned int __stdcall SerialThread(void * /* lpParam */)
+{
+	// New Serial port thread - 7:35pm 16/10/2001 GMT
+	// This sorta runs as a seperate process in effect, checking
+	// enable status, and doing the monitoring.
+#ifdef BEEBWIN
+	do
+	{
+		if (!bSerialStateChanged && SerialPortEnabled && !TouchScreenEnabled && !EthernetPortEnabled && bWaitingForData)
+		{
+			DWORD Result = WaitForSingleObject(olSerialPort.hEvent, INFINITE); // 10ms to respond
+
+			if (Result == WAIT_OBJECT_0)
+			{
+				if (GetOverlappedResult(hSerialPort, &olSerialPort, &BytesIn, FALSE))
+				{
+					// sucessful read, screw any errors.
+					if (SerialChannel == SerialDevice::RS423 && BytesIn > 0)
+					{
+						HandleData((unsigned char)SerialBuffer);
+					}
+
+					if (BytesIn == 0)
+					{
+						bCharReady = false;
+
+						DWORD CommError;
+						ClearCommError(hSerialPort, &CommError, nullptr);
+					}
+
+					bWaitingForData = false;
+				}
+			}
+		}
+		else
+		{
+			Sleep(100); // Don't hog CPU if nothing happening
+		}
+
+		Sleep(0);
+	} while (1);
+#endif
+	return 0;
+}
+
+void InitSerialPort()
+{
+	// Initialise COM port
+	if (SerialPortEnabled && SerialPort > 0)
+	{
+		if (SerialPort==1) pnSerialPort="Com1";
+		if (SerialPort==2) pnSerialPort="Com2";
+		if (SerialPort==3) pnSerialPort="Com3";
+		if (SerialPort==4) pnSerialPort="Com4";
+#ifdef BEEBWIN
+        hSerialPort=CreateFile(pnSerialPort,GENERIC_READ|GENERIC_WRITE,0,0,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
+		if (hSerialPort == INVALID_HANDLE_VALUE)
+		{
+			mainWin->Report(MessageType::Error, "Could not open specified serial port");
+			bSerialStateChanged = true;
+			SerialPortEnabled = false;
+			mainWin->UpdateSerialMenu();
+		}
+		else
+		{
+			BOOL bPortStat = SetupComm(hSerialPort, 1280, 1280);
+
+			DCB dcbSerialPort{}; // Serial port device control block
+			dcbSerialPort.DCBlength = sizeof(dcbSerialPort);
+
+			bPortStat = GetCommState(hSerialPort, &dcbSerialPort);
+			dcbSerialPort.fBinary         = TRUE;
+			dcbSerialPort.BaudRate        = 9600;
+			dcbSerialPort.Parity          = NOPARITY;
+			dcbSerialPort.StopBits        = ONESTOPBIT;
+			dcbSerialPort.ByteSize        = 8;
+			dcbSerialPort.fDtrControl     = DTR_CONTROL_DISABLE;
+			dcbSerialPort.fOutxCtsFlow    = FALSE;
+			dcbSerialPort.fOutxDsrFlow    = FALSE;
+			dcbSerialPort.fOutX           = FALSE;
+			dcbSerialPort.fDsrSensitivity = FALSE;
+			dcbSerialPort.fInX            = FALSE;
+			dcbSerialPort.fRtsControl     = RTS_CONTROL_DISABLE; // Leave it low (do not send) for now
+
+			bPortStat = SetCommState(hSerialPort, &dcbSerialPort);
+
+			COMMTIMEOUTS CommTimeOuts{};
+			CommTimeOuts.ReadIntervalTimeout         = MAXDWORD;
+			CommTimeOuts.ReadTotalTimeoutConstant    = 0;
+			CommTimeOuts.ReadTotalTimeoutMultiplier  = 0;
+			CommTimeOuts.WriteTotalTimeoutConstant   = 0;
+			CommTimeOuts.WriteTotalTimeoutMultiplier = 0;
+
+			SetCommTimeouts(hSerialPort, &CommTimeOuts);
+
+			SetCommMask(hSerialPort, EV_CTS | EV_RXCHAR | EV_ERR);
+		}
+#endif
+	}
+}
+
+void CloseUEF()
+{
+	if (UEFFileOpen)
+	{
+		TapeControlStopRecording(false);
+		UEFReader.Close();
+		UEFFileOpen = false;
+		TxD = 0;
+		RxD = 0;
+  }
+}
+
+void SerialInit()
+{
+	InitThreads();
+
+#ifdef BEEBWIN
+    hSerialThread = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, SerialThread, nullptr, 0, nullptr));
+	hStatThread = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, StatThread, nullptr, 0, nullptr));
+#endif
+    
+}
+
+void Kill_Serial()
+{
+	CloseTape();
+
+#ifdef BEEBWIN
+    if (SerialPortOpen)
+	{
+		CloseHandle(hSerialPort);
+		hSerialPort = INVALID_HANDLE_VALUE;
+	}
+#endif
+}
+
+CSWResult LoadCSWTape(const char *FileName)
+{
+	CloseTape();
+
+	CSWResult Result = CSWOpen(FileName);
+
+	if (Result == CSWResult::Success)
+	{
+		CSWFileOpen = true;
+		strcpy(TapeFileName, FileName);
+
+		TxD = 0;
+		RxD = 0;
+		TapeClock = 0;
+		OldClock = 0;
+		SetTrigger(CSWPollCycles, TapeTrigger);
+
+		CSWCreateTapeMap(TapeMap);
+
+		csw_ptr = 0;
+
+#ifdef BEEBWIN
+		if (TapeControlEnabled)
+		{
+			TapeControlAddMapLines();
+		}
+#endif
+        
+    }
+
+	return Result;
+}
+
+UEFResult LoadUEFTape(const char *FileName)
+{
+	CloseTape();
 
 	// Clock values:
 	// 5600 - Normal speed - anything higher is a bit slow
 	// 750 - Recommended minium settings, fastest reliable load
-	uef_setclock(TapeClockSpeed);
+	UEFReader.SetClock(TapeClockSpeed);
 	SetUnlockTape(UnlockTape);
 
-	if (uef_open(UEFName)) {
-		UEFOpen=1;
-		UEF_BUF=0;
-		TxD=0;
-		RxD=0;
-		TapeClock=0;
-		OldClock=0;
-		TapeTrigger=TotalCycles+TAPECYCLES;
-		TapeControlUpdateCounter(TapeClock);
+	UEFResult Result = UEFReader.Open(FileName);
+
+	if (Result == UEFResult::Success)
+	{
+		UEFFileOpen = true;
+		strcpy(TapeFileName, FileName);
+
+		UEF_BUF = 0;
+		TxD = 0;
+		RxD = 0;
+		TapeClock = 0;
+		OldClock = 0;
+		SetTrigger(TAPECYCLES, TapeTrigger);
+
+		int Clock = TapeClock;
+
+		UEFReader.CreateTapeMap(TapeMap);
+
+		TapeClock = Clock;
+
+#ifdef BEEBWIN
+		if (TapeControlEnabled)
+		{
+			TapeControlAddMapLines();
+		}
+
+        TapeControlUpdateCounter(TapeClock);
+#endif
 	}
-	else {
-		UEFTapeName[0]=0;
-	}
+
+	return Result;
 }
 
-void RewindTape(void) {
-	TapeControlStopRecording(true);
-	UEF_BUF=0;
-	TapeClock=0;
-	OldClock=0;
-	TapeTrigger=TotalCycles+TAPECYCLES;
-	TapeControlUpdateCounter(TapeClock);
+void CloseTape()
+{
+	CloseUEF();
+	CSWClose();
 
-	csw_state = 0;
+	TapeFileName[0] = '\0';
+
+#ifdef BEEBWIN
+    if (TapeControlEnabled)
+	{
+		SendMessage(hwndMap, LB_RESETCONTENT, 0, 0);
+	}
+#endif
+    
+}
+
+void RewindTape()
+{
+#ifdef BEEBWIN
+	TapeControlStopRecording(true);
+
+	UEF_BUF = 0;
+	TapeClock = 0;
+	OldClock = 0;
+	SetTrigger(TAPECYCLES, TapeTrigger);
+
+	TapeControlUpdateCounter(TapeClock);
+#endif
+	csw_state = CSWState::WaitingForTone;
 	csw_bit = 0;
 	csw_pulselen = 0;
 	csw_ptr = 0;
 	csw_pulsecount = -1;
-	
 }
 
-void SetTapeSpeed(int speed) {
-	int NewClock = (int)((double)TapeClock * ((double)speed / TapeClockSpeed));
-	TapeClockSpeed=speed;
-	if (UEFOpen)
-		LoadUEF(UEFTapeName);
-	TapeClock=NewClock;
+void SetTapeSpeed(int Speed)
+{
+	int NewClock = (int)((double)TapeClock * ((double)Speed / TapeClockSpeed));
+	TapeClockSpeed = Speed;
+
+	if (UEFFileOpen)
+	{
+		std::string FileName = TapeFileName;
+		LoadUEFTape(FileName.c_str());
+	}
+
+	TapeClock = NewClock;
 }
 
-void SetUnlockTape(int unlock) {
-	uef_setunlock(unlock);
+void SetUnlockTape(bool Unlock)
+{
+	UEFReader.SetUnlock(Unlock);
 }
 
 //*******************************************************************
+#ifdef BEEBWIN
+INT_PTR CALLBACK TapeControlDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-bool map_file(char *file_name)
+void TapeControlOpenDialog(HINSTANCE hinst, HWND /* hwndMain */)
 {
-	bool done=false;
-	int file;
-	int i;
-	int start_time;
-	int n;
-	int data;
-	int last_data;
-	int blk=0;
-	int blk_num;
-	char block[500];
-	bool std_last_block=true;
-	char name[11];
+	TapeControlEnabled = true;
 
-	uef_setclock(TapeClockSpeed);
+	if (!IsWindow(hwndTapeControl)) {
+		hwndTapeControl = CreateDialog(hinst, MAKEINTRESOURCE(IDD_TAPECONTROL),
+		                               NULL, TapeControlDlgProc);
+		hCurrentDialog = hwndTapeControl;
+		ShowWindow(hwndTapeControl, SW_SHOW);
 
-	file = uef_open(file_name);
-	if (file == 0)
-	{
-		return(false);
-	}
+		hwndMap = GetDlgItem(hwndTapeControl, IDC_TCMAP);
+		SendMessage(hwndMap, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT),
+		            (LPARAM)MAKELPARAM(FALSE,0));
 
-	i=0;
-	start_time=0;
-	map_lines=0;
-	last_data=0;
-	blk_num=0;
-
-	memset(map_desc, 0, sizeof(map_desc));
-	memset(map_time, 0, sizeof(map_time));
-	
-	while (!done && map_lines < MAX_MAP_LINES)
-	{
-		data = uef_getdata(i);
-		if (data != last_data)
-		{
-			if (UEFRES_TYPE(data) != UEFRES_TYPE(last_data))
-			{
-				if (UEFRES_TYPE(last_data) == UEF_DATA)
-				{
-					// End of block, standard header?
-					if (blk > 20 && block[0] == 0x2A)
-					{
-						if (!std_last_block)
-						{
-							// Change of block type, must be first block
-							blk_num=0;
-							if (map_lines > 0 && map_desc[map_lines-1][0] != 0)
-							{
-								strcpy(map_desc[map_lines], "");
-								map_time[map_lines]=start_time;
-								map_lines++;
-							}
-						}
-
-						// Pull file name from block
-						n = 1;
-						while (block[n] != 0 && block[n] >= 32 && block[n] <= 127 && n <= 10)
-						{
-							name[n-1] = block[n];
-							n++;
-						}
-						name[n-1] = 0;
-						if (name[0] != 0)
-							sprintf(map_desc[map_lines], "%-12s %02X  Length %04X", name, blk_num, blk);
-						else
-							sprintf(map_desc[map_lines], "<No name>    %02X  Length %04X", blk_num, blk);
-
-						map_time[map_lines]=start_time;
-
-						// Is this the last block for this file?
-						if (block[strlen(name) + 14] & 0x80)
-						{
-							blk_num=-1;
-							++map_lines;
-							strcpy(map_desc[map_lines], "");
-							map_time[map_lines]=start_time;
-						}
-						std_last_block=true;
-					}
-					else
-					{
-						sprintf(map_desc[map_lines], "Non-standard %02X  Length %04X", blk_num, blk);
-						map_time[map_lines]=start_time;
-						std_last_block=false;
-					}
-
-					// Replace time counter in previous blank lines
-					if (map_lines > 0 && map_desc[map_lines-1][0] == 0)
-						map_time[map_lines-1]=start_time;
-
-					// Data block recorded
-					map_lines++;
-					blk_num++;
-				}
-					
-				if (UEFRES_TYPE(data) == UEF_HTONE)
-				{
-					// strcpy(map_desc[map_lines++], "Tone");
-					start_time=i;
-				}
-				else if (UEFRES_TYPE(data) == UEF_GAP)
-				{
-					if (map_lines > 0 && map_desc[map_lines-1][0] != 0)
-						strcpy(map_desc[map_lines++], "");
-					start_time=i;
-					blk_num=0;
-				}
-				else if (UEFRES_TYPE(data) == UEF_DATA)
-				{
-					blk=0;
-					block[blk++]=UEFRES_BYTE(data);
-				}
-				else if (UEFRES_TYPE(data) == UEF_EOF)
-				{
-					done=true;
-				}
-			}
-			else
-			{
-				if (UEFRES_TYPE(data) == UEF_DATA)
-				{
-					if (blk < 500)
-						block[blk++]=UEFRES_BYTE(data);
-					else
-						blk++;
-				}
-			}
-		}
-		last_data=data;
-		i++;
-	}
-
-	uef_close();
-
-//	for (i = 0; i < map_lines; ++i)
-//		fprintf(stderr, "%s\n", map_desc[i]);
-	
-	return(true);
-}
-#if 0 //ACH - tape control (DONE)
-
-//*******************************************************************
-
-OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
-{
-    HICommand command;
-    OSStatus err = noErr;
-    err = GetEventParameter(event, kEventParamDirectObject,
-							typeHICommand, NULL, sizeof(HICommand), NULL, &command);
-    require_noerr (err, CantGetParameter);
-	
-	err = noErr;
-	switch (command.commandID)
-#else
-
-//swift
-OSStatus TCWindowCommandHandler(UInt32 cmdID)
-{
-    OSStatus err = noErr;
-
-    switch (cmdID)
-#endif
-
-    {
-        case 'tppl':
-            fprintf(stderr, "Tape Control Play selected\n");
-			TapePlaying=true;
-			TapeControlStopRecording(true);
-			TapeAudio.Enabled=Cass_Relay?TRUE:FALSE;
-            break;
-        case 'tpst':
-            fprintf(stderr, "Tape Control Stop selected\n");
-			TapePlaying=false;
-			TapeControlStopRecording(true);
-			TapeAudio.Enabled=FALSE;
-            break;
-        case 'tpej':
-            fprintf(stderr, "Tape Control Eject selected\n");
-			TapeControlStopRecording(false);
-			TapeAudio.Enabled=FALSE;
-			CloseUEF();
-			CloseCSW();
-            break;
-        case 'tprc':
-            fprintf(stderr, "Tape Control Record selected\n");
-
-			SInt16 r;
-//			Str255 S1;
-//			Str255 S2;
-			
-			if (CSWOpen) break;
-				
-			AlertStdAlertParamRec alertParameters;
-			
-			alertParameters.movable			= true;
-			alertParameters.helpButton		= false;
-			alertParameters.filterProc		= NULL;
-			alertParameters.defaultText		= (StringPtr)kAlertDefaultOKText;
-			alertParameters.cancelText		= (StringPtr)kAlertDefaultCancelText;
-			alertParameters.otherText		= NULL;
-			alertParameters.defaultButton	= kAlertStdAlertOKButton;
-			alertParameters.cancelButton	= kAlertStdAlertCancelButton;
-			alertParameters.position		= kWindowDefaultPosition;
-
-			if (!TapeRecording)
-			{
-				r = 2;				// Cancel
-				if (UEFOpen)
-				{
-
-#if 0 //ACH - append alertbox (DONE)
-					CopyCStringToPascal("Append to current tape file :", S1);
-					CopyCStringToPascal(UEFTapeName, S2);
-					
-					StandardAlert( kAlertNoteAlert, S1, S2, &alertParameters, &r);
-					
-					if (r == 1)		// OK
-					{
-						// SendMessage(hwndMap, LB_SETCURSEL, (WPARAM)map_lines-1, 0);
-						
-						const ControlID dbControlID = { 'SLST', 0 };
-						ControlRef dbControl;
-						
-						GetControlByID (mTCWindow, &dbControlID, &dbControl);
-						SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &map_lines, kDataBrowserItemsAssign);
-						
-					}
-#else
-                    // http://mirror.informatimago.com/next/developer.apple.com/documentation/Carbon/Reference/databrow_reference/databrowser_ref/constant_21.html#//apple_ref/doc/uid/TP30000969-CH202-C009004
-                    
-                    r = swift_Alert("Append to current tape file :",UEFTapeName,true);
-                    // select item number 1 from all the items in maplist
-                    if (r == 1)// OK
-                        swift_SelectItem("SLST_assign", 1,(DataBrowserItemID *) &map_lines);
-#endif
-				}
-				else
-				{
-					// Query for new file name
-					CloseUEF();
-					mainWin->NewTapeImage(UEFTapeName);
-					if (UEFTapeName[0])
-					{
-						r = 1;
-						FILE *fd = fopen(UEFTapeName,"rb");
-						if (fd != NULL)
-						{
-							fclose(fd);
-
-#if 0 //ACH - fileexist alertbox (DONE)
-							CopyCStringToPascal("File already exists", S1);
-							CopyCStringToPascal("Overwrite file ?", S2);
-							StandardAlert( kAlertNoteAlert, S1, S2, &alertParameters, &r);
-#else
-                            r = swift_Alert("File already exists","Overwrite file ?",true);
-#endif
-						}
-						
-						if (r == 1)		// OK
-						{
-							// Create file
-							if (uef_create(UEFTapeName))
-							{
-								UEFOpen=1;
-							}
-							else
-							{
-#if 0 //ACH - error alertbox (DONE)
-								CopyCStringToPascal("Error creating tape file:", S1);
-								CopyCStringToPascal(UEFTapeName, S2);
-								alertParameters.cancelButton	= 0;
-								StandardAlert( kAlertNoteAlert, S1, S2, &alertParameters, &r);
-#else
-                                r = swift_Alert("Error creating tape file:", UEFTapeName, false);
-#endif
-								UEFTapeName[0] = 0;
-								r = 2;			// Cancel
-							}
-						}
-					}
-				}
-				
-				if (r == 1)		// OK
-				{
-					TapeRecording=true;
-					TapePlaying=false;
-					TapeAudio.Enabled=Cass_Relay?TRUE:FALSE;
-				}
-			}
-			
-			break;
-			
-        default:
-            err = eventNotHandledErr;
-            break;
-    }
-	
-CantGetParameter:
-		return err;
-}
-
-#if 0 //ACH -- catch window close (DONE)
-    // see beeb_TapeControlCloseDialog
-static OSStatus TCWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
-{
-    OSStatus err = noErr;
-    switch (GetEventKind(event))
-    {
-        case kEventWindowClosed: 
-			mTCWindow = NULL;
-			TapeControlEnabled = FALSE;
-			map_lines = 0;
-			TapePlaying=true;
-			TapeRecording=false;
-            break;
-        default:
-            err = eventNotHandledErr;
-            break;
-    }
-    
-    return err;
-}
-
-OSStatus TCWindowCallback(ControlRef browser, DataBrowserItemID itemID, DataBrowserPropertyID property, DataBrowserItemDataRef itemData, Boolean changeValue)
-{
-OSStatus status = noErr;
-char temp[256];
-CFStringRef pTitle;
-	
-//	fprintf(stderr, "Item = %08x, Property = %08x, change = %d\n", itemID, property, changeValue);
-	
-	if (!changeValue)
-	{
-		switch(property)
-		{
-			case 'NAME' :
-				
-				strcpy(temp, map_desc[itemID - 1]);
-				temp[12] = 0;
-				pTitle = CFStringCreateWithCString (kCFAllocatorDefault, temp, kCFStringEncodingASCII);
-				status = SetDataBrowserItemDataText(itemData, pTitle);
-				CFRelease(pTitle);
-				
-				break;
-
-			case 'BLCK' :
-				
-				strcpy(temp, map_desc[itemID - 1] + 13);
-				temp[2] = 0;
-				pTitle = CFStringCreateWithCString (kCFAllocatorDefault, temp, kCFStringEncodingASCII);
-				status = SetDataBrowserItemDataText(itemData, pTitle);
-				CFRelease(pTitle);
-				
-				break;
-
-			case 'LENG' :
-				
-				strcpy(temp, map_desc[itemID - 1] + 16);
-				pTitle = CFStringCreateWithCString (kCFAllocatorDefault, temp, kCFStringEncodingASCII);
-				status = SetDataBrowserItemDataText(itemData, pTitle);
-				CFRelease(pTitle);
-				
-				break;
-				
-			case 3 :
-				int s;
-				s = itemID - 1;
-				if (s >= 0 && s < map_lines)
-				{
-					if (CSWOpen)
-					{
-						csw_ptr = map_time[s];
-					}
-					else
-					{
-						TapeClock=map_time[s];
-					}
-					OldClock=0;
-					TapeTrigger=TotalCycles+TAPECYCLES;
-				}
-				break;
-				
-			default:
-				status = errDataBrowserPropertyNotSupported;
-				break;
-		}
-	}
-	else
-		status = errDataBrowserPropertyNotSupported;
-
-	return status;
-}
-#endif
-	
-void TapeControlOpenDialog()
-{
-	int Clock;
-	TapeControlEnabled = TRUE;
-
-    if (true) // mTCWindow
-    {
-#if 0 // tapecontrol (DONE)
-	IBNibRef 		nibRef;
-	EventTypeSpec TCcommands[] = {
-	{ kEventClassCommand, kEventCommandProcess }
-	};
-		
-	EventTypeSpec TCevents[] = {
-	{ kEventClassWindow, kEventWindowClosed }
-	};
-
-	if (mTCWindow == NULL)
-	{
-		// Create a Nib reference passing the name of the nib file (without the .nib extension)
-		// CreateNibReference only searches into the application bundle.
-		CreateNibReference(CFSTR("main"), &nibRef);
-		CreateWindowFromNib(nibRef, CFSTR("Window"), &mTCWindow);
-		DisposeNibReference(nibRef);
-		ShowWindow(mTCWindow);
-		
-		InstallWindowEventHandler(mTCWindow, 
-							  NewEventHandlerUPP (TCWindowCommandHandler), 
-							  GetEventTypeCount(TCcommands), TCcommands, 
-							  mTCWindow, NULL);
-		
-		InstallWindowEventHandler (mTCWindow, 
-								   NewEventHandlerUPP (TCWindowEventHandler), 
-								   GetEventTypeCount(TCevents), TCevents, 
-								   mTCWindow, NULL);
-		
-		const ControlID dbControlID = { 'SLST', 0 };
-		ControlRef dbControl;
-		DataBrowserCallbacks dbCallbacks;
-		
-		GetControlByID (mTCWindow, &dbControlID, &dbControl);
-		dbCallbacks.version = kDataBrowserLatestCallbacks;
-		InitDataBrowserCallbacks(&dbCallbacks);
-		dbCallbacks.u.v1.itemDataCallback =
-			NewDataBrowserItemDataUPP( (DataBrowserItemDataProcPtr) TCWindowCallback);
-		SetDataBrowserCallbacks(dbControl, &dbCallbacks);
-		SetAutomaticControlDragTrackingEnabledForWindow(mTCWindow, true);
-#endif
-
-		if (UEFOpen)
-		{
-			Clock = TapeClock;
-			LoadUEF(UEFTapeName);
-			TapeClock = Clock;
-			TapeControlUpdateCounter(TapeClock);
-		}
-
-		if (CSWOpen)
-		{
-			Clock = csw_ptr;
-			LoadCSW(UEFTapeName);
-			csw_ptr = Clock;
-			TapeControlUpdateCounter(csw_ptr);
-		}
-		
-		
+		TapeControlAddMapLines();
 	}
 }
 
 void TapeControlCloseDialog()
 {
-#if 0 //ACH - tape close (DONE)
-	if (mTCWindow)
-	{
-		HideWindow(mTCWindow);
-		DisposeWindow(mTCWindow);
-	}
-	mTCWindow = NULL;
-#endif
-	TapeControlEnabled = FALSE;
-	map_lines = 0;
-	TapePlaying=true;
-	TapeRecording=false;
+	DestroyWindow(hwndTapeControl);
+	hwndTapeControl = nullptr;
+	hwndMap = nullptr;
+	TapeControlEnabled = false;
+	hCurrentDialog = nullptr;
+	TapeMap.empty();
+	TapePlaying = true;
+	TapeRecording = false;
 }
 
-void TapeControlOpenFile(char *UEFName)
+void TapeControlAddMapLines()
 {
-	if (TapeControlEnabled) 
+	SendMessage(hwndMap, LB_RESETCONTENT, 0, 0);
+
+	for (const TapeMapEntry& line : TapeMap)
 	{
-		if (CSWOpen == 0)
-		{
-			if (!map_file(UEFName))
-			{
-				char errstr[256];
-				sprintf(errstr, "Cannot open UEF file:\n  %s", UEFName);
-				return;
-			}
-		}
-#if 0 //ACH - tape openfile (DONE)
-		const ControlID dbControlID = { 'SLST', 0 };
-		ControlRef dbControl;
-			
-		GetControlByID (mTCWindow, &dbControlID, &dbControl);
-		RemoveDataBrowserItems(dbControl, kDataBrowserNoItem, 0, NULL, kDataBrowserItemNoProperty);
-		AddDataBrowserItems(dbControl, kDataBrowserNoItem, map_lines, NULL, kDataBrowserItemNoProperty);
-#else
-        swift_UpdateItem("SLST_clear", map_lines);
-#endif
-
-		TapeControlUpdateCounter(0);
-
+		SendMessage(hwndMap, LB_ADDSTRING, 0, (LPARAM)line.desc.c_str());
 	}
+
+	TapeControlUpdateCounter(UEFFileOpen ? TapeClock : csw_ptr);
 }
 
 void TapeControlUpdateCounter(int tape_time)
 {
-	int i, j;
-
-	if (TapeControlEnabled) 
+	if (TapeControlEnabled)
 	{
-		i = 0;
-		while (i < map_lines && map_time[i] <= tape_time)
+		int i = 0;
+		while (i < TapeMap.size() && TapeMap[i].time <= tape_time)
 			i++;
 
 		if (i > 0)
 			i--;
 
-		//		SendMessage(hwndMap, LB_SETCURSEL, (WPARAM)i, 0);
-#if 0 //ACH - tape updatecounter (DONE)
-
-		const ControlID dbControlID = { 'SLST', 0 };
-		ControlRef dbControl;
-		
-		GetControlByID (mTCWindow, &dbControlID, &dbControl);
-		j = i + 1;
-		SetDataBrowserSelectedItems (dbControl, 1, (DataBrowserItemID *) &j, kDataBrowserItemsAssign);
-		RevealDataBrowserItem(dbControl, j, kDataBrowserNoItem, kDataBrowserRevealOnly);
-#else
-        j = i + 1;
-        swift_SelectItem("SLST_reveal", j, NULL);
-#endif
-        
+		SendMessage(hwndMap, LB_SETCURSEL, (WPARAM)i, 0);
 	}
 }
 
+INT_PTR CALLBACK TapeControlDlgProc(HWND /* hwndDlg */, UINT message, WPARAM wParam, LPARAM /* lParam */)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+			return TRUE;
+
+		case WM_ACTIVATE:
+			if (LOWORD(wParam) == WA_INACTIVE)
+			{
+				hCurrentDialog = nullptr;
+			}
+			else
+			{
+				hCurrentDialog = hwndTapeControl;
+			}
+			return FALSE;
+
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+				case IDC_TCMAP:
+					if (HIWORD(wParam) == LBN_SELCHANGE)
+					{
+						LRESULT s = SendMessage(hwndMap, LB_GETCURSEL, 0, 0);
+
+						if (s != LB_ERR && s >= 0 && s < (int)TapeMap.size())
+						{
+							if (CSWFileOpen)
+							{
+								csw_ptr = TapeMap[s].time;
+							}
+							else
+							{
+								TapeClock = TapeMap[s].time;
+							}
+
+							OldClock = 0;
+
+							SetTrigger(TAPECYCLES, TapeTrigger);
+						}
+					}
+					return FALSE;
+
+				case IDC_TCPLAY:
+					TapePlaying = true;
+					TapeControlStopRecording(true);
+					TapeAudio.Enabled = CassetteRelay;
+					return TRUE;
+
+				case IDC_TCSTOP:
+					TapePlaying = false;
+					TapeControlStopRecording(true);
+					TapeAudio.Enabled = false;
+					return TRUE;
+
+				case IDC_TCEJECT:
+					TapeControlStopRecording(false);
+					TapeAudio.Enabled = false;
+					CloseTape();
+					return TRUE;
+
+				case IDC_TCRECORD:
+					TapeControlRecord();
+					return TRUE;
+
+				case IDCANCEL:
+					TapeControlCloseDialog();
+					return TRUE;
+			}
+	}
+
+	return FALSE;
+}
+
+void TapeControlRecord()
+{
+	if (!TapeRecording)
+	{
+		// Query for new file name
+		char FileName[_MAX_PATH];
+
+#ifdef BEEBWIN
+		if (mainWin->NewTapeImage(FileName))
+		{
+			CloseTape();
+
+			// Create file
+			if (UEFWriter.Open(FileName) == UEFResult::Success)
+			{
+				strcpy(TapeFileName, FileName);
+				UEFFileOpen = true;
+
+				TapeRecording = true;
+				TapePlaying = false;
+				TapeAudio.Enabled = CassetteRelay;
+			}
+			else
+			{
+				mainWin->Report(MessageType::Error,
+				                "Error creating tape file:\n  %s", TapeFileName);
+
+				TapeFileName[0] = '\0';
+			}
+		}
+#endif
+	}
+}
+
+#endif
 void TapeControlStopRecording(bool RefreshControl)
 {
 	if (TapeRecording)
 	{
-		uef_putdata(UEF_EOF, 0);
+		UEFWriter.PutData(UEF_EOF, 0);
+		UEFWriter.Close();
+
 		TapeRecording = false;
 
 		if (RefreshControl)
 		{
-			LoadUEF(UEFTapeName);
+			std::string FileName = TapeFileName;
+
+			LoadUEFTape(FileName.c_str());
 		}
 	}
 }
@@ -1233,19 +1321,21 @@ void TapeControlStopRecording(bool RefreshControl)
 
 void SaveSerialUEF(FILE *SUEF)
 {
-	if (UEFOpen)
+	// TODO: Save/Restore state when CSW file is open
+
+	if (UEFFileOpen)
 	{
 		fput16(0x0473,SUEF);
 		fput32(293,SUEF);
-		fputc(SerialChannel,SUEF);
-		fwrite(UEFTapeName,1,256,SUEF);
-		fputc(Cass_Relay,SUEF);
+		fputc(static_cast<int>(SerialChannel),SUEF);
+		fwrite(TapeFileName,1,256,SUEF);
+		fputc(CassetteRelay,SUEF);
 		fput32(Tx_Rate,SUEF);
 		fput32(Rx_Rate,SUEF);
 		fputc(Clk_Divide,SUEF);
 		fputc(Parity,SUEF);
-		fputc(Stop_Bits,SUEF);
-		fputc(Data_Bits,SUEF);
+		fputc(StopBits,SUEF);
+		fputc(DataBits,SUEF);
 		fputc(RIE,SUEF);
 		fputc(TIE,SUEF);
 		fputc(TxD,SUEF);
@@ -1256,7 +1346,7 @@ void SaveSerialUEF(FILE *SUEF)
 		fputc(TDSR,SUEF);
 		fputc(ACIA_Status,SUEF);
 		fputc(ACIA_Control,SUEF);
-		fputc(SP_Control,SUEF);
+		fputc(SerialULAControl,SUEF);
 		fputc(DCD,SUEF);
 		fputc(DCDI,SUEF);
 		fputc(ODCDI,SUEF);
@@ -1268,54 +1358,60 @@ void SaveSerialUEF(FILE *SUEF)
 
 void LoadSerialUEF(FILE *SUEF)
 {
+	CloseTape();
+
+	SerialChannel = static_cast<SerialDevice>(fgetc(SUEF));
+
 	char FileName[256];
-	int sp;
-
-	CloseUEF();
-
-	SerialChannel=fgetc(SUEF);
 	fread(FileName,1,256,SUEF);
+
 	if (FileName[0])
 	{
-		LoadUEF(FileName);
-		if (!UEFOpen)
+		if (LoadUEFTape(FileName) != UEFResult::Success)
 		{
 			if (!TapeControlEnabled)
 			{
-				fprintf(stderr, "Cannot open UEF file:\n  %s\n", FileName);
-			}
+#ifdef BEEBWIN
+				mainWin->Report(MessageType::Error,
+				                "Cannot open UEF file:\n  %s", FileName);
+#endif
+                
+            }
 		}
 		else
 		{
-			Cass_Relay=fgetc(SUEF);
-			Tx_Rate=fget32(SUEF);
-			Rx_Rate=fget32(SUEF);
-			Clk_Divide=fgetc(SUEF);
-			Parity=fgetc(SUEF);
-			Stop_Bits=fgetc(SUEF);
-			Data_Bits=fgetc(SUEF);
-			RIE=fgetc(SUEF);
-			TIE=fgetc(SUEF);
-			TxD=fgetc(SUEF);
-			RxD=fgetc(SUEF);
-			RDR=fgetc(SUEF);
-			TDR=fgetc(SUEF);
-			RDSR=fgetc(SUEF);
-			TDSR=fgetc(SUEF);
-			ACIA_Status=fgetc(SUEF);
-			ACIA_Control=fgetc(SUEF);
-			SP_Control=fgetc(SUEF);
-			DCD=fgetc(SUEF);
-			DCDI=fgetc(SUEF);
-			ODCDI=fgetc(SUEF);
-			DCDClear=fgetc(SUEF);
+			CassetteRelay = fgetbool(SUEF);
+			Tx_Rate = fget32(SUEF);
+			Rx_Rate = fget32(SUEF);
+			Clk_Divide = fget8(SUEF);
+			Parity = fget8(SUEF);
+			StopBits = fget8(SUEF);
+			DataBits = fget8(SUEF);
+			RIE = fgetbool(SUEF);
+			TIE = fgetbool(SUEF);
+			TxD = fget8(SUEF);
+			RxD = fget8(SUEF);
+			RDR = fget8(SUEF);
+			TDR = fget8(SUEF);
+			RDSR = fget8(SUEF);
+			TDSR = fget8(SUEF);
+			ACIA_Status = fget8(SUEF);
+			ACIA_Control = fget8(SUEF);
+			SerialULAControl = fget8(SUEF);
+			DCD = fgetbool(SUEF);
+			DCDI = fgetbool(SUEF);
+			ODCDI = fgetbool(SUEF);
+			DCDClear = fget8(SUEF);
 			TapeClock=fget32(SUEF);
-			sp=fget32(SUEF);
-			if (sp != TapeClockSpeed)
+			int Speed = fget32(SUEF);
+			if (Speed != TapeClockSpeed)
 			{
-				TapeClock = (int)((double)TapeClock * ((double)TapeClockSpeed / sp));
+				TapeClock = (int)((double)TapeClock * ((double)TapeClockSpeed / Speed));
 			}
+#ifdef BEEBWIN
 			TapeControlUpdateCounter(TapeClock);
-		}
+#endif
+            
+        }
 	}
 }

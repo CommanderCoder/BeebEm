@@ -31,13 +31,16 @@ Boston, MA  02110-1301, USA.
 #include <string>
 
 #ifndef BEEBWIN
-#define _MAX_PATH 512
-#define MAX_PATH 512
 
 #include <stdint.h>
 typedef uint32_t DWORD;   // DWORD = unsigned 32 bit value
 typedef uint16_t WORD;    // WORD = unsigned 16 bit value
 typedef uint8_t BYTE;     // BYTE = unsigned 8 bit value
+#endif
+
+#ifndef BEEBWIN
+#define _MAX_PATH 512
+#define MAX_PATH 512
 #endif
 
 

@@ -20,7 +20,11 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA  02110-1301, USA.
 ****************************************************************/
 
+#ifdef BEEBWIN
 #include <windows.h>
+#else
+#define DWORD __uint32_t
+#endif
 
 #include <map>
 #include <stdio.h>
@@ -69,7 +73,9 @@ CSprowCoPro::InitResult CSprowCoPro::Init(const char* ROMPath)
     m_State->ROMDataPtr = m_ROMMemory;
 
     ARMul_MemoryInit(m_State, 0x4000000); // 64mb
+#ifdef BEEBWIN
     ticks = GetTickCount();
+#endif
     m_CycleCount = 0;
 
     return InitResult::Success;
@@ -80,7 +86,9 @@ void CSprowCoPro::Reset()
     // ARMul_EmulateInit();
     // m_State = ARMul_NewState();
     m_State->ROMDataPtr = m_ROMMemory;
+#ifdef BEEBWIN
     ticks = GetTickCount();
+#endif
     m_State->pc = 0x000;
     m_State->Reg[15] = 0x000;
     ARMul_WriteWord(m_State, RMPCON, 0);
@@ -168,8 +176,11 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
     // timers. However we'll handle it directly here for accuracy
     if (number == OS_ReadMonotonicTime || number == XOS_Bit + OS_ReadMonotonicTime)
     {
+#ifdef BEEBWIN
+//    https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-gettickcount64
         DWORD currentTicks = GetTickCount();
         state->Reg[0] = (currentTicks - ticks) / 10;
+#endif
         return TRUE;
     }
 

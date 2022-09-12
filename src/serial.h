@@ -1,50 +1,92 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2001  Richard Gellman
+Copyright (C) 2004  Mike Wyatt
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
 // Serial/Cassette Support for BeebEm
 // Written by Richard Gellman
 
 #ifndef SERIAL_HEADER
 #define SERIAL_HEADER
 
-#define TAPECYCLES 357 // 2000000/5600 - 5600 is normal tape speed
+#include <vector>
 
-#define MAX_MAP_LINES 4096
-extern int map_lines;
-extern char map_desc[MAX_MAP_LINES][40];
-extern int map_time[MAX_MAP_LINES];
+#include "csw.h"
+#include "uef.h"
+
+extern unsigned int Tx_Rate;
+extern unsigned int Rx_Rate;
 extern unsigned char Clk_Divide;
 
+// MC6850 status register bits
+constexpr unsigned char MC6850_STATUS_RDRF = 0x01;
+constexpr unsigned char MC6850_STATUS_TDRE = 0x02;
+constexpr unsigned char MC6850_STATUS_DCD  = 0x04;
+constexpr unsigned char MC6850_STATUS_CTS  = 0x08;
+constexpr unsigned char MC6850_STATUS_FE   = 0x10;
+constexpr unsigned char MC6850_STATUS_OVRN = 0x20;
+constexpr unsigned char MC6850_STATUS_PE   = 0x40;
+constexpr unsigned char MC6850_STATUS_IRQ  = 0x80;
+
+extern unsigned char ACIA_Status;
+extern unsigned char ACIA_Control;
+
 extern CycleCountT TapeTrigger;
-void Write_ACIA_Control(unsigned char CReg);
-void Write_ACIA_Tx_Data(unsigned char Data);
-void Write_SERPROC(unsigned char Data);
-unsigned char Read_ACIA_Status(void);
-unsigned char Read_ACIA_Rx_Data(void);
-unsigned char Read_SERPROC(void);
-extern unsigned char SerialPortEnabled;
+extern CycleCountT IP232RxTrigger;
+
+void SerialACIAWriteControl(unsigned char Value);
+unsigned char SerialACIAReadStatus();
+
+void SerialACIAWriteTxData(unsigned char Value);
+unsigned char SerialACIAReadRxData();
+
+void SerialULAWrite(unsigned char Value);
+unsigned char SerialULARead();
+
+extern bool SerialPortEnabled;
 extern unsigned char SerialPort;
-void Serial_Poll(void);
-void InitSerialPort(void);
-void Kill_Serial(void);
-void LoadUEF(char *UEFName);
-void RewindTape(void);
-extern int TapeClockSpeed;
-extern void SerialThread(void *lpParam);
-void StatThread(void *lpParam);
-void InitThreads(void);
+
+void SerialInit();
+void SerialPoll();
+void InitSerialPort();
+void Kill_Serial();
+UEFResult LoadUEFTape(const char *FileName);
+CSWResult LoadCSWTape(const char *FileName);
+void CloseTape();
+void RewindTape();
+
 extern volatile bool bSerialStateChanged;
 extern bool TapeControlEnabled;
-extern char UEFTapeName[256];
-extern int UnlockTape;
+extern bool UnlockTape;
 extern unsigned char TxD,RxD;
 extern int TapeClock,OldClock;
 extern int TapeClockSpeed;
 
 void SetTapeSpeed(int speed);
-void SetUnlockTape(int unlock);
-void TapeControlOpenDialog(void);
-void TapeControlOpenFile(char *UEFName);
-void TapeControlCloseDialog(void);
+void SetUnlockTape(bool unlock);
+#ifdef BEEBWIN
+
+void TapeControlOpenDialog(HINSTANCE hinst, HWND hwndMain);
+#endif
+void TapeControlAddMapLines();
+void TapeControlCloseDialog();
+
 void SaveSerialUEF(FILE *SUEF);
 void LoadSerialUEF(FILE *SUEF);
-void SetACIAStatus(unsigned char bit);
-void ResetACIAStatus(unsigned char bit);
+
 #endif
