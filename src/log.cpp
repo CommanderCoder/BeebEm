@@ -22,7 +22,9 @@ Boston, MA  02110-1301, USA.
 
 #include <stdio.h>
 #include <stdarg.h>
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 
 #include "log.h"
 
@@ -59,11 +61,13 @@ void WriteLog(char *fmt, ...)
 
 		va_end(argptr);
 
-		SYSTEMTIME tim;
+#ifdef BEEBWIN
+        SYSTEMTIME tim;
 		GetLocalTime(&tim);
 		fprintf(tlog, "[%02d-%3s-%02d %02d:%02d:%02d.%03d] ",
 			tim.wDay, mon[tim.wMonth - 1], tim.wYear % 100, tim.wHour, tim.wMinute, tim.wSecond, tim.wMilliseconds);
-
+#endif
+        
 		fprintf(tlog, "%s", buff);
 	}
 }

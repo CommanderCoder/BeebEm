@@ -64,12 +64,14 @@ Boston, MA  02110-1301, USA.
 #ifndef BEEBWIN
 
 
+//just for compiling
 Model MachineType;
 int PrePC;
 bool SWRAMBoardEnabled = false;
 Tube TubeType;
 VIAState UserVIAState;
 BeebWin* mainWin;
+int ProgramCounter;
 
 #endif
 

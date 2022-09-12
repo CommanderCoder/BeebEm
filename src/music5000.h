@@ -28,6 +28,9 @@ Boston, MA  02110-1301, USA.
 #define _MUSIC5000_H
 
 extern bool Music5000Enabled;
+#ifndef BEEBWIN
+#define UINT unsigned int
+#endif
 
 #define Music5000Poll(cycles) { if (Music5000Enabled) Music5000Update(cycles); }
 
@@ -35,9 +38,7 @@ void Music5000Init();
 void Music5000Reset();
 void Music5000Write(int address, unsigned char value);
 bool Music5000Read(int address, unsigned char *value);
-#ifdef BEEBWIN
 void Music5000Update(UINT cycles);
-#endif
 void SaveMusic5000UEF(FILE *SUEF);
 void LoadMusic5000UEF(FILE *SUEF, int Version);
 void LoadMusic5000JIMPageRegUEF(FILE *SUEF);

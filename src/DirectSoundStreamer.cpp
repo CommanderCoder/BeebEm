@@ -26,9 +26,11 @@ Boston, MA  02110-1301, USA.
 #include "main.h"
 
 DirectSoundStreamer::DirectSoundStreamer() :
+#ifdef BEEBWIN
 	m_pDirectSound(nullptr),
 	m_pDirectSoundBuffer(nullptr),
-	m_begin(0),
+#endif
+m_begin(0),
 	m_physical(0),
 	m_bytespersample(0),
 	m_channels(0)
@@ -37,6 +39,7 @@ DirectSoundStreamer::DirectSoundStreamer() :
 
 DirectSoundStreamer::~DirectSoundStreamer()
 {
+#ifdef BEEBWIN
 	if (m_pDirectSoundBuffer != nullptr)
 	{
 		m_pDirectSoundBuffer->Release();
@@ -46,6 +49,8 @@ DirectSoundStreamer::~DirectSoundStreamer()
 	{
 		m_pDirectSound->Release();
 	}
+#endif
+    
 }
 
 bool DirectSoundStreamer::Init(std::size_t rate,

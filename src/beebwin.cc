@@ -1,31 +1,53 @@
-/****************************************************************************/
-/*              Beebem - (c) David Alan Gilbert 1994                        */
-/*              ------------------------------------                        */
-/* This program may be distributed freely within the following restrictions:*/
-/*                                                                          */
-/* 1) You may not charge for this program or for any part of it.            */
-/* 2) This copyright message must be distributed with all copies.           */
-/* 3) This program must be distributed complete with source code.  Binary   */
-/*    only distribution is not permitted.                                   */
-/* 4) The author offers no warrenties, or guarentees etc. - you use it at   */
-/*    your own risk.  If it messes something up or destroys your computer   */
-/*    thats YOUR problem.                                                   */
-/* 5) You may use small sections of code from this program in your own      */
-/*    applications - but you must acknowledge its use.  If you plan to use  */
-/*    large sections then please ask the author.                            */
-/*                                                                          */
-/* If you do not agree with any of the above then please do not use this    */
-/* program.                                                                 */
-/* Please report any problems to the author at beebem@treblig.org           */
-/****************************************************************************/
-/* The window which the beeb emulator displays stuff in */
-/* David Alan Gilbert 6/11/94 */
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 1994  Nigel Magnay
+Copyright (C) 1997  Mike Wyatt
+Copyright (C) 1998  Robert Schmidt
+Copyright (C) 2001  Richard Gellman
+Copyright (C) 2004  Ken Lowe
+Copyright (C) 2004  Rob O'Donnell
+Copyright (C) 2005  Jon Welch
 
-#include <Carbon/Carbon.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
+// 07/06/1997: Mike Wyatt and NRM's port to Win32
+// 11/01/1998: Converted to use DirectX, Mike Wyatt
+// 28/12/2004: Econet added Rob O'Donnell. robert@irrelevant.com.
+// 26/12/2011: Added IDE Drive to Hardware options, JGH
+
+#include <stdio.h>
+#include <windows.h>
+#include <windowsx.h>
+#include <initguid.h>
+#include <algorithm>
+
+#pragma warning(push)
+#pragma warning(disable: 4091) // ignored on left of 'tagGPFIDL_FLAGS' when no variable is declared
+#include <shlobj.h>
+#pragma warning(pop)
+
+#include <shlwapi.h>
+
+#pragma warning(push)
+#pragma warning(disable: 4458) // declaration of 'xxx' hides class member
+using std::min;
+using std::max;
+#include <gdiplus.h>
+#pragma warning(pop)
 
 #include "main.h"
 #include "beebwin.h"
@@ -37,431 +59,1788 @@
 #include "uservia.h"
 #include "video.h"
 #include "beebsound.h"
+#include "SoundStreamer.h"
+#include "music5000.h"
 #include "beebmem.h"
+#include "beebemrc.h"
 #include "atodconv.h"
+#include "userkybd.h"
 #include "serial.h"
-#include "econet.h"
+#include "econet.h"	 // Rob O'Donnell Christmas 2004.
 #include "tube.h"
+#include "ext1770.h"
 #include "uefstate.h"
 #include "debug.h"
 #include "scsi.h"
 #include "sasi.h"
-#include "defines.h"
-#if 0 //ACH - GetFile
-#include "GetFile.h"
-#endif
-#include "plist.h"
+#include "ide.h"
 #include "z80mem.h"
 #include "z80.h"
 #include "userkybd.h"
+#include "UserPortBreakoutBox.h"
+#include "Messages.h"
+#ifdef SPEECH_ENABLED
 #include "speech.h"
+#endif
 #include "teletext.h"
+#include "avi.h"
 #include "csw.h"
 #include "serialdevices.h"
 #include "Arm.h"
-#include "printing.h"
-#include "discedit.h"
+#include "version.h"
+#include "SprowCoPro.h"
+#include "Master512CoPro.h"
+#include "FolderSelectDialog.h"
+#include "DebugTrace.h"
 
-// #include "keytable_2"
+using namespace Gdiplus;
 
-#include<thread>
-#include<chrono>
-#include<iostream>
-
-long beeb_now() // milliseconds
-{
-    auto since_epoch = std::chrono::steady_clock::now().time_since_epoch();
-    auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch);
-    auto millis = milli.count();
-    return millis;
-}
-
-extern "C" void swift_sleepCPU(unsigned long microseconds);
-extern "C" void swift_saveScreen(const char * filename);
-
-
-// direct usleep replacement - however calling this on the main thread will
-// cause the UI to freeze up so best to not do this and use
-// DispatchQueue on the main thread
-void beeb_usleep(long microseconds)
-{
-    
-//    long b = beeb_now();
-    std::this_thread::sleep_for(std::chrono::microseconds(microseconds));
-//    std::cout << microseconds/1000 << "ms, slept for " << beeb_now()-b << "ms\n";
-    
-}
-
-// delay the next update of the cpu (i.e. Exec6502Instruction) by this accumulation of
-// this time
-void beeb_nextupdate(long microseconds)
-{
-    swift_sleepCPU(microseconds);
-}
-
-void i86_main(void);
-void PrintScreen(void);
-void CopyToClipBoardAsPDF(int starty, int nlines);
-void ProcessPrintCommand(int starty, int nlines);
-
-
-#define VIDEO_CODEC kVideoCodecType
-#define VIDEO_QUALITY codecMinQuality
+#define WIN_STYLE (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX|WS_MAXIMIZEBOX|WS_SIZEBOX)
 
 // some LED based macros
+#define LED_COL_BASE 64
 
-#define LED_COLOUR_TYPE (LEDByte&4)>>2
-#define LED_SHOW_KB		(LEDByte&1)
-#define LED_SHOW_DISC	(LEDByte&2)>>1
-#define LED_COL_BASE	64
+static const char *CFG_REG_KEY = "Software\\BeebEm";
 
-FILE *CMDF2;
-unsigned char CMA2;
-CArm *arm = NULL;
-
-unsigned char HideMenuEnabled;
-bool MenuOn;
-
-struct LEDType LEDs;
-char DiscLedColour=0; // 0 for red, 1 for green.
-
-bool m_PageFlipping=0;
-
-bool DiscLoaded[2]={false,false}; // Set to TRUE when a disc image has been loaded.
-char CDiscName[2][256]; // Filename of disc current in drive 0 and 1;
-char CDiscType[2]; // Current disc types
-
-static const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
-
-
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
-
-extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
-extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
-extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
-extern "C" void swift_SetWindowTitleWithCString(const char* title);
-extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
-
-
-// Row,Col - Physical mapping
-int transTable1[256][2]={
-	4,1,	5,1,	3,2,	4,3,   // 0  ASDF
-	5,4,	5,3,	6,1,	4,2,   // 4  HGZX
-	5,2,	6,3,	4,7,	6,4,   // 8  CV@B
-	1,0,	2,1,	2,2,	3,3,   // 12 QWER
-	4,4,	2,3,	3,0,	3,1,   // 16 YT12
-	1,1,	1,2,	3,4,	1,3,   // 20 3465
-	1,8,	2,6,	2,4,	1,7,   // 24 =97-
-	1,5,	2,7,	5,8,	3,6,   // 28 80]O
-	3,5,	3,8,	2,5,	3,7,   // 32 U[IP
-	4,9,	5,6,	4,5,	4,8,   // 36 <CR>LJ'
-	4,6,	5,7,	2,8,	6,6,   // 40 K;\,
-	6,8,	5,5,	6,5,	6,7,   // 44 /NM.
-	6,0,	6,2,	7,8,	5,9,   // 48 <TAB><SPC>`<BS>   
-	0,0,	7,0,	0,0,	0,0,   // 52 <ESC>
-	0,0,	0,0,	0,0,	0,0,   // 56
-	0,0,	0,0,	0,0,	0,0,   // 60
-	0,0,	0,0,	0,0,	0,0,   // 64C
-	0,0,	0,0,	0,0,	0,0,   // 68
-	0,0,	0,0,	0,0,	0,0,   // 72
-	0,0,	0,0,	0,0,	0,0,   // 76
-	0,0,	0,0,	0,0,	0,0,   // 80
-	0,0,	0,0,	0,0,	0,0,   // 84
-	0,0,	0,0,	0,0,	0,0,   // 88
-	0,0,	0,0,	0,0,	0,0,   // 92
-	7,4,	7,5,	1,6,	7,3,   // 96  F5F6F3F7
-	7,6,	7,7,	0,0,	2,0,   // 100 F8F9.F11
-	0,0,	-2,-2,	0,0,	0,0,   // 104 [Break - F13]
-	0,0,	2,0,	0,0,	-2,-2,   // 108 .F10.[Break - F12]
-	0,0,	0,0,	0,0,	0,0,   // 112
-	0,0,	5,9,	1,4,	6,9,   // 116 .[Del]F4[End]
-	7,2,	0,0,	7,1,	1,9,   // 120 F2 F1[left]
-	7,9,	2,9,	3,9,	0,0,   // 124 [Right][Down][Up]
-	0,0,	0,0,	0,0,	0,0,   // 128
-	0,0,	0,0,	0,0,	0,0,   // 132
-	0,0,	0,0,	0,0,	0,0,   // 136
-	0,0,	0,0,	0,0,	0,0,   // 140
-	0,0,	0,0,	0,0,	0,0,   // 144
-	0,0,	0,0,	0,0,	0,0,   // 148
-	0,0,	0,0,	0,0,	0,0,   // 152
-	0,0,	0,0,	0,0,	0,0,   // 156
-	0,0,	0,0,	0,0,	0,0,   // 160
-	0,0,	0,0,	0,0,	0,0,   // 164
-	0,0,	0,0,	0,0,	0,0,   // 168
-	0,0,	0,0,	0,0,	0,0,   // 172
-	0,0,	0,0,	0,0,	0,0,   // 176
-	0,0,	0,0,	0,0,	0,0,   // 180
-	0,0,	0,0,	0,0,	0,0,   // 184
-	0,0,	0,0,	0,0,	0,0,   // 188 
-	0,0,	0,0,	0,0,	0,0,   // 192 
-	0,0,	0,0,	0,0,	0,0,   // 196
-	0,0,	0,1,	4,0,	0,0,   // 200 .[Ctrl][Caps]
-	0,0,	0,0,	0,0,	0,0,   // 204
-	0,0,	0,0,	0,0,	0,0,   // 208
-	0,0,	0,0,	0,0,	0,0,   // 212
-	0,0,	0,0,	0,0,	0,0,   // 216 
-	0,0,	0,0,	0,0,	0,0,   // 220 
-	0,0,	0,0,	0,0,	0,0,   // 224
-	0,0,	0,0,	0,0,	0,0,   // 228
-	0,0,	0,0,	0,0,	0,0,   // 232
-	0,0,	0,0,	0,0,	0,0, 
-	0,0,	0,0,	0,0,	0,0, 
-	0,0,	0,0,	0,0,	0,0, 
-	0,0,	0,0,	0,0,	0,0, 
-	0,0,	0,0,	0,0,	0,0 
+static const unsigned char CFG_DISABLE_WINDOWS_KEYS[24] = {
+	00,00,00,00,00,00,00,00,03,00,00,00,00,00,0x5B,0xE0,00,00,0x5C,0xE0,00,00,00,00
 };
 
+CArm *arm = NULL;
+CSprowCoPro *sprow = NULL;
+
+struct LEDType LEDs;
+
+LEDColour DiscLedColour = LEDColour::Red;
+
+AVIWriter *aviWriter = NULL;
+
+// FDC Board extension DLL variables
+HMODULE hFDCBoard;
+
+EDCB ExtBoard={0,0,NULL};
+bool DiscLoaded[2] = { false, false }; // Set to true when a disc image has been loaded
+char CDiscName[2][256]; // Filename of disc current in drive 0 and 1
+DiscType CDiscType[2]; // Current disc types
+char FDCDLL[256]={0};
+
+const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
+static const char *AboutText =
+	"BeebEm - Emulating:\n\nBBC Micro Model B\nBBC Micro Model B + IntegraB\n"
+	"BBC Micro Model B Plus (128)\nAcorn Master 128\n\n"
+	"Acorn 65C02 Second Processor\n"
+	"Torch Z80 Second Processor\nAcorn Z80 Second Processor\n"
+	"Master 512 Second Processor\n"
+	"ARM Second Processor\n"
+	"Sprow ARM7TDMI 64MB\n\n"
+	"Version " VERSION_STRING ", " VERSION_DATE;
+
+/* Prototypes */
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+// Keyboard mappings
+static KeyMap defaultMapping;
+static KeyMap logicalMapping;
+
 /* Currently selected translation table */
-int (*transTable)[2] = transTable1;
-long WindowPos[4];
+static KeyMap *transTable = &defaultMapping;
 
-void BeebWin::SetupClipboard(void)
+/****************************************************************************/
+BeebWin::BeebWin()
 {
-    // temporarily change what 'OSRDCH' does
-    // and set it back in ResetClipboard
-	m_OSRDCH = BeebReadMem(0x210) + (BeebReadMem(0x211) << 8);
-
-    // FC50 (CopyKey - writemem) and FC51 (PasteKey - readmem) are ready to
-    // receive the accumulator data in BeebWriteMem and BeebReadMem respectively
-    
-	BeebWriteMem(0x100, 0x38);	// SEC
-	BeebWriteMem(0x101, 0xad);	// LDA &FC51
-	BeebWriteMem(0x102, 0x51);
-	BeebWriteMem(0x103, 0xfc);
-	BeebWriteMem(0x104, 0xd0);	// BNE P% + 6
-	BeebWriteMem(0x105, 0x04);
-	BeebWriteMem(0x106, 0xad);	// LDA &FC50
-	BeebWriteMem(0x107, 0x50);
-	BeebWriteMem(0x108, 0xfc);
-	BeebWriteMem(0x109, 0x18);	// CLC
-	BeebWriteMem(0x10A, 0x60);	// RTS
-
-	BeebWriteMem(0x210, 0x00);
-	BeebWriteMem(0x211, 0x01);
-
-    
-    // needs to be something in the clipboard (at least)
-    // and space to add another character
-    if (m_clipboardlen > 0 && m_clipboardlen<32765)
-    {
-        // Just to kick off keyboard input
-        
-        // insert a BS to the clipboard, which will
-        // cause the key that is pressed to kick
-        // off the PASTE to be deleted
-        memcpy(m_clipboard+1, m_clipboard, m_clipboardlen);
-        m_clipboard[0]=0x7F;  // BBC DELETE
-        m_clipboardlen+=1;
-        KeyDown(50); // ` key
-    }
-    else
-    {
-        ResetClipboard();
-    }
-}
-
-void BeebWin::ResetClipboard(void)
-{
-    if (m_clipboardptr>0)
-    {
-        KeyUp(50); // ` key
-    }
-
-	BeebWriteMem(0x210, m_OSRDCH & 255);
-	BeebWriteMem(0x211, m_OSRDCH >> 8);
-}
-
-int BeebWin::PasteKey(int addr)
-{
-int data = 0x00;
-	
-	switch (addr)
+	m_DXInit = false;
+	m_hWnd = NULL;
+	m_LastStartY = 0;
+	m_LastNLines = 256;
+	m_LastTickCount = 0;
+	m_KeyMapAS = false;
+	m_KeyMapFunc = false;
+	m_ShiftPressed = 0;
+	m_ShiftBooted = false;
+	for (int k = 0; k < 256; ++k)
 	{
-		case 0 : // readme 0xfc50 : get the next item from the clipboard (i.e. what was printed)
-			if (m_clipboardlen > 0)
+		m_vkeyPressed[k][0][0] = -1;
+		m_vkeyPressed[k][1][0] = -1;
+		m_vkeyPressed[k][0][1] = -1;
+		m_vkeyPressed[k][1][1] = -1;
+	}
+	m_DisableKeysWindows = false;
+	m_DisableKeysBreak = false;
+	m_DisableKeysEscape = false;
+	m_DisableKeysShortcut = false;
+	memset(&defaultMapping, 0, sizeof(KeyMap));
+	memset(&logicalMapping, 0, sizeof(KeyMap));
+	memset(&UserKeymap, 0, sizeof(KeyMap));
+	memset(m_UserKeyMapPath, 0, sizeof(m_UserKeyMapPath));
+	m_hBitmap = m_hOldObj = m_hDCBitmap = NULL;
+	m_screen = m_screen_blur = NULL;
+	m_ScreenRefreshCount = 0;
+	m_RelativeSpeed = 1;
+	m_FramesPerSecond = 50;
+	strcpy(m_szTitle, WindowTitle);
+	m_AviDC = NULL;
+	m_AviDIB = NULL;
+	m_CaptureBitmapPending = false;
+	m_SpVoice = NULL;
+	m_hTextView = NULL;
+	m_frozen = false;
+	aviWriter = NULL;
+	m_WriteProtectDisc[0] = !IsDiscWritable(0);
+	m_WriteProtectDisc[1] = !IsDiscWritable(1);
+	m_AutoSavePrefsCMOS = false;
+	m_AutoSavePrefsFolders = false;
+	m_AutoSavePrefsAll = false;
+	m_AutoSavePrefsChanged = false;
+	memset(m_KbdCmd, 0, sizeof(m_KbdCmd));
+	memset(m_DebugScript, 0, sizeof(m_DebugScript));
+	m_KbdCmdPos = -1;
+	m_KbdCmdPress = false;
+	m_KbdCmdDelay = 40;
+	m_KbdCmdLastCycles = 0;
+	m_NoAutoBoot = false;
+	m_AutoBootDelay = 0;
+	m_EmuPaused = false;
+	m_StartPaused = false;
+	m_WasPaused = false;
+	m_KeyboardTimerElapsed = false;
+	m_BootDiscTimerElapsed = false;
+	memset(m_ClipboardBuffer, 0, sizeof(m_ClipboardBuffer));
+	m_ClipboardLength = 0;
+	m_ClipboardIndex = 0;
+	m_printerbufferlen = 0;
+	m_translateCRLF = true;
+	m_CurrentDisplayRenderer = 0;
+	m_DXSmoothing = true;
+	m_DXSmoothMode7Only = false;
+	m_DXResetPending = false;
+
+	m_JoystickCaptured = false;
+	m_customip[0] = 0;
+	m_customport = 0;
+	m_isFullScreen = false;
+	m_MaintainAspectRatio = true;
+	m_startFullScreen = false;
+	m_XDXSize = 640;
+	m_YDXSize = 480;
+	m_XScrSize = GetSystemMetrics(SM_CXSCREEN);
+	m_YScrSize = GetSystemMetrics(SM_CYSCREEN);
+	m_XWinBorder = GetSystemMetrics(SM_CXSIZEFRAME) * 2;
+	m_YWinBorder = GetSystemMetrics(SM_CYSIZEFRAME) * 2 +
+		GetSystemMetrics(SM_CYMENUSIZE) +
+		GetSystemMetrics(SM_CYCAPTION) + 1;
+	m_HideMenuEnabled = false;
+	m_DisableMenu = false;
+	m_MenuOn = true;
+	m_PaletteType = PaletteType::RGB;
+	m_WriteInstructionCounts = false;
+	m_CaptureMouse = false;
+	m_MouseCaptured = false;
+
+	/* Get the applications path - used for non-user files */
+	char app_path[_MAX_PATH];
+	char app_drive[_MAX_DRIVE];
+	char app_dir[_MAX_DIR];
+	GetModuleFileName(NULL, app_path, _MAX_PATH);
+	_splitpath(app_path, app_drive, app_dir, NULL, NULL);
+	_makepath(m_AppPath, app_drive, app_dir, NULL, NULL);
+
+	// Read user data path from registry
+	if (!RegGetStringValue(HKEY_CURRENT_USER, CFG_REG_KEY, "UserDataFolder",
+	                       m_UserDataPath, _MAX_PATH))
+	{
+		// Default user data path to a sub-directory in My Docs
+		if (SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, m_UserDataPath) == NOERROR)
+		{
+			strcat(m_UserDataPath, "\\BeebEm\\");
+		}
+	}
+
+	m_CustomData = false;
+
+	// Set default files, may be overridden by command line parameters.
+	strcpy(m_PrefsFile, "Preferences.cfg");
+	strcpy(RomFile, "Roms.cfg");
+}
+
+/****************************************************************************/
+bool BeebWin::Initialise()
+{
+	// Parse command line
+	ParseCommandLine();
+	FindCommandLineFile(m_CommandLineFileName1);
+	FindCommandLineFile(m_CommandLineFileName2);
+	CheckForLocalPrefs(m_CommandLineFileName1, false);
+
+	// Check that user data directory exists
+	if (!CheckUserDataPath(!m_CustomData))
+		return false;
+
+	LoadPreferences();
+
+	// Read disc images path from registry
+	if (!RegGetStringValue(HKEY_CURRENT_USER, CFG_REG_KEY, "DiscsPath",
+	                       m_DiscPath, _MAX_PATH))
+	{
+		// Default disc images path to a sub-directory of UserData path
+		strcpy(m_DiscPath, m_UserDataPath);
+
+		char DefaultPath[_MAX_PATH];
+		m_Preferences.GetStringValue("DiscsPath", DefaultPath);
+		GetDataPath(m_DiscPath, DefaultPath);
+		strcpy(m_DiscPath, DefaultPath);
+	}
+
+	// Override full screen?
+	if (m_startFullScreen)
+	{
+		m_isFullScreen = true;
+	}
+
+	if (FAILED(CoInitialize(NULL)))
+	{
+		Report(MessageType::Error, "Failed to initialise COM");
+		return false;
+	}
+
+	// Init Windows controls
+	INITCOMMONCONTROLSEX cc;
+	cc.dwSize = sizeof(cc);
+	cc.dwICC = ICC_LISTVIEW_CLASSES;
+	InitCommonControlsEx(&cc);
+
+	GdiplusStartupInput gdiplusStartupInput;
+	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
+	WSADATA WsaData;
+
+	if (WSAStartup(MAKEWORD(1, 1), &WsaData) != 0)
+	{
+		Report(MessageType::Error, "WSA initialisation failed");
+		return false;
+	}
+
+	InitClass();
+	CreateBeebWindow();
+	CreateBitmap();
+
+	m_hMenu = GetMenu(m_hWnd);
+	m_hDC = GetDC(m_hWnd);
+
+	ReadROMFile(RomFile, RomConfig);
+	ApplyPrefs();
+
+	if (m_DebugScript[0] != '\0')
+	{
+		DebugOpenDialog(hInst, m_hWnd);
+		DebugRunScript(m_DebugScript);
+	}
+
+	if (!m_DebugLabelsFileName.empty())
+	{
+		if (!DebugLoadSwiftLabels(m_DebugLabelsFileName.c_str()))
+		{
+			Report(MessageType::Error, "Failed to load symbols file:\n  %s",
+			       m_DebugLabelsFileName.c_str());
+		}
+	}
+
+	char fontFilename[_MAX_PATH];
+	strcpy(fontFilename, GetAppPath());
+	strcat(fontFilename, "teletext.fnt");
+
+	if (!BuildMode7Font(fontFilename))
+	{
+		Report(MessageType::Error,
+		       "Cannot open Teletext font file:\n  %s",
+		       fontFilename);
+
+		return false;
+	}
+
+	// Boot file if passed on command line
+	HandleCommandLineFile(1, m_CommandLineFileName2);
+	HandleCommandLineFile(0, m_CommandLineFileName1);
+
+	HandleEnvironmentVariables();
+
+	if (!m_StartPaused)
+	{
+		// Schedule first key press if keyboard command supplied
+		if (HasKbdCmd())
+		{
+			SetKeyboardTimer();
+		}
+	}
+
+	return true;
+}
+
+/****************************************************************************/
+void BeebWin::ApplyPrefs()
+{
+	// Set up paths
+	strcpy(EconetCfgPath, m_UserDataPath);
+	strcpy(RomPath, m_UserDataPath);
+
+	char Path[_MAX_PATH];
+	m_Preferences.GetStringValue("HardDrivePath", Path);
+	GetDataPath(m_UserDataPath, Path);
+	strcpy(HardDrivePath, Path);
+
+	// Load key maps
+	char keymap[_MAX_PATH];
+	strcpy(keymap, "Logical.kmap");
+	GetDataPath(m_UserDataPath, keymap);
+	ReadKeyMap(keymap, &logicalMapping);
+	strcpy(keymap, "Default.kmap");
+	GetDataPath(m_UserDataPath, keymap);
+	ReadKeyMap(keymap, &defaultMapping);
+
+	InitMenu();
+	ShowMenu(true);
+
+	ExitDX();
+	if (m_DisplayRenderer != IDM_DISPGDI)
+		InitDX();
+
+	InitTextToSpeech();
+	InitTextView();
+
+	/* Initialise printer */
+	if (PrinterEnabled)
+		PrinterEnable(m_PrinterDevice);
+	else
+		PrinterDisable();
+
+	/* Joysticks can only be initialised after the window is created (needs hwnd) */
+	if (m_MenuIdSticks == IDM_JOYSTICK)
+		InitJoystick();
+
+	LoadFDC(NULL, true);
+	RTCInit();
+
+	SoundReset();
+	if (SoundDefault) SoundInit();
+	Music5000Reset();
+	if (Music5000Enabled)
+		Music5000Init();
+	SetSoundMenu();
+#ifdef SPEECH_ENABLED
+	if (SpeechDefault)
+		tms5220_start();
+#endif
+
+	// Serial init
+	if (IP232custom)
+	{
+		strcpy(IPAddress,IP232customip);
+		PortNo = IP232customport;
+	}
+	else
+	{
+		strcpy(IPAddress,"127.0.0.1");
+		PortNo = 25232;
+	}
+	if (SerialPortEnabled) {
+		if (TouchScreenEnabled)
+			TouchScreenOpen();
+
+		if (EthernetPortEnabled && (IP232localhost || IP232custom))
+		{
+			if (!IP232Open())
 			{
-				data = m_clipboard[m_clipboardptr++];
-				m_clipboardlen--;
-				if (m_clipboardlen <= 0)
+				Report(MessageType::Error, "Serial IP232 could not connect to specified address");
+				bSerialStateChanged = true;
+				SerialPortEnabled = false;
+				UpdateSerialMenu();
+			}
+		}
+	}
+
+	ResetBeebSystem(MachineType, true);
+
+	// Rom write flags
+	for (int slot = 0; slot < 16; ++slot)
+	{
+		if (!RomWritePrefs[slot])
+			RomWritable[slot] = false;
+	}
+
+	SetRomMenu();
+}
+
+/****************************************************************************/
+BeebWin::~BeebWin()
+{
+	if (m_DisplayRenderer != IDM_DISPGDI)
+		ExitDX();
+
+	ReleaseDC(m_hWnd, m_hDC);
+
+	if (m_hOldObj != NULL)
+		SelectObject(m_hDCBitmap, m_hOldObj);
+	if (m_hBitmap != NULL)
+		DeleteObject(m_hBitmap);
+	if (m_hDCBitmap != NULL)
+		DeleteDC(m_hDCBitmap);
+
+	GdiplusShutdown(m_gdiplusToken);
+
+	CoUninitialize();
+}
+
+/****************************************************************************/
+void BeebWin::Shutdown()
+{
+	if (aviWriter)
+	{
+		delete aviWriter;
+		aviWriter = nullptr;
+	}
+
+	if (m_AutoSavePrefsCMOS || m_AutoSavePrefsFolders ||
+		m_AutoSavePrefsAll || m_AutoSavePrefsChanged)
+		SavePreferences(m_AutoSavePrefsAll);
+
+	if (SoundEnabled)
+		SoundReset();
+
+	Music5000Reset();
+
+	if (m_SpVoice)
+	{
+		m_SpVoice->Release();
+		m_SpVoice = nullptr;
+	}
+
+	IP232Close();
+
+	WSACleanup();
+
+	if (m_WriteInstructionCounts) {
+		char FileName[_MAX_PATH];
+		strcpy(FileName, mainWin->m_UserDataPath);
+		strcat(FileName, "InstructionCounts.txt");
+
+		WriteInstructionCounts(FileName);
+	}
+
+	SCSIClose();
+	SASIClose();
+	IDEClose();
+
+	DestroyArmCoPro();
+	DestroySprowCoPro();
+}
+
+/****************************************************************************/
+
+void BeebWin::ResetBeebSystem(Model NewModelType, bool LoadRoms)
+{
+	SoundReset();
+	if (SoundDefault)
+		SoundInit();
+	SwitchOnSound();
+	Music5000Reset();
+	if (Music5000Enabled)
+		Music5000Init();
+	MachineType=NewModelType;
+	BeebMemInit(LoadRoms, m_ShiftBooted);
+	Init6502core();
+
+	if (TubeType == Tube::Acorn65C02)
+	{
+		Init65C02core();
+	}
+	else if (TubeType == Tube::Master512CoPro)
+	{
+		master512CoPro.Reset();
+	}
+	else if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80)
+	{
+		R1Status = 0;
+		ResetTube();
+		init_z80();
+	}
+	else if (TubeType == Tube::AcornArm)
+	{
+		R1Status = 0;
+		ResetTube();
+		DestroyArmCoPro();
+		CreateArmCoPro();
+	}
+	else if (TubeType == Tube::SprowArm)
+	{
+		R1Status = 0;
+		ResetTube();
+		DestroySprowCoPro();
+		CreateSprowCoPro();
+	}
+
+	SysVIAReset();
+	UserVIAReset();
+	VideoInit();
+	SetDiscWriteProtects();
+	Disc8271Reset();
+	if (EconetEnabled) EconetReset();	//Rob:
+	Reset1770();
+	AtoDInit();
+	SetRomMenu();
+	FreeDiscImage(0);
+	// Keep the disc images loaded
+	FreeDiscImage(1);
+	Close1770Disc(0);
+	Close1770Disc(1);
+	if (SCSIDriveEnabled) SCSIReset();
+	if (SCSIDriveEnabled) SASIReset();
+	if (IDEDriveEnabled)  IDEReset();
+	TeletextInit();
+	if (MachineType == Model::Master128) {
+		InvertTR00 = false;
+	}
+	else {
+		LoadFDC(NULL, false);
+	}
+
+	if (MachineType != Model::Master128 && NativeFDC) {
+		// 8271 disc
+		if (DiscLoaded[0] && CDiscType[0] == DiscType::SSD) LoadSimpleDiscImage(CDiscName[0], 0, 0, 80);
+		if (DiscLoaded[0] && CDiscType[0] == DiscType::DSD) LoadSimpleDSDiscImage(CDiscName[0], 0, 80);
+		if (DiscLoaded[1] && CDiscType[1] == DiscType::SSD) LoadSimpleDiscImage(CDiscName[1], 1, 0, 80);
+		if (DiscLoaded[1] && CDiscType[1] == DiscType::DSD) LoadSimpleDSDiscImage(CDiscName[1], 1, 80);
+	}
+	if ((MachineType != Model::Master128 && !NativeFDC) || (MachineType == Model::Master128)) {
+		// 1770 Disc
+		if (DiscLoaded[0]) Load1770DiscImage(CDiscName[0], 0, CDiscType[0]);
+		if (DiscLoaded[1]) Load1770DiscImage(CDiscName[1], 1, CDiscType[1]);
+	}
+}
+
+void BeebWin::CreateArmCoPro()
+{
+	arm = new CArm;
+
+	char ArmROMPath[256];
+
+	strcpy(ArmROMPath, RomPath);
+	strcat(ArmROMPath, "BeebFile/ARMeval_100.rom");
+
+	CArm::InitResult Result = arm->init(ArmROMPath);
+
+	switch (Result) {
+		case CArm::InitResult::FileNotFound:
+			Report(MessageType::Error, "ARM co-processor ROM file not found:\n  %s",
+			       ArmROMPath);
+
+			DestroyArmCoPro();
+
+			TubeType = Tube::None;
+			UpdateTubeMenu();
+			break;
+
+		case CArm::InitResult::Success:
+			break;
+	}
+}
+
+void BeebWin::DestroyArmCoPro()
+{
+	if (arm)
+	{
+		delete arm;
+		arm = nullptr;
+	}
+}
+
+void BeebWin::CreateSprowCoPro()
+{
+	char SprowROMPath[MAX_PATH];
+
+	strcpy(SprowROMPath, RomPath);
+	strcat(SprowROMPath, "BeebFile/Sprow.rom");
+
+	sprow = new CSprowCoPro();
+	CSprowCoPro::InitResult Result = sprow->Init(SprowROMPath);
+
+	switch (Result) {
+		case CSprowCoPro::InitResult::FileNotFound:
+			Report(MessageType::Error, "ARM7TDMI co-processor ROM file not found:\n  %s",
+			       SprowROMPath);
+
+			DestroySprowCoPro();
+
+			TubeType = Tube::None;
+			UpdateTubeMenu();
+			break;
+
+		case CSprowCoPro::InitResult::Success:
+			break;
+	}
+}
+
+void BeebWin::DestroySprowCoPro()
+{
+	if (sprow)
+	{
+		delete sprow;
+		sprow = nullptr;
+	}
+}
+
+/****************************************************************************/
+void BeebWin::CreateBitmap()
+{
+	if (m_hBitmap != NULL)
+		DeleteObject(m_hBitmap);
+	if (m_hDCBitmap != NULL)
+		DeleteDC(m_hDCBitmap);
+	if (m_screen_blur != NULL)
+		free(m_screen_blur);
+
+	m_hDCBitmap = CreateCompatibleDC(NULL);
+
+	m_bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	m_bmi.bmiHeader.biWidth = 800;
+	m_bmi.bmiHeader.biHeight = -512;
+	m_bmi.bmiHeader.biPlanes = 1;
+	m_bmi.bmiHeader.biBitCount = 8;
+	m_bmi.bmiHeader.biXPelsPerMeter = 0;
+	m_bmi.bmiHeader.biYPelsPerMeter = 0;
+	m_bmi.bmiHeader.biCompression = BI_RGB;
+	m_bmi.bmiHeader.biSizeImage = 800*512;
+	m_bmi.bmiHeader.biClrUsed = 68;
+	m_bmi.bmiHeader.biClrImportant = 68;
+
+#ifdef USE_PALETTE
+	__int16 *pInts = (__int16 *)&m_bmi.bmiColors[0];
+
+	for(int i=0; i<12; i++)
+		pInts[i] = i;
+
+	m_hBitmap = CreateDIBSection(m_hDCBitmap, (BITMAPINFO *)&m_bmi, DIB_PAL_COLORS,
+							(void**)&m_screen, NULL,0);
+#else
+	for (int i = 0; i < 64; ++i)
+	{
+		float r,g,b;
+		r = (float) (i & 1);
+		g = (float) ((i & 2) >> 1);
+		b = (float) ((i & 4) >> 2);
+
+		if (m_PaletteType != PaletteType::RGB)
+		{
+			r = g = b = (float) (0.299 * r + 0.587 * g + 0.114 * b);
+
+			switch (m_PaletteType)
+			{
+			case PaletteType::Amber:
+				r *= (float) 1.0;
+				g *= (float) 0.8;
+				b *= (float) 0.1;
+				break;
+			case PaletteType::Green:
+				r *= (float) 0.2;
+				g *= (float) 0.9;
+				b *= (float) 0.1;
+				break;
+			}
+		}
+
+		m_bmi.bmiColors[i].rgbRed   = (BYTE) (r * m_BlurIntensities[i >> 3] / 100.0 * 255);
+		m_bmi.bmiColors[i].rgbGreen = (BYTE) (g * m_BlurIntensities[i >> 3] / 100.0 * 255);
+		m_bmi.bmiColors[i].rgbBlue  = (BYTE) (b * m_BlurIntensities[i >> 3] / 100.0 * 255);
+		m_bmi.bmiColors[i].rgbReserved = 0;
+	}
+
+	// Red Leds - left is dark, right is lit.
+	m_bmi.bmiColors[LED_COL_BASE].rgbRed=80;		m_bmi.bmiColors[LED_COL_BASE+1].rgbRed=255;
+	m_bmi.bmiColors[LED_COL_BASE].rgbGreen=0;		m_bmi.bmiColors[LED_COL_BASE+1].rgbGreen=0;
+	m_bmi.bmiColors[LED_COL_BASE].rgbBlue=0;		m_bmi.bmiColors[LED_COL_BASE+1].rgbBlue=0;
+	m_bmi.bmiColors[LED_COL_BASE].rgbReserved=0;	m_bmi.bmiColors[LED_COL_BASE+1].rgbReserved=0;
+	// Green Leds - left is dark, right is lit.
+	m_bmi.bmiColors[LED_COL_BASE+2].rgbRed=0;		m_bmi.bmiColors[LED_COL_BASE+3].rgbRed=0;
+	m_bmi.bmiColors[LED_COL_BASE+2].rgbGreen=80;	m_bmi.bmiColors[LED_COL_BASE+3].rgbGreen=255;
+	m_bmi.bmiColors[LED_COL_BASE+2].rgbBlue=0;		m_bmi.bmiColors[LED_COL_BASE+3].rgbBlue=0;
+	m_bmi.bmiColors[LED_COL_BASE+2].rgbReserved=0;	m_bmi.bmiColors[LED_COL_BASE+3].rgbReserved=0;
+
+	m_hBitmap = CreateDIBSection(m_hDCBitmap, (BITMAPINFO *)&m_bmi, DIB_RGB_COLORS,
+							(void**)&m_screen, NULL,0);
+#endif
+
+	m_screen_blur = (char *)calloc(m_bmi.bmiHeader.biSizeImage,1);
+
+	m_hOldObj = SelectObject(m_hDCBitmap, m_hBitmap);
+
+	if (m_hOldObj == NULL)
+	{
+		Report(MessageType::Error,
+		       "Cannot select the screen bitmap\nTry running in a 256 colour mode");
+	}
+}
+
+/****************************************************************************/
+bool BeebWin::InitClass()
+{
+	WNDCLASS wc;
+
+	// Fill in window class structure with parameters that describe the
+	// main window.
+
+	wc.style         = CS_HREDRAW | CS_VREDRAW; // Class style(s).
+	wc.lpfnWndProc   = WndProc; // Window Procedure
+	wc.cbClsExtra    = 0; // No per-class extra data.
+	wc.cbWndExtra    = 0; // No per-window extra data.
+	wc.hInstance     = hInst; // Owner of this class
+	wc.hIcon         = LoadIcon(hInst, MAKEINTRESOURCE(IDI_BEEBEM));
+	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wc.lpszMenuName  = MAKEINTRESOURCE(IDR_MENU); // Menu from .rc file
+	wc.lpszClassName = "BEEBWIN"; // Name to register as
+
+	// Register the window class and return success/failure code.
+	return RegisterClass(&wc) != 0;
+}
+
+/****************************************************************************/
+void BeebWin::CreateBeebWindow(void)
+{
+	DWORD style;
+	int show = SW_SHOW;
+
+	int x = m_XWinPos;
+	int y = m_YWinPos;
+	if (x == -1 || y == -1)
+	{
+		x = CW_USEDEFAULT;
+		y = 0;
+		m_XWinPos = 0;
+		m_YWinPos = 0;
+	}
+
+	if (m_DisplayRenderer == IDM_DISPGDI && m_isFullScreen)
+		show = SW_MAXIMIZE;
+
+	if (m_DisplayRenderer != IDM_DISPGDI && m_isFullScreen)
+	{
+		style = WS_POPUP;
+	}
+	else
+	{
+		style = WIN_STYLE;
+	}
+
+	m_hWnd = CreateWindow(
+		"BEEBWIN",  // See RegisterClass() call.
+		m_szTitle,  // Text for window title bar.
+		style,
+		x, y,
+		m_XWinSize + m_XWinBorder,
+		m_YWinSize + m_YWinBorder,
+		nullptr,    // Overlapped windows have no parent.
+		nullptr,    // Use the window class menu.
+		hInst,      // This instance owns this window.
+		nullptr     // We don't use any data in our WM_CREATE
+	);
+
+	ShowWindow(m_hWnd, show); // Show the window
+	UpdateWindow(m_hWnd); // Sends WM_PAINT message
+
+	SetWindowAttributes(false);
+}
+
+void BeebWin::ShowMenu(bool on) {
+	if (m_DisableMenu) {
+		on = false;
+	}
+
+	if (on != m_MenuOn) {
+		SetMenu(m_hWnd, on ? m_hMenu : nullptr);
+	}
+
+	m_MenuOn = on;
+}
+
+void BeebWin::HideMenu(bool hide) {
+	if (m_HideMenuEnabled) {
+		ShowMenu(!hide);
+	}
+}
+
+void BeebWin::TrackPopupMenu(int x, int y) {
+  ::TrackPopupMenu(m_hMenu, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON,
+                   x, y,
+                   0,
+                   m_hWnd,
+                   NULL);
+}
+
+/****************************************************************************/
+void BeebWin::CheckMenuItem(UINT id, bool checked)
+{
+	::CheckMenuItem(m_hMenu, id, checked ? MF_CHECKED : MF_UNCHECKED);
+}
+
+void BeebWin::EnableMenuItem(UINT id, bool enabled)
+{
+	::EnableMenuItem(m_hMenu, id, enabled ? MF_ENABLED : MF_GRAYED);
+}
+
+void BeebWin::InitMenu(void)
+{
+	char menu_string[256];
+
+	// File -> Video Options
+	CheckMenuItem(IDM_VIDEORES1, false);
+	CheckMenuItem(IDM_VIDEORES2, false);
+	CheckMenuItem(IDM_VIDEORES3, false);
+	CheckMenuItem(IDM_VIDEOSKIP0, false);
+	CheckMenuItem(IDM_VIDEOSKIP1, false);
+	CheckMenuItem(IDM_VIDEOSKIP2, false);
+	CheckMenuItem(IDM_VIDEOSKIP3, false);
+	CheckMenuItem(IDM_VIDEOSKIP4, false);
+	CheckMenuItem(IDM_VIDEOSKIP5, false);
+	CheckMenuItem(m_MenuIdAviResolution, true);
+	CheckMenuItem(m_MenuIdAviSkip, true);
+
+	// File -> Disc Options
+	CheckMenuItem(IDM_WPDISC0, m_WriteProtectDisc[0]);
+	CheckMenuItem(IDM_WPDISC1, m_WriteProtectDisc[1]);
+	CheckMenuItem(IDM_WPONLOAD, m_WriteProtectOnLoad);
+
+	// File -> Capture Options
+	CheckMenuItem(IDM_CAPTURERES_DISPLAY, false);
+	CheckMenuItem(IDM_CAPTURERES_1280, false);
+	CheckMenuItem(IDM_CAPTURERES_640, false);
+	CheckMenuItem(IDM_CAPTURERES_320, false);
+	CheckMenuItem(IDM_CAPTUREBMP, false);
+	CheckMenuItem(IDM_CAPTUREJPEG, false);
+	CheckMenuItem(IDM_CAPTUREGIF, false);
+	CheckMenuItem(IDM_CAPTUREPNG, false);
+	CheckMenuItem(m_MenuIdCaptureResolution, true);
+	CheckMenuItem(m_MenuIdCaptureFormat, true);
+
+	// Edit
+	CheckMenuItem(IDM_EDIT_CRLF, m_translateCRLF);
+
+	// Comms -> Tape Speed
+	SetTapeSpeedMenu();
+
+	// Comms
+	CheckMenuItem(ID_UNLOCKTAPE, UnlockTape);
+	CheckMenuItem(IDM_PRINTERONOFF, PrinterEnabled);
+
+	// Comms -> Printer
+	CheckMenuItem(IDM_PRINTER_FILE, false);
+	CheckMenuItem(IDM_PRINTER_LPT1, false);
+	CheckMenuItem(IDM_PRINTER_LPT2, false);
+	CheckMenuItem(IDM_PRINTER_LPT3, false);
+	CheckMenuItem(IDM_PRINTER_LPT4, false);
+	CheckMenuItem(IDM_PRINTER_COM1, false);
+	CheckMenuItem(IDM_PRINTER_COM2, false);
+	CheckMenuItem(IDM_PRINTER_COM3, false);
+	CheckMenuItem(IDM_PRINTER_COM4, false);
+	CheckMenuItem(m_MenuIdPrinterPort, true);
+	strcpy(menu_string, "File: ");
+	strcat(menu_string, m_PrinterFileName);
+	ModifyMenu(m_hMenu, IDM_PRINTER_FILE, MF_BYCOMMAND, IDM_PRINTER_FILE, menu_string);
+
+	// Comms -> RS423
+	CheckMenuItem(ID_SERIAL, SerialPortEnabled);
+	CheckMenuItem(ID_COM1, SerialPort == 1);
+	CheckMenuItem(ID_COM2, SerialPort == 2);
+	CheckMenuItem(ID_COM3, SerialPort == 3);
+	CheckMenuItem(ID_COM4, SerialPort == 4);
+	CheckMenuItem(ID_TOUCHSCREEN, TouchScreenEnabled);
+	// CheckMenuItem(ID_IP232, EthernetPortEnabled);
+	CheckMenuItem(ID_IP232LOCALHOST, IP232localhost);
+	CheckMenuItem(ID_IP232CUSTOM, IP232custom);
+	CheckMenuItem(ID_IP232MODE, IP232mode);
+	CheckMenuItem(ID_IP232RAW, IP232raw);
+
+	// View
+	UpdateDisplayRendererMenu();
+
+	const bool DirectXEnabled = m_DisplayRenderer != IDM_DISPGDI;
+	EnableMenuItem(IDM_DXSMOOTHING, DirectXEnabled);
+	EnableMenuItem(IDM_DXSMOOTHMODE7ONLY, DirectXEnabled);
+
+	CheckMenuItem(IDM_DXSMOOTHING, m_DXSmoothing);
+	CheckMenuItem(IDM_DXSMOOTHMODE7ONLY, m_DXSmoothMode7Only);
+
+	CheckMenuItem(IDM_SPEEDANDFPS, m_ShowSpeedAndFPS);
+	CheckMenuItem(IDM_FULLSCREEN, m_isFullScreen);
+	CheckMenuItem(IDM_MAINTAINASPECTRATIO, m_MaintainAspectRatio);
+	UpdateMonitorMenu();
+	CheckMenuItem(ID_HIDEMENU, m_HideMenuEnabled);
+	UpdateLEDMenu();
+	CheckMenuItem(IDM_TEXTVIEW, m_TextViewEnabled);
+
+	// View -> Win size
+	CheckMenuItem(IDM_320X256, false);
+	CheckMenuItem(IDM_640X512, false);
+	CheckMenuItem(IDM_800X600, false);
+	CheckMenuItem(IDM_1024X768, false);
+	CheckMenuItem(IDM_1024X512, false);
+	CheckMenuItem(IDM_1280X1024, false);
+	CheckMenuItem(IDM_1440X1080, false);
+	CheckMenuItem(IDM_1600X1200, false);
+	// CheckMenuItem(m_MenuIdWinSize, true);
+
+	// View -> DD mode
+	CheckMenuItem(ID_VIEW_DD_SCREENRES, false);
+	CheckMenuItem(ID_VIEW_DD_640X480, false);
+	CheckMenuItem(ID_VIEW_DD_720X576, false);
+	CheckMenuItem(ID_VIEW_DD_800X600, false);
+	CheckMenuItem(ID_VIEW_DD_1024X768, false);
+	CheckMenuItem(ID_VIEW_DD_1280X720, false);
+	CheckMenuItem(ID_VIEW_DD_1280X1024, false);
+	CheckMenuItem(ID_VIEW_DD_1280X768, false);
+	CheckMenuItem(ID_VIEW_DD_1280X960, false);
+	CheckMenuItem(ID_VIEW_DD_1440X900, false);
+	CheckMenuItem(ID_VIEW_DD_1600X1200, false);
+	CheckMenuItem(ID_VIEW_DD_1920X1080, false);
+	CheckMenuItem(ID_VIEW_DD_2560X1440, false);
+	CheckMenuItem(ID_VIEW_DD_3840X2160, false);
+	CheckMenuItem(m_DDFullScreenMode, true);
+
+	// View -> Motion blur
+	CheckMenuItem(IDM_BLUR_OFF, false);
+	CheckMenuItem(IDM_BLUR_2, false);
+	CheckMenuItem(IDM_BLUR_4, false);
+	CheckMenuItem(IDM_BLUR_8, false);
+	CheckMenuItem(m_MotionBlur, true);
+
+	// Speed
+	CheckMenuItem(IDM_REALTIME, false);
+	CheckMenuItem(IDM_FIXEDSPEED100, false);
+	CheckMenuItem(IDM_FIXEDSPEED50, false);
+	CheckMenuItem(IDM_FIXEDSPEED10, false);
+	CheckMenuItem(IDM_FIXEDSPEED5, false);
+	CheckMenuItem(IDM_FIXEDSPEED2, false);
+	CheckMenuItem(IDM_FIXEDSPEED1_5, false);
+	CheckMenuItem(IDM_FIXEDSPEED1_25, false);
+	CheckMenuItem(IDM_FIXEDSPEED1_1, false);
+	CheckMenuItem(IDM_FIXEDSPEED0_9, false);
+	CheckMenuItem(IDM_FIXEDSPEED0_5, false);
+	CheckMenuItem(IDM_FIXEDSPEED0_75, false);
+	CheckMenuItem(IDM_FIXEDSPEED0_25, false);
+	CheckMenuItem(IDM_FIXEDSPEED0_1, false);
+	CheckMenuItem(IDM_50FPS, false);
+	CheckMenuItem(IDM_25FPS, false);
+	CheckMenuItem(IDM_10FPS, false);
+	CheckMenuItem(IDM_5FPS, false);
+	CheckMenuItem(IDM_1FPS, false);
+	CheckMenuItem(m_MenuIdTiming, true);
+	// Check menu based on m_EmuPaused to take into account -StartPaused arg
+	CheckMenuItem(IDM_EMUPAUSED, m_EmuPaused);
+
+	// Sound
+	UpdateSoundStreamerMenu();
+	SetSoundMenu();
+#ifdef SPEECH_ENABLED
+	CheckMenuItem(IDM_SPEECH, SpeechDefault);
+#endif
+	CheckMenuItem(IDM_SOUNDCHIP, SoundChipEnabled);
+	UpdateSFXMenu();
+	CheckMenuItem(ID_TAPESOUND, TapeSoundEnabled);
+	CheckMenuItem(IDM_44100KHZ, false);
+	CheckMenuItem(IDM_22050KHZ, false);
+	CheckMenuItem(IDM_11025KHZ, false);
+	CheckMenuItem(m_MenuIdSampleRate, true);
+	CheckMenuItem(IDM_HIGHVOLUME, false);
+	CheckMenuItem(IDM_MEDIUMVOLUME, false);
+	CheckMenuItem(IDM_LOWVOLUME, false);
+	CheckMenuItem(IDM_FULLVOLUME, false);
+	CheckMenuItem(m_MenuIdVolume, true);
+	CheckMenuItem(ID_PSAMPLES, PartSamples);
+	CheckMenuItem(IDM_EXPVOLUME, SoundExponentialVolume);
+	CheckMenuItem(IDM_TEXTTOSPEECH, m_TextToSpeechEnabled);
+
+	// AMX
+	CheckMenuItem(IDM_AMXONOFF, AMXMouseEnabled);
+	CheckMenuItem(IDM_CAPTUREMOUSE, m_CaptureMouse);
+	EnableMenuItem(IDM_CAPTUREMOUSE, AMXMouseEnabled);
+	CheckMenuItem(IDM_AMX_LRFORMIDDLE, AMXLRForMiddle);
+	CheckMenuItem(IDM_AMX_320X256, false);
+	CheckMenuItem(IDM_AMX_640X256, false);
+	CheckMenuItem(IDM_AMX_160X256, false);
+	CheckMenuItem(m_MenuIdAMXSize, true);
+	CheckMenuItem(IDM_AMX_ADJUSTP50, false);
+	CheckMenuItem(IDM_AMX_ADJUSTP30, false);
+	CheckMenuItem(IDM_AMX_ADJUSTP10, false);
+	CheckMenuItem(IDM_AMX_ADJUSTM10, false);
+	CheckMenuItem(IDM_AMX_ADJUSTM30, false);
+	CheckMenuItem(IDM_AMX_ADJUSTM50, false);
+	if (m_MenuIdAMXAdjust != 0)
+		CheckMenuItem(m_MenuIdAMXAdjust, true);
+
+	// Hardware -> Model
+	UpdateModelMenu();
+
+	// Hardware
+	UpdateTubeMenu();
+
+	SetRomMenu();
+	CheckMenuItem(IDM_SWRAMBOARD, SWRAMBoardEnabled);
+	UpdateOptiMenu();
+	UpdateEconetMenu();
+	CheckMenuItem(ID_TELETEXT, TeletextAdapterEnabled);
+	CheckMenuItem(ID_TELETEXTFILES, TeletextFiles);
+	CheckMenuItem(ID_TELETEXTLOCALHOST, TeletextLocalhost);
+	CheckMenuItem(ID_TELETEXTCUSTOM, TeletextCustom);
+	CheckMenuItem(ID_FLOPPYDRIVE, Disc8271Enabled);
+	CheckMenuItem(ID_HARDDRIVE, SCSIDriveEnabled);
+	CheckMenuItem(ID_IDEDRIVE, IDEDriveEnabled);
+	CheckMenuItem(ID_UPRM, RTC_Enabled);
+	CheckMenuItem(ID_RTCY2KADJUST, RTCY2KAdjust);
+
+	// Options
+	CheckMenuItem(IDM_JOYSTICK, false);
+	CheckMenuItem(IDM_ANALOGUE_MOUSESTICK, false);
+	CheckMenuItem(IDM_DIGITAL_MOUSESTICK, false);
+	if (m_MenuIdSticks != 0)
+		CheckMenuItem(m_MenuIdSticks, true);
+	CheckMenuItem(IDM_FREEZEINACTIVE, m_FreezeWhenInactive);
+	CheckMenuItem(IDM_HIDECURSOR, m_HideCursor);
+	CheckMenuItem(IDM_DEFAULTKYBDMAPPING, false);
+	CheckMenuItem(IDM_LOGICALKYBDMAPPING, false);
+	CheckMenuItem(IDM_USERKYBDMAPPING, false);
+	CheckMenuItem(m_MenuIdKeyMapping, true);
+	CheckMenuItem(IDM_MAPAS, m_KeyMapAS);
+	CheckMenuItem(IDM_MAPFUNCS, m_KeyMapFunc);
+	UpdateDisableKeysMenu();
+	CheckMenuItem(IDM_AUTOSAVE_PREFS_CMOS, m_AutoSavePrefsCMOS);
+	CheckMenuItem(IDM_AUTOSAVE_PREFS_FOLDERS, m_AutoSavePrefsFolders);
+	CheckMenuItem(IDM_AUTOSAVE_PREFS_ALL, m_AutoSavePrefsAll);
+}
+
+void BeebWin::UpdateDisplayRendererMenu() {
+	CheckMenuItem(IDM_DISPGDI, m_DisplayRenderer == IDM_DISPGDI);
+	CheckMenuItem(IDM_DISPDDRAW, m_DisplayRenderer == IDM_DISPDDRAW);
+	CheckMenuItem(IDM_DISPDX9, m_DisplayRenderer == IDM_DISPDX9);
+}
+
+void BeebWin::UpdateSoundStreamerMenu() {
+	CheckMenuItem(IDM_XAUDIO2, SoundConfig::Selection == SoundConfig::XAudio2);
+	CheckMenuItem(IDM_DIRECTSOUND, SoundConfig::Selection == SoundConfig::DirectSound);
+}
+
+void BeebWin::UpdateMonitorMenu() {
+	CheckMenuItem(ID_MONITOR_RGB, m_PaletteType == PaletteType::RGB);
+	CheckMenuItem(ID_MONITOR_BW, m_PaletteType == PaletteType::BW);
+	CheckMenuItem(ID_MONITOR_GREEN, m_PaletteType == PaletteType::Green);
+	CheckMenuItem(ID_MONITOR_AMBER, m_PaletteType == PaletteType::Amber);
+}
+
+void BeebWin::UpdateModelMenu()
+{
+	static const std::map<Model, UINT> ModelMenuItems{
+		{ Model::B,         ID_MODELB },
+		{ Model::IntegraB,  ID_MODELBINT },
+		{ Model::BPlus,     ID_MODELBPLUS },
+		{ Model::Master128, ID_MASTER128 },
+	};
+
+	UINT SelectedMenuItem = ModelMenuItems.find(MachineType)->second;
+
+	CheckMenuRadioItem(
+		m_hMenu,
+		ID_MODELB,
+		ID_MASTER128,
+		SelectedMenuItem,
+		MF_BYCOMMAND
+	);
+
+	if (MachineType == Model::Master128) {
+		EnableMenuItem(ID_FDC_DLL, false);
+	}
+	else {
+		EnableMenuItem(ID_FDC_DLL, true);
+	}
+}
+
+void BeebWin::UpdateSFXMenu() {
+	CheckMenuItem(ID_SFX_RELAY, RelaySoundEnabled);
+	CheckMenuItem(ID_SFX_DISCDRIVES, DiscDriveSoundEnabled);
+}
+
+void BeebWin::UpdateDisableKeysMenu() {
+	CheckMenuItem(IDM_DISABLEKEYSWINDOWS, m_DisableKeysWindows);
+	CheckMenuItem(IDM_DISABLEKEYSBREAK, m_DisableKeysBreak);
+	CheckMenuItem(IDM_DISABLEKEYSESCAPE, m_DisableKeysEscape);
+	CheckMenuItem(IDM_DISABLEKEYSSHORTCUT, m_DisableKeysShortcut);
+}
+
+/****************************************************************************/
+
+void BeebWin::UpdateTubeMenu()
+{
+	static const std::map<Tube, UINT> TubeMenuItems{
+		{ Tube::None,           IDM_TUBE_NONE },
+		{ Tube::Acorn65C02,     IDM_TUBE_ACORN65C02 },
+		{ Tube::Master512CoPro, IDM_TUBE_MASTER512 },
+		{ Tube::AcornZ80,       IDM_TUBE_ACORNZ80 },
+		{ Tube::TorchZ80,       IDM_TUBE_TORCHZ80 },
+		{ Tube::AcornArm,       IDM_TUBE_ACORNARM },
+		{ Tube::SprowArm,       IDM_TUBE_SPROWARM }
+	};
+
+	UINT SelectedMenuItem = TubeMenuItems.find(TubeType)->second;
+
+	CheckMenuRadioItem(
+		m_hMenu,
+		IDM_TUBE_NONE,
+		IDM_TUBE_SPROWARM,
+		SelectedMenuItem,
+		MF_BYCOMMAND
+	);
+}
+
+/****************************************************************************/
+
+void BeebWin::SetRomMenu(void)
+{
+	// Set the ROM Titles in the ROM/RAM menu.
+
+	for (int i = 0; i < 16; i++)
+	{
+		CHAR Title[19];
+
+		Title[0] = '&';
+		_itoa( i, &Title[1], 16 );
+		Title[2] = ' ';
+
+		// Get the Rom Title.
+		ReadRomTitle( i, &Title[3], sizeof( Title )-4);
+
+		if ( Title[3]== '\0' )
+		{
+			if (RomBankType[i] == BankType::Ram)
+				strcpy( &Title[3], "RAM" );
+			else
+				strcpy( &Title[3], "Empty" );
+		}
+
+		ModifyMenu(m_hMenu, // handle of menu
+		           IDM_ALLOWWRITES_ROM0 + i,
+		           MF_BYCOMMAND, // menu item to modify
+		           // MF_STRING, // menu item flags
+		           IDM_ALLOWWRITES_ROM0 + i, // menu item identifier or pop-up menu handle
+		           Title); // menu item content
+
+		/* Disable ROM and uncheck the Rom/RAM which are NOT writable */
+		EnableMenuItem(IDM_ALLOWWRITES_ROM0 + i, RomBankType[i] == BankType::Ram);
+		CheckMenuItem(IDM_ALLOWWRITES_ROM0 + i, RomBankType[i] == BankType::Ram && RomWritable[i]);
+	}
+}
+
+/****************************************************************************/
+void BeebWin::InitJoystick(void)
+{
+	MMRESULT mmresult = JOYERR_NOERROR;
+
+	if (!m_JoystickCaptured)
+	{
+		/* Get joystick updates 10 times a second */
+		mmresult = joySetCapture(m_hWnd, JOYSTICKID1, 100, FALSE);
+		if (mmresult == JOYERR_NOERROR)
+			mmresult = joyGetDevCaps(JOYSTICKID1, &m_JoystickCaps, sizeof(JOYCAPS));
+		if (mmresult == JOYERR_NOERROR)
+			m_JoystickCaptured = true;
+	}
+
+	if (mmresult == JOYERR_NOERROR)
+	{
+		AtoDEnable();
+	}
+	else if (mmresult == JOYERR_UNPLUGGED)
+	{
+		Report(MessageType::Error, "Joystick is not plugged in");
+	}
+	else
+	{
+		Report(MessageType::Error, "Failed to initialise the joystick");
+	}
+}
+
+/****************************************************************************/
+void BeebWin::ScaleJoystick(unsigned int x, unsigned int y)
+{
+	if (m_MenuIdSticks == IDM_JOYSTICK)
+	{
+		/* Scale and reverse the readings */
+		JoystickX = (int)((double)(m_JoystickCaps.wXmax - x) * 65535.0 /
+						  (double)(m_JoystickCaps.wXmax - m_JoystickCaps.wXmin));
+		JoystickY = (int)((double)(m_JoystickCaps.wYmax - y) * 65535.0 /
+						  (double)(m_JoystickCaps.wYmax - m_JoystickCaps.wYmin));
+	}
+}
+
+/****************************************************************************/
+void BeebWin::ResetJoystick(void)
+{
+	// joySetCapture() fails after a joyReleaseCapture() call (not sure why)
+	// so leave joystick captured.
+	// joyReleaseCapture(JOYSTICKID1);
+	AtoDDisable();
+}
+
+/****************************************************************************/
+void BeebWin::SetMousestickButton(int index, bool button)
+{
+	if (m_MenuIdSticks == IDM_ANALOGUE_MOUSESTICK ||
+	    m_MenuIdSticks == IDM_DIGITAL_MOUSESTICK)
+	{
+		JoystickButton[index] = button;
+	}
+}
+
+/****************************************************************************/
+void BeebWin::ScaleMousestick(unsigned int x, unsigned int y)
+{
+	static int lastx = 32768;
+	static int lasty = 32768;
+
+	if (m_MenuIdSticks == IDM_ANALOGUE_MOUSESTICK)
+	{
+		JoystickX = (m_XWinSize - x) * 65535 / m_XWinSize;
+		JoystickY = (m_YWinSize - y) * 65535 / m_YWinSize;
+	}
+	else if (m_MenuIdSticks == IDM_DIGITAL_MOUSESTICK)
+	{
+		int dx = x - lastx;
+		int dy = y - lasty;
+
+		if (dx > 4) JoystickX = 0;
+		if (dx < -4) JoystickX = 65535;
+
+		if (dy > 4) JoystickY = 0;
+		if (dy < -4) JoystickY = 65535;
+
+		lastx = x;
+		lasty = y;
+	}
+}
+
+/****************************************************************************/
+void BeebWin::SetAMXPosition(unsigned int x, unsigned int y)
+{
+	if (AMXMouseEnabled)
+	{
+		// Scale the window coords to the beeb screen coords
+		AMXTargetX = x * m_AMXXSize * (100 + m_AMXAdjust) / 100 / m_XWinSize;
+		AMXTargetY = y * m_AMXYSize * (100 + m_AMXAdjust) / 100 / m_YWinSize;
+
+		AMXMouseMovement();
+	}
+}
+
+/****************************************************************************/
+void BeebWin::ChangeAMXPosition(int deltaX, int deltaY)
+{
+	if (AMXMouseEnabled)
+	{
+		static int remX = 0;
+		static int remY = 0;
+
+		// Scale the window coords to the beeb screen coords
+		int bigX = deltaX * m_AMXXSize * (100 + m_AMXAdjust);
+		AMXDeltaX += (bigX + remX) / (100 * m_XWinSize);
+		remX = (bigX + remX) % (100 * m_XWinSize);
+
+		int bigY = deltaY * m_AMXYSize * (100 + m_AMXAdjust);
+		AMXDeltaY += (bigY + remY) / (100 * m_YWinSize);
+		remY = (bigY + remY) % (100 * m_YWinSize);
+
+		AMXMouseMovement();
+	}
+}
+
+/****************************************************************************/
+LRESULT CALLBACK WndProc(HWND hWnd,     // window handle
+                         UINT message,  // type of message
+                         WPARAM wParam, // additional information
+                         LPARAM lParam) // additional information
+{
+	int wmId, wmEvent;
+	HDC hdc;
+	int row, col;
+
+	switch (message)
+	{
+		case WM_COMMAND:  // message: command from application menu
+			wmId	= LOWORD(wParam);
+			wmEvent = HIWORD(wParam);
+			mainWin->HandleCommand(wmId);
+			break;
+
+		case WM_PALETTECHANGED:
+			if ((HWND)wParam == hWnd)
+				break;
+
+			// fall through to WM_QUERYNEWPALETTE
+		case WM_QUERYNEWPALETTE:
+			hdc = GetDC(hWnd);
+			mainWin->RealizePalette(hdc);
+			ReleaseDC(hWnd, hdc);
+			return TRUE;
+
+		case WM_PAINT:
+			{
+				PAINTSTRUCT ps;
+				HDC hDC = BeginPaint(hWnd, &ps);
+				mainWin->RealizePalette(hDC);
+				mainWin->updateLines(hDC, 0, 0);
+				EndPaint(hWnd, &ps);
+
+				if (mainWin->m_DXResetPending)
+					mainWin->ResetDX();
+			}
+			break;
+
+		case WM_SIZE:
+			mainWin->WinSizeChange(wParam, LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_MOVE:
+			mainWin->WinPosChange(LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case WM_SYSKEYDOWN:
+			// DebugTrace("SysKeyD: %d, 0x%X, 0x%X\n", uParam, uParam, lParam);
+
+			if (mainWin->m_TextToSpeechEnabled &&
+				((wParam >= VK_NUMPAD0 && wParam <= VK_NUMPAD9) ||
+				 wParam == VK_DECIMAL ||
+				 wParam == VK_HOME || wParam == VK_END ||
+				 wParam == VK_PRIOR || wParam == VK_NEXT ||
+				 wParam == VK_UP || wParam == VK_DOWN ||
+				 wParam == VK_LEFT || wParam == VK_RIGHT ||
+				 wParam == VK_INSERT || wParam == VK_DELETE ||
+				 wParam == VK_CLEAR))
+			{
+				mainWin->TextToSpeechKey(wParam);
+			}
+			else if (wParam == VK_OEM_8 /* Alt ` */)
+			{
+				mainWin->TextViewSyncWithBeebCursor();
+			}
+			else if (wParam == VK_RETURN && (lParam & 0x20000000))
+			{
+				mainWin->HandleCommand(IDM_FULLSCREEN);
+				break;
+			}
+			else if (wParam == VK_F4 && (lParam & 0x20000000))
+			{
+				mainWin->HandleCommand(IDM_EXIT);
+				break;
+			}
+			// Alt+F5 pauses the emulation
+			else if (wParam == VK_F5 && (lParam & 0x20000000))
+			{
+				mainWin->HandleCommand(IDM_EMUPAUSED);
+				break;
+			}
+
+			if (wParam != VK_F10 && wParam != VK_CONTROL)
+				break;
+
+		case WM_KEYDOWN:
+			// DebugTrace("KeyD: %d, 0x%X, 0x%X\n", wParam, wParam, lParam);
+
+			if (mainWin->m_TextToSpeechEnabled &&
+				((wParam >= VK_NUMPAD0 && wParam <= VK_NUMPAD9) ||
+				 wParam == VK_DECIMAL ||
+				 wParam == VK_HOME || wParam == VK_END ||
+				 wParam == VK_PRIOR || wParam == VK_NEXT ||
+				 wParam == VK_UP || wParam == VK_DOWN ||
+				 wParam == VK_LEFT || wParam == VK_RIGHT ||
+				 wParam == VK_INSERT || wParam == VK_DELETE ||
+				 wParam == VK_CLEAR))
+			{
+				mainWin->TextToSpeechKey(wParam);
+			}
+			else if ((wParam == VK_DIVIDE || wParam == VK_MULTIPLY ||
+			         wParam == VK_ADD || wParam == VK_SUBTRACT) &&
+			         !mainWin->m_DisableKeysShortcut)
+			{
+				// Ignore shortcut key, handled on key up
+			}
+			else if (wParam == VK_MENU && (GetKeyState(VK_CONTROL) & 0x8000) ||
+			         wParam == VK_CONTROL && (GetKeyState(VK_MENU) & 0x8000))
+			{
+				mainWin->ReleaseMouse();
+			}
+			else
+			{
+				bool bit = false;
+
+				if (userPortBreakoutDialog != nullptr)
 				{
-					ResetClipboard();
+					bit = userPortBreakoutDialog->KeyDown((int)wParam);
+				}
+
+				if (!bit)
+				{
+					// Reset shift state if it was set by Run Disc
+					if (mainWin->m_ShiftBooted)
+					{
+						mainWin->m_ShiftBooted = false;
+						BeebKeyUp(0, 0);
+					}
+
+					mainWin->TranslateKey((int)wParam, false, row, col);
 				}
 			}
 			break;
-		case 1 : // readmem 0xfc51 ; 0 means character available, -1 (255) means not
-			data = (m_clipboardlen == 0) ? 255 : 0;
+
+		case WM_SYSKEYUP:
+			// Debug("SysKeyU: %d, 0x%X, 0x%X\n", uParam, uParam, lParam);
+
+			if ((wParam == 0x35 || wParam == VK_NUMPAD5) && (lParam & 0x20000000))
+			{
+				mainWin->CaptureBitmapPending(true);
+				break;
+			}
+			else if (wParam == 0x31 && (lParam & 0x20000000) && !mainWin->m_DisableKeysShortcut)
+			{
+				mainWin->QuickSave();
+				// Let user know state has been saved
+				FlashWindow(GETHWND, TRUE);
+				MessageBeep(MB_ICONEXCLAMATION);
+				break;
+			}
+			else if (wParam == 0x32 && (lParam & 0x20000000) && !mainWin->m_DisableKeysShortcut)
+			{
+				mainWin->QuickLoad();
+				// Let user know state has been loaded
+				FlashWindow(GETHWND, TRUE);
+				MessageBeep(MB_ICONEXCLAMATION);
+				break;
+			}
+			else if (wParam == VK_OEM_PLUS && (lParam & 0x20000000))
+			{
+				mainWin->AdjustSpeed(true);
+				break;
+			}
+			else if (wParam == VK_OEM_MINUS && (lParam & 0x20000000))
+			{
+				mainWin->AdjustSpeed(false);
+				break;
+			}
+			else if (wParam != VK_F10 && wParam != VK_CONTROL)
+				break;
+
+		case WM_KEYUP:
+			// DebugTrace("KeyU: %d, 0x%X, 0x%X\n", uParam, uParam, lParam);
+
+			if (wParam == VK_DIVIDE && !mainWin->m_DisableKeysShortcut)
+			{
+				mainWin->QuickSave();
+				// Let user know state has been saved
+				FlashWindow(GETHWND, TRUE);
+				MessageBeep(MB_ICONEXCLAMATION);
+			}
+			else if (wParam == VK_MULTIPLY && !mainWin->m_DisableKeysShortcut)
+			{
+				mainWin->QuickLoad();
+				// Let user know state has been loaded
+				FlashWindow(GETHWND, TRUE);
+				MessageBeep(MB_ICONEXCLAMATION);
+			}
+			else if (wParam == VK_ADD && !mainWin->m_DisableKeysShortcut)
+			{
+				mainWin->AdjustSpeed(true);
+			}
+			else if (wParam == VK_SUBTRACT && !mainWin->m_DisableKeysShortcut)
+			{
+				mainWin->AdjustSpeed(false);
+			}
+			else
+			{
+				bool bit = false;
+
+				if (userPortBreakoutDialog != nullptr)
+				{
+					bit = userPortBreakoutDialog->KeyUp(static_cast<int>(wParam));
+				}
+
+				if (!bit)
+				{
+					if (mainWin->TranslateKey((int)wParam, true, row, col) < 0)
+					{
+						if (row == -2)
+						{
+							// Must do a reset!
+							Init6502core();
+
+							if (TubeType == Tube::Acorn65C02)
+							{
+								Init65C02core();
+							}
+							else if (TubeType == Tube::Master512CoPro)
+							{
+								master512CoPro.Reset();
+							}
+							else if (TubeType == Tube::AcornZ80 || TubeType == Tube::TorchZ80)
+							{
+								R1Status = 0;
+								ResetTube();
+								init_z80();
+							}
+							else if (TubeType == Tube::AcornArm)
+							{
+								R1Status = 0;
+								ResetTube();
+								mainWin->DestroyArmCoPro();
+								mainWin->CreateArmCoPro();
+							}
+							else if (TubeType == Tube::SprowArm)
+							{
+								R1Status = 0;
+								ResetTube();
+								// We don't want to throw the contents of memory away
+								// just tell the co-pro to reset itself.
+								sprow->Reset();
+							}
+
+							Disc8271Reset();
+							Reset1770();
+							if (EconetEnabled) EconetReset();//Rob
+							if (SCSIDriveEnabled) SCSIReset();
+							if (SCSIDriveEnabled) SASIReset();
+							if (IDEDriveEnabled)  IDEReset();
+							TeletextInit();
+							//SoundChipReset();
+							Music5000Reset();
+							if (Music5000Enabled)
+								Music5000Init();
+						}
+						else if(row==-3)
+						{
+							if (col==-3) SoundTuning+=0.1; // Page Up
+							if (col==-4) SoundTuning-=0.1; // Page Down
+						}
+					}
+				}
+			}
 			break;
-	}
-//    printf("pastekey %d %d [%d]\n", addr,data,m_clipboardlen);
-	return data;
-}
 
-void BeebWin::CopyKey(int Value)
-{
-//	fprintf(stderr, "Print %d (%c) to clipboard\n", Value, Value);
-
-	PasteboardRef outPasteboard;
-	OSStatus err;
-    CFMutableDataRef    returnData = NULL;
-	UInt8*              returnBytes;
-	int					i;
-	
-	if (m_printerbufferlen >= 1024 * 1024)
-		return;
-
-	m_printerbuffer[m_printerbufferlen++] = Value;
-	
-	err = PasteboardCreate(kPasteboardClipboard, &outPasteboard);
-	
-	err = PasteboardClear( outPasteboard );
-	
-	if (m_printerbufferlen > 5)		// Don't paste initial L.<cr> command or final <cr> > prompt
-	{
-		
-		returnData = CFDataCreateMutable( kCFAllocatorDefault, m_printerbufferlen - 4);
-		
-		returnBytes = CFDataGetMutableBytePtr( returnData );
-		
-		CFDataSetLength( returnData, m_printerbufferlen - 4);
-		
-		for( i = 0; i < m_printerbufferlen - 4; i++ )
-			returnBytes[i] = m_printerbuffer[i + 3];
-		
-		PasteboardPutItemFlavor( outPasteboard, (PasteboardItemID)1,
-//							   CFSTR("com.apple.traditional-mac-plain-text"),
-                             CFSTR("public.utf8-plain-text"),
-                                      returnData, 0 );
-
-		CFRelease(returnData);
-	}
-
-	CFRelease(outPasteboard);
-
-}
-
-
-int BeebWin::KeyDown(int vkey)
-{
-int row, col;
-//int i;
-//int mask = 0x01;
-bool bit = false;
-
-#if 0//ACH - ethernet
-	if (mEthernetPortWindow) return 0;
-	
-	if (mBreakOutWindow)
-	{
-		for (i = 0; i < 8; ++i)
-		{
-			if (BitKeys[i] == vkey)
+		case WM_ACTIVATE:
+			mainWin->Activate(wParam != WA_INACTIVE);
+			if (wParam != WA_INACTIVE)
 			{
-				if ((UserVIAState.ddrb & mask) == 0x00)
+				// Bring debug window to foreground BEHIND main window.
+				if(hwndDebug)
 				{
-					UserVIAState.irb &= ~mask;
-					ShowInputs( (UserVIAState.orb & UserVIAState.ddrb) | (UserVIAState.irb & (~UserVIAState.ddrb)) );
-					bit = true;
+					SetWindowPos(hwndDebug, GETHWND,0,0,0,0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOACTIVATE);
+					SetWindowPos(GETHWND, HWND_TOP,0,0,0,0, SWP_NOMOVE | SWP_NOSIZE);
 				}
 			}
-			mask <<= 1;
-		}
-	}
-#endif
-	if (bit == true) return 0;
-	
-	// Reset shift state if it was set by Run Disc
-	if (m_ShiftBooted)
-	{
-		m_ShiftBooted = false;
-		BeebKeyUp(0, 0);
-	}
 
-	TranslateKey(vkey, false, row, col);
-
-	return 0;
-}
-
-int BeebWin::KeyUp(int vkey)
-{
-int row, col;
-//int i;
-//int mask = 0x01;
-bool bit = false;
-#if 0//ACH - ethernet
-	if (mEthernetPortWindow) return 0;
-
-	if (mBreakOutWindow)
-	{
-		for (i = 0; i < 8; ++i)
-		{
-			if (BitKeys[i] == vkey)
+			if (mainWin->m_MouseCaptured && wParam == WA_INACTIVE)
 			{
-				if ((UserVIAState.ddrb & mask) == 0x00)
+				mainWin->ReleaseMouse();
+			}
+			break;
+
+		case WM_SETFOCUS:
+			mainWin->Focus(true);
+			break;
+
+		case WM_KILLFOCUS:
+			BeebReleaseAllKeys();
+			mainWin->Focus(false);
+			break;
+
+		case WM_SETCURSOR:
+			if (mainWin->m_HideCursor && LOWORD(lParam) == HTCLIENT)
+			{
+				SetCursor(nullptr);
+				return TRUE;
+			}
+			else
+			{
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
+			break;
+
+		case MM_JOY1MOVE:
+			mainWin->ScaleJoystick(LOWORD(lParam), HIWORD(lParam));
+			break;
+
+		case MM_JOY1BUTTONDOWN:
+		case MM_JOY1BUTTONUP:
+			JoystickButton[0] = (wParam & (JOY_BUTTON1 | JOY_BUTTON2)) != 0;
+			break;
+
+		case WM_INPUT:
+			if (mainWin->m_MouseCaptured)
+			{
+				UINT dwSize = sizeof(RAWINPUT);
+				BYTE Buffer[sizeof(RAWINPUT)];
+
+				GetRawInputData((HRAWINPUT)lParam,
+				                RID_INPUT,
+				                Buffer,
+				                &dwSize,
+				                sizeof(RAWINPUTHEADER));
+
+				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(Buffer);
+
+				if (raw->header.dwType != RIM_TYPEMOUSE)
+					break;
+
+				int xDelta = raw->data.mouse.lLastX;
+				int yDelta = raw->data.mouse.lLastY;
+
+				mainWin->m_RelMousePos.x += xDelta;
+
+				if (mainWin->m_RelMousePos.x < 0)
 				{
-					UserVIAState.irb |= mask;
-					ShowInputs( (UserVIAState.orb & UserVIAState.ddrb) | (UserVIAState.irb & (~UserVIAState.ddrb)) );
-					bit = true;
+					mainWin->m_RelMousePos.x = 0;
 				}
-			}
-			mask <<= 1;
-		}
-	}
-#endif
-	if (bit == true) return 0;
-	
-	if(TranslateKey(vkey, true, row, col) < 0)
-	{
-		if(row==-2)
-		{ // Must do a reset!
-			Init6502core();
-			if ( (EnableTube) && (TubeEnabled) ) Init65C02core();
-			if (Tube186Enabled) i86_main();
-			Enable_Z80 = 0;
-			if (TorchTube || AcornZ80)
-			{
-				R1Status = 0;
-				ResetTube();
-				init_z80();
-				Enable_Z80 = 1;
-			}
-			Enable_Arm = 0;
-			if (ArmTube)
-			{
-				R1Status = 0;
-				ResetTube();
-				if (arm) delete arm;
-				arm = new CArm;
-				Enable_Arm = 1;
-			}
-			Disc8271_reset();
-			Reset1770();
-			if (EconetEnabled) EconetReset();
-			if (HardDriveEnabled) SCSIReset();
-			if (HardDriveEnabled) SASIReset();
-			if (TeleTextAdapterEnabled) TeleTextInit();
+				else if (mainWin->m_RelMousePos.x > mainWin->m_XWinSize)
+				{
+					mainWin->m_RelMousePos.x = mainWin->m_XWinSize;
+				}
 
-			//SoundChipReset();
-		}
+				mainWin->m_RelMousePos.y += yDelta;
+
+				if (mainWin->m_RelMousePos.y < 0)
+				{
+					mainWin->m_RelMousePos.y = 0;
+				}
+				else if (mainWin->m_RelMousePos.y > mainWin->m_YWinSize)
+				{
+					mainWin->m_RelMousePos.y = mainWin->m_YWinSize;
+				}
+
+				mainWin->ScaleMousestick(mainWin->m_RelMousePos.x,
+				                         mainWin->m_RelMousePos.y);
+
+				mainWin->ChangeAMXPosition(xDelta, yDelta);
+			}
+			break;
+
+		case WM_MOUSEMOVE:
+			if (!mainWin->m_MouseCaptured)
+			{
+				int xPos = GET_X_LPARAM(lParam);
+				int yPos = GET_Y_LPARAM(lParam);
+
+				mainWin->ScaleMousestick(xPos, yPos);
+				mainWin->SetAMXPosition(xPos, yPos);
+
+				// Experiment: show menu in full screen when cursor moved to top of window
+				mainWin->HideMenu(yPos > 2);
+			}
+			break;
+
+		case WM_LBUTTONDOWN:
+			if (AMXMouseEnabled && mainWin->m_CaptureMouse && !mainWin->m_MouseCaptured)
+			{
+				mainWin->CaptureMouse();
+			}
+			else
+			{
+				mainWin->SetMousestickButton(0, (wParam & MK_LBUTTON) != 0);
+				AMXButtons |= AMX_LEFT_BUTTON;
+			}
+			break;
+
+		case WM_LBUTTONUP:
+			mainWin->SetMousestickButton(0, (wParam & MK_LBUTTON) != 0);
+			AMXButtons &= ~AMX_LEFT_BUTTON;
+			break;
+
+		case WM_MBUTTONDOWN:
+			AMXButtons |= AMX_MIDDLE_BUTTON;
+			break;
+
+		case WM_MBUTTONUP:
+			AMXButtons &= ~AMX_MIDDLE_BUTTON;
+			break;
+
+		case WM_RBUTTONDOWN:
+			mainWin->SetMousestickButton(1, (wParam & MK_RBUTTON) != 0);
+			AMXButtons |= AMX_RIGHT_BUTTON;
+			break;
+
+		case WM_RBUTTONUP:
+			mainWin->SetMousestickButton(1, (wParam & MK_RBUTTON) != 0);
+			AMXButtons &= ~AMX_RIGHT_BUTTON;
+			break;
+
+		case WM_DESTROY:  // message: window being destroyed
+			mainWin->Shutdown();
+			PostQuitMessage(0);
+			break;
+
+		case WM_ENTERMENULOOP: // entering menu, must mute directsound
+			SetSound(SoundState::Muted);
+			break;
+
+		case WM_EXITMENULOOP:
+			SetSound(SoundState::Unmuted);
+			mainWin->ResetTiming();
+			break;
+
+		case WM_ENTERSIZEMOVE: // Window being moved
+			SetSound(SoundState::Muted);
+			break;
+
+		case WM_EXITSIZEMOVE:
+			SetSound(SoundState::Unmuted);
+			break;
+
+		case WM_REINITDX:
+			mainWin->ReinitDX();
+			break;
+
+		case WM_TIMER:
+			if (wParam == 1)
+			{
+				mainWin->HandleTimer();
+			}
+			else if (wParam == 2) // Handle timer for automatic disc boot delay
+			{
+				mainWin->KillBootDiscTimer();
+				mainWin->DoShiftBreak();
+			}
+			break;
+
+		case WM_USER_KEYBOARD_DIALOG_CLOSED:
+			mainWin->UserKeyboardDialogClosed();
+			break;
+
+		case WM_USER_PORT_BREAKOUT_DIALOG_CLOSED:
+			delete userPortBreakoutDialog;
+			userPortBreakoutDialog = nullptr;
+			break;
+
+		default: // Passes it on if unproccessed
+			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
 	return 0;
 }
 
 /****************************************************************************/
-int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
+int BeebWin::TranslateKey(int vkey, bool keyUp, int &row, int &col)
 {
+	if (vkey < 0 || vkey > 255)
+		return -9;
+
 	// Key track of shift state
-	if (vkey == 200)
+	if ((*transTable)[vkey][0].row == 0 && (*transTable)[vkey][0].col == 0)
 	{
-		if (keyUp)
-			m_ShiftPressed = false;
-		else
-			m_ShiftPressed = true;
+		m_ShiftPressed = !keyUp;
 	}
 
 	if (keyUp)
 	{
-		// Key released, lookup beeb row + col that this vkey 
+		// Key released, lookup beeb row + col that this vkey
 		// mapped to when it was pressed.  Need to release
 		// both shifted and non-shifted presses.
 		row = m_vkeyPressed[vkey][0][0];
@@ -480,25 +1859,52 @@ int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
 	}
 	else // New key press - convert to beeb row + col
 	{
-		int needShift = m_ShiftPressed;
-
-		row = transTable[vkey][0];
-		col = transTable[vkey][1];
+		row = (*transTable)[vkey][static_cast<int>(m_ShiftPressed)].row;
+		col = (*transTable)[vkey][static_cast<int>(m_ShiftPressed)].col;
+		bool needShift = (*transTable)[vkey][static_cast<int>(m_ShiftPressed)].shift;
 
 		if (m_KeyMapAS)
 		{
 			// Map A & S to CAPS & CTRL - good for some games
-			if (vkey == 0)				// A
+			if (vkey == 65)
 			{
 				row = 4;
 				col = 0;
-			} else if (vkey == 1)		// S
+			}
+			else if (vkey == 83)
 			{
 				row = 0;
 				col = 1;
 			}
 		}
-		
+
+		if (m_KeyMapFunc)
+		{
+			// Map F1-F10 to f0-f9
+			if (vkey >= 113 && vkey <= 121)
+			{
+				row = (*transTable)[vkey - 1][0].row;
+				col = (*transTable)[vkey - 1][0].col;
+			}
+			else if (vkey == 112)
+			{
+				row = 2;
+				col = 0;
+			}
+		}
+		//Reset IntegraB RTC on Break
+		if (MachineType == Model::IntegraB && row == -2 && col == -2)
+		{
+			RTCReset();
+		}
+
+		if (m_DisableKeysShortcut && (row == -3 || row == -4))
+			row = -10;
+		if (m_DisableKeysEscape && row == 7 && col == 0)
+			row = -10;
+		if (m_DisableKeysBreak && row == -2 && col == -2)
+			row = -10;
+
 		if (row >= 0)
 		{
 			// Make sure shift state is correct
@@ -510,8 +1916,8 @@ int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
 			BeebKeyDown(row, col);
 
 			// Record beeb row + col for key release
-			m_vkeyPressed[vkey][0][m_ShiftPressed ? 1 : 0] = row;
-			m_vkeyPressed[vkey][1][m_ShiftPressed ? 1 : 0] = col;
+			m_vkeyPressed[vkey][0][static_cast<int>(m_ShiftPressed)] = row;
+			m_vkeyPressed[vkey][1][static_cast<int>(m_ShiftPressed)] = col;
 		}
 		else
 		{
@@ -524,2081 +1930,52 @@ int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
 	return(row);
 }
 
-BeebWin::BeebWin() 
+/****************************************************************************/
+int BeebWin::StartOfFrame(void)
 {
-#if 0 //ACH - nib setup
-  IBNibRef 		nibRef;
-  OSStatus		err;
+	int FrameNum = 1;
 
-  // Create a Nib reference passing the name of the nib file (without the .nib extension)
-  // CreateNibReference only searches into the application bundle.
-  err = CreateNibReference(CFSTR("main"), &nibRef);
-  if (err)
-  {
-	fprintf(stderr, "CreateNibReference : %ld\n", err);
-  }
-    
-  // Once the nib reference is created, set the menu bar. "MainMenu" is the name of the menu bar
-  // object. This name is set in InterfaceBuilder when the nib is created.
-  err = SetMenuBarFromNib(nibRef, CFSTR("MenuBar"));
-  if (err)
-  {
-	fprintf(stderr, "SetMenuBarFromNib : %ld\n", err);
-  }
+	if (UpdateTiming())
+		FrameNum = 0;
 
-  // Then create a window. "MainWindow" is the name of the window object. This name is set in 
-  // InterfaceBuilder when the nib is created.
-  err = CreateWindowFromNib(nibRef, CFSTR("MainWindow"), &mWindow);
-  if (err)
-  {
-	fprintf(stderr, "CreateWindowFromNib : %ld\n", err);
-  }
-
-  // We don't need the nib reference anymore.
-  DisposeNibReference(nibRef);
-	  
-  SetPortWindowPort(mWindow);
-#endif
-    
-  DataSize=640*512;
-  m_screen = (char *) malloc(800 * 512);
-  m_screen_blur = (char *) malloc(800 * 512);
-
-  fprintf(stderr, "Base Address = %08lx\n", (unsigned long) m_screen);
-
-  mBitMap.baseAddr = m_screen;
-  mBitMap.rowBytes = (short)(800 | 0x8000);
-  mBitMap.bounds.left = 0;
-  mBitMap.bounds.top = 0;
-  mBitMap.bounds.right = 640;
-  mBitMap.bounds.bottom = 512;
-  mBitMap.pmVersion = 0;
-  mBitMap.packType = 0;
-  mBitMap.packSize = 0;
-  mBitMap.hRes = 0x00480000;
-  mBitMap.vRes = 0x00480000;
-  mBitMap.pixelType = 0;
-  mBitMap.pixelSize = 8;
-  mBitMap.cmpCount = 1;
-  mBitMap.cmpSize = 8;
-
-  mCT = (CTabPtr) malloc(sizeof(ColorTable) + (LED_COL_BASE + 4) * sizeof(CSpecArray));
-  mCT->ctSeed = 00;
-  mCT->ctFlags = 0x4000;
-  mCT->ctSize = LED_COL_BASE + 4 - 1;
-
-  UpdatePalette(RGB);
-#if 0 //ACH - show window
-
-  ShowWindow(mWindow);
-
-CantCreateWindow:
-CantSetMenuBar:
-CantGetNibRef:
-#endif
-
-;
-
-}; /* BeebWin */
-
-BeebWin::~BeebWin() 
-{
-  if (SoundEnabled)
-	SoundReset();
-	
-  free(m_screen);
-  free(m_screen_blur);
-
-}; /* Destructor */
-
-extern int done;
-
-void BeebWin::doHorizLine(unsigned long Col, int y, int sx, int width) 
-{
-    long d;
-    int e;
-char *p;
-
-	if (TeletextEnabled) 
+	// Force video frame rate to match AVI capture rate to avoid
+	// video and sound getting out of sync
+	if (aviWriter != NULL)
 	{
-		e = sx + 80;
-	}
-	else
-	{
-		e = sx;
-	}
-
-	if (e < 0)
-	{
-		width = width - e;
-		e = 0;
-	}
-
-	if (e + width > 799) width = 800 - e;
-	if (width <= 0) return;
-
-	d = (y*800)+ e + ScreenAdjust;
-	if ((d+width)>(512*800)) return;
-	if (d<0) return;
-	p = m_screen + d;
-
-	memset(m_screen + d, (int)Col, width);
-};
-
-void BeebWin::doInvHorizLine(unsigned long Col, int y, int sx, int width) 
-{
-long d;
-int e;
-char *vaddr;
-
-	if (TeletextEnabled)
-	{
-		e = sx + 80;
-	}
-	else
-	{
-		e = sx;
-	}
-
-	if (e < 0)
-	{
-		width = width - e;
-		e = 0;
-	}
-
-	if (e + width > 799) width = 800 - e;
-	if (width <= 0) return;
-
-	d = (y*800) + e + ScreenAdjust;
-
-	if ((d+width)>(512*800)) return;
-	if (d<0) return;
-	vaddr=m_screen+d;
-
-	for (int n=0;n<width;n++)
-	{
-		vaddr[n] ^= Col;
-	}
-	
-};
-
-void BeebWin::doUHorizLine(unsigned long Col, int y, int sx, int width) 
-{
-	if (y>500) return;
-    memset(m_screen + y*800 + sx, (int)Col, width);
-};
-
-EightUChars *BeebWin::GetLinePtr(int y) 
-{
-	long d = (y*800) + ScreenAdjust;
-	if (d > (MAX_VIDEO_SCAN_LINES*800))
-		return((EightUChars *)(m_screen+(MAX_VIDEO_SCAN_LINES*800)));
-	return((EightUChars *)(m_screen + d));
-}
-
-SixteenUChars *BeebWin::GetLinePtr16(int y) 
-{
-	long d = (y*800) + ScreenAdjust;
-	if (d > (MAX_VIDEO_SCAN_LINES*800))
-		return((SixteenUChars *)(m_screen+(MAX_VIDEO_SCAN_LINES*800)));
-	return((SixteenUChars *)(m_screen + d));
-}
-
-#if 0
- //ACH - blittask
- // - copy bitmap to window <<<<
- // - create bitmap context and blit buffers  <<<<<
-
-static OSStatus blittask1(void *parameter);
-
-void BeebWin::updateLines(int starty, int nlines)
-{
-CGrafPtr mWin;
-
-// OSStatus err;
-// MPTaskID taskID;
-// unsigned long data;
-
-//	data = (starty << 16) | nlines;
-//	err = MPCreateTask(blittask1, (void *) data, 0, nil, nil, nil, 0, &taskID);
-
-	if (quitNow) return;		// Don't repaint if shutting down program
-
-	if (m_FreezeWhenInactive)
-		if (IsWindowCollapsed(mWindow)) return;	// Don't repaint if minimised
-	
-	bufferblit(starty, nlines);
-	return;
-
-	++m_ScreenRefreshCount;
-
-//	fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
-	
-    Rect destR;
-    Rect srcR;
-
-	mWin = GetWindowPort(mWindow);
-	SetPortWindowPort(mWindow);
-	GetPortBounds(mWin, &destR);
-
-	srcR.left = 0;
-	srcR.right = 640;
-
-	if (TeletextEnabled)
-	{
-		srcR.top = 0;
-		srcR.bottom = 512;
-	}
-	else
-	{
-		srcR.top = starty;
-		srcR.bottom = starty + nlines;
-	}
-	
-	CopyBits ( (BitMap *) &mBitMap, GetPortBitMapForCopyBits(mWin), &srcR, &destR, srcCopy, nil);
-}; /* BeebWin::updateLines */
-
-CGContextRef MyCreateBitmapContext (int pixelsWide, int pixelsHigh, int bpp)
-{
-	CGContextRef context = NULL;
-	CGColorSpaceRef colorSpace;
-	void *bitmapData;
-	int bitmapByteCount;
-	int bitmapBytesPerRow;
-	
-	//	fprintf(stderr, "Creating a bitmap %d by %d\n", pixelsWide, pixelsHigh);
-	
-	switch (bpp)
-	{
-		case 32 :
-			bitmapBytesPerRow = pixelsWide * 4;
-			break;
-		case 16 :
-			bitmapBytesPerRow = pixelsWide * 2;
-			break;
-	}
-
-	bitmapByteCount = (bitmapBytesPerRow * pixelsHigh);
-	
-	//	colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-	
-	colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-	
-	bitmapData = malloc(bitmapByteCount);
-	if (bitmapData == NULL)
-	{
-		fprintf(stderr, "Memory not allocated !\n");
-		return NULL;
-	}
-	
-	switch (bpp)
-	{
-		case 32 :
-			context = CGBitmapContextCreate(bitmapData, pixelsWide, pixelsHigh, 8, bitmapBytesPerRow, colorSpace, kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host);
-			break;
-		case 16 :
-			context = CGBitmapContextCreate(bitmapData, pixelsWide, pixelsHigh, 5, bitmapBytesPerRow, colorSpace, kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder16Host);
-			break;
-	}
-
-	if (context == NULL)
-	{
-		free(bitmapData);
-		fprintf(stderr, "Context not created!\n");
-		return NULL;
-	}
-	
-	CGColorSpaceRelease(colorSpace);
-	
-	return context;
-}
-
-void BeebWin::bufferblit1(int starty, int nlines) 
-{
-	CGrafPtr mWin;
-	register int i, j;
-	char *p;
-	
-	++m_ScreenRefreshCount;
-	
-	//	fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
-	
-    Rect destR;
-    Rect srcR;
-	
-	mWin = GetWindowPort(mWindow);
-	SetPortWindowPort(mWindow);
-	GetPortBounds(mWin, &destR);
-	
-	srcR.left = 0;
-	srcR.right = 640;
-	
-	if (TeletextEnabled)
-	{
-		srcR.top = 0;
-		srcR.bottom = 512;
-	}
-	else
-	{
-		srcR.top = starty;
-		srcR.bottom = starty + nlines;
-	}
-	
-	long *pPtr32;
-	short *pPtr16;
-	
-	CGContextRef myBitmapContext;
-	
-	PixMapHandle	pmh;
-	int				bpp;
-	
-	LockPortBits(mWin);
-	pmh = GetPortPixMap(mWin);
-	LockPixels(pmh);
-	bpp = GetPixDepth(pmh);
-
-	UnlockPixels(pmh);
-	UnlockPortBits(mWin);
-
-	myBitmapContext = MyCreateBitmapContext(srcR.right - srcR.left, srcR.bottom - srcR.top, bpp);
-	
-	pPtr32 = (long *) CGBitmapContextGetData (myBitmapContext);
-	pPtr16 = (short *) CGBitmapContextGetData (myBitmapContext);
-	
-	//	fprintf(stderr, "Bitmap data ptr = %08x\n", (unsigned char *) pPtr);
-	
-	p = m_screen;
-	
-	//	fprintf(stderr, "top = %d, left = %d, bottom = %d, right = %d, bpr = %d, ppr = %d, scalex = %f, scaley = %f\n",
-	//		rect.top, rect.left, rect.bottom, rect.right, bpr, ppr, scalex, scaley);
-	
-	for (j = srcR.top; j < srcR.bottom; ++j)
-	{
-		p = m_screen + j * 800 + srcR.left;
-		
-		for (i = srcR.left; i < srcR.right; ++i)
+		m_AviFrameSkipCount++;
+		if (m_AviFrameSkipCount > m_AviFrameSkip)
 		{
-			switch (bpp)
-			{
-				case 32 :
-					*pPtr32++ = m_RGB32[*p++];
-					break;
-				case 16 :
-					*pPtr16++ = m_RGB16[*p++];
-					break;
-			}
-		}
-	}
-	
-	CGContextRef myContext;
-	CGImageRef myImage;
-	
-	QDBeginCGContext(mWin, &myContext);
-	
-	myImage = CGBitmapContextCreateImage(myBitmapContext);
-	
-	CGContextDrawImage(myContext, CGRectMake(destR.left, destR.top, destR.right, destR.bottom), myImage);
-	
-	CGContextFlush(myContext);
-	
-	CGContextRelease(myBitmapContext);
-	CGImageRelease(myImage);
-	
-	QDEndCGContext(mWin, &myContext);
-	
-}
-
-void BeebWin::bufferblit2(int starty, int nlines)
-{
-CGrafPtr mWin;
-register int i, j;
-char *p;
-
-	++m_ScreenRefreshCount;
-
-//	fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
-	
-    Rect destR;
-    Rect srcR;
-
-	mWin = GetWindowPort(mWindow);
-	SetPortWindowPort(mWindow);
-	GetPortBounds(mWin, &destR);
-
-	srcR.left = 0;
-	srcR.right = 640;
-
-	if (TeletextEnabled)
-	{
-		srcR.top = 0;
-		srcR.bottom = 512;
-	}
-	else
-	{
-		srcR.top = starty;
-		srcR.bottom = starty + nlines;
-	}
-	
-long *pPtr;
-CGColorSpaceRef colorSpace;
-CGImageRef imageRef;
-Ptr	dataPtr;
-int w, h;
-	
-	w = srcR.right - srcR.left;
-	h = srcR.bottom - srcR.top;
-	
-	colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-	
-	dataPtr = NewPtr( w * h * 4);
-	
-	CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, dataPtr, w * h * 4, NULL);
-	if (provider == NULL)
-	{
-		fprintf(stderr, "Memory not allocated !\n");
-		return;
-	}
-	
-	imageRef = CGImageCreate(w, h, 8, 32, w * 4, colorSpace,
-							 kCGImageAlphaPremultipliedLast,
-							 provider,
-							 NULL, 	// colourMap translation table
-							 false,	// shouldInterpolate colours?
-							 kCGRenderingIntentDefault);
-	
-	if (imageRef == NULL)
-	{
-		DisposePtr(dataPtr);
-		fprintf(stderr, "Context not created!\n");
-		return;
-	}
-	
-	CGColorSpaceRelease(colorSpace);
-	
-	pPtr = (long *) dataPtr;
-
-	p = m_screen;
-
-	for (j = srcR.top; j < srcR.bottom; ++j)
-	{
-		p = m_screen + j * 800 + srcR.left;
-		for (i = srcR.left; i < srcR.right; i++)
-		{
-			*pPtr++ = m_RGB32[*p++];
-		}
-	}
-
-CGContextRef myContext;
-
-	QDBeginCGContext(mWin, &myContext);
-
-	CGContextDrawImage(myContext, CGRectMake(destR.left, destR.top, destR.right, destR.bottom), imageRef);
-
-	CGContextFlush(myContext);
-
-	CGImageRelease(imageRef);
-
-	CGDataProviderRelease(provider);
-
-	QDEndCGContext(mWin, &myContext);
-
-	DisposePtr(dataPtr);
-	
-}
-
-void BeebWin::bufferblit(int starty, int nlines) 
-{
-CGrafPtr mWin;
-register int i, j;
-char *p;
-int width, height;
-	
-
-//	fprintf(stderr, "starty = %d, nlines = %d\n", starty, nlines);
-	
-	++m_ScreenRefreshCount;
-
-	if (m_Motion_Blur > 0)
-	{
-		switch (m_Motion_Blur)
-		{
-			case 1 :			// 2 Frames
-				j = 32;
-				break;
-			case 2 :			// 4 Frames
-				j = 16;
-				break;
-			case 3 :			// 8 Frames
-				j = 8;
-				break;
-		}
-	
-		for (i = 0; i < 800 * 512; ++i)
-		{	
-			if (m_screen[i] != 0)
-			{
-				m_screen_blur[i] = m_screen[i];
-			}
-			else if (m_screen_blur[i] != 0)
-			{
-				m_screen_blur[i] += j;
-				if (m_screen_blur[i] > 63)
-					m_screen_blur[i] = 0;
-			}
-		}
-		memcpy(m_screen, m_screen_blur, 800 * 512);
-	}
-	
-//	fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
-	
-    Rect destR;
-    Rect srcR;
-
-	if (m_isFullScreen)
-	{
-		mWin = GetWindowPort(m_FullScreenWindow);
-		SetPortWindowPort(m_FullScreenWindow);
-	}
-	else
-	{
-		mWin = GetWindowPort(mWindow);
-		SetPortWindowPort(mWindow);
-	}
-	GetPortBounds(mWin, &destR);
-	
-	width = destR.right;
-	height = destR.bottom;
-
-	int xAdj = 0;
-	int yAdj = 0;
-	
-	if (m_isFullScreen && m_maintainAspectRatio)
-	{
-		float m_XRatioCrop = 0.0f;
-		float m_YRatioCrop = 0.0f;
-		float m_XRatioAdj;
-		float m_YRatioAdj;
-		int w = width * 4;
-		int h = height * 5;
-		if (w > h)
-		{
-			m_XRatioAdj = (float) height / (float) width * (float) 5 / (float) 4;
-			m_XRatioCrop = (1.0f - m_XRatioAdj) / 2.0f;
-		}
-		else if (w < h)
-		{
-			m_YRatioAdj = (float) width / (float) height * (float) 4 / (float) 5;
-			m_YRatioCrop = (1.0f - m_YRatioAdj) / 2.0f;
-		}
-		xAdj = (int)(m_XRatioCrop * (float) (width));
-		yAdj = (int)(m_YRatioCrop * (float) (height));
-		
-		width = width - 2 * xAdj;
-		height = height - 2 * yAdj;
-		
-	}
-	
-	srcR.left = 0;
-	srcR.right = ActualScreenWidth;
-
-//	fprintf(stderr, "ActualScreenWidth = %d\n", ActualScreenWidth);
-
-	if (TeletextEnabled)
-	{
-		srcR.top = 0;
-		srcR.bottom = 512;
-	}
-	else
-	{
-		srcR.top = starty;
-		srcR.bottom = starty + nlines;
-	}
-	
-long *pPtr32;
-long *pRPtr32;
-short *pPtr16;
-short *pRPtr16;
-
-PixMapHandle	pmh;
-Ptr             buffer;
-int				bpr;
-float			scalex;
-float			scaley;
-int				ppr;
-Rect			rect;
-int				bpp;
-
-	LockPortBits(mWin);
-
-	pmh = GetPortPixMap(mWin);
-
-	LockPixels(pmh);
-
-	bpr = GetPixRowBytes(pmh);
-	buffer = GetPixBaseAddr(pmh);
-	bpp = GetPixDepth(pmh);
-
-//	fprintf(stderr, "bpp = %d\n", bpp);
-	
-	GetPixBounds(pmh, &rect);
-
-	if (bpp == 32)
-	{
-		ppr = bpr / 4;
-	}
-	else if (bpp == 16)
-	{
-		ppr = bpr / 2;
-	}
-	else
-	{
-		ppr = bpr;
-	}
-	
-//	fprintf(stderr, "dest : top = %d, left = %d, bottom = %d, right = %d\n", destR.top, destR.left, destR.bottom, destR.right);
-//	fprintf(stderr, "rect : top = %d, left = %d, bottom = %d, right = %d\n", rect.top, rect.left, rect.bottom, rect.right);
-
-	if (rect.top != 0)		// running full screen - don't paint !
-	{
-	
-		p = m_screen;
-
-		pRPtr32 = (long *) (buffer - rect.top * bpr - rect.left * 4 - yAdj * bpr);		// Skip past rows for window's menu bar, rect.top = -22 (on my system), plus any left margin
-		pRPtr16 = (short *) (buffer - rect.top * bpr - rect.left * 2 - yAdj * bpr);		// Skip past rows for window's menu bar, rect.top = -22 (on my system)
-	
-		scalex = (float) ((srcR.right - srcR.left)) / (float) ((width));
-		scaley = (float) ((srcR.bottom - srcR.top)) / (float) ((height));
-	
-
-// Pre-calculate the x scaling factor for speed
-
-int sx[2000];
-
-		for (i = 0; i < width; ++i)
-		{
-			sx[i] = (int) (i * scalex);
-		}
-
-		switch (bpp)
-		{
-			case 32 :
-				for (j = 0; j < height; ++j)
-				{
-					p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-					pPtr32 = pRPtr32 + xAdj;
-					for (i = 0; i < width; ++i)
-						*pPtr32++ = m_RGB32[p[sx[i]]];
-					
-					pRPtr32 += ppr;
-					
-				}
-				break;
-			case 16 :
-				for (j = 0; j < height; ++j)
-				{
-					p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-					pPtr16 = pRPtr16 + xAdj;
-					
-					for (i = 0; i < width; ++i)
-						*pPtr16++ = m_RGB16[p[sx[i]]];
-					
-					pRPtr16 += ppr;
-					
-				}
-				break;
-		}
-		
-/*
-		
-		for (j = destR.top; j < destR.bottom; ++j)
-		{
-			p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-
-			for (i = destR.left; i < destR.right; ++i)
-			{
-				switch (bpp)
-				{
-					case 32 :
-						*pPtr32++ = m_RGB32[p[sx[i]]];
-						break;
-					case 16 :
-						*pPtr16++ = m_RGB16[p[sx[i]]];
-						break;
-				}
-			}
-
-			pPtr32 += (ppr - destR.right);
-			pPtr16 += (ppr - destR.right);
-
-		}
-*/
-		
-	}
-	
-OSErr err;
-
-	if (m_PrintScreen)
-	{
-
-		if (TeletextEnabled)
-		{
-			DumpScreen(0);
+			m_AviFrameSkipCount = 0;
+			FrameNum = 0;
 		}
 		else
 		{
-			DumpScreen(starty);
+			FrameNum = 1;
 		}
-		
-		m_PrintScreen = false;
+
+		// Ensure that frames captured each second (50 frames) matches
+		// the AVI capture FPS rate
+		m_AviFrameCount++;
+		if (m_AviFrameCount >= 50)
+		{
+			m_AviFrameCount = 0;
+			m_AviFrameSkipCount = 0;
+		}
 	}
 
-	if (m_PrintToPDF)
-	{
-		
-		if (TeletextEnabled)
-		{
-			ProcessPrintCommand(0, 512);
-		}
-		else
-		{
-			ProcessPrintCommand(starty, nlines);
-		}
-		
-		m_PrintToPDF = false;
-	}
-
-	if (m_CopyToClip)
-	{
-		
-		if (TeletextEnabled)
-		{
-			CopyToClipBoardAsPDF(0, 512);
-		}
-		else
-		{
-			CopyToClipBoardAsPDF(starty, nlines);
-		}
-		
-		m_CopyToClip = false;
-	}
-	
-	
-	if (m_pMovie)
-	{
-
-		if (m_firstFrame)
-		{
-			m_firstFrame = false;
-			err = SCCompressSequenceBegin(m_ci, pmh, &m_trackFrame, &m_imageDesc);
-			if (err != noErr) fprintf(stderr, "SCCompressSequenceBegin error %d\n", err);
-			m_frameDuration = 0;
-			m_frameSkipCount = 0;
-		}
-	
-		// 600 frames per second
-		// current frame speed is m_FramesPerSecond
-		
-		if (m_frameSkipCount == 0)
-		{
-			short	flag = (m_keyFrameCount == m_keyFrame) ? 0 : mediaSampleNotSync;
-
-//			flag = mediaSampleNotSync;
-		
-// Bug in H264 codec crashes system after an -8960 error
-// so disable video capture after getting any error
-			
-			err = SCCompressSequenceFrame(m_ci, pmh, &m_trackFrame, &m_compressedData, &m_frameSize, &flag);
-			if (err != noErr) 
-			{
-				fprintf(stderr, "SCCompressSequenceFrame error %d\n", err);
-				EndCaptureVideo();
-				goto bye;
-			}
-
-		}
-
-		m_frameDuration += m_soundBufferLen;
-		
-		m_frameSkipCount++;
-		if (m_frameSkipCount > m_frameSkip)
-		{
-			m_frameSkipCount = 0;
-
-			m_keyFrameCount--;
-			if (m_keyFrameCount <= 0)
-				m_keyFrameCount = m_keyFrame;
-
-			err = AddMediaSample(m_pMedia, m_compressedData, 0,  m_frameSize, m_frameDuration,
-								 (SampleDescriptionHandle) m_imageDesc, 
-								 1,  /* one sample */
-								 mediaSampleNotSync,  /* self-contained samples */
-								 nil);
-			
-			if (err != noErr) 
-			{
-				fprintf(stderr, "AddMediaSample Video error %d\n", err);
-				EndCaptureVideo();
-				goto bye;
-			}
-			
-			m_frameDuration = 0;
-		}
-		
-// Send sound to quicktime movie file
-
-		err = AddMediaSample(m_sMedia, m_soundBuffer, 0, m_soundBufferLen, 
-					 1,
-					 (SampleDescriptionHandle) m_soundDesc, 
-					 m_soundBufferLen,  /* samples per sec */
-					 mediaSampleNotSync,
-					 nil);
-
-		if (err != noErr) 
-		{
-			fprintf(stderr, "AddMediaSample Sound error %d\n", err);
-			EndCaptureVideo();
-		}
-		
-		m_soundBufferLen = 0;
-
-	}
-	
-bye: ;
-	
-	UnlockPixels(pmh);
-	UnlockPortBits(mWin);
-	
-// Start a thread to flush buffer to screen ?
-
-// OSStatus err;
-// MPTaskID taskID;
-
-//	err = MPCreateTask(blittask, nil, 0, nil, nil, nil, 0, &taskID);
-
-RgnHandle reg;
-
-	reg = NewRgn();
-	
-	SetRectRgn(reg, destR.left, destR.top, destR.right, destR.bottom);
-
-	QDFlushPortBuffer(mWin, reg);
-}
-#endif
-
-extern char videobuffer[];
-
-// NEW updateLines based on bufferblit
-void BeebWin::updateLines(int starty, int nlines)
-{
-    int i, j=0;
-    char *p;
-    int width, height;
-
-
-    ++m_ScreenRefreshCount;
-
-    if (m_Motion_Blur > 0)
-    {
-        switch (m_Motion_Blur)
-        {
-            case 1 :            // 2 Frames
-                j = 32;
-                break;
-            case 2 :            // 4 Frames
-                j = 16;
-                break;
-            case 3 :            // 8 Frames
-                j = 8;
-                break;
-        }
-    
-        for (i = 0; i < 800 * 512; ++i)
-        {
-            if (m_screen[i] != 0)
-            {
-                m_screen_blur[i] = m_screen[i];
-            }
-            else if (m_screen_blur[i] != 0)
-            {
-                m_screen_blur[i] += j;
-                if (m_screen_blur[i] > 63)
-                    m_screen_blur[i] = 0;
-            }
-        }
-        memcpy(m_screen, m_screen_blur, 800 * 512);
-    }
-    
-//        fprintf(stderr, "Refresh screen = %d\n", m_ScreenRefreshCount);
-
-    Rect destR;
-    Rect srcR;
-
-    if (m_isFullScreen)
-    {
-//        mWin = GetWindowPort(m_FullScreenWindow);
-//        SetPortWindowPort(m_FullScreenWindow);
-    }
-    else
-    {
-//        mWin = GetWindowPort(mWindow);
-//        SetPortWindowPort(mWindow);
-    }
-//    GetPortBounds(mWin, &destR);
-
-    // ACH - normally get width and height from the window
-    destR = {0,0,512,640};  //top, left, bottom, right
-
-    width = destR.right;
-    height = destR.bottom;
-
-    int xAdj = 0;
-    int yAdj = 0;
-    
-    if (m_isFullScreen && m_maintainAspectRatio)
-    {
-        float m_XRatioCrop = 0.0f;
-        float m_YRatioCrop = 0.0f;
-        float m_XRatioAdj;
-        float m_YRatioAdj;
-        int w = width * 4;
-        int h = height * 5;
-        if (w > h)
-        {
-            m_XRatioAdj = (float) height / (float) width * (float) 5 / (float) 4;
-            m_XRatioCrop = (1.0f - m_XRatioAdj) / 2.0f;
-        }
-        else if (w < h)
-        {
-            m_YRatioAdj = (float) width / (float) height * (float) 4 / (float) 5;
-            m_YRatioCrop = (1.0f - m_YRatioAdj) / 2.0f;
-        }
-        xAdj = (int)(m_XRatioCrop * (float) (width));
-        yAdj = (int)(m_YRatioCrop * (float) (height));
-        
-        width = width - 2 * xAdj;
-        height = height - 2 * yAdj;
-        
-    }
-    
-    srcR.left = 0;
-    srcR.right = ActualScreenWidth;
-
-    //    fprintf(stderr, "ActualScreenWidth = %d\n", ActualScreenWidth);
-
-    if (TeletextEnabled)
-    {
-        srcR.top = 0;
-        srcR.bottom = 512;
-    }
-    else
-    {
-        srcR.top = starty;
-        srcR.bottom = starty + nlines;
-    }
-    
-    int_fast32_t *pPtr32; // on 32 bit machine this was 'long' which ought to be 32 bits
-    int_fast32_t *pRPtr32;
-    int_fast16_t *pPtr16;  // on 32 bit machine this was 'short' which ought to be 16 bits
-    int_fast16_t *pRPtr16;
-
-//    PixMapHandle    pmh;
-    Ptr             buffer;  // Ptr is a char which is 8 bits
-    int                bpr;
-    float            scalex;
-    float            scaley;
-    int                ppr;
-    Rect            rect;
-    int                bpp;
- 
-//        LockPortBits(mWin);
-
-//        pmh = GetPortPixMap(mWin);
-
-//        LockPixels(pmh);
-
-//        bpr = GetPixRowBytes(pmh);
-//        buffer = GetPixBaseAddr(pmh);
-//        bpp = GetPixDepth(pmh);
-    bpr = 640*4;// 640 pixels per row, 4 bytes per pixel
-    buffer = videobuffer; // videobuffer is char, 8 bits ; size is 640x512x4
-    bpp = 32; // 4 bytes per pixel
-
-    //    fprintf(stderr, "bpp = %d\n", bpp);
-        
-//        GetPixBounds(pmh, &rect);
-    rect = {0,0,512,640}; //top, left, bottom, right
-    
-    if (bpp == 32)
-    {
-        ppr = bpr / 4;
-    }
-    else if (bpp == 16)
-    {
-        ppr = bpr / 2;
-    }
-    else
-    {
-        ppr = bpr;
-    }
-        
-    //    fprintf(stderr, "dest : top = %d, left = %d, bottom = %d, right = %d\n", destR.top, destR.left, destR.bottom, destR.right);
-    //    fprintf(stderr, "rect : top = %d, left = %d, bottom = %d, right = %d\n", rect.top, rect.left, rect.bottom, rect.right);
-
-    // NO IDEA WHAT HAPPENS IF THIS IS FULLSCREEN - WHAT PAINTS IT?
-    p = m_screen;
-    char* bufferptr = (buffer - rect.top * bpr - rect.left * 4 - yAdj * bpr);  // Skip past rows for window's menu bar,
-    pRPtr32 = (int_fast32_t *) bufferptr;
-
-    scalex = (float) ((srcR.right - srcR.left)) / (float) ((width));
-    scaley = (float) ((srcR.bottom - srcR.top)) / (float) ((height));
-    int sx[2000];
-
-    for (i = 0; i < width; ++i)
-    {
-        sx[i] = (int) (i * scalex);
-    }
-
-    for (j = 0; j < height; ++j)
-    {
-        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-        pPtr32 = pRPtr32 + xAdj;
-        for (i = 0; i < width; ++i)
-        {
-            uint32_t val = (uint32_t)m_RGB32[p[sx[i]]];
-            // argb
-//            val |= 0xff003f00;
-            *pPtr32++ = val;
-        }
-        
-        pRPtr32 += ppr;
-    }
-
-// END TEST
-    
-        if (rect.top != 0)        // running full screen - don't paint !
-        {
-        
-            p = m_screen;
-
-            printf("%d : %d\n",
-                   0 - rect.top * bpr - rect.left * 4 - yAdj * bpr,
-                   0 - rect.top * bpr - rect.left * 2 - yAdj * bpr);
-            
-            pRPtr32 = (int_fast32_t *) (buffer - rect.top * bpr - rect.left * 4 - yAdj * bpr);        // Skip past rows for window's menu bar, rect.top = -22 (on my system), plus any left margin
-            pRPtr16 = (short *) (buffer - rect.top * bpr - rect.left * 2 - yAdj * bpr);        // Skip past rows for window's menu bar, rect.top = -22 (on my system)
-
-            scalex = (float) ((srcR.right - srcR.left)) / (float) ((width));
-            scaley = (float) ((srcR.bottom - srcR.top)) / (float) ((height));
-        
-
-    // Pre-calculate the x scaling factor for speed
-
-    int sx[2000];
-
-            for (i = 0; i < width; ++i)
-            {
-                sx[i] = (int) (i * scalex);
-            }
-
-            switch (bpp)
-            {
-                case 32 :
-                    for (j = 0; j < height; ++j)
-                    {
-                        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-                        pPtr32 = pRPtr32 + xAdj;
-                        for (i = 0; i < width; ++i)
-                            *pPtr32++ = m_RGB32[p[sx[i]]];
-                        
-                        pRPtr32 += ppr;
-                        
-                    }
-                    break;
-                case 16 :
-                    for (j = 0; j < height; ++j)
-                    {
-                        p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-                        pPtr16 = pRPtr16 + xAdj;
-                        
-                        for (i = 0; i < width; ++i)
-                            *pPtr16++ = m_RGB16[p[sx[i]]];
-                        
-                        pRPtr16 += ppr;
-                        
-                    }
-                    break;
-            }
-            
-    /*
-            
-            for (j = destR.top; j < destR.bottom; ++j)
-            {
-                p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
-
-                for (i = destR.left; i < destR.right; ++i)
-                {
-                    switch (bpp)
-                    {
-                        case 32 :
-                            *pPtr32++ = m_RGB32[p[sx[i]]];
-                            break;
-                        case 16 :
-                            *pPtr16++ = m_RGB16[p[sx[i]]];
-                            break;
-                    }
-                }
-
-                pPtr32 += (ppr - destR.right);
-                pPtr16 += (ppr - destR.right);
-
-            }
-    */
-            
-        }
-    
-
-
-        if (m_PrintScreen)
-        {
-            swift_saveScreen("BeebEm.png");
-
-            m_PrintScreen = false;
-        }
-
+	return FrameNum;
 }
 
-void BeebWin::DumpScreen(int offset)
-{
-#if 0 //ACH - dumpscreen
-FILE *f;
-int i, j, x, y1, y2, s, c;
-char *p;
-char FileName[256];
-	
-	SystemSoundPlay(0);
-		
-	p = m_screen;
-	x = 640;
+void BeebWin::doLED(int sx,bool on) {
+	int tsy;
+	int colbase = static_cast<int>(DiscLedColour) * 2 + LED_COL_BASE; // colour will be 0 for red, 1 for green.
+	if (sx<100) colbase=LED_COL_BASE; // Red leds for keyboard always
 	if (TeletextEnabled)
-	{
-		y1 = offset;
-		y2 = offset + 510;
-		s = 2;
-	}
+		tsy=496;
 	else
-	{
-		y1 = offset;
-		y2 = offset + 255;
-		s = 1;
-	}
-
-	m_PicNum++;
-	
-	f = (FILE *) 1;
-	
-	while (f != NULL)
-	{
-		sprintf(FileName, "%spics/pic%d.bmp", RomPath, m_PicNum);
-
-		f = fopen(FileName, "rb");
-		if (f)
-		{
-			fclose(f);
-			m_PicNum++;
-		}
-	}
-	
-	fprintf(stderr, "Writing screen dump %s\n", FileName);
-	
-	f = fopen(FileName, "wb");
-	if (f == NULL) return;
-
-	fputc('B', f);		// Bitmap Header
-	fputc('M', f);
-
-	fputc(0x76, f);		// Size of file, 0xa076 = 41078 bytes
-	fputc(0xa0, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// Reserved
-	fputc(0x00, f);
-	fputc(0x00, f);		// Reserved
-	fputc(0x00, f);
-
-	fputc(0x76, f);		// Offset into file for beginning of bitmap data, 0x76 = 118
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x28, f);		// Size of bitmap header structure in bytes
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-	
-	fputc(0x40, f);		// Width of image in pixels, 0x0140 = 320
-	fputc(0x01, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// Height of image in pixels, 0x0100 = 256
-	fputc(0x01, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x01, f);		// Number of planes, 1
-	fputc(0x00, f);
-
-	fputc(0x04, f);		// Number of bits per pixel, 4
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// No compression
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// Compressed file size
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// XPels per meter
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// YPels per meter
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// Colours used in bitmap
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-	fputc(0x00, f);		// Number of important colours
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0x00, f);
-
-// RGB Quad colour array
-	
-	fputc(0x00, f);		// Black
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0xff, f);
-
-	fputc(0x00, f);		// Red
-	fputc(0x00, f);
-	fputc(0xff, f);
-	fputc(0xff, f);
-	
-	fputc(0x00, f);		// Green
-	fputc(0xff, f);
-	fputc(0x00, f);
-	fputc(0xff, f);
-	
-	fputc(0x00, f);		// Yellow
-	fputc(0xff, f);
-	fputc(0xff, f);
-	fputc(0xff, f);
-	
-	fputc(0xff, f);		// Blue
-	fputc(0x00, f);
-	fputc(0x00, f);
-	fputc(0xff, f);
-
-	fputc(0xff, f);		// Magenta
-	fputc(0x00, f);
-	fputc(0xff, f);
-	fputc(0xff, f);
-	
-	fputc(0xff, f);		// Cyan
-	fputc(0xff, f);
-	fputc(0x00, f);
-	fputc(0xff, f);
-	
-	fputc(0xff, f);		// White
-	fputc(0xff, f);
-	fputc(0xff, f);
-	fputc(0xff, f);
-	
-	for (i = 0; i < 8; ++i)
-	{
-		fputc(0x00, f);		// Unused
-		fputc(0x00, f);
-		fputc(0x00, f);
-		fputc(0x00, f);
-	}
-	
-	for (j = y2; j >= y1; j -= s)
-	{
-		for (i = 0; i < x; i += 4)
-		{
-			c = ( ((m_screen[i + j * 800]) & 0x0f) << 4) | (m_screen[i + 2 + j * 800] & 0x0f);
-			fputc(c, f);
-		}
-	}
-
-	fclose(f);
-#endif
-}
-
-#if 0 //ACH - blittasks
-static OSStatus blittask1(void *parameter)
-{
-unsigned long data;
-
-	data = (unsigned long) parameter;
-	
-	mainWin->bufferblit((data >> 16), data & 0xffff);
-
-	return noErr;
-}
-
-static OSStatus blittask(void *parameter)
-{
-RgnHandle reg;
-CGrafPtr mWin;
-
-    Rect destR;
-
-	mWin = GetWindowPort(mainWin->mWindow);
-	SetPortWindowPort(mainWin->mWindow);
-	GetPortBounds(mWin, &destR);
-
-	reg = NewRgn();
-	SetRectRgn(reg, destR.left, destR.top, destR.right, destR.bottom);
-
-	QDFlushPortBuffer(mWin, reg);
-	return noErr;
-}
-
-#endif
-
-/****************************************************************************/
-void BeebWin::Initialise(char *home)
-{   
-	m_PicNum = 0;
-	m_LastTickCount = 0;
-	m_KeyMapAS = 0;
-	m_KeyMapFunc = 0;
-	m_ShiftPressed = 0;
-	m_ShiftBooted = false;
-	for (int k = 0; k < 256; ++k)
-	{
-		m_vkeyPressed[k][0][0] = -1;
-		m_vkeyPressed[k][1][0] = -1;
-		m_vkeyPressed[k][0][1] = -1;
-		m_vkeyPressed[k][1][1] = -1;
-	}
-
-#ifdef DEBUG
-
-    fprintf(stderr, "DEBUG\n");
-	
-#else
-
-	fprintf(stderr, "RELEASE\n");
-
-#endif
-
-	strcpy(RomPath, home);
-//	char *p = strstr(RomPath, ".app");		// Find name of bundle
-//	if (p) *p = 0;
-//	p = strrchr(RomPath, '/');		// then come back to parent directory
-//	if (p) p[1] = 0;
-    char *p = strstr(RomPath, "MacOS");        // Find MacOS folder
-    if (p) *p = 0;
-
-    strcat(RomPath, "Resources/");
-
-	strcpy(EconetCfgPath, RomPath);
-
-	fprintf(stderr, "Home directory is '%s'\n", RomPath);
-
-	LoadPreferences();
-
-	// load the default user keymap if it is present
-	char defaultUserKeymapPath [256];
-	sprintf(defaultUserKeymapPath, "%sdefault.kmap", RomPath);
-	if (LoadUserKeyboard(defaultUserKeymapPath))
-	{
-		fprintf(stderr, "Default User Defined Keyboard Mapping '%s' loaded\n", defaultUserKeymapPath);
-		m_MenuIdKeyMapping = 1;
-		TranslateKeyMapping();
-	}
-	TouchScreenOpen();
-	IgnoreIllegalInstructions = 1;
-
-	m_WriteProtectDisc[0] = !IsDiscWritable(0);
-	m_WriteProtectDisc[1] = !IsDiscWritable(1);
-
-	m_ScreenRefreshCount = 0;
-	m_RelativeSpeed = 1;
-	m_FramesPerSecond = 50;
-	strcpy(m_szTitle, WindowTitle);
-
-	for(int i = 0; i < LED_COL_BASE + 4; i++)
-		cols[i] = i;
-
-	m_frozen = false;
-
-	MenuOn=true;
-
-	InitMenu();
-
-	if (PrinterEnabled)
-		PrinterEnable(m_PrinterDevice);
-	else
-		PrinterDisable();
-}
-
-/****************************************************************************/
-void BeebWin::SetRomMenu(void)
-{
-char Title[19];
-int i;
-
-//MenuRef			menu = nil;
-//MenuItemIndex	j;
-OSStatus		err;
-
-	for (i = 0; i < 16; ++i)
-	{
-		sprintf(Title, "%1x ", i);
-		ReadRomTitle(i, &Title[2], sizeof (Title) - 3);
-		if (Title[2] == 0)
-			strcpy(&Title[2], "Empty");
-
-#if 0//ACH - rom menu (DONE)
-		err = GetIndMenuItemWithCommandID(nil, 'roma' + i, 1, &menu, &j);
-		if (!err)
-		{
-
-			CFStringRef pTitle;
-			pTitle = CFStringCreateWithCString (kCFAllocatorDefault, Title, kCFStringEncodingASCII);
-			err = SetMenuItemTextWithCFString(menu, j, pTitle);
-
-			if (err)
-			{
-				fprintf(stderr, "SetMenuTitle returned err code %d\n", (int) err);
-			}
-			CFRelease(pTitle);
-		}
-		else
-		{
-			fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
-		}
-#else
-        err = swift_SetMenuItemTextWithCString('roma' + i, Title);
-        if (err)
-        {
-            fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
-        }
-#endif
-		
-		SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
-	}
-}
-
-
-void BeebWin::SetSoundMenu(void) {
-}
-
-/****************************************************************************/
-void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatus,unsigned char LoadRoms) 
-{
-	BeebReleaseAllKeys();
-	SwitchOnCycles=0; // Reset delay
-	SoundChipReset();
-	SwitchOnSound();
-	EnableTube=TubeStatus;
-	MachineType=NewModelType;
-	BeebMemInit(LoadRoms,m_ShiftBooted);
-	Init6502core();
-	if (EnableTube) Init65C02core();
-	if (Tube186Enabled) i86_main();
-	Enable_Z80 = 0;
-	if (TorchTube || AcornZ80)
-	{
-		R1Status = 0;
-		ResetTube();
-		init_z80();
-		Enable_Z80 = 1;
-	}
-	Enable_Arm = 0;
-	if (ArmTube)
-	{
-		R1Status = 0;
-		ResetTube();
-		if (arm) delete arm;
-		arm = new CArm;
-		Enable_Arm = 1;
-	}
-	SysVIAReset();
-	UserVIAReset();
-	VideoInit();
-	Disc8271_reset();
-	if (EconetEnabled) EconetReset();
-	Reset1770();
-	AtoDInit();
-	SetRomMenu();
-	FreeDiscImage(0);
-	// Keep the disc images loaded
-	FreeDiscImage(1);
-	Close1770Disc(0);
-	Close1770Disc(1);
-    if (HardDriveEnabled) SCSIReset();
-    if (HardDriveEnabled) SASIReset();
-    if (TeleTextAdapterEnabled) TeleTextInit();
-	if (MachineType==3) InvertTR00=false;
-	if ((MachineType!=3) && (NativeFDC)) {
-		// 8271 disc
-		if ((DiscLoaded[0]) && (CDiscType[0]==0)) LoadSimpleDiscImage(CDiscName[0],0,0,80);
-		if ((DiscLoaded[0]) && (CDiscType[0]==1)) LoadSimpleDSDiscImage(CDiscName[0],0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==0)) LoadSimpleDiscImage(CDiscName[1],1,0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==1)) LoadSimpleDSDiscImage(CDiscName[1],1,80);
-	}
-	if (((MachineType!=3) && (!NativeFDC)) || (MachineType==3)) {
-		// 1770 Disc
-		if (DiscLoaded[0]) Load1770DiscImage(CDiscName[0],0,CDiscType[0]);
-		if (DiscLoaded[1]) Load1770DiscImage(CDiscName[1],1,CDiscType[1]);
-	}
-
-	InitMenu();
-}
-
-void BeebWin::SetImageName(char *DiscName,char Drive,char DType) {
-//MenuRef			menu = nil;
-//MenuItemIndex	j;
-//OSStatus		err;
-char			*fname;
-char			Title[100];
-
-	strcpy(CDiscName[Drive],DiscName);
-	CDiscType[Drive]=DType;
-	DiscLoaded[Drive]=true;
-
-	fname = strrchr(CDiscName[Drive], '\\');
-	if (fname == NULL)
-		fname = strrchr(CDiscName[Drive], '/');
-	if (fname == NULL)
-		fname = CDiscName[Drive];
-	else
-		fname++;
-
-	sprintf(Title, "Eject Disc %d: ", Drive);
-	strncat(Title, fname, 99 - strlen(Title));
-	Title[99] = 0;
-	
-#if 0//ACH - eject
-	err = GetIndMenuItemWithCommandID(nil, 'ejd0' + Drive, 1, &menu, &j);
-	if (!err)
-	{
-			
-		CFStringRef pTitle;
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, Title, kCFStringEncodingASCII);
-		err = SetMenuItemTextWithCFString(menu, j, pTitle);
-			
-		if (err)
-		{
-			fprintf(stderr, "SetMenuTitle returned err code %ld\n", err);
-		}
-		CFRelease(pTitle);
-	}
-#endif
-}
-
-void BeebWin::EjectDiscImage(int Drive) {
-//MenuRef			menu = nil;
-//MenuItemIndex	j;
-//OSStatus		err;
-char			Title[100];
-	
-	Eject8271DiscImage(Drive);
-	Close1770Disc(Drive);
-	
-	strcpy(CDiscName[Drive], "");
-	CDiscType[Drive] = 0;
-	DiscLoaded[Drive] = FALSE;
-
-	sprintf(Title, "Eject Disc %d", Drive);
-#if 0//ACH - eject
-	err = GetIndMenuItemWithCommandID(nil, 'ejd0' + Drive, 1, &menu, &j);
-	if (!err)
-	{
-		
-		CFStringRef pTitle;
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, Title, kCFStringEncodingASCII);
-		err = SetMenuItemTextWithCFString(menu, j, pTitle);
-		
-		if (err)
-		{
-			fprintf(stderr, "SetMenuTitle returned err code %d\n", (int) err);
-		}
-		CFRelease(pTitle);
-	}
-	
-	if (Drive == 0)
-	{
-		SetMenuCommandIDCheck('wrp0', true);
-	}
-	else
-	{
-		SetMenuCommandIDCheck('wrp1', true);
-	}
-#endif
-	SetDiscWriteProtects();
-	
-}
-
-/****************************************************************************/
-void BeebWin::SavePreferences()
-{
-CFURLRef fileURL;
-char path[256];
-CFStringRef pIni;
-CFMutableDictionaryRef dict;
-char temp[256];
-int i;
-CFStringRef pTitle;
-
-	// Create a dictionary that will hold the data.
-	dict = CFDictionaryCreateMutable( kCFAllocatorDefault,
-            0,
-            &kCFTypeDictionaryKeyCallBacks,
-            &kCFTypeDictionaryValueCallBacks );
-
-// Put the various items into the dictionary.
-// Because the values are retained as they are placed into the
-//  dictionary, we can release any allocated objects here.
-
-	AddDictNum(dict, CFSTR("MachineType"), MachineType);
-	AddDictNum(dict, CFSTR("ShowFPS"), m_ShowSpeedAndFPS);
-	AddDictNum(dict, CFSTR("TubeEnabled"), TubeEnabled);
-	AddDictNum(dict, CFSTR("Tube186Enabled"), Tube186Enabled);
-	AddDictNum(dict, CFSTR("TorchTube"), TorchTube);
-	AddDictNum(dict, CFSTR("ArmTube"), ArmTube);
-	AddDictNum(dict, CFSTR("AcornZ80"), AcornZ80);
-	AddDictNum(dict, CFSTR("OpCodes"), OpCodes);
-	AddDictNum(dict, CFSTR("BasicHardware"), BHardware);
-	AddDictNum(dict, CFSTR("TeletextHalfMode"), THalfMode);
-	AddDictNum(dict, CFSTR("SoundBlockSize"), SBSize);
-	AddDictNum(dict, CFSTR("isFullScreen"), m_isFullScreen);
-	AddDictNum(dict, CFSTR("MaintainAspectRatio"), m_maintainAspectRatio);
-	AddDictNum(dict, CFSTR("WindowSize"), m_MenuIdWinSize);
-	AddDictNum(dict, CFSTR("Monitor"), palette_type);
-	AddDictNum(dict, CFSTR("MotionBlur"), m_Motion_Blur);
-	AddDictNum(dict, CFSTR("LEDInformation"), (DiscLedColour << 2) | ((LEDs.ShowDisc?1:0)<<1) | (LEDs.ShowKB?1:0));
-	AddDictNum(dict, CFSTR("Timing"), m_MenuIdTiming);
-	AddDictNum(dict, CFSTR("EconetEnabled"), EconetEnabled);
-	AddDictNum(dict, CFSTR("SpeechEnabled"), SpeechDefault);
-	AddDictNum(dict, CFSTR("SoundEnabled"), SoundEnabled);
-	AddDictNum(dict, CFSTR("SoundChipEnabled"), SoundChipEnabled);
-	AddDictNum(dict, CFSTR("SampleRate"), m_MenuIdSampleRate);
-	AddDictNum(dict, CFSTR("Volume"), m_MenuIdVolume);
-	AddDictNum(dict, CFSTR("PartSamples"), PartSamples);
-	AddDictNum(dict, CFSTR("Sticks"), m_MenuIdSticks);
-	AddDictNum(dict, CFSTR("FreezeWhenInactive"), m_FreezeWhenInactive);
-	AddDictNum(dict, CFSTR("HideCursor"), m_HideCursor);
-	AddDictNum(dict, CFSTR("KeyMapping"), m_MenuIdKeyMapping);
-	AddDictNum(dict, CFSTR("KeyMapAS"), m_KeyMapAS);
-	AddDictNum(dict, CFSTR("KeyMapFunc"), m_KeyMapFunc);
-	AddDictNum(dict, CFSTR("PrinterEnabled"), PrinterEnabled);
-	AddDictNum(dict, CFSTR("PrinterPort"), m_MenuIdPrinterPort);
-	AddDictString(dict, CFSTR("PrinterFile"), m_PrinterFileName);
-	AddDictNum(dict, CFSTR("AMXMouseEnabled"), AMXMouseEnabled);
-	AddDictNum(dict, CFSTR("AMXMouseLRForMiddle"), AMXLRForMiddle);
-	AddDictNum(dict, CFSTR("AMXMouseSize"), m_MenuIdAMXSize);
-	AddDictNum(dict, CFSTR("AMXMouseAdjust"), m_MenuIdAMXAdjust);
-	AddDictNum(dict, CFSTR("UnlockTape"), UnlockTape);
-	AddDictNum(dict, CFSTR("TapeClockSpeed"), TapeClockSpeed);
-	AddDictNum(dict, CFSTR("TapeSoundEnabled"), TapeSoundEnabled);
-	AddDictNum(dict, CFSTR("RelaySoundEnabled"), RelaySoundEnabled);
-	AddDictNum(dict, CFSTR("DiscDriveSoundEnabled"), DiscDriveSoundEnabled);
-	AddDictNum(dict, CFSTR("FrameSkip"), m_skip);
-	AddDictNum(dict, CFSTR("CaptureResolution"), m_captureresolution);
-	AddDictNum(dict, CFSTR("ExponentialVolume"), SoundExponentialVolume);
-	AddDictNum(dict, CFSTR("TeleTextAdapterEnabled"), TeleTextAdapterEnabled);
-	AddDictNum(dict, CFSTR("TeleTextData"), TeleTextData);
-	AddDictNum(dict, CFSTR("TeleTextServer"), TeleTextServer);
-	AddDictNum(dict, CFSTR("HardDriveEnabled"), HardDriveEnabled);
-	AddDictNum(dict, CFSTR("SerialPortEnabled"), SerialPortEnabled);
-	AddDictNum(dict, CFSTR("EthernetPortEnabled"), EthernetPortEnabled);
-	AddDictNum(dict, CFSTR("TouchScreenEnabled"), TouchScreenEnabled);
-	AddDictNum(dict, CFSTR("RTCEnabled"), RTC_Enabled);
-
-    AddDictNum(dict, CFSTR("RTCY2KAdjust"), RTCY2KAdjust);
-
-	AddDictNum(dict, CFSTR("InvertBackground"), m_Invert);
-	AddDictNum(dict, CFSTR("WriteProtectOnLoad"), m_WriteProtectOnLoad);
-	AddDictNum(dict, CFSTR("NativeFDC"), NativeFDC);
-	AddDictNum(dict, CFSTR("FDCType"), FDCType);
-
-	for (i = 0; i < 256; ++i)
-	{
-		sprintf(temp, "Row%d", i);
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault,temp, kCFStringEncodingASCII);
-		AddDictNum(dict, pTitle, UserKeymap[i][0]);
-		CFRelease(pTitle);
-
-		sprintf(temp, "Col%d", i);
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault,temp, kCFStringEncodingASCII);
-		AddDictNum(dict, pTitle, UserKeymap[i][1]);
-		CFRelease(pTitle);
-	}
-	
-	for (i = 0; i < 8; ++i)
-	{
-		sprintf(temp, "BitKey%d", i);
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault,temp, kCFStringEncodingASCII);
-		AddDictNum(dict, pTitle, BitKeys[i]);
-		CFRelease(pTitle);
-	}
-	
-    
-	// Create a URL that specifies the file we will create to
-	// hold the XML data.
-
-	sprintf(path, "%sbeebem.ini", RomPath);
-	pIni = CFStringCreateWithCString (kCFAllocatorDefault, path, kCFStringEncodingASCII);
-
-	fileURL = CFURLCreateWithFileSystemPath( kCFAllocatorDefault,    
-               pIni,       // file path name
-               kCFURLPOSIXPathStyle,    // interpret as POSIX path        
-               false );                 // is it a directory?
-			   
-   // Write the property list to the file.
-	WriteMyPropertyListToFile( dict, fileURL );
-	CFRelease(dict);
-	CFRelease(fileURL);
-
-	CFRelease(pIni);
-}
-
-/****************************************************************************/
-void BeebWin::LoadPreferences()
-{
-CFURLRef fileURL;
-char path[256];
-CFStringRef pIni;
-CFMutableDictionaryRef dict;
-CFStringRef pTitle;
-int i;
-char temp[256];
-
-int LEDByte;
-
-	// Create a URL that specifies the file we will create to
-	// hold the XML data.
-
-	sprintf(path, "%sbeebem.ini", RomPath);
-	pIni = CFStringCreateWithCString (kCFAllocatorDefault, path, kCFStringEncodingASCII);
-
-	fileURL = CFURLCreateWithFileSystemPath( kCFAllocatorDefault,    
-               pIni,       // file path name
-               kCFURLPOSIXPathStyle,    // interpret as POSIX path        
-               false );                 // is it a directory?
-
-	if (fileURL == NULL)
-	{
-		fprintf(stderr, "Cannot find beebem.ini\n");
-		exit(1);
-	}
-
-	dict = (CFMutableDictionaryRef) CreateMyPropertyListFromFile(fileURL); 
-
-	if (dict == NULL)
-	{
-		fprintf(stderr, "Cannot create property file\n");
-		exit(1);
-	}
-
-	NativeFDC = GetDictNum(dict, CFSTR("NativeFDC"), 1);
-	FDCType = GetDictNum(dict, CFSTR("FDCType"), 0);
-	TranslateFDC();
-
-	m_WriteProtectOnLoad = GetDictNum(dict, CFSTR("WriteProtectOnLoad"), 1);
-	MachineType = GetDictNum(dict, CFSTR("MachineType"), 3);
-	m_isFullScreen = GetDictNum(dict, CFSTR("isFullScreen"), 0);
-	m_maintainAspectRatio = GetDictNum(dict, CFSTR("MaintainAspectRatio"), 1);
-	m_MenuIdWinSize = GetDictNum(dict, CFSTR("WindowSize"), 4);
-	TranslateWindowSize(m_MenuIdWinSize);
-
-	m_ShowSpeedAndFPS = GetDictNum(dict, CFSTR("ShowFPS"), 1);
-	palette_type = (PaletteType) GetDictNum(dict, CFSTR("Monitor"), (PaletteType) RGB);
-
-	m_Motion_Blur = GetDictNum(dict, CFSTR("MotionBlur"), 0);
-
-	LEDByte = GetDictNum(dict, CFSTR("LEDInformation"), 7);
-
-	DiscLedColour = LED_COLOUR_TYPE;
-	LEDs.ShowDisc = LED_SHOW_DISC;
-	LEDs.ShowKB = LED_SHOW_KB;
-
-	m_MenuIdTiming = GetDictNum(dict, CFSTR("Timing"), IDM_REALTIME);
-	TranslateTiming(m_MenuIdTiming);
-	
-	EconetEnabled = GetDictNum(dict, CFSTR("EconetEnabled"), 0);
-	SpeechDefault = GetDictNum(dict, CFSTR("SpeechEnabled"), 0);
-	SoundEnabled = GetDictNum(dict, CFSTR("SoundEnabled"), 1);
-	SoundChipEnabled = GetDictNum(dict, CFSTR("SoundChipEnabled"), 1);
-	m_MenuIdSampleRate = GetDictNum(dict, CFSTR("SampleRate"), IDM_22050KHZ);
-	TranslateSampleRate();
-
-	m_MenuIdVolume = GetDictNum(dict, CFSTR("Volume"), IDM_MEDIUMVOLUME);
-	TranslateVolume();
-
-	PartSamples = GetDictNum(dict, CFSTR("PartSamples"), 1);
-	m_MenuIdSticks = GetDictNum(dict, CFSTR("Sticks"), 0);
-	m_FreezeWhenInactive = GetDictNum(dict, CFSTR("FreezeWhenInactive"), 1);
-	m_HideCursor = GetDictNum(dict, CFSTR("HideCursor"), 0);
-	m_MenuIdKeyMapping = GetDictNum(dict, CFSTR("KeyMapping"), 0);
-	m_KeyMapAS = GetDictNum(dict, CFSTR("KeyMapAS"), 0);
-	m_KeyMapFunc = GetDictNum(dict, CFSTR("KeyMapFunc"), 0);
-	TranslateKeyMapping();
-
-	for (i = 0; i < 256; ++i)
-	{
-		sprintf(temp, "Row%d", i);
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, temp, kCFStringEncodingASCII);
-		UserKeymap[i][0] = GetDictNum(dict, pTitle, transTable1[i][0]);
-		CFRelease(pTitle);
-		
-		sprintf(temp, "Col%d", i);
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, temp, kCFStringEncodingASCII);
-		UserKeymap[i][1] = GetDictNum(dict, pTitle, transTable1[i][1]);
-		CFRelease(pTitle);
-	}
-	
-	for (i = 0; i < 8; ++i)
-	{
-		sprintf(temp, "BitKey%d", i);
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, temp, kCFStringEncodingASCII);
-		BitKeys[i] = GetDictNum(dict, pTitle, BitKeys[i]);
-		CFRelease(pTitle);
-	}
-	
-	SoundExponentialVolume = GetDictNum(dict, CFSTR("ExponentialVolume"), 1);
-	TeleTextAdapterEnabled = GetDictNum(dict, CFSTR("TeleTextAdapterEnabled"), 0);
-	TeleTextData = GetDictNum(dict, CFSTR("TeleTextData"), 0);
-	TeleTextServer = GetDictNum(dict, CFSTR("TeleTextServer"), 0);
-	HardDriveEnabled = GetDictNum(dict, CFSTR("HardDriveEnabled"), 0);
-	TubeEnabled = GetDictNum(dict, CFSTR("TubeEnabled"), 0);
-	Tube186Enabled = GetDictNum(dict, CFSTR("Tube186Enabled"), 0);
-	TorchTube = GetDictNum(dict, CFSTR("TorchTube"), 0);
-	ArmTube = GetDictNum(dict, CFSTR("ArmTube"), 0);
-	AcornZ80 = GetDictNum(dict, CFSTR("AcornZ80"), 0);
-	OpCodes = GetDictNum(dict, CFSTR("OpCodes"), 2);
-	BHardware = GetDictNum(dict, CFSTR("BasicHardware"), 0);
-	THalfMode = GetDictNum(dict, CFSTR("TeletextHalfMode"), 0);
-	SBSize = GetDictNum(dict, CFSTR("SoundBlockSize"), 0);
-	m_Invert = GetDictNum(dict, CFSTR("InvertBackground"), 0);
-
-	UnlockTape = GetDictNum(dict, CFSTR("UnlockTape"), 0);
-	TapeClockSpeed = GetDictNum(dict, CFSTR("TapeClockSpeed"), 5600);
-	TapeSoundEnabled = GetDictNum(dict, CFSTR("TapeSoundEnabled"), 1);
-	RelaySoundEnabled = GetDictNum(dict, CFSTR("RelaySoundEnabled"), 1);
-	DiscDriveSoundEnabled = GetDictNum(dict, CFSTR("DiscDriveSoundEnabled"), 1);
-
-	PrinterEnabled = GetDictNum(dict, CFSTR("PrinterEnabled"), 0);
-	m_MenuIdPrinterPort = GetDictNum(dict, CFSTR("PrinterPort"), IDM_PRINTER_FILE);
-	GetDictString(dict, CFSTR("PrinterFile"), m_PrinterFileName, (char *) "");
-	TranslatePrinterPort();
-
-	AMXMouseEnabled = GetDictNum(dict, CFSTR("AMXMouseEnabled"), 0);
-	AMXLRForMiddle = GetDictNum(dict, CFSTR("AMXMouseLRForMiddle"), 1);
-	m_MenuIdAMXSize = GetDictNum(dict, CFSTR("AMXMouseSize"), 2);
-	m_MenuIdAMXAdjust = GetDictNum(dict, CFSTR("AMXMouseAdjust"), 2);
-	TranslateAMX();
-
-	m_skip = GetDictNum(dict, CFSTR("FrameSkip"), 0);
-	m_captureresolution = GetDictNum(dict, CFSTR("CaptureResolution"), 2);
-	TranslateCapture();
-	
-	SerialPortEnabled = GetDictNum(dict, CFSTR("SerialPortEnabled"), 0);
-	EthernetPortEnabled = GetDictNum(dict, CFSTR("EthernetPortEnabled"), 0);
-	TouchScreenEnabled = GetDictNum(dict, CFSTR("TouchScreenEnabled"), 0);
-	RTC_Enabled = GetDictNum(dict, CFSTR("RTCEnabled"), 0);
-    RTCY2KAdjust = GetDictNum(dict, CFSTR("RTCY2KAdjust"), 1);
-
-	SavePreferences();
-}
-
-
-/****************************************************************************/
-void BeebWin::TranslateTiming(int id)
-{
-	m_FPSTarget = 0;
-	m_RealTimeTarget = 1.0;
-	m_MenuIdTiming = id;
-	
-	SetMenuCommandIDCheck('sRT ', false);
-	SetMenuCommandIDCheck('s50 ', false);
-	SetMenuCommandIDCheck('s25 ', false);
-	SetMenuCommandIDCheck('s10 ', false);
-	SetMenuCommandIDCheck('s5  ', false);
-	SetMenuCommandIDCheck('s1  ', false);
-	SetMenuCommandIDCheck('f100', false);
-	SetMenuCommandIDCheck('f50 ', false);
-	SetMenuCommandIDCheck('f10 ', false);
-	SetMenuCommandIDCheck('f5  ', false);
-	SetMenuCommandIDCheck('f2  ', false);
-	SetMenuCommandIDCheck('f1.5', false);
-	SetMenuCommandIDCheck('f1.2', false);
-	SetMenuCommandIDCheck('f1.1', false);
-	SetMenuCommandIDCheck('f0.9', false);
-	SetMenuCommandIDCheck('f0.7', false);
-	SetMenuCommandIDCheck('f0.5', false);
-	SetMenuCommandIDCheck('f0.2', false);
-	SetMenuCommandIDCheck('f0.1', false);
-
-	if (m_MenuIdTiming == IDM_3QSPEED)
-		m_MenuIdTiming = IDM_FIXEDSPEED0_75;
-	if (m_MenuIdTiming == IDM_HALFSPEED)
-		m_MenuIdTiming = IDM_FIXEDSPEED0_5;
-
-	switch (m_MenuIdTiming)
-	{
-	default:
-	case IDM_REALTIME:
-		SetMenuCommandIDCheck('sRT ', true);
-		m_RealTimeTarget = 1.0;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED100:
-		SetMenuCommandIDCheck('f100', true);
-		m_RealTimeTarget = 100.0;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED50:
-		SetMenuCommandIDCheck('f50 ', true);
-		m_RealTimeTarget = 50.0;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED10:
-		SetMenuCommandIDCheck('f10 ', true);
-		m_RealTimeTarget = 10.0;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED5:
-		SetMenuCommandIDCheck('f5  ', true);
-		m_RealTimeTarget = 5.0;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED2:
-		SetMenuCommandIDCheck('f2  ', true);
-		m_RealTimeTarget = 2.0;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED1_5:
-		SetMenuCommandIDCheck('f1.5', true);
-		m_RealTimeTarget = 1.5;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED1_25:
-		SetMenuCommandIDCheck('f1.2', true);
-		m_RealTimeTarget = 1.25;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED1_1:
-		SetMenuCommandIDCheck('f1.1', true);
-		m_RealTimeTarget = 1.1;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED0_9:
-		SetMenuCommandIDCheck('f0.9', true);
-		m_RealTimeTarget = 0.9;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED0_5:
-		SetMenuCommandIDCheck('f0.5', true);
-		m_RealTimeTarget = 0.5;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED0_75:
-		SetMenuCommandIDCheck('f0.7', true);
-		m_RealTimeTarget = 0.75;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED0_25:
-		SetMenuCommandIDCheck('f0.2', true);
-		m_RealTimeTarget = 0.25;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_FIXEDSPEED0_1:
-		SetMenuCommandIDCheck('f0.1', true);
-		m_RealTimeTarget = 0.1;
-		m_FPSTarget = 0;
-		break;
-
-	case IDM_50FPS:
-		SetMenuCommandIDCheck('s50 ', true);
-		m_FPSTarget = 50;
-		m_RealTimeTarget = 0;
-		break;
-
-	case IDM_25FPS:
-		SetMenuCommandIDCheck('s25 ', true);
-		m_FPSTarget = 25;
-		m_RealTimeTarget = 0;
-		break;
-
-	case IDM_10FPS:
-		SetMenuCommandIDCheck('s10 ', true);
-		m_FPSTarget = 10;
-		m_RealTimeTarget = 0;
-		break;
-
-	case IDM_5FPS:
-		SetMenuCommandIDCheck('s5  ', true);
-		m_FPSTarget = 5;
-		m_RealTimeTarget = 0;
-		break;
-
-	case IDM_1FPS:
-		SetMenuCommandIDCheck('s1  ', true);
-		m_FPSTarget = 1;
-		m_RealTimeTarget = 0;
-		break;
-	}
-
-	ResetTiming();
-}
-
-
-void BeebWin::AdjustSpeed(bool up)
-{
-}
-
-/****************************************************************************/
-void BeebWin::TranslateKeyMapping(void)
-{
-	switch (m_MenuIdKeyMapping)
-	{
-	default :
-	case 0 :
-		transTable = transTable1;
-		break;
-	case 1 :
-		transTable = UserKeymap;
-		break;
-	}
+		tsy=m_LastStartY+m_LastNLines-2;
+	doUHorizLine((on ? 1 : 0) + colbase, tsy, sx, 8);
+	doUHorizLine((on ? 1 : 0) + colbase, tsy, sx, 8);
 }
 
 /****************************************************************************/
@@ -2616,585 +1993,77 @@ void BeebWin::ResetTiming(void)
 }
 
 /****************************************************************************/
-void BeebWin::TranslateVolume(void)
+bool BeebWin::UpdateTiming()
 {
+	bool UpdateScreen = false;
 
-	SetMenuCommandIDCheck('volf', false);
-	SetMenuCommandIDCheck('volh', false);
-	SetMenuCommandIDCheck('volm', false);
-	SetMenuCommandIDCheck('voll', false);
-
-	switch (m_MenuIdVolume)
-	{
-	case IDM_FULLVOLUME:
-		SetMenuCommandIDCheck('volf', true);
-		SoundVolume = 1;
-		break;
-	case IDM_HIGHVOLUME:
-		SetMenuCommandIDCheck('volh', true);
-		SoundVolume = 2;
-		break;
-	case IDM_MEDIUMVOLUME:
-		SetMenuCommandIDCheck('volm', true);
-		SoundVolume = 3;
-		break;
-	case IDM_LOWVOLUME:
-		SetMenuCommandIDCheck('voll', true);
-		SoundVolume = 4;
-		break;
-	}
-}
-
-/****************************************************************************/
-void BeebWin::TranslateFDC(void)
-{
-	
-	SetMenuCommandIDCheck('mbcn', NativeFDC);
-	SetMenuCommandIDCheck('mbca', false);
-	SetMenuCommandIDCheck('mbco', false);
-	SetMenuCommandIDCheck('mbcw', false);
-
-	if (NativeFDC == false)
-	{
-		switch(FDCType)
-		{
-			case 0 :
-				SetMenuCommandIDCheck('mbca', true);
-				EFDCAddr = 0xfe84;
-				EDCAddr = 0xfe80;
-				InvertTR00 = FALSE;
-				break;
-			case 1 :
-				SetMenuCommandIDCheck('mbco', true);
-				EFDCAddr = 0xfe80;
-				EDCAddr = 0xfe84;
-				InvertTR00 = FALSE;
-				break;
-			case 2 :
-				SetMenuCommandIDCheck('mbcw', true);
-				EFDCAddr = 0xfe84;
-				EDCAddr = 0xfe80;
-				InvertTR00 = TRUE;
-				break;
-		}
-	}
-		
-}
-
-void BeebWin::SetDriveControl(unsigned char value)
-{
-
-	unsigned char temp = 0;
-	
-//	WriteLog("SetDriveControl - Type - %d, Value = %02x\n", FDCType, value);
-	
-	switch (FDCType)
-	{
-		case 0 :		// Acorn
-			temp = value & 3;
-			temp |= (value & 12) << 2;
-			break;
-		case 1 :		// Opus
-			temp = (value & 2) << 3;
-			temp |= ((value ^255) & 64) >> 1;
-			if (value & 1) temp |= 2; else temp |= 1;
-			break;
-		case 2 :		// Watford
-			if (value & 4) temp = 2; else temp = 1;
-			temp |= (value & 2) << 3;
-			temp |= (value & 1) << 5;
-			
-			temp = value & 3;			// Drive Select
-			temp |= (value & 4) << 2;	// Side Select
-			temp |= (value & 8) << 2;	// Density
-			
-			break;
-	}
-	
-	WriteFDCControlReg(temp);
-}
-
-unsigned char BeebWin::GetDriveControl(void)
-{
-	
-	unsigned char value;
-	unsigned char temp;
-
-	temp = 0;
-	
-	value = ReadFDCControlReg();
-	
-	switch (FDCType)
-	{
-		case 0 :		// Acorn
-			temp = value & 3;
-			temp |= (value & 48) >> 2;
-			break;
-		case 1 :		// Opus
-			temp = ((value ^ 255) & 32) << 1;
-			temp |= (value & 16) >> 3;
-			if (value & 2) temp |= 1;
-			break;
-		case 2 :		// Watford
-			if (value & 1) temp = 0;
-			if (value & 2) temp = 4;
-			temp |= (value & 16) >> 3;
-			temp |= (value & 32) >> 5;
-			
-			temp = value & 3;
-			temp |= (value & 16) >> 2;
-			temp |= (value & 32) >> 2;
-			
-			break;
-	}
-	
-	return temp;
-}
-
-
-/****************************************************************************/
-void BeebWin::TranslateCapture(void)
-{
-	
-	SetMenuCommandIDCheck('skp0', false);
-	SetMenuCommandIDCheck('skp1', false);
-	SetMenuCommandIDCheck('skp2', false);
-	SetMenuCommandIDCheck('skp3', false);
-	SetMenuCommandIDCheck('skp4', false);
-	SetMenuCommandIDCheck('skp5', false);
-	SetMenuCommandIDCheck('rec1', false);
-	SetMenuCommandIDCheck('rec2', false);
-	SetMenuCommandIDCheck('rec3', false);
-	SetMenuCommandIDCheck('rec4', false);
-	
-	switch (m_skip)
-	{
-		case 0:
-			SetMenuCommandIDCheck('skp0', true);
-			break;
-		case 1:
-			SetMenuCommandIDCheck('skp1', true);
-			break;
-		case 2:
-			SetMenuCommandIDCheck('skp2', true);
-			break;
-		case 3:
-			SetMenuCommandIDCheck('skp3', true);
-			break;
-		case 4:
-			SetMenuCommandIDCheck('skp4', true);
-			break;
-		case 5:
-			SetMenuCommandIDCheck('skp5', true);
-			break;
-	}
-
-	switch (m_captureresolution)
-	{
-		case 1:
-			SetMenuCommandIDCheck('rec1', true);
-			break;
-		case 2:
-			SetMenuCommandIDCheck('rec2', true);
-			break;
-		case 3:
-			SetMenuCommandIDCheck('rec3', true);
-			break;
-		case 4:
-			SetMenuCommandIDCheck('rec4', true);
-			break;
-	}
-	
-}
-
-/****************************************************************************/
-void BeebWin::TranslateSampleRate(void)
-{
-// IDM_44100KHZ:
-//	SoundSampleRate = 44100;
-
-// IDM_22050KHZ:
-//	SoundSampleRate = 22050;
-	
-// IDM_11025KHZ:
-//	SoundSampleRate = 11025;
-}
-
-/****************************************************************************/
-void BeebWin::TranslateWindowSize(int size)
-{
-
-	if ( (size < 0) || (size > 10) ) return;
-	
-	SetMenuCommandIDCheck('siz1', false);
-	SetMenuCommandIDCheck('siz2', false);
-	SetMenuCommandIDCheck('siz3', false);
-	SetMenuCommandIDCheck('siz4', false);
-	SetMenuCommandIDCheck('siz5', false);
-	SetMenuCommandIDCheck('siz6', false);
-	SetMenuCommandIDCheck('siz7', false);
-	SetMenuCommandIDCheck('siz8', false);
-	SetMenuCommandIDCheck('siz9', false);
-	SetMenuCommandIDCheck('siza', false);
-	SetMenuCommandIDCheck('sizb', false);
-
-	m_MenuIdWinSize = size;
-
-	switch (size)
-	{
-	case 0 :
-		SetMenuCommandIDCheck('siz1', true);
-		m_XWinSize = 160;
-		m_YWinSize = 128;
-		break;
-	case 1 :
-		SetMenuCommandIDCheck('siz2', true);
-		m_XWinSize = 240;
-		m_YWinSize = 192;
-		break;
-	case 2 :
-		SetMenuCommandIDCheck('siz3', true);
-		m_XWinSize = 320;
-		m_YWinSize = 256;
-		break;
-	case 3 :
-		SetMenuCommandIDCheck('siz4', true);
-		m_XWinSize = 640;
-		m_YWinSize = 256;
-		break;
-	case 4 :
-		SetMenuCommandIDCheck('siz5', true);
-		m_XWinSize = 640;
-		m_YWinSize = 512;
-		break;
-	case 5 :
-		SetMenuCommandIDCheck('siz6', true);
-		m_XWinSize = 800;
-		m_YWinSize = 600;
-		break;
-	case 6 :
-		SetMenuCommandIDCheck('siz7', true);
-		m_XWinSize = 1024;
-		m_YWinSize = 512;
-		break;
-	case 7 :
-		SetMenuCommandIDCheck('siz8', true);
-		m_XWinSize = 1024;
-		m_YWinSize = 768;
-		break;
-	case 8 :
-		SetMenuCommandIDCheck('siz9', true);
-		m_XWinSize = 1280;
-		m_YWinSize = 1024;
-		break;
-	case 9 :
-		SetMenuCommandIDCheck('siza', true);
-		m_XWinSize = 1440;
-		m_YWinSize = 1080;
-		break;
-	case 10 :
-		SetMenuCommandIDCheck('sizb', true);
-		m_XWinSize = 1600;
-		m_YWinSize = 1200;
-		break;
-	}
-#if 0//ACH - windowsize
-
-	SizeWindow(mWindow, m_XWinSize, m_YWinSize, false);
-	RepositionWindow(mWindow, NULL, kWindowCenterOnMainScreen);
-#endif
-}
-
-void BeebWin::doLED(int sx,bool on) {
-	int tsy; char colbase;
-	colbase=(DiscLedColour*2)+LED_COL_BASE; // colour will be 0 for red, 1 for green.
-	if (sx<100) colbase=LED_COL_BASE; // Red leds for keyboard always
-//	if (TeletextEnabled) tsy=496; else tsy=254;
-	if (TeletextEnabled) tsy=500; else tsy=286;
-	doUHorizLine(mainWin->cols[((on)?1:0)+colbase],tsy,sx,8);
-	doUHorizLine(mainWin->cols[((on)?1:0)+colbase],tsy,sx,8);
-};
-
-extern "C" int beeb_HandleCommand(unsigned int cmdID)
-{
-    char* cmdCHR = (char*)&cmdID;
-    printf("HANDLECMD %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
-    return mainWin->HandleCommand(cmdID);
-}
-
-
-int SaveFile (const char *path, FSSpec *fs)
-{
-#if 0//ACH - savefile (DONE)
-    NavReplyRecord    myReply;
-    NavDialogOptions    myDialogOptions;
-    NavEventUPP    myEventUPP = NULL;
-#endif
-    OSErr        myErr = noErr;
-#if 0//ACH - savefile (DONE)
-    OSType    fileTypeToSave = 'TEXT', fileCreator = 'jjf0';
-
-      // specify the options for the dialog box
-      NavGetDefaultDialogOptions(&myDialogOptions);
-      myDialogOptions.dialogOptionFlags += kNavNoTypePopup;
-      myDialogOptions.dialogOptionFlags += kNavDontAutoTranslate;
-      
-      // prompt the user for a file
-      myErr = NavPutFile(NULL, &myReply, &myDialogOptions, myEventUPP, fileTypeToSave, fileCreator, NULL);
-
-      if ((myErr == noErr) && myReply.validRecord) {
-        AEKeyword    myKeyword;
-        DescType    myActualType;
-        Size      myActualSize = 0;
-        FSSpec        theFSSpec;
-        FSRef       theFSRef;
-        
-        myErr = AEGetNthPtr(&(myReply.selection), 1, typeFSS, &myKeyword, &myActualType, &theFSSpec, sizeof(FSSpec), &myActualSize);
-
-        if ((myErr == noErr) && myReply.validRecord)
-        {
-            myErr = FSpCreate(&theFSSpec, fileCreator, fileTypeToSave, smSystemScript);
-            myErr = FSpMakeFSRef(&theFSSpec, &theFSRef);
-            UInt8 *ptr;
-            ptr = (UInt8 *) path;
-            FSRefMakePath(&theFSRef, ptr, 255);
-            fprintf(stderr, "Picked %s\n", path);
-            unlink(path);
-            if (fs) memcpy(fs, &theFSSpec, sizeof(FSSpec));
-        }
-            
-        NavDisposeReply(&myReply);
-      }
-
-      DisposeNavEventUPP(myEventUPP);
-
-      return (myErr);
-#else
-    swift_SaveFile(path, 256);
-#endif
-
-    return (myErr);
-}
-
-void BeebWin::ReadDisc(int drive)
-
-{
-OSErr err = noErr;
-char path[256];
-
-#if 0//ACH - getonefile (DONE)
-    err = GetOneFileWithPreview(path, DiscFilterProc);
-#else
-    err = swift_GetOneFileWithPreview(path, 256, DISC);
-#endif
-	if (err) return;
-	LoadDisc(drive, path);
-}
-
-
-void BeebWin::LoadTape()
-{
-	OSErr err = noErr;
-	char path[256];
-	
-#if 0//ACH - getonefile (DONE)
-    err = GetOneFileWithPreview(path, DiscFilterProc);
-#else
-    err = swift_GetOneFileWithPreview(path, 256, UEF);
-#endif
-	if (err) return;
-	LoadTapeFromPath(path);
-}
-
-
-void BeebWin::LoadTapeFromPath(char *path)
-{
-	if (strstr(path, ".uef")) LoadUEF(path);
-	if (strstr(path, ".csw")) LoadCSW(path);
-}
-
-void BeebWin::LoadDisc(int drive, char *path)
-{
-bool dsd = false;
-bool adfs = false;
-bool img = false;
-bool dos = false;
-bool ssd = false;
-bool wdd = false;
-
-	if (strstr(path, ".ssd")) ssd = true;
-	if (strstr(path, ".dsd")) dsd = true;
-	if (strstr(path, ".wdd")) wdd = true;
-	if (strstr(path, ".adl")) adfs = true;
-	if (strstr(path, ".adf")) adfs = true;
-	if (strstr(path, ".img")) img = true;
-	if (strstr(path, ".dos")) dos = true;
-	if (strstr(path, ".SSD")) ssd = true;
-	if (strstr(path, ".DSD")) dsd = true;
-	if (strstr(path, ".WDD")) wdd = true;
-	if (strstr(path, ".ADL")) adfs = true;
-	if (strstr(path, ".ADF")) adfs = true;
-	if (strstr(path, ".IMG")) img = true;
-	if (strstr(path, ".DOS")) dos = true;
-	
-	if (MachineType != 3)
-	{
-		if (dsd)
-		{
-			if (NativeFDC)
-				LoadSimpleDSDiscImage(path, drive, 80);
-			else
-				Load1770DiscImage(path, drive, 1);		// 1 = dsd
-		}
-		if (ssd || img)
-		{
-			if (NativeFDC)
-				LoadSimpleDiscImage(path,drive, 0, 80);
-			else
-				Load1770DiscImage(path, drive, 0);		// 0 = ssd
-		}
-		if (adfs)
-		{
-			if (NativeFDC)
-			{
-				fprintf(stderr, "The native 8271 FDC cannot read ADFS discs\n");
-			}
-			else
-				Load1770DiscImage(path, drive, 2);					// 2 = adfs
-		}
-		if (wdd)
-		{
-			if (NativeFDC)
-			{
-				fprintf(stderr, "The native 8271 FDC cannot read Watford Double Density discs\n");
-			}
-			else
-				Load1770DiscImage(path, drive, 5);					// 5 = watford double density
-		}
-	}
-			
-	if (MachineType == 3)
-	{
-		if (dsd)
-			Load1770DiscImage(path, drive, 1);						// 1 = dsd
-		if (ssd)
-			Load1770DiscImage(path, drive, 0);						// 0 = ssd
-		if (adfs)
-			Load1770DiscImage(path, drive, 2);						// ADFS
-		if (img)
-			Load1770DiscImage(path, drive, 3);						// 800K DOS PLUS
-		if (dos)
-			Load1770DiscImage(path, drive, 4);						// 720K DOS PLUS
-		if (wdd)
-			Load1770DiscImage(path, drive, 5);						// 720K WATFORD DOUBLE DENSITY
-	}
-						
-	if (m_WriteProtectOnLoad != m_WriteProtectDisc[drive])
-		ToggleWriteProtect(drive);
-}
-
-/****************************************************************************/
-bool BeebWin::UpdateTiming(void)
-{
-	unsigned long TickCount;
-	unsigned long Ticks;
-	unsigned long SpareTicks;
-	int Cycles;
-	int CyclesPerSec;
-	bool UpdateScreen = FALSE;
-	static int firsttime = 0;
-
-
-	TickCount = GetTickCount(); // milliseconds
+	DWORD TickCount = GetTickCount();
 
 	/* Don't do anything if this is the first call or there has
 	   been a long pause due to menu commands, or when something
 	   wraps. */
-
-	if ( (m_LastTickCount == 0) ||
-		 (TickCount < m_LastTickCount) ||
-		((TickCount - m_LastTickCount) > 1000) ||
-		(firsttime == 0) ||
-		(TotalCycles < m_LastTotalCycles) )
+	if (m_LastTickCount == 0 ||
+		TickCount < m_LastTickCount ||
+		(TickCount - m_LastTickCount) > 1000 ||
+		TotalCycles < m_LastTotalCycles)
 	{
-		firsttime = 1;
 		ResetTiming();
-		return TRUE;
+		return true;
 	}
 
 	/* Update stats every second */
 	if (TickCount >= m_LastStatsTickCount + 1000)
 	{
-
 		m_FramesPerSecond = m_ScreenRefreshCount;
 		m_ScreenRefreshCount = 0;
 		m_RelativeSpeed = ((TotalCycles - m_LastStatsTotalCycles) / 2000.0) /
 								(TickCount - m_LastStatsTickCount);
-
 		m_LastStatsTotalCycles = TotalCycles;
 		m_LastStatsTickCount += 1000;
 		DisplayTiming();
-
-		
 	}
 
 	// Now we work out if BeebEm is running too fast or not
 	if (m_RealTimeTarget > 0.0)
 	{
-        // TICKS is realworld time (in milliseconds - 1000ms per second)
-        // Cycles is the emulator time (2000000 cycles per second)
-        // BOTH - since last time this screen update was checked
-        
-		Ticks = TickCount - m_TickBase;
-		Cycles = (int)((double)(TotalCycles - m_CycleBase) / m_RealTimeTarget);
+		DWORD Ticks = TickCount - m_TickBase;
+		int nCycles = (int)((double)(TotalCycles - m_CycleBase) / m_RealTimeTarget);
 
-        // if real time is less than cycles(in milliseconds) then emulator is running too fast
-		if (Ticks <= (unsigned long)(Cycles / 2000))
+		if (Ticks <= (DWORD)(nCycles / 2000))
 		{
 			// Need to slow down, show frame (max 50fps though)
 			// and sleep a bit
-
-            // if real time > 50th second (1 frame) then update screen
-            if (TickCount >= m_LastFPSCount + 20)
+			if (TickCount >= m_LastFPSCount + 20)
 			{
-				UpdateScreen = TRUE;
-				m_LastFPSCount += 20;  // 1000/50 = 50 FPS
+				UpdateScreen = true;
+				m_LastFPSCount += 20;
 			}
 			else
 			{
-				UpdateScreen = FALSE;
+				UpdateScreen = false;
 			}
 
-			SpareTicks = ((unsigned long)(Cycles / 2000) - Ticks) * 1000;
-            
-//            printf("sleeping for %lums (bbc %dms, mac %ldms) \n", (SpareTicks + 500)/1000, Cycles/2000, Ticks);
-
-            // hold up the emulator for microseconds (us)
-//			beeb_usleep( SpareTicks + 500);
-            beeb_nextupdate( SpareTicks + 500);
-
+			DWORD SpareTicks = (DWORD)(nCycles / 2000) - Ticks;
+			Sleep(SpareTicks);
 			m_MinFrameCount = 0;
 		}
 		else
 		{
-            // running too slow  (unlikely to be exactly same speed as a Beeb!)
-
 			// Need to speed up, skip a frame
-			UpdateScreen = FALSE;
+			UpdateScreen = false;
 
 			// Make sure we show at least one in 100 frames
 			++m_MinFrameCount;
 			if (m_MinFrameCount >= 100)
 			{
-				UpdateScreen = TRUE;
+				UpdateScreen = true;
 				m_MinFrameCount = 0;
 			}
 		}
 
 		/* Move counter bases forward */
-		CyclesPerSec = (int) (2000000.0 * m_RealTimeTarget);
-
-		while ( ((TickCount - m_TickBase) > 1000) && ((TotalCycles - m_CycleBase) > CyclesPerSec))
+		int CyclesPerSec = (int)(2000000.0 * m_RealTimeTarget);
+		while ((TickCount - m_TickBase) > 1000 && (TotalCycles - m_CycleBase) > CyclesPerSec)
 		{
 			m_TickBase += 1000;
 			m_CycleBase += CyclesPerSec;
@@ -3202,16 +2071,15 @@ bool BeebWin::UpdateTiming(void)
 	}
 	else
 	{
-        // not running in real time - so fpstarget will be 50,25,10,5 FPS or similar
 		/* Fast as possible with a certain frame rate */
 		if (TickCount >= m_LastFPSCount + (1000 / m_FPSTarget))
 		{
-			UpdateScreen = TRUE;
-			m_LastFPSCount += (1000 / m_FPSTarget);
+			UpdateScreen = true;
+			m_LastFPSCount += 1000 / m_FPSTarget;
 		}
 		else
 		{
-			UpdateScreen = FALSE;
+			UpdateScreen = false;
 		}
 	}
 
@@ -3222,2034 +2090,526 @@ bool BeebWin::UpdateTiming(void)
 }
 
 /****************************************************************************/
-void BeebWin::DisplayTiming(void)
+void BeebWin::TranslateDDSize(void)
 {
-#if 0 //ACH - title (DONE)
-CFStringRef pTitle;
-    #endif
-
-    char MachineName[4][50] = {"BBC Model B","BBC Model B + Integra-B","BBC Model B Plus","BBC Master 128"};
-
-	if (m_ShowSpeedAndFPS && !m_isFullScreen)
+	switch (m_DDFullScreenMode)
 	{
-		sprintf(m_szTitle, "BeebEm - %s emulator - Speed: %2.2f - fps: %2d",
-                MachineName[MachineType], m_RelativeSpeed, (int)m_FramesPerSecond);
-
-#if 0 //ACH - title (DONE)
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, m_szTitle, kCFStringEncodingASCII);
-
-		SetWindowTitleWithCFString(mWindow, pTitle);
-		
-		CFRelease(pTitle);
-
-#else
-        // set the window title via swift
-        swift_SetWindowTitleWithCString(m_szTitle);
-#endif
-	}
-}
-
-/****************************************************************************/
-unsigned long BeebWin::GetTickCount(void)
-{
-#if 0//ACH - TickCount (DONE)
-  struct timeval now;
-  struct timezone tpz;
-  long milli;
-	
-  gettimeofday(&now, &tpz);
-
-  now.tv_sec %= (60 * 60 * 24);
-
-  milli = (now.tv_sec % (60 * 60 * 24)) * 1000L + now.tv_usec / 1000L;
-
-  return milli;
-#else
-    return beeb_now();
-#endif
-}
-
-/****************************************************************************/
-int BeebWin::StartOfFrame(void)
-{
-	int FrameNum = 1;
-
-	if (UpdateTiming())
-		FrameNum = 0;
-
-	return FrameNum;
-}
-
-void BeebWin::ToggleWriteProtect(int Drive)
-{
-
-	if (MachineType != 3)
-	{
-		if (m_WriteProtectDisc[Drive])
-		{
-			m_WriteProtectDisc[Drive] = 0;
-			DiscWriteEnable(Drive, 1);
-		}
-		else
-		{
-			m_WriteProtectDisc[Drive] = 1;
-			DiscWriteEnable(Drive, 0);
-		}
-	
-		if (Drive == 0)
-			SetMenuCommandIDCheck('wrp0', (m_WriteProtectDisc[0]) ? true : false);
-		else
-			SetMenuCommandIDCheck('wrp1', (m_WriteProtectDisc[1]) ? true : false);
-	}
-
-	if ((MachineType == 3) || ((MachineType == 0) && (!NativeFDC)))
-	{
-		DWriteable[Drive] = 1 - DWriteable[Drive];
-
-		fprintf(stderr, "Drive = %d, Writeable = %d\n", Drive, DWriteable[Drive]);
-		
-		if (Drive == 0)
-			SetMenuCommandIDCheck('wrp0', (DWriteable[0]) ? false : true);
-		else
-			SetMenuCommandIDCheck('wrp1', (DWriteable[1]) ? false : true);
-	}
-}
-
-void BeebWin::SetDiscWriteProtects(void)
-{
-
-	if (MachineType != 3)
-	{
-		m_WriteProtectDisc[0] = !IsDiscWritable(0);
-		m_WriteProtectDisc[1] = !IsDiscWritable(1);
-		SetMenuCommandIDCheck('wrp0', (m_WriteProtectDisc[0]) ? true : false);
-		SetMenuCommandIDCheck('wrp1', (m_WriteProtectDisc[1]) ? true : false);
-	}
-	else
-	{
-		SetMenuCommandIDCheck('wrp0', (DWriteable[0]) ? false : true);
-		SetMenuCommandIDCheck('wrp1', (DWriteable[1]) ? false : true);
-	}
-}
-
-void BeebWin::InitMenu(void)
-{
-
-	SetMenuCommandIDCheck('ofwm', (m_FreezeWhenInactive) ? true : false);
-	SetMenuCommandIDCheck('msea', (m_MenuIdSticks == 1) ? true : false);
-	SetMenuCommandIDCheck('msed', (m_MenuIdSticks == 2) ? true : false);
-
-	SetMenuCommandIDCheck('kmas', (m_KeyMapAS) ? true : false);
-
-	SetMenuCommandIDCheck('docu', (OpCodes == 1) ? true : false);
-	SetMenuCommandIDCheck('extr', (OpCodes == 2) ? true : false);
-	SetMenuCommandIDCheck('full', (OpCodes == 3) ? true : false);
-
-	SetMenuCommandIDCheck('hard', (BHardware) ? true : false);
-	SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
-	SetMenuCommandIDCheck('sfps', (m_ShowSpeedAndFPS) ? true : false);
-	SetMenuCommandIDCheck('sped', (SpeechEnabled) ? true : false);
-	SetMenuCommandIDCheck('sond', (SoundEnabled) ? true : false);
-	SetMenuCommandIDCheck('sndc', (SoundChipEnabled) ? true : false);
-	SetMenuCommandIDCheck('snev', (SoundExponentialVolume) ? true : false);
-	SetMenuCommandIDCheck('tube', (TubeEnabled) ? true : false);
-	SetMenuCommandIDCheck('t186', (Tube186Enabled) ? true : false);
-	SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
-	SetMenuCommandIDCheck('tarm', (ArmTube) ? true : false);
-	SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
-	SetMenuCommandIDCheck('txte', (TeleTextAdapterEnabled) ? true : false);
-	SetMenuCommandIDCheck('txtd', (TeleTextData) ? true : false);
-	SetMenuCommandIDCheck('txts', (TeleTextServer) ? true : false);
-	SetMenuCommandIDCheck('hdre', (HardDriveEnabled) ? true : false);
-	SetMenuCommandIDCheck('invb', (m_Invert) ? true : false);
-	
-	SetMenuCommandIDCheck('tpso', TapeSoundEnabled ? true : false);
-	SetMenuCommandIDCheck('tpcr', RelaySoundEnabled ? true : false);
-	SetMenuCommandIDCheck('ddso', DiscDriveSoundEnabled ? true : false);
-
-	SetMenuCommandIDCheck('tpul', UnlockTape ? true : false);
-	
-	SetMenuCommandIDCheck('prnt', (PrinterEnabled) ? true : false);
-	SetMenuCommandIDCheck('rs42', (SerialPortEnabled) ? true : false);
-    SetMenuCommandIDCheck('sdts', (TouchScreenEnabled) ? true : false);
-	SetMenuCommandIDCheck('sdep', (EthernetPortEnabled) ? true : false);
-    SetMenuCommandIDCheck('uprm', (RTC_Enabled) ? true : false);
-
-	SetMenuCommandIDCheck('wpol', (m_WriteProtectOnLoad) ? true : false);
-	SetMenuCommandIDCheck('vmar', (m_maintainAspectRatio) ? true : false);
-
-	char Title[256];
-    OSStatus        err;
-
-#if 0 //ACH - menu setup
-	MenuRef			menu = nil;
-	MenuItemIndex	j;
-
-	err = GetIndMenuItemWithCommandID(nil, 'pfle', 1, &menu, &j);
-	if (!err)
-	{
-		CFStringRef pTitle;
-		sprintf(Title, "File: %s", m_PrinterFileName);
-		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, Title, kCFStringEncodingASCII);
-		err = SetMenuItemTextWithCFString(menu, j, pTitle);
-		if (err) fprintf(stderr, "SetMenuTitle returned err code %d\n", (int) err);
-		CFRelease(pTitle);
-	}
-#else
-    sprintf(Title, "File: %s", m_PrinterFileName);
-    err = swift_SetMenuItemTextWithCString('pfle', Title);
-    if (err)
-    {
-        fprintf(stderr, "SetMenuTitle returned err code %d\n", (int) err);
-    }
-#endif
-
-	if (MachineType != 3)
-	{
-		SetMenuCommandIDCheck('wrp0', (m_WriteProtectDisc[0]) ? true : false);
-		SetMenuCommandIDCheck('wrp1', (m_WriteProtectDisc[1]) ? true : false);
-	}
-	else
-	{
-		SetMenuCommandIDCheck('wrp0', (DWriteable[0]) ? false : true);
-		SetMenuCommandIDCheck('wrp1', (DWriteable[1]) ? false : true);
-	}
-	
-	SetMenuCommandIDCheck('dkm ', (m_MenuIdKeyMapping == 0) ? true : false);
-	SetMenuCommandIDCheck('udkm', (m_MenuIdKeyMapping == 1) ? true : false);
-
-	UpdateEconetMenu();
-	UpdateMonitorMenu();
-	UpdateModelType();
-	UpdateLEDMenu();
-	UpdateMotionBlurMenu();
-	UpdateAMXMenu();
-	SetTapeSpeedMenu();
-
-	SetRomMenu();
-}
-
-void BeebWin::UpdateAMXMenu(void)
-{
-	SetMenuCommandIDCheck('amxo', (AMXMouseEnabled) ? true : false);
-	SetMenuCommandIDCheck('amxl', (AMXLRForMiddle) ? true : false);
-
-	SetMenuCommandIDCheck('amx1', false);
-	SetMenuCommandIDCheck('amx3', false);
-	SetMenuCommandIDCheck('amx6', false);
-	SetMenuCommandIDCheck('axp5', false);
-	SetMenuCommandIDCheck('axp3', false);
-	SetMenuCommandIDCheck('axp1', false);
-	SetMenuCommandIDCheck('axm1', false);
-	SetMenuCommandIDCheck('axm3', false);
-	SetMenuCommandIDCheck('axm5', false);
-
-	if (m_MenuIdAMXSize == 1) SetMenuCommandIDCheck('amx1', true);
-	if (m_MenuIdAMXSize == 2) SetMenuCommandIDCheck('amx3', true);
-	if (m_MenuIdAMXSize == 3) SetMenuCommandIDCheck('amx6', true);
-
-	if (m_MenuIdAMXAdjust == 1) SetMenuCommandIDCheck('axp5', true);
-	if (m_MenuIdAMXAdjust == 2) SetMenuCommandIDCheck('axp3', true);
-	if (m_MenuIdAMXAdjust == 3) SetMenuCommandIDCheck('axp1', true);
-	if (m_MenuIdAMXAdjust == 4) SetMenuCommandIDCheck('axm1', true);
-	if (m_MenuIdAMXAdjust == 5) SetMenuCommandIDCheck('axm3', true);
-	if (m_MenuIdAMXAdjust == 6) SetMenuCommandIDCheck('axm5', true);
-}
-
-void BeebWin::UpdateMotionBlurMenu(void)
-{
-	SetMenuCommandIDCheck('mbof', (m_Motion_Blur == 0) ? true : false);
-	SetMenuCommandIDCheck('mb2f', (m_Motion_Blur == 1) ? true : false);
-	SetMenuCommandIDCheck('mb4f', (m_Motion_Blur == 2) ? true : false);
-	SetMenuCommandIDCheck('mb8f', (m_Motion_Blur == 3) ? true : false);
-}
-
-void BeebWin::UpdateLEDMenu(void)
-{
-	SetMenuCommandIDCheck('ledr', (DiscLedColour == 0) ? true : false);
-	SetMenuCommandIDCheck('ledg', (DiscLedColour == 1) ? true : false);
-	SetMenuCommandIDCheck('ledk', (LEDs.ShowKB) ? true : false);
-	SetMenuCommandIDCheck('ledd', (LEDs.ShowDisc) ? true : false);
-}
-
-void BeebWin::UpdateMonitorMenu(void)
-{
-	SetMenuCommandIDCheck('monr', (palette_type == RGB) ? true : false);
-	SetMenuCommandIDCheck('monb', (palette_type == BW) ? true : false);
-	SetMenuCommandIDCheck('mong', (palette_type == GREEN) ? true : false);
-	SetMenuCommandIDCheck('mona', (palette_type == AMBER) ? true : false);
-}
-
-void BeebWin::UpdateModelType(void)
-{
-	SetMenuCommandIDCheck('bbcb', (MachineType == 0) ? true : false);
-	SetMenuCommandIDCheck('bbci', (MachineType == 1) ? true : false);
-	SetMenuCommandIDCheck('bbcp', (MachineType == 2) ? true : false);
-	SetMenuCommandIDCheck('bbcm', (MachineType == 3) ? true : false);
-}
-
-void BeebWin::UpdateEconetMenu(void)
-{
-	SetMenuCommandIDCheck('enet', (EconetEnabled == 1) ? true : false);
-}
-
-void BeebWin::SetTapeSpeedMenu(void)
-{
-	SetMenuCommandIDCheck('tpfa', (TapeClockSpeed == 750) ? true : false);
-	SetMenuCommandIDCheck('tpmf', (TapeClockSpeed == 1600) ? true : false);
-	SetMenuCommandIDCheck('tpms', (TapeClockSpeed == 3200) ? true : false);
-	SetMenuCommandIDCheck('tpno', (TapeClockSpeed == 5600) ? true : false);
-}
-
-void BeebWin::SetMenuCommandIDCheck(UInt32 commandID, bool check)
-{
-    swift_SetMenuCheck(commandID, check);
-#if 0//ACH - menu check
-	MenuRef			menu = nil;
-	MenuItemIndex	i;
-	OSStatus		err;
-	err = GetIndMenuItemWithCommandID(nil, commandID, 1, &menu, &i);
-	if (!err)
-	{
-		CheckMenuItem(menu,i,check);
-	}
-	else
-	{
-		fprintf(stderr, "Cannot find menu id %08x\n", (unsigned int) commandID);
-	}
-#endif
-}
-
-void BeebWin::UpdatePalette(PaletteType NewPal)
-{
-int col;
-float r, g, b;
-
-  palette_type = NewPal;
-
-  m_BlurIntensities[0] = 100;
-  m_BlurIntensities[1] = 88;
-  m_BlurIntensities[2] = 75;
-  m_BlurIntensities[3] = 62;
-  m_BlurIntensities[4] = 50;
-  m_BlurIntensities[5] = 38;
-  m_BlurIntensities[6] = 25;
-  m_BlurIntensities[7] = 12;
-  
-  for(col = 0; col < 64; col++)
-  {
-	cols[col] = col;
-    mCT->ctTable[col].value = col;
-
-	r = (col & 1);
-	g = (col & 2) >> 1;
-	b = (col & 4) >> 2;
-	
-	if (palette_type != RGB)
-	{
-		r = g = b = 0.299 * r + 0.587 * g + 0.114 * b;
-		switch (palette_type)
-		{
-		case AMBER:
-			r *= 1.0;
-			g *= 0.8;
-			b *= 0.1;
-			break;
-		case GREEN:
-			r *= 0.2;
-			g *= 0.9;
-			b *= 0.1;
-			break;
-        default:
-            break;
-		}
-	}
-	
-    mCT->ctTable[col].rgb.red = (int) (r * m_BlurIntensities[col >> 3] / 100.0 * 0xffff);
-    mCT->ctTable[col].rgb.green = (int) (g * m_BlurIntensities[col >> 3] / 100.0 * 0xffff);
-    mCT->ctTable[col].rgb.blue = (int) (b * m_BlurIntensities[col >> 3] / 100.0 * 0xffff);
-
-  };
-
-// Red Leds - left is dark, right is lit
-
-  mCT->ctTable[LED_COL_BASE].value = LED_COL_BASE;
-  mCT->ctTable[LED_COL_BASE].rgb.red = 80 * 256;
-  mCT->ctTable[LED_COL_BASE].rgb.green = 0;
-  mCT->ctTable[LED_COL_BASE].rgb.blue = 0;
-
-  mCT->ctTable[LED_COL_BASE + 1].value = LED_COL_BASE + 1;
-  mCT->ctTable[LED_COL_BASE + 1].rgb.red = 0xffff;
-  mCT->ctTable[LED_COL_BASE + 1].rgb.green = 0;
-  mCT->ctTable[LED_COL_BASE + 1].rgb.blue = 0;
-
-// Green Leds - left is dark, right is lit
-
-  mCT->ctTable[LED_COL_BASE + 2].value = LED_COL_BASE + 2;
-  mCT->ctTable[LED_COL_BASE + 2].rgb.red = 0;
-  mCT->ctTable[LED_COL_BASE + 2].rgb.green = 80 * 256;
-  mCT->ctTable[LED_COL_BASE + 2].rgb.blue = 0;
-
-  mCT->ctTable[LED_COL_BASE + 3].value = LED_COL_BASE + 3;
-  mCT->ctTable[LED_COL_BASE + 3].rgb.red = 0;
-  mCT->ctTable[LED_COL_BASE + 3].rgb.green = 0xffff;
-  mCT->ctTable[LED_COL_BASE + 3].rgb.blue = 0;
-
-  mBitMap.pmTable = &mCT;
-#if 0 //ACH - palette menu
-PaletteHandle gPalette;
-
-  gPalette = NewPalette( LED_COL_BASE + 4,  &mCT, pmExplicit + pmTolerant, 0 );
-
-  SetPortWindowPort(mWindow);
-  SetPalette (mWindow, gPalette, true);
-
-
-  CTabChanged(mBitMap.pmTable);
-
-  UpdateMonitorMenu();
-
-#endif
-  for (int i = 0; i < LED_COL_BASE + 4; ++i)
-  {
-	m_RGB32[i] = ((( ((mCT->ctTable[i].rgb.red >> 8) << 8)  + (mCT->ctTable[i].rgb.green >> 8)) << 8) + (mCT->ctTable[i].rgb.blue >> 8));
-	m_RGB32[i] |= 0xff000000;
-
-	m_RGB16[i] = ((( ((mCT->ctTable[i].rgb.red >> 11) << 5)  + (mCT->ctTable[i].rgb.green >> 11)) << 5) + (mCT->ctTable[i].rgb.blue >> 11));
-
-//	WriteLog("RGB32[%d] = %08x, RGB16[%d] = %04x\n", i, m_RGB32[i], i, m_RGB16[i]);
-  
-  }
-}
-#if 0 //ACH - Tape command handler (DONE)
-OSStatus TCWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
-
-#endif
-
-OSStatus BeebWin::HandleCommand(UInt32 cmdID)
-
-{
-int i;
-OSStatus err = noErr;
-
-//	fprintf(stderr, "Command ID = %08x\n", cmdID);
-
-	switch (cmdID)
-    {
-        case 'sfps':
-            fprintf(stderr, "Show Speed and FPS selected\n");
-			if (m_ShowSpeedAndFPS)
-			{
-				m_ShowSpeedAndFPS = false;
-				SetMenuCommandIDCheck('sfps', false);
-
-#if 0//ACH - FPS (DONE)
-				CFStringRef pTitle;
-				pTitle = CFStringCreateWithCString (kCFAllocatorDefault, WindowTitle, kCFStringEncodingASCII);
-				SetWindowTitleWithCFString(mWindow, pTitle);
-				CFRelease(pTitle);
-#else
-                swift_SetWindowTitleWithCString(WindowTitle);
-#endif
-			}
-			else
-			{
-				m_ShowSpeedAndFPS = true;
-				SetMenuCommandIDCheck('sfps', true);
-			}
-	
-            break;
-
-        case 'rund':
-            fprintf(stderr, "Run Disc selected\n");
-			ReadDisc(0);
-			m_ShiftBooted = true;
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			BeebKeyDown(0, 0);
-            break;
-        case 'opn0':
-            fprintf(stderr, "Load Disc 0 selected\n");
-			ReadDisc(0);
-            break;
-        case 'opn1':
-            fprintf(stderr, "Load Disc 1 selected\n");
-			ReadDisc(1);
-            break;
-        case 'new0':
-            fprintf(stderr, "New Disc 0 selected\n");
-			NewDiscImage(0);
-            break;
-        case 'new1':
-            fprintf(stderr, "New Disc 1 selected\n");
-			NewDiscImage(1);
-            break;
-        case 'rest':
-            fprintf(stderr, "Reset selected\n");
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-            break;
-        case 'bbcb':
-            fprintf(stderr, "BBC B selected\n");
-			if (MachineType != 0)
-			{
-				ResetBeebSystem(0, EnableTube, 1);
-				UpdateModelType();
-			}
-            break;
-        case 'bbci':
-            fprintf(stderr, "BBC B Integra selected\n");
-			if (MachineType != 1)
-			{
-				ResetBeebSystem(1, EnableTube, 1);
-				UpdateModelType();
-			}
-            break;
-        case 'bbcp':
-            fprintf(stderr, "BBC B Plus selected\n");
-			if (MachineType != 2)
-			{
-				ResetBeebSystem(2, EnableTube, 1);
-				UpdateModelType();
-			}
-            break;
-        case 'bbcm':
-            fprintf(stderr, "BBC Master 128 selected\n");
-			if (MachineType != 3)
-			{
-				ResetBeebSystem(3, EnableTube, 1);
-				UpdateModelType();
-			}
-            break;
-        case 'tube':
-            fprintf(stderr, "Tube selected\n");
-			TubeEnabled = 1 - TubeEnabled;
-			Tube186Enabled = 0;
-			TorchTube = 0;
-			AcornZ80 = 0;
-			ArmTube = 0;
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			SetMenuCommandIDCheck('tube', (TubeEnabled) ? true : false);
-			SetMenuCommandIDCheck('t186', (Tube186Enabled) ? true : false);
-			SetMenuCommandIDCheck('tarm', (ArmTube) ? true : false);
-			SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
-			SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
-            break;
-        case 't186':
-            fprintf(stderr, "Tube 80186 selected\n");
-			Tube186Enabled = 1 - Tube186Enabled;
-			TubeEnabled = 0;
-			TorchTube = 0;
-			ArmTube = 0;
-			AcornZ80 = 0;
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			SetMenuCommandIDCheck('tube', (TubeEnabled) ? true : false);
-			SetMenuCommandIDCheck('t186', (Tube186Enabled) ? true : false);
-			SetMenuCommandIDCheck('tarm', (ArmTube) ? true : false);
-			SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
-			SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
-            break;
-        case 'tz80':
-            fprintf(stderr, "Torch Z80 Tube selected\n");
-			TorchTube = 1 - TorchTube;
-			Tube186Enabled = 0;
-			TubeEnabled = 0;
-			ArmTube = 0;
-			AcornZ80 = 0;
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			SetMenuCommandIDCheck('tube', (TubeEnabled) ? true : false);
-			SetMenuCommandIDCheck('t186', (Tube186Enabled) ? true : false);
-			SetMenuCommandIDCheck('tarm', (ArmTube) ? true : false);
-			SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
-			SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
-            break;
-        case 'tarm':
-            fprintf(stderr, "Arm Tube selected\n");
-			ArmTube = 1 - ArmTube;
-			Tube186Enabled = 0;
-			TubeEnabled = 0;
-			AcornZ80 = 0;
-			TorchTube = 0;
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			SetMenuCommandIDCheck('tube', (TubeEnabled) ? true : false);
-			SetMenuCommandIDCheck('t186', (Tube186Enabled) ? true : false);
-			SetMenuCommandIDCheck('tarm', (ArmTube) ? true : false);
-			SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
-			SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
-            break;
-        case 'az80':
-            fprintf(stderr, "Acorn Z80 Tube selected\n");
-			AcornZ80 = 1 - AcornZ80;
-			Tube186Enabled = 0;
-			TubeEnabled = 0;
-			TorchTube = 0;
-			ArmTube = 0;
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			SetMenuCommandIDCheck('tube', (TubeEnabled) ? true : false);
-			SetMenuCommandIDCheck('t186', (Tube186Enabled) ? true : false);
-			SetMenuCommandIDCheck('tarm', (ArmTube) ? true : false);
-			SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
-			SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
-            break;
-			
-        case 'sRT ':
-            fprintf(stderr, "Real Time selected\n");
-			TranslateTiming(IDM_REALTIME);
-            break;
-
-        case 's50 ':
-            fprintf(stderr, "50 FPS selected\n");
-			TranslateTiming(IDM_50FPS);
-            break;
-
-        case 's25 ':
-            fprintf(stderr, "25 FPS selected\n");
-			TranslateTiming(IDM_25FPS);
-            break;
-        case 's10 ':
-            fprintf(stderr, "10 FPS selected\n");
-			TranslateTiming(IDM_10FPS);
-            break;
-        case 's5  ':
-            fprintf(stderr, "5 FPS selected\n");
-			TranslateTiming(IDM_5FPS);
-            break;
-        case 's1  ':
-            fprintf(stderr, "1 FPS selected\n");
-			TranslateTiming(IDM_1FPS);
-            break;
-
-        case 'f100':
-            fprintf(stderr, "Fixed Speed 100\n");
-			TranslateTiming(IDM_FIXEDSPEED100);
-            break;
-
-        case 'f50 ':
-            fprintf(stderr, "Fixed Speed 50\n");
-			TranslateTiming(IDM_FIXEDSPEED50);
-            break;
-
-        case 'f10 ':
-            fprintf(stderr, "Fixed Speed 10\n");
-			TranslateTiming(IDM_FIXEDSPEED10);
-            break;
-
-        case 'f5  ':
-            fprintf(stderr, "Fixed Speed 5\n");
-			TranslateTiming(IDM_FIXEDSPEED5);
-            break;
-
-        case 'f2  ':
-            fprintf(stderr, "Fixed Speed 2\n");
-			TranslateTiming(IDM_FIXEDSPEED2);
-            break;
-        case 'f1.5':
-            fprintf(stderr, "Fixed Speed 1.5\n");
-			TranslateTiming(IDM_FIXEDSPEED1_5);
-            break;
-        case 'f1.2':
-            fprintf(stderr, "Fixed Speed 1.25\n");
-			TranslateTiming(IDM_FIXEDSPEED1_25);
-            break;
-        case 'f1.1':
-            fprintf(stderr, "Fixed Speed 1.1\n");
-			TranslateTiming(IDM_FIXEDSPEED1_1);
-            break;
-        case 'f0.9':
-            fprintf(stderr, "Fixed Speed 0.9\n");
-			TranslateTiming(IDM_FIXEDSPEED0_9);
-            break;
-        case 'f0.7':
-            fprintf(stderr, "Fixed Speed 0.75\n");
-			TranslateTiming(IDM_FIXEDSPEED0_75);
-            break;
-        case 'f0.5':
-            fprintf(stderr, "Fixed Speed 0.5\n");
-			TranslateTiming(IDM_FIXEDSPEED0_5);
-            break;
-        case 'f0.2':
-            fprintf(stderr, "Fixed Speed 0.25\n");
-			TranslateTiming(IDM_FIXEDSPEED0_25);
-            break;
-        case 'f0.1':
-            fprintf(stderr, "Fixed Speed 0.1\n");
-			TranslateTiming(IDM_FIXEDSPEED0_1);
-            break;
-
-// monitor type
-
-        case 'monr':
-            fprintf(stderr, "RGB selected\n");
-			UpdatePalette(RGB);
-            break;
-
-        case 'monb':
-            fprintf(stderr, "BW selected\n");
-			UpdatePalette(BW);
-            break;
-
-        case 'mong':
-            fprintf(stderr, "GREEN selected\n");
-			UpdatePalette(GREEN);
-            break;
-
-        case 'mona':
-            fprintf(stderr, "AMBER selected\n");
-			UpdatePalette(AMBER);
-            break;
-
-// disc write protects
-
-        case 'wrp0':
-            fprintf(stderr, "Toggle Write Protect Disc 0 selected\n");
-			ToggleWriteProtect(0);
-            break;
-
-        case 'wrp1':
-            fprintf(stderr, "Toggle Write Protect Disc 1 selected\n");
-			ToggleWriteProtect(1);
-            break;
-
-		case 'wpol':
-			fprintf(stderr, "Protect on load selected\n");
-			m_WriteProtectOnLoad = 1 - m_WriteProtectOnLoad;
-			SetMenuCommandIDCheck('wpol', (m_WriteProtectOnLoad) ? true : false);
-            break;
-			
-// screen size
-
-        case 'siz1':
-            fprintf(stderr, "160x128 selected\n");
-			TranslateWindowSize(0);
-            break;
-
-        case 'siz2':
-            fprintf(stderr, "240x192 selected\n");
-			TranslateWindowSize(1);
-            break;
-
-        case 'siz3':
-            fprintf(stderr, "320x256 selected\n");
-			TranslateWindowSize(2);
-            break;
-
-        case 'siz4':
-            fprintf(stderr, "640x256 selected\n");
-			TranslateWindowSize(3);
-            break;
-
-        case 'siz5':
-            fprintf(stderr, "640x512 selected\n");
-			TranslateWindowSize(4);
-            break;
-
-        case 'siz6':
-            fprintf(stderr, "800x600 selected\n");
-			TranslateWindowSize(5);
-            break;
-
-        case 'siz7':
-            fprintf(stderr, "1024x512 selected\n");
-			TranslateWindowSize(6);
-            break;
-
-        case 'siz8':
-            fprintf(stderr, "1024x768 selected\n");
-			TranslateWindowSize(7);
-            break;
-
-		case 'siz9':
-			fprintf(stderr, "1280x1024 selected\n");
-			TranslateWindowSize(8);
-			break;
-
-		case 'siza':
-			fprintf(stderr, "1440x1080 selected\n");
-			TranslateWindowSize(9);
-			break;
-			
-		case 'sizb':
-			fprintf(stderr, "1600x1200 selected\n");
-			TranslateWindowSize(10);
-			break;
-			
-		case 'vfsc':
-            fprintf(stderr, "View full screen selected %d, %d\n", m_XWinSize, m_YWinSize);
-			m_isFullScreen = 1 - m_isFullScreen;
-			SetMenuCommandIDCheck('vfsc', (m_isFullScreen) ? true : false);
-			if (m_isFullScreen == 1)
-			{
-				short width = m_XWinSize;
-				short height = m_YWinSize;
-#if 0 //ACH -- fullscreen
-                BeginFullScreen(&m_RestoreState, nil, &width, &height, &m_FullScreenWindow, nil, fullScreenHideCursor);
-#endif
-                fprintf(stderr, "Actual screen dimensions %d, %d\n", width, height);
-			}
-			else
-			{
-#if 0 //ACH -- fullscreen
-				EndFullScreen(m_RestoreState, nil);
-#endif
-            }
-			break;
-		case 'vmar':
-            fprintf(stderr, "Maintain Aspect Ratio selected\n");
-			m_maintainAspectRatio = 1 - m_maintainAspectRatio;
-			SetMenuCommandIDCheck('vmar', (m_maintainAspectRatio) ? true : false);
-			break;
-			
-// Sound volume
-
-        case 'volf':
-            fprintf(stderr, "Full Volume selected\n");
-			m_MenuIdVolume = IDM_FULLVOLUME;
-			TranslateVolume();
-            break;
-
-        case 'volh':
-            fprintf(stderr, "High Volume selected\n");
-			m_MenuIdVolume = IDM_HIGHVOLUME;
-			TranslateVolume();
-            break;
-
-        case 'volm':
-            fprintf(stderr, "Medium Volume selected\n");
-			m_MenuIdVolume = IDM_MEDIUMVOLUME;
-			TranslateVolume();
-            break;
-
-        case 'voll':
-            fprintf(stderr, "Low Volume selected\n");
-			m_MenuIdVolume = IDM_LOWVOLUME;
-			TranslateVolume();
-            break;
-
-        case 'sndc':
-            fprintf(stderr, "Sound Chip Enabled selected\n");
-			SoundChipEnabled = 1 - SoundChipEnabled;
-			SetMenuCommandIDCheck('sndc', (SoundChipEnabled) ? true : false);
-            break;
-
-        case 'sond':
-
-            fprintf(stderr, "Sound on/off selected\n");
-
-			if (SoundEnabled)
-			{
-				SetMenuCommandIDCheck('sond', false);
-				SoundReset();
-				SoundEnabled = 0;
-			}
-			else
-			{
-				SoundInit();
-				SetMenuCommandIDCheck('sond', true);
-				SoundEnabled = 1;
-			}
-			
-            break;
-
-        case 'sped':
-			
-            fprintf(stderr, "Speech on/off selected\n");
-			
-			if (SpeechDefault)
-			{
-				SetMenuCommandIDCheck('sped', false);
-				tms5220_stop();
-				SpeechDefault = 0;
-			}
-			else
-			{
-				tms5220_start();
-				if (SpeechEnabled)
-				{
-					SetMenuCommandIDCheck('sped', true);
-					SpeechDefault = 1;
-				}
-			}
-				
-			break;
-
-        case 'enet':
-			
-            fprintf(stderr, "Econet on/off selected\n");
-			EconetEnabled = 1 - EconetEnabled;
-			if (EconetEnabled)
-			{
-				ResetBeebSystem(MachineType, TubeEnabled, 0);
-				EconetStateChanged = TRUE;
-			}
-			else
-			{
-				EconetReset();
-			}
-			UpdateEconetMenu();
-			
-			break;
-			
-        case 'igil':
-            fprintf(stderr, "Ignore Illegal Instructions selected\n");
-			if (IgnoreIllegalInstructions)
-			{
-				IgnoreIllegalInstructions = false;
-			}
-			else
-			{
-				IgnoreIllegalInstructions = true;
-			}
-			SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
-            break;
-
-        case 'hard':
-            fprintf(stderr, "Basic Hardware selected\n");
-			BHardware = 1 - BHardware;
-			SetMenuCommandIDCheck('hard', (BHardware) ? true : false);
-            break;
-
-        case 'docu':
-            fprintf(stderr, "Documented Only selected\n");
-			OpCodes = 1;
-			InitMenu();
-            break;
-
-        case 'extr':
-            fprintf(stderr, "Common Extras selected\n");
-			OpCodes = 2;
-			InitMenu();
-            break;
-
-        case 'full':
-            fprintf(stderr, "Full Set selected\n");
-			OpCodes = 3;
-			InitMenu();
-            break;
-
-			
-        case 'ifd0':
-        case 'ifd1':
-        case 'ifd2':
-        case 'ifd3':
-			i = cmdID - 'ifd0';
-            fprintf(stderr, "Import Files From Disc %d selected\n", i);
-			ImportDiscFiles(i);
-            break;
-
-		case 'efd0':
-        case 'efd1':
-        case 'efd2':
-        case 'efd3':
-			i = cmdID - 'efd0';
-            fprintf(stderr, "Export Files To Disc %d selected\n", i);
-			ExportDiscFiles(i);
-            break;
-			
-        case 'roma':
-        case 'romb':
-        case 'romc':
-        case 'romd':
-        case 'rome':
-        case 'romf':
-        case 'romg':
-        case 'romh':
-        case 'romi':
-        case 'romj':
-        case 'romk':
-        case 'roml':
-        case 'romm':
-        case 'romn':
-        case 'romo':
-        case 'romp':
-			i = cmdID - 'roma';
-            fprintf(stderr, "Allow Rom Writed %1x selected\n", i);
-			RomWritable[i] = 1 - RomWritable[i];
-			SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
-            break;
-
-// LED's
-
-        case 'ledr':
-            fprintf(stderr, "Red LED's selected\n");
-			DiscLedColour = 0;
-			UpdateLEDMenu();
-            break;
-
-        case 'ledg':
-            fprintf(stderr, "Green LED's selected\n");
-			DiscLedColour = 1;
-			UpdateLEDMenu();
-            break;
-
-        case 'ledk':
-            fprintf(stderr, "Keyboard LED's selected\n");
-			LEDs.ShowKB = !LEDs.ShowKB;
-			UpdateLEDMenu();
-            break;
-
-        case 'ledd':
-            fprintf(stderr, "Disc LED's selected\n");
-			LEDs.ShowDisc = !LEDs.ShowDisc;
-			UpdateLEDMenu();
-            break;
-
-        case 'savp':
-            fprintf(stderr, "Save Preferences\n");
-			SavePreferences();
-            break;
-
-// UEF State
-
-        case 'qukl':
-            fprintf(stderr, "Quick Load State selected\n");
-			char FileName[256];
-			sprintf(FileName, "%sbeebstate/quicksave.uef", RomPath);
-			LoadUEFState(FileName);
-            break;
-
-        case 'quks':
-            fprintf(stderr, "Quick Save State selected\n");
-			sprintf(FileName, "%sbeebstate/quicksave.uef", RomPath);
-			SaveUEFState(FileName);
-            break;
-
-        case 'rsts':
-            fprintf(stderr, "Load State selected\n");
-			RestoreState();
-            break;
-
-        case 'savs':
-            fprintf(stderr, "Save State selected\n");
-			SaveState();
-            break;
-
-// Printer
-
-        case 'pfle':
-            fprintf(stderr, "Print To File selected\n");
-
-			if (m_MenuIdPrinterPort == IDM_PRINTER_CLIPBOARD)
-			{
-				SetMenuCommandIDCheck('pclp', false);
-				m_printerbufferlen = 0;
-			}
-				
-			if (PrinterFile())
-			{
-				/* If printer is enabled then need to disable it before changing file */
-				if (PrinterEnabled)
-					TogglePrinter();
-					
-				char Title[256];
-                OSStatus        err;
-
-#if 0//ACH -printerfile
-				MenuRef			menu = nil;
-				MenuItemIndex	j;
-
-				err = GetIndMenuItemWithCommandID(nil, 'pfle', 1, &menu, &j);
-				if (!err)
-				{
-					CFStringRef pTitle;
-					sprintf(Title, "File: %s", m_PrinterFileName);
-					pTitle = CFStringCreateWithCString (kCFAllocatorDefault, Title, kCFStringEncodingASCII);
-					err = SetMenuItemTextWithCFString(menu, j, pTitle);
-					if (err) fprintf(stderr, "SetMenuTitle returned err code %ld\n", err);
-					CFRelease(pTitle);
-				}
-#else
-                sprintf(Title, "File: %s", m_PrinterFileName);
-                err = swift_SetMenuItemTextWithCString('pfle', Title);
-                if (err)
-                {
-                    fprintf(stderr, "SetMenuTitle returned err code %d\n", (int)err);
-                }
-#endif
-				m_MenuIdPrinterPort = IDM_PRINTER_FILE;
-				SetMenuCommandIDCheck('pfle', true);
-				TranslatePrinterPort();
-				TogglePrinter();		// Turn printer back on
-			}
-            break;
-
-		case 'pclp':
-            fprintf(stderr, "Print To Clipboard selected\n");
-			
-			if (PrinterEnabled)
-				TogglePrinter();
-				
-			if (PrinterFileHandle != NULL)
-			{
-				fclose(PrinterFileHandle);
-				PrinterFileHandle = NULL;
-			}
-			SetMenuCommandIDCheck('pfle', false);
-				
-			m_MenuIdPrinterPort = IDM_PRINTER_CLIPBOARD;
-			SetMenuCommandIDCheck('pclp', true);
-			TranslatePrinterPort();
-			TogglePrinter();		// Turn printer back on
-
-			m_printerbufferlen = 0;
-
-			break;
-			
-        case 'prnt':
-            fprintf(stderr, "Printer On/Off selected\n");
-			TogglePrinter();
-			m_printerbufferlen = 0;
-			break;
-
-	
-// Keyboard re-mapping
-
-        case 'kmas':
-            fprintf(stderr, "Keyboard Map A, S selected\n");
-			m_KeyMapAS = !m_KeyMapAS;
-			SetMenuCommandIDCheck('kmas', (m_KeyMapAS) ? true : false);
-			break;
-
-		case 'copy':
-            fprintf(stderr, "Copy selected\n");
-			doCopy();
-			break;
-			
-		case 'past':
-            fprintf(stderr, "Paste selected\n");
-			doPaste();
-			break;
-			
-        case 'trac':
-            fprintf(stderr, "trace186\n");
-            trace_186 = 1 - trace_186;
-            break;
-// AMX Mouse
-
-        case 'amxo':
-            fprintf(stderr, "AMX Mouse On/Off selected\n");
-			AMXMouseEnabled = !AMXMouseEnabled;
-			UpdateAMXMenu();
-			AMXCurrentX = AMXTargetX;
-			AMXCurrentY = AMXTargetY;
-            break;
-
-        case 'amxl':
-            fprintf(stderr, "AMX L+R For Middle selected\n");
-			AMXLRForMiddle = !AMXLRForMiddle;
-			UpdateAMXMenu();
-            break;
-
-        case 'amx1':
-            fprintf(stderr, "AMX 160x256 selected\n");
-			m_MenuIdAMXSize = 1;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-        case 'amx3':
-            fprintf(stderr, "AMX 320x256 selected\n");
-			m_MenuIdAMXSize = 2;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-        case 'amx6':
-            fprintf(stderr, "AMX 640x256 selected\n");
-			m_MenuIdAMXSize = 3;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-// If menu option already selected, set to 0, ie disable tick, else select option
-
-        case 'axp5':
-            fprintf(stderr, "AMX Adjust +50%c selected\n", '%');
-			m_MenuIdAMXAdjust = (m_MenuIdAMXAdjust == 1) ? 0 : 1;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-        case 'axp3':
-            fprintf(stderr, "AMX Adjust +30%c selected\n", '%');
-			m_MenuIdAMXAdjust = (m_MenuIdAMXAdjust == 2) ? 0 : 2;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-        case 'axp1':
-            fprintf(stderr, "AMX Adjust +10%c selected\n", '%');
-			m_MenuIdAMXAdjust = (m_MenuIdAMXAdjust == 3) ? 0 : 3;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-        case 'axm1':
-            fprintf(stderr, "AMX Adjust -10%c selected\n", '%');
-			m_MenuIdAMXAdjust = (m_MenuIdAMXAdjust == 4) ? 0 : 4;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-        case 'axm3':
-            fprintf(stderr, "AMX Adjust -30%c selected\n", '%');
-			m_MenuIdAMXAdjust = (m_MenuIdAMXAdjust == 5) ? 0 : 5;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-        case 'axm5':
-            fprintf(stderr, "AMX Adjust -50%c selected\n", '%');
-			m_MenuIdAMXAdjust = (m_MenuIdAMXAdjust == 6) ? 0 : 6;
-			TranslateAMX();
-			UpdateAMXMenu();
-            break;
-
-		case 'ofwm':
-            fprintf(stderr, "Freeze When Minimised selected\n");
-			m_FreezeWhenInactive = 1 - m_FreezeWhenInactive;
-			SetMenuCommandIDCheck('ofwm', (m_FreezeWhenInactive) ? true : false);
-			break;
-
-		case 'msea':
-            fprintf(stderr, "Analogue Mouse stick selected\n");
-			if (m_MenuIdSticks == 1)
-			{
-				AtoDInit();
-				m_MenuIdSticks = 0;
-			}
-			else
-			{
-				AtoDInit();
-				m_MenuIdSticks = 1;
-			}
-			
-			SetMenuCommandIDCheck('msea', (m_MenuIdSticks == 1) ? true : false);
-			SetMenuCommandIDCheck('msed', (m_MenuIdSticks == 2) ? true : false);
-			break;
-
-        case 'msed':
-            fprintf(stderr, "Digital Mouse stick selected\n");
-			if (m_MenuIdSticks == 2)
-			{
-				AtoDInit();
-				m_MenuIdSticks = 0;
-			}
-			else
-			{
-				AtoDInit();
-				m_MenuIdSticks = 2;
-			}
-			
-			SetMenuCommandIDCheck('msea', (m_MenuIdSticks == 1) ? true : false);
-			SetMenuCommandIDCheck('msed', (m_MenuIdSticks == 2) ? true : false);
-            break;
-
-// Tape
-
-        case 'opnt':
-            fprintf(stderr, "Load Tape selected\n");
-			LoadTape();
-            break;
-        case 'tpfa':
-            fprintf(stderr, "Fast Tape Speed selected\n");
-			SetTapeSpeed(750);
-			SetTapeSpeedMenu();
-			break;
-        case 'tpmf':
-            fprintf(stderr, "Medium Fast Tape Speed selected\n");
-			SetTapeSpeed(1600);
-			SetTapeSpeedMenu();
-			break;
-        case 'tpms':
-            fprintf(stderr, "Medium Slow Tape Speed selected\n");
-			SetTapeSpeed(3200);
-			SetTapeSpeedMenu();
-			break;
-        case 'tpno':
-            fprintf(stderr, "Normal Tape Speed selected\n");
-			SetTapeSpeed(5600);
-			SetTapeSpeedMenu();
-			break;
-        case 'tpso':
-            fprintf(stderr, "Tape Sound selected\n");
-			TapeSoundEnabled = 1 - TapeSoundEnabled;
-			SetMenuCommandIDCheck('tpso', TapeSoundEnabled ? true : false);
-			break;
-        case 'tpcr':
-            fprintf(stderr, "Relay Click Sound selected\n");
-			RelaySoundEnabled = 1 - RelaySoundEnabled;
-			SetMenuCommandIDCheck('tpcr', RelaySoundEnabled ? true : false);
-			break;
-        case 'ddso':
-            fprintf(stderr, "Disc Drive Sound selected\n");
-			DiscDriveSoundEnabled = 1 - DiscDriveSoundEnabled;
-			SetMenuCommandIDCheck('ddso', DiscDriveSoundEnabled ? true : false);
-			break;
-        case 'tpre':
-            fprintf(stderr, "Rewind Tape selected\n");
-			RewindTape();
-			break;
-        case 'tpul':
-            fprintf(stderr, "Unlock Tape selected\n");
-			UnlockTape = 1 - UnlockTape;
-			SetUnlockTape(UnlockTape);
-			SetMenuCommandIDCheck('tpul', UnlockTape ? true : false);
-			break;
-
-		case 'tpco':
-            fprintf(stderr, "Tape Control selected\n");
-			if (TapeControlEnabled)
-				TapeControlCloseDialog();
-			else
-				TapeControlOpenDialog();
-            break;
-			
-		case 'dbgr':
-            fprintf(stderr, "Debug selected\n");
-#if 0 //ACH - debug dialog
-			if (DebugEnabled)
-			{
-				DebugCloseDialog();
-				SetMenuCommandIDCheck('dbgr', false);
-			}
-			else
-			{
-				DebugOpenDialog();
-				SetMenuCommandIDCheck('dbgr', true);
-			}
-#endif
-			break;
-        
-		case 'upbo':
-            fprintf(stderr, "User Port Breakout Box\n");
-#if 0 //ACH - userport breakout
-			if (mBreakOutWindow)
-			{
-				BreakOutCloseDialog();
-				SetMenuCommandIDCheck('upbo', false);
-			}
-				else
-				{
-					BreakOutOpenDialog();
-					SetMenuCommandIDCheck('upbo', true);
-				}
-#endif
-            break;
-			
-		case 'uprm':
-            fprintf(stderr, "User Port RTC Module\n");
-			RTC_Enabled = 1 - RTC_Enabled;
-			SetMenuCommandIDCheck('uprm', RTC_Enabled ? true : false);
-			break;
-			
-		case 'abou':
-            fprintf(stderr, "About Menu Selected\n");
-
-//			Str255 S1;
-//			Str255 S2;
-//			SInt16 r;
-//			char buff[256];
-	
-#if 0 //ACH - aboutmenu
-			sprintf(buff, "MacBeebEm Ver %s", Version);
-			CopyCStringToPascal(buff, S1);
-			sprintf(buff, "Mac Conversion By Jon Welch\n\njon@g7jjf.com\nhttp://www.g7jjf.com\n%s", VersionDate);
-			CopyCStringToPascal(buff, S2);
-			StandardAlert( kAlertNoteAlert, S1, S2, NULL, &r);
-#endif
-			break;
-			
-		case 'kusr':
-            fprintf(stderr, "Define User Keyboard selected\n");
-#if 0 //ACH - userkeyboard
-			if (mUKWindow == NULL)
-				UserKeyboardOpenDialog();
-			else
-				UserKeyboardCloseDialog();
-#endif
-            break;
-
-		case 'lukm':
-            fprintf(stderr, "Load user key map selected\n");
-			LoadUserKeyMap();
-			break;
-			
-		case 'sukm':
-            fprintf(stderr, "Save user key map selected\n");
-			SaveUserKeyMap();
-			break;
-			
-		case 'udkm':
-            fprintf(stderr, "User Defined Keyboard Mapping selected\n");
-			m_MenuIdKeyMapping = 1;
-			SetMenuCommandIDCheck('dkm ', false);
-			SetMenuCommandIDCheck('udkm', true);
-			TranslateKeyMapping();
-			break;
-			
-		case 'dkm ':
-            fprintf(stderr, "Default Keyboard Mapping selected\n");
-			m_MenuIdKeyMapping = 0;
-			SetMenuCommandIDCheck('dkm ', true);
-			SetMenuCommandIDCheck('udkm', false);
-			TranslateKeyMapping();
-			break;
-			
-			// Tape
-			
-#if 0//ACH - video capture
-        case 'vidc':
-            fprintf(stderr, "Capture Video selected\n");
-			SetMenuCommandIDCheck('vidc', true);
-			CaptureVideo();
-            break;
-
-        case 'vide':
-            fprintf(stderr, "End Capture Video selected\n");
-			EndCaptureVideo();
-            break;
-#endif
-        case 'skp0':
-            fprintf(stderr, "Frame Skip 0 selected\n");
-			m_skip = 0;
-			TranslateCapture();
-            break;
-
-        case 'skp1':
-            fprintf(stderr, "Frame Skip 1 selected\n");
-			m_skip = 1;
-			TranslateCapture();
-            break;
-
-        case 'skp2':
-            fprintf(stderr, "Frame Skip 2 selected\n");
-			m_skip = 2;
-			TranslateCapture();
-            break;
-
-        case 'skp3':
-            fprintf(stderr, "Frame Skip 3 selected\n");
-			m_skip = 3;
-			TranslateCapture();
-            break;
-
-        case 'skp4':
-            fprintf(stderr, "Frame Skip 4 selected\n");
-			m_skip = 4;
-			TranslateCapture();
-            break;
-
-        case 'skp5':
-            fprintf(stderr, "Frame Skip 5 selected\n");
-			m_skip = 5;
-			TranslateCapture();
-            break;
-			
-        case 'rec1':
-            fprintf(stderr, "Capture Resolution @ 768x576 selected\n");
-			m_captureresolution = 1;
-			TranslateCapture();
-            break;
-
-		case 'rec2':
-            fprintf(stderr, "Capture Resolution @ Display Resolution selected\n");
-			m_captureresolution = 2;
-			TranslateCapture();
-            break;
-
-		case 'rec3':
-            fprintf(stderr, "Capture Resolution @ 1/2 Display Resolution selected\n");
-			m_captureresolution = 3;
-			TranslateCapture();
-            break;
-
-		case 'rec4':
-            fprintf(stderr, "Capture Resolution @ 1/4 Display Resolution selected\n");
-			m_captureresolution = 4;
-			TranslateCapture();
-            break;
-			
-// Motion Blur
-			
-        case 'mbof':
-            fprintf(stderr, "Motion Blur Off selected\n");
-			m_Motion_Blur = 0;
-			UpdateMotionBlurMenu();
-            break;
-
-        case 'mb2f':
-            fprintf(stderr, "Motion Blur 2 Frames selected\n");
-			m_Motion_Blur = 1;
-			UpdateMotionBlurMenu();
-            break;
-        
-		case 'mb4f':
-            fprintf(stderr, "Motion Blur 4 Frames selected\n");
-			m_Motion_Blur = 2;
-			UpdateMotionBlurMenu();
-            break;
-        
-		case 'mb8f':
-            fprintf(stderr, "Motion Blur 8 Frames selected\n");
-			m_Motion_Blur = 3;
-			UpdateMotionBlurMenu();
-            break;
-
-		case 'ejd0':
-            fprintf(stderr, "Eject Disc 0 selected\n");
-			EjectDiscImage(0);
-            break;
-
-		case 'ejd1':
-            fprintf(stderr, "Eject Disc 1 selected\n");
-			EjectDiscImage(1);
-            break;
-			
-		case 'snev':
-            fprintf(stderr, "Sound Volume Exponential selected\n");
-			SoundExponentialVolume = 1 - SoundExponentialVolume;
-			SetMenuCommandIDCheck('snev', (SoundExponentialVolume) ? true : false);
-            break;
-
-		case 'txte':
-            fprintf(stderr, "TeleText On/Off selected\n");
-			TeleTextAdapterEnabled = 1 - TeleTextAdapterEnabled;
-			TeleTextInit();
-			SetMenuCommandIDCheck('txte', (TeleTextAdapterEnabled) ? true : false);
-			if (TeleTextAdapterEnabled == 0)
-			{
-				TeleTextData = 0;
-				TeleTextServer = 0;
-				SetMenuCommandIDCheck('txtd', (TeleTextData) ? true : false);
-				SetMenuCommandIDCheck('txts', (TeleTextServer) ? true : false);
-			}
-            break;
-
-		case 'txtd':
-            fprintf(stderr, "TeleText Data selected\n");
-			if (TeleTextAdapterEnabled == 1)
-			{
-				TeleTextData = 1 - TeleTextData;
-				if (TeleTextData == 1) TeleTextServer = 0;
-				SetMenuCommandIDCheck('txtd', (TeleTextData) ? true : false);
-				SetMenuCommandIDCheck('txts', (TeleTextServer) ? true : false);
-				TeleTextInit();
-			}
-			break;
-			
-		case 'txts':
-            fprintf(stderr, "TeleText Server selected\n");
-			if (TeleTextAdapterEnabled == 1)
-			{
-				TeleTextServer = 1 - TeleTextServer;
-				if (TeleTextServer == 1) TeleTextData = 0;
-				SetMenuCommandIDCheck('txtd', (TeleTextData) ? true : false);
-				SetMenuCommandIDCheck('txts', (TeleTextServer) ? true : false);
-				TeleTextInit();
-			}
-			break;
-			
-		case 'hdre':
-            fprintf(stderr, "Hard Drive On/Off selected\n");
-			HardDriveEnabled = 1 - HardDriveEnabled;
-			SCSIReset();
-			SASIReset();
-			SetMenuCommandIDCheck('hdre', (HardDriveEnabled) ? true : false);
-            break;
-		
-        case 'rs42':
-            fprintf(stderr, "RS423 On/Off selected\n");
-			if (TouchScreenEnabled)
-			{
-				TouchScreenClose();
-				TouchScreenEnabled = false;
-			}
-
-#if 0//ACH - serial/ethernet
-			if (EthernetPortEnabled)
-			{
-				EthernetPortClose();
-				EthernetPortEnabled = false;
-			}
-			
-			if (mSerialHandle != -1)
-			{
-				CloseSerialPort(mSerialHandle);
-			}
-				
-			SerialPortEnabled = 1 - SerialPortEnabled;
-			
-			SetMenuCommandIDCheck('rs42', (SerialPortEnabled) ? true : false);
-			SetMenuCommandIDCheck('sdep', (EthernetPortEnabled) ? true : false);
-			SetMenuCommandIDCheck('sdsp', (mSerialHandle != -1) ? true : false);
-#endif
-            SetMenuCommandIDCheck('sdts', (TouchScreenEnabled) ? true : false);
-			break;
-			
-        case 'sdts':
-            fprintf(stderr, "Touch Screen selected\n");
-#if 0//ACH - serial/ethernet
-
-			if (mSerialHandle != -1)
-			{
-				CloseSerialPort(mSerialHandle);
-			}
-#endif
-
-			if (TouchScreenEnabled)
-			{
-				TouchScreenClose();
-			}
-
-#if 0//ACH - serial/ethernet
-			if (EthernetPortEnabled)
-			{
-				EthernetPortClose();
-			}
-#endif
-
-			TouchScreenEnabled = 1 - TouchScreenEnabled;
-			SetMenuCommandIDCheck('sdts', (TouchScreenEnabled) ? true : false);
-			
-			if (TouchScreenEnabled)
-			{
-				
-				// Also switch on analogue mousestick as touch screen uses mousestick position
-				
-				m_MenuIdSticks = 1;
-				AtoDInit();
-				SetMenuCommandIDCheck('msea', (m_MenuIdSticks == 1) ? true : false);
-				SetMenuCommandIDCheck('msed', (m_MenuIdSticks == 2) ? true : false);
-				
-				SerialPortEnabled = true;
-				SetMenuCommandIDCheck('rs42', (SerialPortEnabled) ? true : false);
-				SetMenuCommandIDCheck('sdsp', false);
-				TouchScreenOpen();
-			}
-			break;
-
-		case 'sdep':
-#if 0//ACH - ethernet port
-
-            fprintf(stderr, "Remote Ethernet Port ... selected\n");
-			
-			if (mSerialHandle != -1)
-			{
-				CloseSerialPort(mSerialHandle);
-			}
-			
-			if (TouchScreenEnabled)
-			{
-				TouchScreenClose();
-				TouchScreenEnabled = false;
-				SetMenuCommandIDCheck('sdts', false);
-			}
-
-			if (mEthernetPortWindow == NULL)
-			{
-				EthernetPortOpenDialog();
-				EthernetPortEnabled = true;
-				SerialPortEnabled = true;
-				SetMenuCommandIDCheck('rs42', true);
-				SetMenuCommandIDCheck('sdep', true);
-			}
-			else
-			{
-				if (mEthernetHandle > 0)
-				{
-					EthernetPortClose();
-				}
-				EthernetPortCloseDialog();
-				EthernetPortEnabled = false;
-				SerialPortEnabled = false;
-				SetMenuCommandIDCheck('rs42', false);
-				SetMenuCommandIDCheck('sdep', false);
-			}
-#endif
-			break;
-			
-		case 'sdsp':
-            fprintf(stderr, "Serial Port... selected\n");
-
-			if (TouchScreenEnabled)
-			{
-				TouchScreenClose();
-				TouchScreenEnabled = false;
-				SetMenuCommandIDCheck('sdts', (TouchScreenEnabled) ? true : false);
-			}
-
-#if 0//ACH - ethernet/serial port
-			if (EthernetPortEnabled)
-			{
-				EthernetPortClose();
-				EthernetPortEnabled = false;
-				SetMenuCommandIDCheck('sdep', (EthernetPortEnabled) ? true : false);
-			}
-
-			if (mSerialPortWindow == NULL)
-			{
-				SerialPortOpenDialog();
-				SerialPortEnabled = true;
-				SetMenuCommandIDCheck('rs42', (SerialPortEnabled) ? true : false);
-				SetMenuCommandIDCheck('sdsp', true);
-			}
-			else
-			{
-				if (mSerialHandle != -1)
-				{
-					CloseSerialPort(mSerialHandle);
-				}
-				SerialPortCloseDialog();
-				SetMenuCommandIDCheck('sdsp', false);
-			}
-#endif
-			break;
-
-		case 'page':
-            fprintf(stderr, "Page Setup... selected\n");
-			DoPageSetup();
-            break;
-
-		case 'prns':
-            fprintf(stderr, "Print... selected\n");
-			m_PrintToPDF = true;
-			break;
-
-		case 'cpyc':
-            fprintf(stderr, "Copy To Clipboard selected\n");
-			m_CopyToClip = true;
-			break;
-			
-		case 'invb':
-            fprintf(stderr, "Invert Background selected\n");
-			m_Invert = 1 - m_Invert;
-			SetMenuCommandIDCheck('invb', (m_Invert) ? true : false);
-            break;
-		case 'swtd':
-            fprintf(stderr, "Save Window To Disc ... selected\n");
-			m_PrintScreen = true;
-			break;
-
-		case 'mbcn':
-            fprintf(stderr, "Native 8271 Controller selected\n");
-			NativeFDC = true;
-			FDCType = 0;
-			TranslateFDC();
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			break;
-
-		case 'mbca':
-            fprintf(stderr, "Acorn 1770 Controller selected\n");
-			NativeFDC = false;
-			FDCType = 0;
-			TranslateFDC();
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			break;
-
-		case 'mbco':
-            fprintf(stderr, "OPUS 1770 Controller selected\n");
-			NativeFDC = false;
-			FDCType = 1;
-			TranslateFDC();
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			break;
-
-		case 'mbcw':
-            fprintf(stderr, "Watford 1770 Controller selected\n");
-			NativeFDC = false;
-			FDCType = 2;
-			TranslateFDC();
-			ResetBeebSystem(MachineType, TubeEnabled, 0);
-			break;
-			
-			default:
-            err = eventNotHandledErr;
-            break;
-    }
-    
-	return err;
-}
-
-void BeebWin::NewDiscImage(int Drive)
-
-{
-char path[256];  
-OSErr err = noErr;
-
-	*path = 0;
-	err = SaveFile(path, nil);
-
-// For some reason, Return key sticks down if replace an existing file
-
-	KeyUp(36);
-
-	if (err != noErr) return;
-	if (*path == 0) return;
-
-	if (strstr(path, "ssd")) CreateDiscImage(path, Drive, 1, 80);
-	if (strstr(path, "dsd")) CreateDiscImage(path, Drive, 2, 80);
-	if (strstr(path, "adf")) CreateADFSImage(path, Drive, 80);
-	if (strstr(path, "adl")) CreateADFSImage(path, Drive, 160);
-			
-	LoadDisc(Drive, path);
-	
-//	if (m_WriteProtectDisc[Drive])
-//		ToggleWriteProtect(Drive);
-//	DWriteable[Drive] = 1;
-//	DiscLoaded[Drive] = true;
-//	strcpy(CDiscName[1], path);
-}
-
-
-void BeebWin::NewTapeImage(char *FileName)
-
-{
-	char path[256];  
-	OSErr err = noErr;
-	
-	*FileName = 0;
-	*path = 0;
-	err = SaveFile(path, nil);
-	
-	// For some reason, Return key sticks down if replace an existing file
-	
-	KeyUp(36);
-	
-	if (err != noErr) return;
-	
-	if ( ! ((strstr(path, ".UEF")) ||(strstr(path, ".UEF"))) )
-		strcat(path, ".uef");
-
-	strcpy(FileName, path);
-}
-
-void BeebWin::SaveState()
-{
-char path[256];  
-OSErr err = noErr;
-
-	*path = 0;
-	err = SaveFile(path, nil);
-
-// For some reason, Return key sticks down if replace an existing file
-
-	KeyUp(36);
-
-	if (err != noErr) return;
-	if (*path == 0) return;
-
-	if ( ! ((strstr(path, ".UEF")) ||(strstr(path, ".UEF"))) )
-		strcat(path, ".uef");
-	
-	SaveUEFState(path);
-}
-
-void BeebWin::RestoreState()
-{
-char path[256];  
-OSErr err = noErr;
-
-#if 0//ACH - GetOneFile (DONE)
-	err = GetOneFileWithPreview(path, UEFFilterProc);
-#else
-    err = swift_GetOneFileWithPreview(path, 256, UEF);
-#endif
-	if (err) return;
-	LoadUEFState(path);
-}
-
-bool BeebWin::PrinterFile()
-{
-char path[256];  
-OSErr err = noErr;
-
-	*path = 0;
-	err = SaveFile(path, nil);
-
-// For some reason, Return key sticks down if replace an existing file
-
-	KeyUp(36);
-
-	if (err != noErr) return false;
-	if (*path == 0) return false;
-
-	strcpy(m_PrinterFileName, path);
-	return true;
-}
-
-void BeebWin::TogglePrinter()
-{
-	if (PrinterEnabled) {
-		PrinterDisable();
-	}
-	else
-	{
-		if (m_MenuIdPrinterPort == IDM_PRINTER_FILE)
-		{
-			if (strlen(m_PrinterFileName) == 0)
-				PrinterFile();
-			else
-				PrinterEnable(m_PrinterFileName);
-		}
-		else
-		{
-			PrinterEnable(m_PrinterDevice);
-		}
-	}
-
-	SetMenuCommandIDCheck('prnt', (PrinterEnabled) ? true : false);
-
-}
-
-void BeebWin::TranslatePrinterPort()
-{
-	switch (m_MenuIdPrinterPort)
-	{
-	case IDM_PRINTER_FILE :
-		strcpy(m_PrinterDevice, m_PrinterFileName);
+	default:
+	case ID_VIEW_DD_640X480:
+		m_XDXSize = 640;
+		m_YDXSize = 480;
 		break;
-	case IDM_PRINTER_CLIPBOARD :
-		strcpy(m_PrinterDevice, "CLIPBOARD");
+	case ID_VIEW_DD_720X576:
+		m_XDXSize = 720;
+		m_YDXSize = 576;
+		break;
+	case ID_VIEW_DD_800X600:
+		m_XDXSize = 800;
+		m_YDXSize = 600;
+		break;
+	case ID_VIEW_DD_1024X768:
+		m_XDXSize = 1024;
+		m_YDXSize = 768;
+		break;
+	case ID_VIEW_DD_1280X720:
+		m_XDXSize = 1280;
+		m_YDXSize = 720;
+		break;
+	case ID_VIEW_DD_1280X768:
+		m_XDXSize = 1280;
+		m_YDXSize = 768;
+		break;
+	case ID_VIEW_DD_1280X960:
+		m_XDXSize = 1280;
+		m_YDXSize = 960;
+		break;
+	case ID_VIEW_DD_1280X1024:
+		m_XDXSize = 1280;
+		m_YDXSize = 1024;
+		break;
+	case ID_VIEW_DD_1440X900:
+		m_XDXSize = 1440;
+		m_YDXSize = 900;
+		break;
+	case ID_VIEW_DD_1600X1200:
+		m_XDXSize = 1600;
+		m_YDXSize = 1200;
+		break;
+	case ID_VIEW_DD_1920X1080:
+		m_XDXSize = 1920;
+		m_YDXSize = 1080;
+		break;
+	case ID_VIEW_DD_2560X1440:
+		m_XDXSize = 2560;
+		m_YDXSize = 1440;
+		break;
+	case ID_VIEW_DD_3840X2160:
+		m_XDXSize = 3840;
+		m_YDXSize = 2160;
+		break;
+	case ID_VIEW_DD_SCREENRES:
+		// Pixel size of default monitor
+		m_XDXSize = GetSystemMetrics(SM_CXSCREEN);
+		m_YDXSize = GetSystemMetrics(SM_CYSCREEN);
 		break;
 	}
 }
 
-void SaveEmuUEF(FILE *SUEF) {
-	char EmuName[16];
-	fput16(0x046C,SUEF);
-	fput32(16,SUEF);
-	// BeebEm Title Block
-	strcpy(EmuName,"BeebEm");
-	EmuName[14]=3;
-	EmuName[15]=0; // Version, 3.0
-	fwrite(EmuName,16,1,SUEF);
-	//
-	fput16(0x046a,SUEF);
-	fput32(16,SUEF);
-	// Emulator Specifics
-	// Note about this block: It should only be handled by beebem from uefstate.cpp if
-	// the UEF has been determined to be from BeebEm (Block 046C)
-	fputc(MachineType,SUEF);
-	fputc((NativeFDC)?0:1,SUEF);
-	fputc(TubeEnabled,SUEF);
-	fputc(0,SUEF); // Monitor type, reserved
-	fputc(0,SUEF); // Speed Setting, reserved
-	fput32(0,SUEF);
-	fput32(0,SUEF);
-	fput16(0,SUEF);
-	fputc(0,SUEF);
-}
-
-void LoadEmuUEF(FILE *SUEF, int Version) {
-	MachineType=fgetc(SUEF);
-	if (Version <= 8 && MachineType == 1)
-		MachineType = 3;
-	NativeFDC=(fgetc(SUEF)==0)?TRUE:FALSE;
-	TubeEnabled=fgetc(SUEF);
-	mainWin->ResetBeebSystem(MachineType,TubeEnabled,1);
-	mainWin->UpdateModelType();
-}
-
-void BeebWin::LoadUserKeyMap ()
+/****************************************************************************/
+void BeebWin::TranslateWindowSize(void)
 {
-	OSErr err = noErr;
-	char path[256];
-	
-#if 0//ACH - GetOneFile (DONE)
-    err = GetOneFileWithPreview(path, KeyboardFilterProc);
-#else
-    err = swift_GetOneFileWithPreview(path, 256, KEYBOARD);
-#endif
-    if (err != noErr) return;
-	
-	LoadUserKeyboard(path);
-}
-
-void BeebWin::SaveUserKeyMap ()
-{
-	OSErr err = noErr;
-	char path[256];
-	
-	err = SaveFile(path, nil);
-	if (err != noErr) return;
-	
-	if ( ! ((strstr(path, ".KMAP")) ||(strstr(path, ".kmap"))) )
-		strcat(path, ".kmap");
-	
-	SaveUserKeyboard (path);
-    
-}
-
-void BeebWin::SetAMXPosition(unsigned int x, unsigned int y)
-{
-	if ( (x < 0) || (x >= mainWin->m_XWinSize) ) return;
-	if ( (y < 0) || (y >= mainWin->m_YWinSize) ) return;
-	
-	if (AMXMouseEnabled)
+	switch (m_MenuIdWinSize)
 	{
+	case IDM_320X256:
+		m_XWinSize = 320;
+		m_YWinSize = 256;
+		break;
+	default:
+	case IDM_640X512:
+		m_XWinSize = 640;
+		m_YWinSize = 512;
+		break;
+	case IDM_800X600:
+		m_XWinSize = 800;
+		m_YWinSize = 600;
+		break;
+	case IDM_1024X512:
+		m_XWinSize = 1024;
+		m_YWinSize = 512;
+		break;
+	case IDM_1024X768:
+		m_XWinSize = 1024;
+		m_YWinSize = 768;
+		break;
+	case IDM_1280X1024:
+		m_XWinSize = 1280;
+		m_YWinSize = 1024;
+		break;
+	case IDM_1440X1080:
+		m_XWinSize = 1440;
+		m_YWinSize = 1080;
+		break;
+	case IDM_1600X1200:
+		m_XWinSize = 1600;
+		m_YWinSize = 1200;
+		break;
+	case IDM_CUSTOMWINSIZE:
+		break;
+	}
 
-		AMXTargetX = (int) (x * (m_AMXXSize * (100.0 + m_AMXAdjust) / 100.0 / m_XWinSize));
-		AMXTargetY = (int) (y * (m_AMXYSize * (100.0 + m_AMXAdjust) / 100.0 / m_YWinSize));
-		
-//		WriteLog("X = %d, Y = %d, B = %d\n", AMXTargetX, AMXTargetY, AMXButtons);
-		AMXMouseMovement();
+	m_XLastWinSize = m_XWinSize;
+	m_YLastWinSize = m_YWinSize;
+
+	m_MenuIdWinSize = IDM_CUSTOMWINSIZE;
+}
+
+/****************************************************************************/
+void BeebWin::TranslateSampleRate(void)
+{
+	switch (m_MenuIdSampleRate)
+	{
+	default:
+	case IDM_44100KHZ:
+		SoundSampleRate = 44100;
+		break;
+
+	case IDM_22050KHZ:
+		SoundSampleRate = 22050;
+		break;
+
+	case IDM_11025KHZ:
+		SoundSampleRate = 11025;
+		break;
 	}
 }
 
-void BeebWin::SetMousestickButton(int index, bool button)
+/****************************************************************************/
+void BeebWin::TranslateVolume(void)
 {
-    if (m_MenuIdSticks == 1 ||
-        m_MenuIdSticks == 2)
-    {
-        JoystickButton[index] = button;
-    }
+	switch (m_MenuIdVolume)
+	{
+	default:
+	case IDM_FULLVOLUME:
+		SoundVolume = 100;
+		break;
+
+	case IDM_HIGHVOLUME:
+		SoundVolume = 75;
+		break;
+
+	case IDM_MEDIUMVOLUME:
+		SoundVolume = 50;
+		break;
+
+	case IDM_LOWVOLUME:
+		SoundVolume = 25;
+		break;
+	}
 }
 
-void BeebWin::ScaleMousestick(unsigned int x, unsigned int y)
+/****************************************************************************/
+void BeebWin::TranslateTiming(void)
 {
-static int lastx = 32768;
-static int lasty = 32768;
-int dx, dy;
+	m_FPSTarget = 0;
+	m_RealTimeTarget = 1.0;
 
-	if ( (x < 0) || (x >= mainWin->m_XWinSize) ) return;
-	if ( (y < 0) || (y >= mainWin->m_YWinSize) ) return;
-	
-	if (m_MenuIdSticks == 1)		// Analogue Mousestick
+	if (m_MenuIdTiming == IDM_3QSPEED)
+		m_MenuIdTiming = IDM_FIXEDSPEED0_75;
+	if (m_MenuIdTiming == IDM_HALFSPEED)
+		m_MenuIdTiming = IDM_FIXEDSPEED0_5;
+
+	switch (m_MenuIdTiming)
 	{
-		JoystickX = (m_XWinSize - x) * 65535 / m_XWinSize;
-		JoystickY = (m_YWinSize - y) * 65535 / m_YWinSize;
-		return;
+	default:
+	case IDM_REALTIME:
+		m_RealTimeTarget = 1.0;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED100:
+		m_RealTimeTarget = 100.0;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED50:
+		m_RealTimeTarget = 50.0;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED10:
+		m_RealTimeTarget = 10.0;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED5:
+		m_RealTimeTarget = 5.0;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED2:
+		m_RealTimeTarget = 2.0;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED1_5:
+		m_RealTimeTarget = 1.5;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED1_25:
+		m_RealTimeTarget = 1.25;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED1_1:
+		m_RealTimeTarget = 1.1;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED0_9:
+		m_RealTimeTarget = 0.9;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED0_5:
+		m_RealTimeTarget = 0.5;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED0_75:
+		m_RealTimeTarget = 0.75;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED0_25:
+		m_RealTimeTarget = 0.25;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_FIXEDSPEED0_1:
+		m_RealTimeTarget = 0.1;
+		m_FPSTarget = 0;
+		break;
+
+	case IDM_50FPS:
+		m_FPSTarget = 50;
+		m_RealTimeTarget = 0;
+		break;
+
+	case IDM_25FPS:
+		m_FPSTarget = 25;
+		m_RealTimeTarget = 0;
+		break;
+
+	case IDM_10FPS:
+		m_FPSTarget = 10;
+		m_RealTimeTarget = 0;
+		break;
+
+	case IDM_5FPS:
+		m_FPSTarget = 5;
+		m_RealTimeTarget = 0;
+		break;
+
+	case IDM_1FPS:
+		m_FPSTarget = 1;
+		m_RealTimeTarget = 0;
+		break;
 	}
 
-	if (m_MenuIdSticks == 2)		// Digital Mousestick
-	{
-		dx = x - lastx;
-		dy = y - lasty;
-		
-		if (dx > 4) JoystickX = 0;
-		if (dx < -4) JoystickX = 65535;
-
-		if (dy > 4) JoystickY = 0;
-		if (dy < -4) JoystickY = 65535;
-
-		lastx = x;
-		lasty = y;
-	}
-
+	ResetTiming();
 }
 
+void BeebWin::AdjustSpeed(bool up)
+{
+	static int speeds[] = {
+				IDM_FIXEDSPEED100,
+				IDM_FIXEDSPEED50,
+				IDM_FIXEDSPEED10,
+				IDM_FIXEDSPEED5,
+				IDM_FIXEDSPEED2,
+				IDM_FIXEDSPEED1_5,
+				IDM_FIXEDSPEED1_25,
+				IDM_FIXEDSPEED1_1,
+				IDM_REALTIME,
+				IDM_FIXEDSPEED0_9,
+				IDM_FIXEDSPEED0_75,
+				IDM_FIXEDSPEED0_5,
+				IDM_FIXEDSPEED0_25,
+				IDM_FIXEDSPEED0_1,
+				0};
+	int s = 0;
+	int t = m_MenuIdTiming;
+
+	while (speeds[s] != 0 && speeds[s] != m_MenuIdTiming)
+		s++;
+
+	if (speeds[s] == 0)
+	{
+		t = IDM_REALTIME;
+	}
+	else if (up)
+	{
+		if (s > 0)
+			t = speeds[s-1];
+	}
+	else
+	{
+		if (speeds[s+1] != 0)
+			t = speeds[s+1];
+	}
+
+	if (t != m_MenuIdTiming)
+	{
+		CheckMenuItem(m_MenuIdTiming, false);
+		m_MenuIdTiming = t;
+		CheckMenuItem(m_MenuIdTiming, true);
+		TranslateTiming();
+	}
+}
+
+/****************************************************************************/
+void BeebWin::TranslateKeyMapping(void)
+{
+	switch (m_MenuIdKeyMapping)
+	{
+	default:
+	case IDM_DEFAULTKYBDMAPPING:
+		transTable = &defaultMapping;
+		break;
+
+	case IDM_LOGICALKYBDMAPPING:
+		transTable = &logicalMapping;
+		break;
+
+	case IDM_USERKYBDMAPPING:
+		transTable = &UserKeymap;
+		break;
+	}
+}
+
+/****************************************************************************/
+void BeebWin::SetTapeSpeedMenu() {
+	CheckMenuItem(ID_TAPE_FAST, TapeClockSpeed == 750);
+	CheckMenuItem(ID_TAPE_MFAST, TapeClockSpeed == 1600);
+	CheckMenuItem(ID_TAPE_MSLOW, TapeClockSpeed == 3200);
+	CheckMenuItem(ID_TAPE_NORMAL, TapeClockSpeed == 5600);
+}
+
+/****************************************************************************/
+#define ASPECT_RATIO_X 5
+#define ASPECT_RATIO_Y 4
+void BeebWin::CalcAspectRatioAdjustment(int DisplayWidth, int DisplayHeight)
+{
+	m_XRatioAdj = 0.0f;
+	m_YRatioAdj = 0.0f;
+	m_XRatioCrop = 0.0f;
+	m_YRatioCrop = 0.0f;
+
+	if (m_isFullScreen)
+	{
+		int w = DisplayWidth * ASPECT_RATIO_Y;
+		int h = DisplayHeight * ASPECT_RATIO_X;
+		if (w > h)
+		{
+			m_XRatioAdj = (float)DisplayHeight / (float)DisplayWidth * (float)ASPECT_RATIO_X/(float)ASPECT_RATIO_Y;
+			m_XRatioCrop = (1.0f - m_XRatioAdj) / 2.0f;
+		}
+		else if (w < h)
+		{
+			m_YRatioAdj = (float)DisplayWidth / (float)DisplayHeight * (float)ASPECT_RATIO_Y/(float)ASPECT_RATIO_X;
+			m_YRatioCrop = (1.0f - m_YRatioAdj) / 2.0f;
+		}
+	}
+}
+
+/****************************************************************************/
+void BeebWin::SetWindowAttributes(bool wasFullScreen)
+{
+	RECT wndrect;
+	long style;
+
+	if (m_isFullScreen)
+	{
+		// Get the monitor that the BeebEm window is on to account for multiple monitors
+		if (m_DDFullScreenMode == ID_VIEW_DD_SCREENRES)
+		{
+			HMONITOR monitor = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
+			MONITORINFO info;
+			info.cbSize = sizeof(MONITORINFO);
+			GetMonitorInfo(monitor, &info);
+
+			// Get current resolution of the monitor
+			m_XDXSize = info.rcMonitor.right - info.rcMonitor.left;
+			m_YDXSize = info.rcMonitor.bottom - info.rcMonitor.top;
+		}
+
+		if (!wasFullScreen)
+		{
+			GetWindowRect(m_hWnd, &wndrect);
+			m_XWinPos = wndrect.left;
+			m_YWinPos = wndrect.top;
+		}
+
+		if (m_DisplayRenderer != IDM_DISPGDI)
+		{
+			m_XWinSize = m_XDXSize;
+			m_YWinSize = m_YDXSize;
+			CalcAspectRatioAdjustment(m_XDXSize, m_YDXSize);
+
+			style = GetWindowLong(m_hWnd, GWL_STYLE);
+			style &= ~(WIN_STYLE);
+			style |= WS_POPUP;
+			SetWindowLong(m_hWnd, GWL_STYLE, style);
+
+			if (m_DXInit)
+			{
+				ResetDX();
+			}
+		}
+		else
+		{
+			CalcAspectRatioAdjustment(m_XWinSize, m_YWinSize);
+
+			style = GetWindowLong(m_hWnd, GWL_STYLE);
+			style &= ~WS_POPUP;
+			style |= WIN_STYLE;
+			SetWindowLong(m_hWnd, GWL_STYLE, style);
+
+			ShowWindow(m_hWnd, SW_MAXIMIZE);
+		}
+
+		// Experiment: hide menu in full screen
+		HideMenu(true);
+	}
+	else
+	{
+		CalcAspectRatioAdjustment(0, 0);
+
+		if (wasFullScreen)
+			ShowWindow(m_hWnd, SW_RESTORE);
+
+		// Note: Window size gets lost in DDraw mode when DD is reset
+		int xs = m_XLastWinSize;
+		int ys = m_YLastWinSize;
+
+		if (m_DisplayRenderer != IDM_DISPGDI && m_DXInit)
+		{
+			ResetDX();
+		}
+
+		m_XWinSize = xs;
+		m_YWinSize = ys;
+
+		style = GetWindowLong(m_hWnd, GWL_STYLE);
+		style &= ~WS_POPUP;
+		style |= WIN_STYLE;
+		SetWindowLong(m_hWnd, GWL_STYLE, style);
+
+		SetWindowPos(m_hWnd, HWND_TOP, m_XWinPos, m_YWinPos,
+					 m_XWinSize + m_XWinBorder,
+					 m_YWinSize + m_YWinBorder,
+					 !wasFullScreen ? SWP_NOMOVE : 0);
+
+		// Experiment: hide menu in full screen
+		HideMenu(false);
+	}
+
+	// Clear unused areas of screen
+	RECT rc;
+	GetClientRect(m_hWnd, &rc);
+	InvalidateRect(m_hWnd, &rc, TRUE);
+}
+
+/*****************************************************************************/
+void BeebWin::WinSizeChange(WPARAM size, int width, int height)
+{
+	if (m_DisplayRenderer == IDM_DISPGDI && size == SIZE_RESTORED && m_isFullScreen)
+	{
+		m_isFullScreen = false;
+		CheckMenuItem(IDM_FULLSCREEN, false);
+	}
+
+	if (!m_isFullScreen || m_DisplayRenderer == IDM_DISPGDI)
+	{
+		m_XWinSize = width;
+		m_YWinSize = height;
+		CalcAspectRatioAdjustment(m_XWinSize, m_YWinSize);
+
+		if (size != SIZE_MINIMIZED && m_DisplayRenderer != IDM_DISPGDI && m_DXInit)
+		{
+			m_DXResetPending = true;
+		}
+	}
+
+	if (!m_isFullScreen)
+	{
+		m_XLastWinSize = m_XWinSize;
+		m_YLastWinSize = m_YWinSize;
+	}
+}
+
+/****************************************************************************/
+void BeebWin::WinPosChange(int /* x */, int /* y */)
+{
+	// DebugTrace("WM_MOVE %d, %d (%d, %d)\n", x, y, m_XWinPos, m_YWinPos);
+}
+
+/****************************************************************************/
 void BeebWin::TranslateAMX(void)
 {
 	switch (m_MenuIdAMXSize)
 	{
-	case 1 :
+	case IDM_AMX_160X256:
 		m_AMXXSize = 160;
 		m_AMXYSize = 256;
 		break;
 	default:
-	case 2 :
+	case IDM_AMX_320X256:
 		m_AMXXSize = 320;
 		m_AMXYSize = 256;
 		break;
-	case 3 :
+	case IDM_AMX_640X256:
 		m_AMXXSize = 640;
 		m_AMXYSize = 256;
 		break;
@@ -5257,917 +2617,2728 @@ void BeebWin::TranslateAMX(void)
 
 	switch (m_MenuIdAMXAdjust)
 	{
-	case 0 :
+	case 0:
 		m_AMXAdjust = 0;
 		break;
-	case 1 :
+	case IDM_AMX_ADJUSTP50:
 		m_AMXAdjust = 50;
 		break;
 	default:
-	case 2 :
+	case IDM_AMX_ADJUSTP30:
 		m_AMXAdjust = 30;
 		break;
-	case 3 :
+	case IDM_AMX_ADJUSTP10:
 		m_AMXAdjust = 10;
 		break;
-	case 4 :
+	case IDM_AMX_ADJUSTM10:
 		m_AMXAdjust = -10;
 		break;
-	case 5 :
+	case IDM_AMX_ADJUSTM30:
 		m_AMXAdjust = -30;
 		break;
-	case 6 :
+	case IDM_AMX_ADJUSTM50:
 		m_AMXAdjust = -50;
 		break;
 	}
 }
 
-
-#if 0 //ACH - capture video
-
-void BeebWin::CaptureVideo()
+void BeebWin::SelectSerialPort(unsigned char PortNumber)
 {
-	FSSpec fileSpec;
-	OSErr err = noErr;
-	char path[256];
-	
-	if (m_pMovie)
-		EndCaptureVideo();
-
-	*path = 0;
-	err = SaveFileMov(path, &fileSpec);
-	
-	// For some reason, Return key sticks down if replace an existing file
-	
-	KeyUp(36);
-	
-	if (err != noErr) return;
-	
-	StartRecordingVideo(path, &fileSpec);
+	SerialPort = PortNumber;
+	bSerialStateChanged = true;
+	EthernetPortEnabled = false;
+	IP232custom = false;
+	IP232localhost = false;
+	TouchScreenEnabled = false;
+	IP232Close();
+	TouchScreenClose();
+	UpdateSerialMenu();
 }
 
-void MacQTOpenVideoComponent(ComponentInstance *rci)
+void BeebWin::UpdateSerialMenu() {
+	CheckMenuItem(ID_SERIAL, SerialPortEnabled);
+	CheckMenuItem(ID_TOUCHSCREEN, TouchScreenEnabled);
+	// CheckMenuItem(ID_IP232, EthernetPortEnabled);
+	CheckMenuItem(ID_IP232LOCALHOST, IP232localhost);
+	CheckMenuItem(ID_IP232CUSTOM, IP232custom);
+	CheckMenuItem(ID_IP232MODE, IP232mode);
+	CheckMenuItem(ID_IP232RAW, IP232raw);
+
+	CheckMenuItem(ID_COM1, SerialPort == 1);
+	CheckMenuItem(ID_COM2, SerialPort == 2);
+	CheckMenuItem(ID_COM3, SerialPort == 3);
+	CheckMenuItem(ID_COM4, SerialPort == 4);
+}
+
+//Rob
+void BeebWin::UpdateEconetMenu() {
+	CheckMenuItem(ID_ECONET, EconetEnabled);
+}
+
+void BeebWin::UpdateLEDMenu() {
+	// Update the LED Menu
+	CheckMenuItem(ID_RED_LEDS, DiscLedColour == LEDColour::Red);
+	CheckMenuItem(ID_GREEN_LEDS, DiscLedColour == LEDColour::Green);
+	CheckMenuItem(ID_SHOW_KBLEDS, LEDs.ShowKB);
+	CheckMenuItem(ID_SHOW_DISCLEDS, LEDs.ShowDisc);
+}
+
+void BeebWin::UpdateOptiMenu() {
+	CheckMenuItem(ID_BASIC_HARDWARE_ONLY, BasicHardwareOnly);
+	CheckMenuItem(ID_TELETEXTHALFMODE, TeletextHalfMode);
+	CheckMenuItem(ID_PSAMPLES, PartSamples);
+}
+
+/***************************************************************************/
+void BeebWin::HandleCommand(int MenuId)
 {
-	OSStatus			err;
-	ComponentInstance	ci;
-	
-	ci = OpenDefaultComponent(StandardCompressionType, StandardCompressionSubType);
-	
-	CFDataRef	data;
-	
-	data = (CFDataRef) CFPreferencesCopyAppValue(CFSTR("QTVideoSetting"), kCFPreferencesCurrentApplication);
-	if (data)
+	char TmpPath[256];
+	PaletteType PrevPaletteType = m_PaletteType;
+
+	SetSound(SoundState::Muted);
+	bool StayMuted = false;
+
+	switch (MenuId)
 	{
-		CFIndex	len;
-		Handle	hdl;
-		
-		len = CFDataGetLength(data);
-		hdl = NewHandleClear((Size) len);
-		if (MemError() == noErr)
+	case IDM_RUNDISC:
+		if (ReadDisc(0, true))
 		{
-			HLock(hdl);
-			CFDataGetBytes(data, CFRangeMake(0, len), (unsigned char *) *hdl);
-			err = SCSetInfo(ci, scSettingsStateType, &hdl);
-			
-			DisposeHandle(hdl);
+			m_ShiftBooted = true;
+			ResetBeebSystem(MachineType, false);
+			BeebKeyDown(0, 0); // Shift key
 		}
-		
-		CFRelease(data);
-	}
-	
-	*rci = ci;
-}
+		break;
 
-void MacQTCloseVideoComponent(ComponentInstance ci)
-{
-	OSStatus	err;
-	
-	err = CloseComponent(ci);
-}
+	case IDM_LOADSTATE:
+		RestoreState();
+		break;
 
-void BeebWin::StartRecordingVideo(char *path, FSSpec *fs)
-{
-	OSErr err = noErr;
-	FSSpec fileSpec;
-	Str255 FileName;
-	
-	if (m_pMovie)
-		EndCaptureVideo();
-	
-	if (fs == nil)
+	case IDM_SAVESTATE:
+		SaveState();
+		break;
+
+	case IDM_QUICKLOAD:
+		QuickLoad();
+		break;
+
+	case IDM_QUICKSAVE:
+		QuickSave();
+		break;
+
+	case IDM_LOADDISC0:
+		ReadDisc(0, false);
+		break;
+
+	case IDM_LOADDISC1:
+		ReadDisc(1, false);
+		break;
+
+	case ID_LOADTAPE:
+		LoadTape();
+		break;
+
+	case IDM_NEWDISC0:
+		NewDiscImage(0);
+		break;
+
+	case IDM_NEWDISC1:
+		NewDiscImage(1);
+		break;
+
+	case IDM_EJECTDISC0:
+		EjectDiscImage(0);
+		break;
+
+	case IDM_EJECTDISC1:
+		EjectDiscImage(1);
+		break;
+
+	case IDM_WPDISC0:
+		ToggleWriteProtect(0);
+		break;
+
+	case IDM_WPDISC1:
+		ToggleWriteProtect(1);
+		break;
+
+	case IDM_WPONLOAD:
+		m_WriteProtectOnLoad = !m_WriteProtectOnLoad;
+		CheckMenuItem(IDM_WPONLOAD, m_WriteProtectOnLoad);
+		break;
+
+	case IDM_EDIT_COPY:
+		doCopy();
+		break;
+
+	case IDM_EDIT_PASTE:
+		doPaste();
+		break;
+
+	case IDM_EDIT_CRLF:
+		m_translateCRLF = !m_translateCRLF;
+		CheckMenuItem(IDM_EDIT_CRLF, m_translateCRLF);
+		break;
+
+	case IDM_DISC_EXPORT_0:
+	case IDM_DISC_EXPORT_1:
+	case IDM_DISC_EXPORT_2:
+	case IDM_DISC_EXPORT_3:
+		ExportDiscFiles(MenuId);
+		break;
+
+	case IDM_DISC_IMPORT_0:
+	case IDM_DISC_IMPORT_1:
+	case IDM_DISC_IMPORT_2:
+	case IDM_DISC_IMPORT_3:
+		ImportDiscFiles(MenuId);
+		break;
+
+	case IDM_PRINTER_FILE:
+		if (PrinterFile())
+		{
+			/* If printer is enabled then need to
+				disable it before changing file */
+			if (PrinterEnabled)
+				TogglePrinter();
+
+			/* Add file name to menu */
+			char menu_string[256];
+			strcpy(menu_string, "File: ");
+			strcat(menu_string, m_PrinterFileName);
+			ModifyMenu(m_hMenu, IDM_PRINTER_FILE,
+				MF_BYCOMMAND, IDM_PRINTER_FILE,
+				menu_string);
+
+			if (MenuId != m_MenuIdPrinterPort)
+			{
+				CheckMenuItem(m_MenuIdPrinterPort, false);
+				m_MenuIdPrinterPort = MenuId;
+				CheckMenuItem(m_MenuIdPrinterPort, true);
+			}
+			TranslatePrinterPort();
+		}
+		break;
+
+	case IDM_PRINTER_CLIPBOARD:
+		if (PrinterEnabled)
+			TogglePrinter();
+
+		if (MenuId != m_MenuIdPrinterPort)
+		{
+			CheckMenuItem(m_MenuIdPrinterPort, false);
+			m_MenuIdPrinterPort = MenuId;
+			CheckMenuItem(m_MenuIdPrinterPort, true);
+		}
+		TranslatePrinterPort();
+		break;
+
+	case IDM_PRINTER_LPT1:
+	case IDM_PRINTER_LPT2:
+	case IDM_PRINTER_LPT3:
+	case IDM_PRINTER_LPT4:
+		if (MenuId != m_MenuIdPrinterPort)
+		{
+			/* If printer is enabled then need to
+				disable it before changing file */
+			if (PrinterEnabled)
+				TogglePrinter();
+
+			CheckMenuItem(m_MenuIdPrinterPort, false);
+			m_MenuIdPrinterPort = MenuId;
+			CheckMenuItem(m_MenuIdPrinterPort, true);
+			TranslatePrinterPort();
+		}
+		break;
+
+	case IDM_PRINTERONOFF:
+		TogglePrinter();
+		break;
+
+	case ID_SERIAL:
+		if (SerialPortEnabled) { // so disabling..
+			if (TouchScreenEnabled)
+			{
+				TouchScreenClose();
+				TouchScreenEnabled = false;
+			}
+			if (EthernetPortEnabled)
+			{
+				IP232Close();
+				EthernetPortEnabled = false;
+	//			IP232custom = false;
+	//			IP232localhost = false;
+			}
+		}
+		SerialPortEnabled = !SerialPortEnabled;
+
+		if (SerialPortEnabled && (IP232custom || IP232localhost))
+		{
+			EthernetPortEnabled = true;
+			if (!IP232Open())
+			{
+				Report(MessageType::Error, "Could not connect to specified address");
+				bSerialStateChanged = true;
+				UpdateSerialMenu();
+				SerialPortEnabled = false;
+			}
+		}
+		bSerialStateChanged = true;
+		UpdateSerialMenu();
+		break;
+
+	case ID_TOUCHSCREEN:
+		if (TouchScreenEnabled)
+		{
+			TouchScreenClose();
+		}
+
+		TouchScreenEnabled = !TouchScreenEnabled;
+
+		if (TouchScreenEnabled)
+		{
+			// Also switch on analogue mousestick (touch screen uses
+			// mousestick position)
+			if (m_MenuIdSticks != IDM_ANALOGUE_MOUSESTICK)
+				HandleCommand(IDM_ANALOGUE_MOUSESTICK);
+
+			if (EthernetPortEnabled)
+			{
+				IP232Close();
+				EthernetPortEnabled = false;
+			}
+			IP232custom = false;
+			IP232localhost = false;
+
+			SerialPortEnabled = true;
+
+			Kill_Serial();
+			SerialPort = 0;
+
+			bSerialStateChanged = true;
+			TouchScreenOpen();
+		}
+		UpdateSerialMenu();
+		break;
+
+	case ID_IP232MODE:
+		IP232mode = !IP232mode;
+		UpdateSerialMenu();
+		break;
+
+	case ID_IP232RAW:
+		IP232raw = !IP232raw;
+		UpdateSerialMenu();
+		break;
+
+	case ID_IP232LOCALHOST:
+		if (IP232localhost)
+		{
+			IP232Close();
+		}
+
+		IP232localhost = !IP232localhost;
+
+		if (IP232localhost)
+		{
+			if (TouchScreenEnabled)
+			{
+				TouchScreenClose();
+			}
+			if (IP232custom) IP232Close();
+			IP232custom = false;
+			EthernetPortEnabled = true;
+			TouchScreenEnabled = false;
+
+			Kill_Serial();
+
+			SerialPort = 0;
+			bSerialStateChanged = true;
+
+			strcpy(IPAddress,"127.0.0.1");
+			PortNo = 25232;
+
+			if (SerialPortEnabled) {
+				if (!IP232Open()) {
+					Report(MessageType::Error, "Could not connect to specified address");
+					bSerialStateChanged = true;
+					UpdateSerialMenu();
+					SerialPortEnabled = false;
+				}
+			}
+		}
+
+		if (!IP232localhost && !IP232custom)
+		{
+			EthernetPortEnabled = false;
+			IP232Close();
+		}
+
+		UpdateSerialMenu();
+		break;
+
+	case ID_IP232CUSTOM:
+		if (IP232custom)
+		{
+			IP232Close();
+		}
+
+		IP232custom = !IP232custom;
+
+		if (IP232custom)
+		{
+			if (TouchScreenEnabled)
+			{
+				TouchScreenClose();
+			}
+			if (IP232localhost) IP232Close();
+			IP232localhost = false;
+			EthernetPortEnabled = true;
+			TouchScreenEnabled = false;
+
+			Kill_Serial();
+
+			SerialPort = 0;
+			bSerialStateChanged=TRUE;
+
+			strcpy(IPAddress,IP232customip);
+			PortNo = IP232customport;
+			if (SerialPortEnabled) {
+				if (!IP232Open()) {
+					Report(MessageType::Error, "Could not connect to specified address");
+					bSerialStateChanged = true;
+					UpdateSerialMenu();
+					SerialPortEnabled = false;
+				}
+			}
+		}
+
+		if (!IP232localhost && !IP232custom)
+		{
+			EthernetPortEnabled = false;
+			IP232Close();
+		}
+
+		UpdateSerialMenu();
+		break;
+
+	case ID_COM1:
+		SelectSerialPort(1);
+		break;
+
+	case ID_COM2:
+		SelectSerialPort(2);
+		break;
+
+	case ID_COM3:
+		SelectSerialPort(3);
+		break;
+
+	case ID_COM4:
+		SelectSerialPort(4);
+		break;
+
+	//Rob
+	case ID_ECONET:
+		EconetEnabled = !EconetEnabled;
+		if (EconetEnabled)
+		{
+			// Need hard reset for DNFS to detect econet HW
+			ResetBeebSystem(MachineType, false);
+			EconetStateChanged = true;
+		}
+		else
+		{
+			EconetReset();
+		}
+		UpdateEconetMenu();
+		break;
+
+	case IDM_DISPGDI:
+	case IDM_DISPDDRAW:
+	case IDM_DISPDX9:
 	{
-		CopyCStringToPascal(path, FileName);
-		err = FSMakeFSSpec(0, 0, FileName, &fileSpec);
+		ExitDX();
+
+		m_DisplayRenderer = MenuId;
+		SetWindowAttributes(m_isFullScreen);
+
+		bool DirectXEnabled = m_DisplayRenderer != IDM_DISPGDI;
+
+		if (DirectXEnabled)
+		{
+			InitDX();
+		}
+
+		UpdateDisplayRendererMenu();
+		EnableMenuItem(IDM_DXSMOOTHING, DirectXEnabled);
+		EnableMenuItem(IDM_DXSMOOTHMODE7ONLY, DirectXEnabled);
+		break;
+	}
+
+	case IDM_DXSMOOTHING:
+		m_DXSmoothing = !m_DXSmoothing;
+		CheckMenuItem(IDM_DXSMOOTHING, m_DXSmoothing);
+		if (m_DisplayRenderer != IDM_DISPGDI)
+		{
+			UpdateSmoothing();
+		}
+		break;
+
+	case IDM_DXSMOOTHMODE7ONLY:
+		m_DXSmoothMode7Only = !m_DXSmoothMode7Only;
+		CheckMenuItem(IDM_DXSMOOTHMODE7ONLY, m_DXSmoothMode7Only);
+		if (m_DisplayRenderer != IDM_DISPGDI)
+		{
+			UpdateSmoothing();
+		}
+		break;
+
+	case IDM_320X256:
+	case IDM_640X512:
+	case IDM_800X600:
+	case IDM_1024X512:
+	case IDM_1024X768:
+	case IDM_1280X1024:
+	case IDM_1440X1080:
+	case IDM_1600X1200:
+		{
+			if (m_isFullScreen)
+				HandleCommand(IDM_FULLSCREEN);
+			// CheckMenuItem(m_MenuIdWinSize, false);
+			m_MenuIdWinSize = MenuId;
+			// CheckMenuItem(m_MenuIdWinSize, true);
+			TranslateWindowSize();
+			SetWindowAttributes(m_isFullScreen);
+		}
+		break;
+
+	case ID_VIEW_DD_SCREENRES:
+	case ID_VIEW_DD_640X480:
+	case ID_VIEW_DD_720X576:
+	case ID_VIEW_DD_800X600:
+	case ID_VIEW_DD_1024X768:
+	case ID_VIEW_DD_1280X720:
+	case ID_VIEW_DD_1280X768:
+	case ID_VIEW_DD_1280X960:
+	case ID_VIEW_DD_1280X1024:
+	case ID_VIEW_DD_1440X900:
+	case ID_VIEW_DD_1600X1200:
+	case ID_VIEW_DD_1920X1080:
+	case ID_VIEW_DD_2560X1440:
+	case ID_VIEW_DD_3840X2160:
+		// Ignore ID_VIEW_DD_SCREENRES if already in full screen mode
+		if ((MenuId != ID_VIEW_DD_SCREENRES) || !m_isFullScreen)
+		{
+			CheckMenuItem(m_DDFullScreenMode, false);
+			m_DDFullScreenMode = MenuId;
+			CheckMenuItem(m_DDFullScreenMode, true);
+			TranslateDDSize();
+
+			if (m_isFullScreen && m_DisplayRenderer != IDM_DISPGDI)
+			{
+				SetWindowAttributes(m_isFullScreen);
+			}
+		}
+		break;
+
+	case IDM_FULLSCREEN:
+		m_isFullScreen = !m_isFullScreen;
+		CheckMenuItem(IDM_FULLSCREEN, m_isFullScreen);
+		SetWindowAttributes(!m_isFullScreen);
+		if (m_MouseCaptured)
+			ReleaseMouse();
+		break;
+
+	case IDM_MAINTAINASPECTRATIO:
+		m_MaintainAspectRatio = !m_MaintainAspectRatio;
+		CheckMenuItem(IDM_MAINTAINASPECTRATIO, m_MaintainAspectRatio);
+		if (m_isFullScreen)
+		{
+			// Clear unused areas of screen
+			RECT rc;
+			GetClientRect(m_hWnd, &rc);
+			InvalidateRect(m_hWnd, &rc, TRUE);
+		}
+		break;
+
+	case IDM_SPEEDANDFPS:
+		if (m_ShowSpeedAndFPS)
+		{
+			m_ShowSpeedAndFPS = false;
+			SetWindowText(m_hWnd, WindowTitle);
+		}
+		else
+		{
+			m_ShowSpeedAndFPS = true;
+		}
+
+		CheckMenuItem(IDM_SPEEDANDFPS, m_ShowSpeedAndFPS);
+		break;
+
+	case IDM_XAUDIO2:
+	case IDM_DIRECTSOUND:
+		SoundConfig::Selection = MenuId == IDM_XAUDIO2 ? SoundConfig::XAudio2 : SoundConfig::DirectSound;
+
+		if (SoundEnabled)
+		{
+			SoundReset();
+			SoundInit();
+		}
+
+		if (Music5000Enabled)
+		{
+			Music5000Reset();
+			Music5000Init();
+		}
+
+#ifdef SPEECH_ENABLED
+		if (SpeechDefault)
+		{
+			tms5220_stop();
+			tms5220_start();
+		}
+#endif
+
+		UpdateSoundStreamerMenu();
+		break;
+
+	case IDM_SOUNDONOFF:
+		if (SoundEnabled)
+		{
+			CheckMenuItem(IDM_SOUNDONOFF, false);
+			SoundReset();
+			SoundDefault = false;
+		}
+		else
+		{
+			SoundInit();
+			if (SoundEnabled) {
+				CheckMenuItem(IDM_SOUNDONOFF, true);
+				SoundDefault = true;
+			}
+		}
+		break;
+
+	case IDM_SOUNDCHIP:
+		SoundChipEnabled = !SoundChipEnabled;
+		CheckMenuItem(IDM_SOUNDCHIP, SoundChipEnabled);
+		break;
+
+	case ID_SFX_RELAY:
+		RelaySoundEnabled = !RelaySoundEnabled;
+		CheckMenuItem(ID_SFX_RELAY, RelaySoundEnabled);
+		break;
+
+	case ID_SFX_DISCDRIVES:
+		DiscDriveSoundEnabled = !DiscDriveSoundEnabled;
+		CheckMenuItem(ID_SFX_DISCDRIVES, DiscDriveSoundEnabled);
+		break;
+
+	case IDM_44100KHZ:
+	case IDM_22050KHZ:
+	case IDM_11025KHZ:
+		if (MenuId != m_MenuIdSampleRate)
+		{
+			CheckMenuItem(m_MenuIdSampleRate, false);
+			m_MenuIdSampleRate = MenuId;
+			CheckMenuItem(m_MenuIdSampleRate, true);
+			TranslateSampleRate();
+
+			if (SoundEnabled)
+			{
+				SoundReset();
+				SoundInit();
+			}
+
+#ifdef SPEECH_ENABLED
+			if (SpeechDefault)
+			{
+				tms5220_stop();
+				tms5220_start();
+			}
+#endif
+		}
+		break;
+
+	case IDM_FULLVOLUME:
+	case IDM_HIGHVOLUME:
+	case IDM_MEDIUMVOLUME:
+	case IDM_LOWVOLUME:
+		if (MenuId != m_MenuIdVolume)
+		{
+			CheckMenuItem(m_MenuIdVolume, false);
+			m_MenuIdVolume = MenuId;
+			CheckMenuItem(m_MenuIdVolume, true);
+			TranslateVolume();
+		}
+		break;
+
+	case IDM_MUSIC5000:
+		Music5000Enabled = !Music5000Enabled;
+		Music5000Reset();
+		if (Music5000Enabled)
+			Music5000Init();
+		CheckMenuItem(IDM_MUSIC5000, Music5000Enabled);
+		break;
+
+	/* LRW Added switch individual ROMS Writable ON/OFF */
+	case IDM_ALLOWWRITES_ROM0:
+	case IDM_ALLOWWRITES_ROM1:
+	case IDM_ALLOWWRITES_ROM2:
+	case IDM_ALLOWWRITES_ROM3:
+	case IDM_ALLOWWRITES_ROM4:
+	case IDM_ALLOWWRITES_ROM5:
+	case IDM_ALLOWWRITES_ROM6:
+	case IDM_ALLOWWRITES_ROM7:
+	case IDM_ALLOWWRITES_ROM8:
+	case IDM_ALLOWWRITES_ROM9:
+	case IDM_ALLOWWRITES_ROMA:
+	case IDM_ALLOWWRITES_ROMB:
+	case IDM_ALLOWWRITES_ROMC:
+	case IDM_ALLOWWRITES_ROMD:
+	case IDM_ALLOWWRITES_ROME:
+	case IDM_ALLOWWRITES_ROMF:
+	{
+		int slot = MenuId-IDM_ALLOWWRITES_ROM0;
+		RomWritable[slot] = !RomWritable[slot];
+		CheckMenuItem(MenuId, RomWritable[slot]);
+		break;
+	}
+
+	case IDM_SWRAMBOARD:
+		SWRAMBoardEnabled = !SWRAMBoardEnabled;
+		CheckMenuItem(IDM_SWRAMBOARD, SWRAMBoardEnabled);
+		break;
+
+	case IDM_ROMCONFIG:
+		EditROMConfig();
+		SetRomMenu();
+		break;
+
+	case IDM_REALTIME:
+	case IDM_FIXEDSPEED100:
+	case IDM_FIXEDSPEED50:
+	case IDM_FIXEDSPEED10:
+	case IDM_FIXEDSPEED5:
+	case IDM_FIXEDSPEED2:
+	case IDM_FIXEDSPEED1_5:
+	case IDM_FIXEDSPEED1_25:
+	case IDM_FIXEDSPEED1_1:
+	case IDM_FIXEDSPEED0_9:
+	case IDM_FIXEDSPEED0_5:
+	case IDM_FIXEDSPEED0_75:
+	case IDM_FIXEDSPEED0_25:
+	case IDM_FIXEDSPEED0_1:
+	case IDM_50FPS:
+	case IDM_25FPS:
+	case IDM_10FPS:
+	case IDM_5FPS:
+	case IDM_1FPS:
+		if (MenuId != m_MenuIdTiming)
+		{
+			CheckMenuItem(m_MenuIdTiming, false);
+			m_MenuIdTiming = MenuId;
+			CheckMenuItem(m_MenuIdTiming, true);
+			TranslateTiming();
+		}
+		break;
+
+	case IDM_EMUPAUSED:
+		TogglePause();
+		break;
+
+	case IDM_JOYSTICK:
+	case IDM_ANALOGUE_MOUSESTICK:
+	case IDM_DIGITAL_MOUSESTICK:
+		/* Disable current selection */
+		if (m_MenuIdSticks != 0)
+		{
+			CheckMenuItem(m_MenuIdSticks, false);
+
+			if (m_MenuIdSticks == IDM_JOYSTICK)
+			{
+				ResetJoystick();
+			}
+			else /* mousestick */
+			{
+				AtoDDisable();
+			}
+		}
+
+		if (MenuId == m_MenuIdSticks)
+		{
+			/* Joysticks switched off completely */
+			m_MenuIdSticks = 0;
+		}
+		else
+		{
+			/* Initialise new selection */
+			m_MenuIdSticks = MenuId;
+
+			if (m_MenuIdSticks == IDM_JOYSTICK)
+			{
+				InitJoystick();
+			}
+			else /* mousestick */
+			{
+				AtoDEnable();
+			}
+
+			if (JoystickEnabled)
+				CheckMenuItem(m_MenuIdSticks, true);
+			else
+				m_MenuIdSticks = 0;
+		}
+		break;
+
+	case IDM_FREEZEINACTIVE:
+		m_FreezeWhenInactive = !m_FreezeWhenInactive;
+		CheckMenuItem(IDM_FREEZEINACTIVE, m_FreezeWhenInactive);
+		break;
+
+	case IDM_HIDECURSOR:
+		m_HideCursor = !m_HideCursor;
+		CheckMenuItem(IDM_HIDECURSOR, m_HideCursor);
+		break;
+
+	case IDM_DEFINEKEYMAP:
+		OpenUserKeyboardDialog();
+		StayMuted = true;
+		break;
+
+	case IDM_LOADKEYMAP:
+		LoadUserKeyMap();
+		break;
+
+	case IDM_SAVEKEYMAP:
+		SaveUserKeyMap();
+		break;
+
+	case IDM_USERKYBDMAPPING:
+	case IDM_DEFAULTKYBDMAPPING:
+	case IDM_LOGICALKYBDMAPPING:
+		if (MenuId != m_MenuIdKeyMapping)
+		{
+			CheckMenuItem(m_MenuIdKeyMapping, false);
+			m_MenuIdKeyMapping = MenuId;
+			CheckMenuItem(m_MenuIdKeyMapping, true);
+			TranslateKeyMapping();
+		}
+		break;
+
+	case IDM_MAPAS:
+		m_KeyMapAS = !m_KeyMapAS;
+		CheckMenuItem(IDM_MAPAS, m_KeyMapAS);
+		break;
+
+	case IDM_MAPFUNCS:
+		m_KeyMapFunc = !m_KeyMapFunc;
+		CheckMenuItem(IDM_MAPFUNCS, m_KeyMapFunc);
+		break;
+
+	case IDM_ABOUT:
+		MessageBox(m_hWnd, AboutText, WindowTitle, MB_OK);
+		break;
+
+	case IDM_VIEWREADME:
+		strcpy(TmpPath, m_AppPath);
+		strcat(TmpPath, "Help\\index.html");
+		ShellExecute(m_hWnd, NULL, TmpPath, NULL, NULL, SW_SHOWNORMAL);;
+		break;
+
+	case IDM_EXIT:
+		PostMessage(m_hWnd, WM_CLOSE, 0, 0L);
+		break;
+
+	case IDM_SAVE_PREFS:
+		SavePreferences(true);
+		break;
+
+	case IDM_AUTOSAVE_PREFS_CMOS:
+		m_AutoSavePrefsCMOS = !m_AutoSavePrefsCMOS;
+		CheckMenuItem(IDM_AUTOSAVE_PREFS_CMOS, m_AutoSavePrefsCMOS);
+		m_AutoSavePrefsChanged = true;
+		break;
+
+	case IDM_AUTOSAVE_PREFS_FOLDERS:
+		m_AutoSavePrefsFolders = !m_AutoSavePrefsFolders;
+		CheckMenuItem(IDM_AUTOSAVE_PREFS_FOLDERS, m_AutoSavePrefsFolders);
+		m_AutoSavePrefsChanged = true;
+		break;
+
+	case IDM_AUTOSAVE_PREFS_ALL:
+		m_AutoSavePrefsAll = !m_AutoSavePrefsAll;
+		CheckMenuItem(IDM_AUTOSAVE_PREFS_ALL, m_AutoSavePrefsAll);
+		m_AutoSavePrefsChanged = true;
+		break;
+
+	case IDM_SELECT_USER_DATA_FOLDER:
+		SelectUserDataPath();
+		break;
+
+	case IDM_AMXONOFF:
+		AMXMouseEnabled = !AMXMouseEnabled;
+		CheckMenuItem(IDM_AMXONOFF, AMXMouseEnabled);
+		EnableMenuItem(IDM_CAPTUREMOUSE, AMXMouseEnabled);
+		break;
+
+	case IDM_CAPTUREMOUSE:
+		m_CaptureMouse = !m_CaptureMouse;
+		CheckMenuItem(IDM_CAPTUREMOUSE, m_CaptureMouse);
+		break;
+
+	case IDM_AMX_LRFORMIDDLE:
+		AMXLRForMiddle = !AMXLRForMiddle;
+		CheckMenuItem(IDM_AMX_LRFORMIDDLE, AMXLRForMiddle);
+		break;
+
+	case IDM_AMX_160X256:
+	case IDM_AMX_320X256:
+	case IDM_AMX_640X256:
+		if (MenuId != m_MenuIdAMXSize)
+		{
+			CheckMenuItem(m_MenuIdAMXSize, false);
+			m_MenuIdAMXSize = MenuId;
+			CheckMenuItem(m_MenuIdAMXSize, true);
+		}
+		TranslateAMX();
+		break;
+
+	case IDM_AMX_ADJUSTP50:
+	case IDM_AMX_ADJUSTP30:
+	case IDM_AMX_ADJUSTP10:
+	case IDM_AMX_ADJUSTM10:
+	case IDM_AMX_ADJUSTM30:
+	case IDM_AMX_ADJUSTM50:
+		if (m_MenuIdAMXAdjust != 0)
+		{
+			CheckMenuItem(m_MenuIdAMXAdjust, false);
+		}
+
+		if (MenuId != m_MenuIdAMXAdjust)
+		{
+			m_MenuIdAMXAdjust = MenuId;
+			CheckMenuItem(m_MenuIdAMXAdjust, true);
+		}
+		else
+		{
+			m_MenuIdAMXAdjust = 0;
+		}
+		TranslateAMX();
+		break;
+
+	case ID_MONITOR_RGB:
+		m_PaletteType = PaletteType::RGB;
+		CreateBitmap();
+		break;
+
+	case ID_MONITOR_BW:
+		m_PaletteType = PaletteType::BW;
+		CreateBitmap();
+		break;
+
+	case ID_MONITOR_GREEN:
+		m_PaletteType = PaletteType::Green;
+		CreateBitmap();
+		break;
+
+	case ID_MONITOR_AMBER:
+		m_PaletteType = PaletteType::Amber;
+		CreateBitmap();
+		break;
+
+	case IDM_TUBE_NONE:
+		if (TubeType != Tube::None)
+		{
+			TubeType = Tube::None;
+			UpdateTubeMenu();
+			ResetBeebSystem(MachineType, false);
+		}
+		break;
+
+	case IDM_TUBE_ACORN65C02:
+		if (TubeType != Tube::Acorn65C02)
+		{
+			TubeType = Tube::Acorn65C02;
+			UpdateTubeMenu();
+			ResetBeebSystem(MachineType, false);
+		}
+		break;
+
+	case IDM_TUBE_MASTER512:
+		if (TubeType != Tube::Master512CoPro)
+		{
+			TubeType = Tube::Master512CoPro;
+			UpdateTubeMenu();
+			ResetBeebSystem(MachineType, false);
+		}
+		break;
+
+	case IDM_TUBE_ACORNZ80:
+		if (TubeType != Tube::AcornZ80)
+		{
+			TubeType = Tube::AcornZ80;
+			UpdateTubeMenu();
+			ResetBeebSystem(MachineType, false);
+		}
+		break;
+
+	case IDM_TUBE_TORCHZ80:
+		if (TubeType != Tube::TorchZ80)
+		{
+			TubeType = Tube::TorchZ80;
+			UpdateTubeMenu();
+			ResetBeebSystem(MachineType, false);
+		}
+		break;
+
+	case IDM_TUBE_ACORNARM:
+		if (TubeType != Tube::AcornArm)
+		{
+			TubeType = Tube::AcornArm;
+			UpdateTubeMenu();
+			ResetBeebSystem(MachineType, false);
+		}
+		break;
+
+	case IDM_TUBE_SPROWARM:
+		if (TubeType != Tube::SprowArm)
+		{
+			TubeType = Tube::SprowArm;
+			UpdateTubeMenu();
+			ResetBeebSystem(MachineType, false);
+		}
+		break;
+
+	case ID_FILE_RESET:
+		ResetBeebSystem(MachineType, false);
+		break;
+
+	case ID_MODELB:
+		if (MachineType != Model::B)
+		{
+			ResetBeebSystem(Model::B, true);
+			UpdateModelMenu();
+		}
+		break;
+
+	case ID_MODELBINT:
+		if (MachineType != Model::IntegraB)
+		{
+			ResetBeebSystem(Model::IntegraB, true);
+			UpdateModelMenu();
+		}
+		break;
+
+	case ID_MODELBPLUS:
+		if (MachineType != Model::BPlus)
+		{
+			ResetBeebSystem(Model::BPlus, true);
+			UpdateModelMenu();
+		}
+		break;
+
+	case ID_MASTER128:
+		if (MachineType != Model::Master128)
+		{
+			ResetBeebSystem(Model::Master128, true);
+			UpdateModelMenu();
+		}
+		break;
+
+	case ID_REWINDTAPE:
+		RewindTape();
+		break;
+
+	case ID_UNLOCKTAPE:
+		UnlockTape = !UnlockTape;
+		SetUnlockTape(UnlockTape);
+		CheckMenuItem(ID_UNLOCKTAPE, UnlockTape);
+		break;
+
+	case ID_HIDEMENU:
+		m_HideMenuEnabled = !m_HideMenuEnabled;
+		CheckMenuItem(ID_HIDEMENU, m_HideMenuEnabled);
+		break;
+
+	case ID_RED_LEDS:
+		DiscLedColour = LEDColour::Red;
+		UpdateLEDMenu();
+		break;
+
+	case ID_GREEN_LEDS:
+		DiscLedColour = LEDColour::Green;
+		UpdateLEDMenu();
+		break;
+
+	case ID_SHOW_KBLEDS:
+		LEDs.ShowKB = !LEDs.ShowKB;
+		UpdateLEDMenu();
+		break;
+
+	case ID_SHOW_DISCLEDS:
+		LEDs.ShowDisc = !LEDs.ShowDisc;
+		UpdateLEDMenu();
+		break;
+
+	case ID_FDC_DLL:
+		if (MachineType != Model::Master128)
+			SelectFDC();
+		break;
+
+	case ID_8271:
+		KillDLLs();
+		NativeFDC = true;
+		CheckMenuItem(ID_8271, true);
+		CheckMenuItem(ID_FDC_DLL, false);
+		if (MachineType != Model::Master128)
+		{
+			char CfgName[20];
+			sprintf(CfgName, "FDCDLL%d", static_cast<int>(MachineType));
+			m_Preferences.SetStringValue(CfgName, "None");
+		}
+		break;
+
+	case ID_TAPE_FAST:
+		SetTapeSpeed(750);
+		SetTapeSpeedMenu();
+		break;
+
+	case ID_TAPE_MFAST:
+		SetTapeSpeed(1600);
+		SetTapeSpeedMenu();
+		break;
+
+	case ID_TAPE_MSLOW:
+		SetTapeSpeed(3200);
+		SetTapeSpeedMenu();
+		break;
+
+	case ID_TAPE_NORMAL:
+		SetTapeSpeed(5600);
+		SetTapeSpeedMenu();
+		break;
+
+	case ID_TAPESOUND:
+		TapeSoundEnabled = !TapeSoundEnabled;
+		CheckMenuItem(ID_TAPESOUND, TapeSoundEnabled);
+		break;
+
+	case ID_TAPECONTROL:
+		if (TapeControlEnabled)
+		{
+			TapeControlCloseDialog();
+		}
+		else
+		{
+			TapeControlOpenDialog(hInst, m_hWnd);
+		}
+		break;
+
+	case ID_BREAKOUT:
+		if (userPortBreakoutDialog != nullptr)
+		{
+			userPortBreakoutDialog->Close();
+			delete userPortBreakoutDialog;
+			userPortBreakoutDialog = nullptr;
+		}
+		else
+		{
+			userPortBreakoutDialog = new UserPortBreakoutDialog(hInst, m_hWnd);
+			userPortBreakoutDialog->Open();
+		}
+		break;
+
+	case ID_UPRM:
+		RTC_Enabled = !RTC_Enabled;
+		CheckMenuItem(ID_UPRM, RTC_Enabled);
+		break;
+
+	case ID_TELETEXTHALFMODE:
+		TeletextHalfMode = !TeletextHalfMode;
+		UpdateOptiMenu();
+		break;
+
+	case ID_BASIC_HARDWARE_ONLY:
+		BasicHardwareOnly = !BasicHardwareOnly;
+		UpdateOptiMenu();
+		break;
+
+	case ID_PSAMPLES:
+		PartSamples = !PartSamples;
+		UpdateOptiMenu();
+		break;
+
+	case IDM_EXPVOLUME:
+		SoundExponentialVolume = !SoundExponentialVolume;
+		CheckMenuItem(IDM_EXPVOLUME, SoundExponentialVolume);
+		break;
+
+	case IDM_SHOWDEBUGGER:
+		if (DebugEnabled)
+			DebugCloseDialog();
+		else
+			DebugOpenDialog(hInst, m_hWnd);
+		break;
+
+	case IDM_BLUR_OFF:
+	case IDM_BLUR_2:
+	case IDM_BLUR_4:
+	case IDM_BLUR_8:
+		if (MenuId != m_MotionBlur)
+		{
+			CheckMenuItem(m_MotionBlur, false);
+			m_MotionBlur = MenuId;
+			CheckMenuItem(m_MotionBlur, true);
+		}
+		break;
+
+	case IDM_CAPTURERES_DISPLAY:
+	case IDM_CAPTURERES_1280:
+	case IDM_CAPTURERES_640:
+	case IDM_CAPTURERES_320:
+		if (MenuId != m_MenuIdCaptureResolution)
+		{
+			CheckMenuItem(m_MenuIdCaptureResolution, false);
+			m_MenuIdCaptureResolution = MenuId;
+			CheckMenuItem(m_MenuIdCaptureResolution, true);
+		}
+		break;
+
+	case IDM_CAPTUREBMP:
+	case IDM_CAPTUREJPEG:
+	case IDM_CAPTUREGIF:
+	case IDM_CAPTUREPNG:
+		if (MenuId != m_MenuIdCaptureFormat)
+		{
+			CheckMenuItem(m_MenuIdCaptureFormat, false);
+			m_MenuIdCaptureFormat = MenuId;
+			CheckMenuItem(m_MenuIdCaptureFormat, true);
+		}
+		break;
+
+	case IDM_CAPTURESCREEN:
+		// Prompt for file name.  Need to do this in WndProc otherwise
+		// dialog does not show in full screen mode.
+		if (GetImageFile(m_CaptureFileName))
+			CaptureBitmapPending(false);
+		break;
+
+	case IDM_VIDEORES1:
+	case IDM_VIDEORES2:
+	case IDM_VIDEORES3:
+		if (MenuId != m_MenuIdAviResolution)
+		{
+			CheckMenuItem(m_MenuIdAviResolution, false);
+			m_MenuIdAviResolution = MenuId;
+			CheckMenuItem(m_MenuIdAviResolution, true);
+		}
+		break;
+
+	case IDM_VIDEOSKIP0:
+	case IDM_VIDEOSKIP1:
+	case IDM_VIDEOSKIP2:
+	case IDM_VIDEOSKIP3:
+	case IDM_VIDEOSKIP4:
+	case IDM_VIDEOSKIP5:
+		if (MenuId != m_MenuIdAviSkip)
+		{
+			CheckMenuItem(m_MenuIdAviSkip, false);
+			m_MenuIdAviSkip = MenuId;
+			CheckMenuItem(m_MenuIdAviSkip, true);
+		}
+		break;
+
+	case IDM_CAPTUREVIDEO:
+		CaptureVideo();
+		break;
+
+	case IDM_ENDVIDEO:
+		EndVideo();
+		break;
+
+#ifdef SPEECH_ENABLED
+	case IDM_SPEECH:
+		if (SpeechDefault)
+		{
+			CheckMenuItem(IDM_SPEECH, false);
+			tms5220_stop();
+			SpeechDefault = false;
+		}
+		else
+		{
+			tms5220_start();
+			if (SpeechEnabled)
+			{
+				CheckMenuItem(IDM_SPEECH, true);
+				SpeechDefault = true;
+			}
+		}
+		break;
+#endif
+
+	case ID_TELETEXT:
+		TeletextAdapterEnabled = !TeletextAdapterEnabled;
+		TeletextInit();
+		CheckMenuItem(ID_TELETEXT, TeletextAdapterEnabled);
+		break;
+
+	case ID_TELETEXTFILES:
+		if (!TeletextFiles)
+		{
+			TeletextFiles = true;
+			TeletextLocalhost = false;
+			TeletextCustom = false;
+			TeletextInit();
+		}
+		CheckMenuItem(ID_TELETEXTFILES, TeletextFiles);
+		CheckMenuItem(ID_TELETEXTLOCALHOST, TeletextLocalhost);
+		CheckMenuItem(ID_TELETEXTCUSTOM, TeletextCustom);
+		break;
+
+	case ID_TELETEXTLOCALHOST:
+		if (!TeletextLocalhost)
+		{
+			TeletextFiles = false;
+			TeletextLocalhost = true;
+			TeletextCustom = false;
+			TeletextInit();
+		}
+		CheckMenuItem(ID_TELETEXTFILES, TeletextFiles);
+		CheckMenuItem(ID_TELETEXTLOCALHOST, TeletextLocalhost);
+		CheckMenuItem(ID_TELETEXTCUSTOM, TeletextCustom);
+		break;
+
+	case ID_TELETEXTCUSTOM:
+		if (!TeletextCustom)
+		{
+			TeletextFiles = false;
+			TeletextLocalhost = false;
+			TeletextCustom = true;
+			for (int ch=0; ch<4; ch++)
+			{
+				strcpy(TeletextIP[ch],TeletextCustomIP[ch]);
+				TeletextPort[ch] = TeletextCustomPort[ch];
+			}
+			TeletextInit();
+		}
+		CheckMenuItem(ID_TELETEXTFILES, TeletextFiles);
+		CheckMenuItem(ID_TELETEXTLOCALHOST, TeletextLocalhost);
+		CheckMenuItem(ID_TELETEXTCUSTOM, TeletextCustom);
+		break;
+
+	case ID_HARDDRIVE:
+		SCSIDriveEnabled = !SCSIDriveEnabled;
+		SCSIReset();
+		SASIReset();
+		CheckMenuItem(ID_HARDDRIVE, SCSIDriveEnabled);
+		if (SCSIDriveEnabled) {
+			IDEDriveEnabled = false;
+			CheckMenuItem(ID_IDEDRIVE, IDEDriveEnabled);
+		}
+		break;
+
+	case ID_IDEDRIVE:
+		IDEDriveEnabled = !IDEDriveEnabled;
+		IDEReset();
+		CheckMenuItem(ID_IDEDRIVE, IDEDriveEnabled);
+		if (IDEDriveEnabled) {
+			SCSIDriveEnabled = false;
+			CheckMenuItem(ID_HARDDRIVE, SCSIDriveEnabled);
+		}
+		break;
+
+	case IDM_SELECT_HARD_DRIVE_FOLDER:
+		SelectHardDriveFolder();
+		break;
+
+	case ID_FLOPPYDRIVE:
+		Disc8271Enabled = !Disc8271Enabled;
+		Disc1770Enabled = !Disc1770Enabled;
+		CheckMenuItem(ID_FLOPPYDRIVE, Disc8271Enabled);
+		break;
+
+	case ID_RTCY2KADJUST:
+		RTCY2KAdjust = !RTCY2KAdjust;
+		RTCInit();
+		CheckMenuItem(ID_RTCY2KADJUST, RTCY2KAdjust);
+		break;
+
+	case IDM_TEXTTOSPEECH:
+		m_TextToSpeechEnabled = !m_TextToSpeechEnabled;
+		InitTextToSpeech();
+		break;
+
+	case IDM_TEXTVIEW:
+		m_TextViewEnabled = !m_TextViewEnabled;
+		InitTextView();
+		break;
+
+	case IDM_DISABLEKEYSWINDOWS:
+	{
+		bool reboot = false;
+		m_DisableKeysWindows = !m_DisableKeysWindows;
+		UpdateDisableKeysMenu();
+		if (m_DisableKeysWindows)
+		{
+			// Give user warning
+			if (Report(MessageType::Question,
+			           "Disabling the Windows keys will affect the whole PC.\n"
+			           "Go ahead and disable the Windows keys?") == MessageResult::Yes)
+			{
+				int binsize=sizeof(CFG_DISABLE_WINDOWS_KEYS);
+				RegSetBinaryValue(HKEY_LOCAL_MACHINE, CFG_KEYBOARD_LAYOUT,
+				                  CFG_SCANCODE_MAP, CFG_DISABLE_WINDOWS_KEYS, &binsize);
+				reboot = true;
+			}
+			else
+			{
+				m_DisableKeysWindows = false;
+				UpdateDisableKeysMenu();
+			}
+		}
+		else
+		{
+			int binsize=0;
+			RegSetBinaryValue(HKEY_LOCAL_MACHINE, CFG_KEYBOARD_LAYOUT,
+			                  CFG_SCANCODE_MAP, CFG_DISABLE_WINDOWS_KEYS, &binsize);
+			reboot = true;
+		}
+
+		if (reboot)
+		{
+			// Ask user for reboot
+			if (Report(MessageType::Question,
+			           "Reboot required for key change to\ntake effect. Reboot now?") == MessageResult::Yes)
+			{
+				RebootSystem();
+			}
+		}
+		break;
+	}
+
+	case IDM_DISABLEKEYSBREAK:
+		m_DisableKeysBreak = !m_DisableKeysBreak;
+		UpdateDisableKeysMenu();
+		break;
+
+	case IDM_DISABLEKEYSESCAPE:
+		m_DisableKeysEscape = !m_DisableKeysEscape;
+		UpdateDisableKeysMenu();
+		break;
+
+	case IDM_DISABLEKEYSSHORTCUT:
+		m_DisableKeysShortcut = !m_DisableKeysShortcut;
+		UpdateDisableKeysMenu();
+		break;
+
+	case IDM_DISABLEKEYSALL:
+		if (m_DisableKeysWindows && m_DisableKeysBreak &&
+			m_DisableKeysEscape && m_DisableKeysShortcut)
+		{
+			if (m_DisableKeysWindows)
+				HandleCommand(IDM_DISABLEKEYSWINDOWS);
+			m_DisableKeysBreak = false;
+			m_DisableKeysEscape = false;
+			m_DisableKeysShortcut = false;
+		}
+		else
+		{
+			if (!m_DisableKeysWindows)
+				HandleCommand(IDM_DISABLEKEYSWINDOWS);
+			m_DisableKeysBreak = true;
+			m_DisableKeysEscape = true;
+			m_DisableKeysShortcut = true;
+		}
+		UpdateDisableKeysMenu();
+		break;
+	}
+
+	if (!StayMuted)
+	{
+		SetSound(SoundState::Unmuted);
+	}
+
+	if (m_PaletteType != PrevPaletteType)
+	{
+		CreateBitmap();
+		UpdateMonitorMenu();
+	}
+}
+
+void BeebWin::SetSoundMenu()
+{
+	CheckMenuItem(IDM_SOUNDONOFF, SoundEnabled);
+	CheckMenuItem(IDM_MUSIC5000, Music5000Enabled);
+}
+
+void BeebWin::Activate(bool active)
+{
+	if (active)
+		m_frozen = false;
+	else if (m_FreezeWhenInactive)
+		m_frozen = true;
+}
+
+void BeebWin::Focus(bool gotit)
+{
+	if (gotit && m_TextViewEnabled)
+	{
+		SetFocus(m_hTextView);
+	}
+}
+
+bool BeebWin::IsFrozen()
+{
+	return m_frozen;
+}
+
+void BeebWin::TogglePause()
+{
+	m_EmuPaused = !m_EmuPaused;
+	CheckMenuItem(IDM_EMUPAUSED, m_EmuPaused);
+	if (m_ShowSpeedAndFPS && m_EmuPaused)
+	{
+		sprintf(m_szTitle, "%s  Paused", WindowTitle);
+		SetWindowText(m_hWnd, m_szTitle);
+	}
+
+	if (m_EmuPaused)
+	{
+		KillTimer(m_hWnd, 1);
+		KillTimer(m_hWnd, 2);
 	}
 	else
 	{
-		memcpy(&fileSpec, fs, sizeof(FSSpec));
-	}
-	
-	MacQTOpenVideoComponent(&m_ci);
-	
-	long	flag;
-	
-	flag = scListEveryCodec | scAllowZeroKeyFrameRate | scDisableFrameRateItem;
-	err = SCSetInfo(m_ci, scPreferenceFlagsType, &flag);
-	
-	CGrafPtr mWin;
-	PixMapHandle	pmh;
-	
-	mWin = GetWindowPort(mWindow);
-	SetPortWindowPort(mWindow);
-	
-	LockPortBits(mWin);
-	
-	pmh = GetPortPixMap(mWin);
-	
-	LockPixels(pmh);
-
-	err = SCSetTestImagePixMap(m_ci, pmh, nil, scPreferScaling);
-	
-	err = SCRequestSequenceSettings(m_ci);
-
-	UnlockPixels(pmh);
-	UnlockPortBits(mWin);
-
-	if (err == noErr)
-	{
-		CFDataRef	data;
-		Handle		hdl;
-		
-		err = SCGetInfo(m_ci, scSettingsStateType, &hdl);
-		if (err == noErr)
+		if (HasKbdCmd() && !m_KeyboardTimerElapsed)
 		{
-			HLock(hdl);
-			data = CFDataCreate(kCFAllocatorDefault, (unsigned char *) *hdl, GetHandleSize(hdl));
-			if (data)
-			{
-				CFPreferencesSetAppValue(CFSTR("QTVideoSetting"), data, kCFPreferencesCurrentApplication);
-				CFRelease(data);
-			}
-			
-			DisposeHandle(hdl);
+			SetKeyboardTimer();
+		}
+
+		if (m_AutoBootDisc && !m_BootDiscTimerElapsed)
+		{
+			SetBootDiscTimer();
 		}
 	}
-	
-	MacQTCloseVideoComponent(m_ci);
-	
-	if (err != noErr) return;
-	
-	MacQTOpenVideoComponent(&m_ci);
-	
-	SCTemporalSettings	ts;
-	
-	err = SCGetInfo(m_ci, scTemporalSettingsType, &ts);
-	ts.frameRate = FixRatio( (long) m_FramesPerSecond, 1);
-	if (ts.keyFrameRate < 1)
-		ts.keyFrameRate = (long) m_FramesPerSecond;
-	m_keyFrame  = m_keyFrameCount  = ts.keyFrameRate;
-	m_frameSkip = m_frameSkipCount = m_skip;					// Miss out every other frame
-	err = SCSetInfo(m_ci, scTemporalSettingsType, &ts);
-
-	err = EnterMovies();
-	
-	err = CreateMovieFile(&fileSpec, FOUR_CHAR_CODE('TVOD'), smCurrentScript, createMovieFileDeleteCurFile | createMovieFileDontCreateResFile,
-						  &m_resRefNum, &m_pMovie);
-	
-	if (err != noErr)
-	{
-		fprintf(stderr, "CreateMovieFailed with return code %d\n", err);
-	}
-	
-	m_trackFrame.left = 0;
-	m_trackFrame.top = 22;
-	m_trackFrame.right = m_XWinSize;
-	m_trackFrame.bottom = m_YWinSize + 22;
-	
-	m_firstFrame = true;
-	
-	switch (m_captureresolution)
-	{
-		case 1 :
-			m_pTrack = NewMovieTrack(m_pMovie, FixRatio(768, 1), FixRatio(576, 1), 0);
-			break;
-		case 2 :
-			m_pTrack = NewMovieTrack(m_pMovie, FixRatio(m_XWinSize, 1), FixRatio(m_YWinSize, 1), 0);
-			break;
-		case 3 :
-			m_pTrack = NewMovieTrack(m_pMovie, FixRatio(m_XWinSize / 2, 1), FixRatio(m_YWinSize / 2, 1), 0);
-			break;
-		case 4 :
-			m_pTrack = NewMovieTrack(m_pMovie, FixRatio(m_XWinSize / 4, 1), FixRatio(m_YWinSize / 4, 1), 0);
-			break;
-	}
-	
-	m_pMedia = NewTrackMedia(m_pTrack, VideoMediaType, 44100, nil, 0);
-	
-	// sound
-	
-	m_soundDesc = (SoundDescriptionHandle) NewHandleClear(sizeof(SoundDescription));
-	
-	(**m_soundDesc).descSize    = sizeof(SoundDescription);
-	(**m_soundDesc).dataFormat  = k8BitOffsetBinaryFormat;
-	(**m_soundDesc).numChannels = 1;
-	(**m_soundDesc).sampleSize  = 8;
-	(**m_soundDesc).sampleRate  = (UnsignedFixed) FixRatio(44100, 1);
-	
-	m_soundBuffer = NewHandle(32768);
-	MoveHHi(m_soundBuffer);
-	HLock(m_soundBuffer);
-	m_soundBufferPtr = *m_soundBuffer;
-	m_soundBufferLen = 0;
-
-	m_sTrack = NewMovieTrack(m_pMovie, 0, 0, kFullVolume);
-	m_sMedia = NewTrackMedia(m_sTrack, SoundMediaType, 44100, nil, 0);
-	
-	err = BeginMediaEdits(m_pMedia);
-	err = BeginMediaEdits(m_sMedia);
-	
 }
 
-void BeebWin::EndCaptureVideo()
-
+bool BeebWin::IsPaused()
 {
-OSErr err;
-short resId =movieInDataForkResID;
-    
-    if (m_pMovie == NULL) return;
-    
-    SetMenuCommandIDCheck('vidc', false);
-
-    err = SCCompressSequenceEnd(m_ci);
-    if (err != noErr) fprintf(stderr, "SCCompressSequenceEnd error %d\n", err);
-        
-    if (m_pMedia) EndMediaEdits(m_pMedia);
-    if (m_pTrack) InsertMediaIntoTrack(m_pTrack, 0, 0, GetMediaDuration(m_pMedia), fixed1);
-
-    if (m_sMedia) EndMediaEdits(m_sMedia);
-    if (m_sTrack) InsertMediaIntoTrack(m_sTrack, 0, 0, GetMediaDuration(m_sMedia), fixed1);
-
-    if (m_pMovie) AddMovieResource(m_pMovie, m_resRefNum, &resId, NULL);
-    
-    if (m_resRefNum != 0) CloseMovieFile(m_resRefNum);
-    
-    MacQTCloseVideoComponent(m_ci);
-    
-    if (m_soundDesc)
-    {
-        DisposeHandle( (Handle) m_soundDesc);
-        m_soundDesc = NULL;
-    }
-    
-    if (m_soundBuffer)
-    {
-        DisposeHandle( (Handle) m_soundBuffer);
-        m_soundBuffer = NULL;
-    }
-
-    if (m_pMovie)
-    {
-        DisposeMovie(m_pMovie);
-        m_pMovie = NULL;
-    }
-    
-    ExitMovies();
-    
-    m_pMovie = NULL;
-    
+	return m_EmuPaused;
 }
+
+#ifndef HID_USAGE_PAGE_GENERIC
+#define HID_USAGE_PAGE_GENERIC ((USHORT)0x01)
 #endif
 
-void BeebWin::doCopy()
-{
-    
-    if (PrinterEnabled)
-        TogglePrinter();
-
-    if (PrinterFileHandle != NULL)
-    {
-        fclose(PrinterFileHandle);
-        PrinterFileHandle = NULL;
-    }
-    SetMenuCommandIDCheck('pfle', false);
-        
-    m_MenuIdPrinterPort = IDM_PRINTER_CLIPBOARD;
-    SetMenuCommandIDCheck('pclp', true);
-    TranslatePrinterPort();
-    TogglePrinter();        // Turn printer back on
-        
-    m_printerbufferlen = 0;
-        
-    m_clipboard[0] = 2; // turn printer on CTRL-B
-    m_clipboard[1] = 'L';
-    m_clipboard[2] = '.';
-    m_clipboard[3] = 13;
-    m_clipboard[4] = 3; // turn printer off CTRL-C
-    m_clipboardlen = 5;
-    m_clipboardptr = 0;
-    m_printerbufferlen = 0;
-    SetupClipboard();
-}
-
-void BeebWin::doPaste()
-{
-PasteboardRef outPasteboard;
-OSStatus err;
-ItemCount itemCount;
-
-    err = PasteboardCreate(kPasteboardClipboard, &outPasteboard);
-
-    // Count the number of items on the pasteboard so we can iterate through them.
-    err = PasteboardGetItemCount( outPasteboard, &itemCount );
-
-    for( UInt32 itemIndex = 1; itemIndex <= itemCount; itemIndex++ )
-    {
-        PasteboardItemID  itemID;
-        CFArrayRef      flavorTypeArray;
-        CFIndex        flavorCount;
-                
-        // Every item is identified by a unique value.
-        err = PasteboardGetItemIdentifier( outPasteboard, itemIndex, &itemID );
-                
-        // The item's flavor types are retreived as an array which we are responsible for
-        // releaseing later. It's important to take into account all flavors, their flags
-        // and the context the data will be used when deciding which flavor ought to be used.
-        // The flavor type array is a CFType and we'll need to call CFRelease on it later.
-        err = PasteboardCopyItemFlavors( outPasteboard, itemID, &flavorTypeArray );
-                
-        // Count the number of flavors in the item so we can iterate through them.
-        flavorCount = CFArrayGetCount( flavorTypeArray );
-                
-        for( CFIndex flavorIndex = 0; flavorIndex < flavorCount; flavorIndex++ )
-        {
-            CFStringRef flavorType;
-            CFDataRef   flavorData;
-            CFIndex     flavorDataSize;
-            char        flavorTypeStr[128];
-                    
-            // grab the flavor name so we can extract it's flags and data
-            flavorType = (CFStringRef)CFArrayGetValueAtIndex( flavorTypeArray, flavorIndex );
-                    
-            // Having looked at the item's flavors and their flags we've settled on the data
-            // we want to reteive.  Because we're copying the flavor data we'll need to
-            // dispose of it via CFRelease when we no longer need it.
-            err = PasteboardCopyItemFlavorData( outPasteboard, itemID, flavorType, &flavorData );
-                    
-            flavorDataSize = CFDataGetLength( flavorData );
-                    
-            // Now that we have the flavor, flags, and data we need to format it nicely for the text view.
-            CFStringGetCString( flavorType, flavorTypeStr, 128, kCFStringEncodingMacRoman );
-                    
-            if (strcmp(flavorTypeStr, "com.apple.traditional-mac-plain-text") == 0)
-            {
-                for( short dataIndex = 0; dataIndex <= flavorDataSize; dataIndex++ )
-                {
-                    char byte = *(CFDataGetBytePtr( flavorData ) + dataIndex);
-                    fprintf(stderr, "Clipboard %d = %d\n", dataIndex, byte);
-                    m_clipboard[dataIndex] = byte;
-                }
-                        
-                m_clipboardlen = (int)flavorDataSize;
-                m_clipboardptr = 0;
-                SetupClipboard();
-            }
-                    
-        }
-                
-        CFRelease(flavorTypeArray);
-    }
-
-    CFRelease(outPasteboard);
-
-}
-
-#if 0//ACH - Copy and Paste PDF
-
-//--------------------------------------------------------------------------------------------------
-/////////////////////////////// Support for Copy/Paste of PDF Data /////////////////////////////////
-//--------------------------------------------------------------------------------------------------
-
-// To create PDF data for the Pasteboard, we need to set up a CFDataConsumer that collects data in a CFMutableDataRef.
-// Here are the two required callbacks:
-
-static size_t MyCFDataPutBytes(void* info, const void* buffer, size_t count)
-{
-    CFDataAppendBytes((CFMutableDataRef)info, (const UInt8 *) buffer, count);
-    return count;
-}
-
-static void MyCFDataRelease(void* info)
-{
-    CFRelease((CFMutableDataRef)info);
-}
-
-void MyDrawIntoPDFPage(CGContextRef pdfContext, PMRect pageRect, int starty, int nlines)
-{
-    CGrafPtr mWin;
-    register int i, j;
-    char *p;
-    
-    Rect destR;
-    Rect srcR;
-    
-    mWin = GetWindowPort(mainWin->mWindow);
-    SetPortWindowPort(mainWin->mWindow);
-    GetPortBounds(mWin, &destR);
-    
-    srcR.left = 0;
-    srcR.right = ActualScreenWidth;
-    
-    if (TeletextEnabled)
-    {
-        srcR.top = 0;
-        srcR.bottom = 512;
-    }
-    else
-    {
-        srcR.top = starty;
-        srcR.bottom = starty + nlines;
-    }
-    
-    long *pPtr32;
-    short *pPtr16;
-    
-    CGContextRef myBitmapContext;
-    
-    PixMapHandle    pmh;
-    int                bpp;
-    char            col;
-    
-    LockPortBits(mWin);
-    pmh = GetPortPixMap(mWin);
-    LockPixels(pmh);
-    bpp = GetPixDepth(pmh);
-    
-    UnlockPixels(pmh);
-    UnlockPortBits(mWin);
-    
-    myBitmapContext = MyCreateBitmapContext(srcR.right - srcR.left, srcR.bottom - srcR.top, bpp);
-    
-    pPtr32 = (long *) CGBitmapContextGetData (myBitmapContext);
-    pPtr16 = (short *) CGBitmapContextGetData (myBitmapContext);
-    
-    p = mainWin->m_screen;
-    
-    for (j = srcR.top; j < srcR.bottom; ++j)
-    {
-        p = mainWin->m_screen + j * 800 + srcR.left;
-        
-        for (i = srcR.left; i < srcR.right; ++i)
-        {
-            col = *p++;
-
-            switch (bpp)
-            {
-                case 32 :
-                    if (mainWin->m_Invert)
-                    {
-                        if (col == 0) *pPtr32++ = 0xffffffff;
-                        else if (col == 7) *pPtr32++ = ( (mainWin->palette_type == mainWin->AMBER) || (mainWin->palette_type == mainWin->GREEN) ) ? mainWin->m_RGB32[7] : mainWin->m_RGB32[0];
-                        else *pPtr32++ = mainWin->m_RGB32[col];
-                    }
-                    else *pPtr32++ = mainWin->m_RGB32[col];
-                    break;
-                case 16 :
-                    if (mainWin->m_Invert)
-                    {
-                        if (col == 0) *pPtr16++ = 0x7fff;
-                        else if (col == 7) *pPtr16++ = ( (mainWin->palette_type == mainWin->AMBER) || (mainWin->palette_type == mainWin->GREEN) ) ? mainWin->m_RGB16[7] : mainWin->m_RGB16[0];
-                        else *pPtr16++ = mainWin->m_RGB16[col];
-                    }
-                    else *pPtr16++ = mainWin->m_RGB16[col];
-                    break;
-            }
-        }
-    }
-    
-    CGImageRef myImage;
-    
-    //    CGColorSpaceRef genericColorSpace = GetGenericRGBColorSpace();
-    
-    CGRect  docRect = CGRectMake (pageRect.left, pageRect.top, pageRect.right, pageRect.bottom);
-    
-//    CGContextBeginPage(pdfContext, &docRect);
-    
-    // ensure that we are drawing in the correct color space, a calibrated color space
-
-    CGColorSpaceRef colorSpace;
-    colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-    
-    CGContextSetFillColorSpace(pdfContext, colorSpace);
-    CGContextSetStrokeColorSpace(pdfContext, colorSpace);
-    
-    CGColorSpaceRelease(colorSpace);
-
-    myImage = CGBitmapContextCreateImage(myBitmapContext);
-    
-    docRect.origin.x = pageRect.right / 2 - (destR.right - destR.left) / 2;
-    docRect.origin.y = pageRect.bottom / 2 - (destR.bottom - destR.top) / 2;
-
-    docRect.size.width = (destR.right - destR.left);
-    docRect.size.height = (destR.bottom - destR.top);
-    
-    CGContextDrawImage(pdfContext, docRect, myImage);
-
-//    CGContextEndPage(pdfContext);
-    
-    CGContextRelease(myBitmapContext);
-    
-    CGImageRelease(myImage);
-
-}
-
-void CopyToClipBoardAsPDF(int starty, int nlines)
-{
-    //    fprintf(stderr, "Print %d (%c) to clipboard\n", Value, Value);
-    
-    PasteboardRef outPasteboard;
-    OSStatus err;
-    
-    CGRect  docRect = CGRectMake (0, 0, mainWin->m_XWinSize, mainWin->m_YWinSize);
-    
-    CFDataRef       pdfData = CFDataCreateMutable (kCFAllocatorDefault, 0);
-    CGContextRef            pdfContext;
-    CGDataConsumerRef       consumer;
-    CGDataConsumerCallbacks cfDataCallbacks = {MyCFDataPutBytes, MyCFDataRelease };
-    
-    err = PasteboardCreate(kPasteboardClipboard, &outPasteboard);
-    
-    err = PasteboardClear( outPasteboard );
-    
-    consumer = CGDataConsumerCreate ((void*)pdfData, &cfDataCallbacks);// 2
-    
-    pdfContext = CGPDFContextCreate (consumer, &docRect, NULL);// 3
-    
-    PMRect    pageRect;
-    pageRect.top = 0;
-    pageRect.left = 0;
-    pageRect.bottom = mainWin->m_YWinSize;
-    pageRect.right = mainWin->m_XWinSize;
-    
-    CGContextBeginPage(pdfContext, &docRect);
-    
-    MyDrawIntoPDFPage (pdfContext, pageRect, starty, nlines);
-    
-    CGContextEndPage(pdfContext);
-    
-    CGContextRelease (pdfContext);
-    
-    PasteboardPutItemFlavor( outPasteboard, (PasteboardItemID)1,
-                            kUTTypePDF, pdfData, kPasteboardFlavorNoFlags );
-    
-    CGDataConsumerRelease (consumer);
-    
-    CFRelease(outPasteboard);
-    
-}
+#ifndef HID_USAGE_GENERIC_MOUSE
+#define HID_USAGE_GENERIC_MOUSE ((USHORT)0x02)
 #endif
+
+void BeebWin::CaptureMouse()
+{
+	if (m_MouseCaptured)
+		return;
+
+	RAWINPUTDEVICE Rid[1];
+	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
+	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
+	Rid[0].dwFlags = 0;
+	Rid[0].hwndTarget = m_hWnd;
+	if (!RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])))
+		return;
+
+	// Capture mouse
+	m_MouseCaptured = true;
+	SetCapture(m_hWnd);
+
+	// Move mouse to window centre and hide cursor
+	POINT centre{ m_XWinSize/2, m_YWinSize/2 };
+	m_RelMousePos = centre;
+	ClientToScreen(m_hWnd, &centre);
+	SetCursorPos(centre.x, centre.y);
+	ShowCursor(false);
+
+	// Clip cursor to the main window's client area. Coordinates are converted
+	// to screen coordinates for ClipCursor()
+	RECT clientRect;
+	GetClientRect(m_hWnd, &clientRect);
+	MapWindowPoints(m_hWnd, nullptr, reinterpret_cast<LPPOINT>(&clientRect), 2);
+	ClipCursor(&clientRect);
+
+	// Display info on title bar
+	UpdateWindowTitle();
+}
+
+void BeebWin::ReleaseMouse()
+{
+	if (!m_MouseCaptured)
+		return;
+
+	// Deregister to stop receiving WM_INPUT messages.
+	RAWINPUTDEVICE Rid[1];
+	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
+	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
+	Rid[0].dwFlags = RIDEV_REMOVE;
+	Rid[0].hwndTarget = nullptr;
+
+	RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+
+	ClipCursor(nullptr);
+
+	// Show cursor in the centre of the window
+	POINT centre{ m_XWinSize / 2, m_YWinSize / 2 };
+	ClientToScreen(m_hWnd, &centre);
+	SetCursorPos(centre.x, centre.y);
+
+	// Release mouse and show cursor
+	ShowCursor(true);
+	ReleaseCapture();
+
+	m_MouseCaptured = false;
+
+	// Restore original window title
+	UpdateWindowTitle();
+}
+
+void BeebWin::OpenUserKeyboardDialog()
+{
+	// Pause the emulator if not already paused.
+
+	m_WasPaused = mainWin->IsPaused();
+
+	if (!m_WasPaused)
+	{
+		TogglePause();
+	}
+
+	UserKeyboardDialog(m_hWnd);
+}
+
+void BeebWin::UserKeyboardDialogClosed()
+{
+	// Restart the emulator if it wasn't paused before the "user keyboard"
+	// dialog box was opened.
+
+	if (!mainWin->m_WasPaused)
+	{
+		mainWin->TogglePause();
+	}
+}
+
+/*****************************************************************************/
+// Parse command line parameters
+
+void BeebWin::ParseCommandLine()
+{
+	bool invalid;
+
+	m_CommandLineFileName1[0] = 0;
+	m_CommandLineFileName2[0] = 0;
+
+	int i = 1;
+
+	while (i < __argc)
+	{
+		// Params with no arguments
+		if (_stricmp(__argv[i], "-DisMenu") == 0)
+		{
+			m_DisableMenu = true;
+		}
+		else if (_stricmp(__argv[i], "-NoAutoBoot") == 0)
+		{
+			m_NoAutoBoot = true;
+		}
+		else if (_stricmp(__argv[i], "-StartPaused") == 0)
+		{
+			m_StartPaused = true;
+			m_EmuPaused = true;
+		}
+		else if (_stricmp(__argv[i], "-FullScreen") == 0)
+		{
+			m_startFullScreen = true;
+		}
+		else if (__argv[i][0] == '-' && i+1 >= __argc)
+		{
+			Report(MessageType::Error, "Invalid command line parameter:\n  %s",
+			       __argv[i]);
+		}
+		else // Params with additional arguments
+		{
+			invalid = false;
+
+			const bool Data       = _stricmp(__argv[i], "-Data") == 0;
+			const bool CustomData = _stricmp(__argv[i], "-CustomData") == 0;
+
+			if (Data || CustomData)
+			{
+				strcpy(m_UserDataPath, __argv[++i]);
+
+				if (strcmp(m_UserDataPath, "-") == 0)
+				{
+					// Use app path
+					strcpy(m_UserDataPath, m_AppPath);
+					strcat(m_UserDataPath, "UserData\\");
+				}
+				else
+				{
+					if (m_UserDataPath[strlen(m_UserDataPath) - 1] != '\\' &&
+					    m_UserDataPath[strlen(m_UserDataPath) - 1] != '/')
+					{
+						strcat(m_UserDataPath, "\\");
+					}
+				}
+
+				if (CustomData) {
+					m_CustomData = true;
+				}
+			}
+			else if (_stricmp(__argv[i], "-Prefs") == 0)
+			{
+				strcpy(m_PrefsFile, __argv[++i]);
+			}
+			else if (_stricmp(__argv[i], "-Roms") == 0)
+			{
+				strcpy(RomFile, __argv[++i]);
+			}
+			else if (_stricmp(__argv[i], "-EcoStn") == 0)
+			{
+				int a = atoi(__argv[++i]);
+
+				if (a < 1 || a > 254)
+					invalid = true;
+				else
+					EconetStationNumber = static_cast<unsigned char>(a);
+			}
+			else if (_stricmp(__argv[i], "-EcoFF") == 0)
+			{
+				int a = atoi(__argv[++i]);
+
+				if (a < 1)
+					invalid = true;
+				else
+					EconetFlagFillTimeout = a;
+			}
+			else if (_stricmp(__argv[i], "-KbdCmd") == 0)
+			{
+				strncpy(m_KbdCmd, __argv[++i], sizeof(m_KbdCmd));
+			}
+			else if (_stricmp(__argv[i], "-DebugScript") == 0)
+			{
+				strncpy(m_DebugScript, __argv[++i], sizeof(m_DebugScript));
+			}
+			else if (_stricmp(__argv[i], "-DebugLabels") == 0)
+			{
+				m_DebugLabelsFileName = __argv[++i];
+			}
+			else if (_stricmp(__argv[i], "-AutoBootDelay") == 0)
+			{
+				int a = atoi(__argv[++i]);
+
+				if (a < 1)
+					invalid = true;
+				else
+					m_AutoBootDelay = a;
+			}
+			else if (__argv[i][0] == '-')
+			{
+				invalid = true;
+				++i;
+			}
+			else
+			{
+				// Assume it's a file name
+				if (m_CommandLineFileName1[0] == 0)
+					strncpy(m_CommandLineFileName1, __argv[i], _MAX_PATH);
+				else if (m_CommandLineFileName2[0] == 0)
+					strncpy(m_CommandLineFileName2, __argv[i], _MAX_PATH);
+			}
+
+			if (invalid)
+			{
+				Report(MessageType::Error, "Invalid command line parameter:\n  %s %s",
+				       __argv[i-1], __argv[i]);
+			}
+		}
+
+		++i;
+	}
+}
+
+/*****************************************************************************/
+// Check for preference files in the same directory as the file specified
+void BeebWin::CheckForLocalPrefs(const char *path, bool bLoadPrefs)
+{
+	char file[_MAX_PATH];
+	char drive[_MAX_DRIVE];
+	char dir[_MAX_DIR];
+	FILE *fd;
+
+	if (path[0] == 0)
+		return;
+
+	_splitpath(path, drive, dir, NULL, NULL);
+
+	// Look for prefs file
+	_makepath(file, drive, dir, "Preferences", "cfg");
+	fd = fopen(file, "r");
+	if (fd != NULL)
+	{
+		fclose(fd);
+		// File exists, use it
+		strcpy(m_PrefsFile, file);
+		if (bLoadPrefs)
+		{
+			LoadPreferences();
+
+			// Reinit with new prefs
+			SetWindowPos(m_hWnd, HWND_TOP, m_XWinPos, m_YWinPos,
+						 0, 0, SWP_NOSIZE);
+			HandleCommand(m_DisplayRenderer);
+			InitMenu();
+			SetWindowText(m_hWnd, WindowTitle);
+			if (m_MenuIdSticks == IDM_JOYSTICK)
+				InitJoystick();
+		}
+	}
+
+	// Look for ROMs file
+	_makepath(file, drive, dir, "Roms", "cfg");
+	fd = fopen(file, "r");
+	if (fd != NULL)
+	{
+		fclose(fd);
+		// File exists, use it
+		strcpy(RomFile, file);
+		if (bLoadPrefs)
+		{
+			ReadROMFile(RomFile, RomConfig);
+			BeebReadRoms();
+		}
+	}
+}
+
+/*****************************************************************************/
+// File location of a file passed on command line
+
+void BeebWin::FindCommandLineFile(char *CmdLineFile)
+{
+	bool ssd = false;
+	bool dsd = false;
+	bool adfs = false;
+	bool cont = false;
+	char TmpPath[_MAX_PATH];
+	char *FileName = NULL;
+	bool uef = false;
+	bool csw = false;
+	bool img = false;
+
+	// See if file is readable
+	if (CmdLineFile[0] != 0)
+	{
+		FileName = CmdLineFile;
+		strncpy(TmpPath, CmdLineFile, _MAX_PATH);
+
+		// Work out which type of files it is
+		const char *ext = strrchr(FileName, '.');
+		if (ext != NULL)
+		{
+			cont = true;
+			if (_stricmp(ext+1, "ssd") == 0)
+				ssd = true;
+			else if (_stricmp(ext+1, "dsd") == 0)
+				dsd = true;
+			else if (_stricmp(ext+1, "adl") == 0)
+				adfs = true;
+			else if (_stricmp(ext+1, "adf") == 0)
+				adfs = true;
+			else if (_stricmp(ext+1, "uef") == 0)
+				uef = true;
+			else if (_stricmp(ext+1, "csw") == 0)
+				csw = true;
+			else if (_stricmp(ext+1, "img") == 0)
+				img = true;
+			else
+			{
+				Report(MessageType::Error, "Unrecognised file type:\n  %s",
+				       FileName);
+
+				cont = false;
+			}
+		}
+	}
+
+	if (cont)
+	{
+		cont = false;
+
+		FILE *fd = fopen(FileName, "rb");
+		if (fd != NULL)
+		{
+			cont = true;
+			fclose(fd);
+		}
+		else if (uef)
+		{
+			// Try getting it from BeebState directory
+			strcpy(TmpPath, m_UserDataPath);
+			strcat(TmpPath, "beebstate/");
+			strcat(TmpPath, FileName);
+			fd = fopen(TmpPath, "rb");
+			if (fd != NULL)
+			{
+				cont = true;
+				FileName = TmpPath;
+				fclose(fd);
+			}
+			else
+			{
+				// Try getting it from Tapes directory
+				strcpy(TmpPath, m_UserDataPath);
+				strcat(TmpPath, "tapes/");
+				strcat(TmpPath, FileName);
+				fd = fopen(TmpPath, "rb");
+				if (fd != NULL)
+				{
+					cont = true;
+					FileName = TmpPath;
+					fclose(fd);
+				}
+			}
+		}
+		else if (csw)
+		{
+			// Try getting it from Tapes directory
+			strcpy(TmpPath, m_UserDataPath);
+			strcat(TmpPath, "tapes/");
+			strcat(TmpPath, FileName);
+			fd = fopen(TmpPath, "rb");
+			if (fd != NULL)
+			{
+				cont = true;
+				FileName = TmpPath;
+				fclose(fd);
+			}
+		}
+		else
+		{
+			// Try getting it from DiscIms directory
+			strcpy(TmpPath, m_UserDataPath);
+			strcat(TmpPath, "discims/");
+			strcat(TmpPath, FileName);
+			fd = fopen(TmpPath, "rb");
+			if (fd != NULL)
+			{
+				cont = true;
+				FileName = TmpPath;
+				fclose(fd);
+			}
+		}
+
+		if (!cont)
+		{
+			Report(MessageType::Error, "Cannot find file:\n  %s", FileName);
+			cont = false;
+		}
+	}
+
+	if (cont)
+	{
+		PathCanonicalize(CmdLineFile, TmpPath);
+	}
+	else
+	{
+		CmdLineFile[0] = 0;
+	}
+}
+
+/*****************************************************************************/
+// Handle a file name passed on command line
+
+void BeebWin::HandleCommandLineFile(int drive, const char *CmdLineFile)
+{
+	bool ssd = false;
+	bool dsd = false;
+	bool adfs = false;
+	bool cont = false;
+	const char *FileName = NULL;
+	bool uef = false;
+	bool csw = false;
+	bool img = false;
+
+	m_AutoBootDisc = false;
+
+	if (CmdLineFile[0] != 0)
+	{
+		FileName = CmdLineFile;
+
+		// Work out which type of files it is
+		const char *ext = strrchr(FileName, '.');
+		if (ext != NULL)
+		{
+			cont = true;
+			if (_stricmp(ext+1, "ssd") == 0)
+				ssd = true;
+			else if (_stricmp(ext+1, "dsd") == 0)
+				dsd = true;
+			else if (_stricmp(ext+1, "adl") == 0)
+				adfs = true;
+			else if (_stricmp(ext+1, "adf") == 0)
+				adfs = true;
+			else if (_stricmp(ext+1, "uef") == 0)
+				uef = true;
+			else if (_stricmp(ext+1, "csw") == 0)
+				csw = true;
+			else if (_stricmp(ext+1, "img") == 0)
+				img = true;
+			else
+			{
+				Report(MessageType::Error, "Unrecognised file type:\n  %s",
+				       FileName);
+
+				cont = false;
+			}
+		}
+	}
+
+	if (cont)
+	{
+		cont = false;
+
+		FILE *fd = fopen(FileName, "rb");
+		if (fd != NULL)
+		{
+			cont = true;
+			fclose(fd);
+		}
+
+		if (!cont)
+		{
+			Report(MessageType::Error, "Cannot find file:\n  %s", FileName);
+		}
+	}
+
+	if (cont)
+	{
+		if (uef)
+		{
+			// Determine if file is a tape or a state file
+			bool stateFile = false;
+			FILE *fd = fopen(FileName, "rb");
+			if (fd != NULL)
+			{
+				char buf[14];
+				fread(buf,14,1,fd);
+				if (strcmp(buf,"UEF File!")==0 && buf[12]==0x6c && buf[13]==0x04)
+				{
+					stateFile = true;
+				}
+				fclose(fd);
+			}
+
+			if (stateFile)
+				LoadUEFState(FileName);
+			else
+				LoadUEFTape(FileName);
+
+			cont = false;
+		}
+		else if (csw)
+		{
+			CSWOpen(FileName);
+			cont = false;
+		}
+	}
+
+	if (cont)
+	{
+		if (MachineType != Model::Master128)
+		{
+			if (dsd)
+			{
+				if (NativeFDC)
+					LoadSimpleDSDiscImage(FileName, drive, 80);
+				else
+					Load1770DiscImage(FileName, drive, DiscType::DSD);
+			}
+			else if (ssd)
+			{
+				if (NativeFDC)
+					LoadSimpleDiscImage(FileName, drive, 0, 80);
+				else
+					Load1770DiscImage(FileName, drive, DiscType::SSD);
+			}
+			else if (adfs)
+			{
+				if (!NativeFDC)
+					Load1770DiscImage(FileName, drive, DiscType::ADFS);
+				else
+					cont = false;  // cannot load adfs with native DFS
+			}
+			else if (img)
+			{
+				if (NativeFDC)
+					LoadSimpleDiscImage(FileName, drive, 0, 80); // Treat like an ssd
+				else
+					Load1770DiscImage(FileName, drive, DiscType::IMG);
+			}
+		}
+		else // Model::Master128
+		{
+			if (dsd)
+				Load1770DiscImage(FileName, drive, DiscType::DSD);
+			else if (ssd)
+				Load1770DiscImage(FileName, drive, DiscType::SSD);
+			else if (adfs)
+				Load1770DiscImage(FileName, drive, DiscType::ADFS);
+			else if (img)
+				Load1770DiscImage(FileName, drive, DiscType::IMG);
+		}
+	}
+
+	if (cont && !m_NoAutoBoot && drive == 0)
+	{
+		m_AutoBootDisc = true;
+
+		if (!m_StartPaused)
+		{
+			SetBootDiscTimer();
+		}
+	}
+}
+
+void BeebWin::DoShiftBreak()
+{
+	// Do a shift + break
+	ResetBeebSystem(MachineType, false);
+	BeebKeyDown(0, 0); // Shift key
+	m_ShiftBooted = true;
+}
+
+bool BeebWin::HasKbdCmd() const
+{
+	return m_KbdCmd[0] != '\0';
+}
+
+void BeebWin::SetKeyboardTimer()
+{
+	SetTimer(m_hWnd, 1, 1000, NULL);
+}
+
+void BeebWin::SetBootDiscTimer()
+{
+	SetTimer(m_hWnd, 2, m_AutoBootDelay, NULL);
+}
+
+void BeebWin::KillBootDiscTimer()
+{
+	m_BootDiscTimerElapsed = true;
+	KillTimer(m_hWnd, 2);
+}
+
 
 /****************************************************************************/
-/* Disc Import / Export */
-
-static DFS_DISC_CATALOGUE dfsCat;
-//static int filesSelected[DFS_MAX_CAT_SIZE];
- //static int numSelected;
-//static char szExportFolder[MAX_PATH];
-
-//ACH - File export seems to have been removed in BeebEm4
-// File export
-
-/*
-int CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+void BeebWin::HandleEnvironmentVariables()
 {
-    switch (uMsg)
-    {
-        case BFFM_INITIALIZED:
-            if (szExportFolder[0])
-            {
-                SendMessage(hwnd, BFFM_SETEXPANDED, TRUE, (LPARAM)szExportFolder);
-                SendMessage(hwnd, BFFM_SETSELECTION, TRUE, (LPARAM)szExportFolder);
-            }
-            break;
-    }
-    return 0;
-}
-*/
-
-/*
-BOOL CALLBACK DiscExportDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    char str[100];
-    HWND hwndList;
-    char szDisplayName[MAX_PATH];
-    int i, j;
-    
-    hwndList = GetDlgItem(hwndDlg, IDC_EXPORTFILELIST);
-    
-    switch (message)
-    {
-        case WM_INITDIALOG:
-            SendMessage(hwndList, WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), (LPARAM)MAKELPARAM(FALSE,0));
-            
-            for (i = 0; i < dfsCat.numFiles; ++i)
-            {
-                sprintf(str, "%c.%-7s %06X %06X %06X",
-                        dfsCat.fileAttrs[i].directory,
-                        dfsCat.fileAttrs[i].filename,
-                        dfsCat.fileAttrs[i].loadAddr & 0xffffff,
-                        dfsCat.fileAttrs[i].execAddr & 0xffffff,
-                        dfsCat.fileAttrs[i].length);
-                j = (int)SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)str);
-                // List is sorted so store catalogue index in list's item data
-                SendMessage(hwndList, LB_SETITEMDATA, j, (LPARAM)i);
-            }
-            return TRUE;
-            
-        case WM_COMMAND:
-            switch (LOWORD(wParam))
-        {
-            case IDOK:
-                numSelected = (int)SendMessage(
-                                               hwndList, LB_GETSELITEMS, (WPARAM)DFS_MAX_CAT_SIZE, (LPARAM)filesSelected);
-                if (numSelected)
-                {
-                    // Convert list indices to catalogue indices
-                    for (i = 0; i < numSelected; ++i)
-                    {
-                        filesSelected[i] = (int)SendMessage(hwndList, LB_GETITEMDATA, filesSelected[i], 0);
-                    }
-                    
-                    // Get folder to export to
-                    BROWSEINFO bi;
-                    memset(&bi, 0, sizeof(bi));
-                    bi.hwndOwner = hwndDlg; // m_hWnd;
-                    bi.pszDisplayName = szDisplayName;
-                    bi.lpszTitle = "Select folder for exported files:";
-                    bi.ulFlags = BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
-                    bi.lpfn = BrowseCallbackProc;
-                    LPITEMIDLIST idList = SHBrowseForFolder(&bi);
-                    if (idList == NULL)
-                    {
-                        wParam = IDCANCEL;
-                    }
-                    else if (SHGetPathFromIDList(idList, szExportFolder) == FALSE)
-                    {
-                        MessageBox(hwndDlg, "Invalid folder selected", WindowTitle, MB_OK|MB_ICONWARNING);
-                        wParam = IDCANCEL;
-                    }
-                    if (idList != NULL)
-                        CoTaskMemFree(idList);
-                }
-                
-                EndDialog(hwndDlg, wParam);
-                return TRUE;
-                
-            case IDCANCEL:
-                EndDialog(hwndDlg, wParam);
-                return TRUE;
-        }
-    }
-    return FALSE;
-}
-*/
-void BeebWin::ExportDiscFiles(int menuId)
-{
-/*
-    bool success = true;
-    int drive;
-    int type;
-    char szDiscFile[MAX_PATH];
-    int heads;
-    int side;
-    char szErrStr[500];
-    int i, n;
-    
-    if (menuId == 0 || menuId == 2)
-        drive = 0;
-    else
-        drive = 1;
-    
-    if (MachineType != 3 && NativeFDC)
-    {
-        // 8271 controller
-        Get8271DiscInfo(drive, szDiscFile, &heads);
-    }
-    else
-    {
-        // 1770 controller
-        Get1770DiscInfo(drive, &type, szDiscFile);
-        if (type == 0)
-            heads = 1;
-        else if (type == 1)
-            heads = 2;
-        else
-        {
-            // ADFS - not currently supported
-            MessageBox(m_hWnd, "Export from ADFS disc not supported", WindowTitle, MB_OK|MB_ICONWARNING);
-            return;
-        }
-    }
-    
-    // Check for no disk loaded
-    if (szDiscFile[0] == 0 || heads == 1 && (menuId == 2 || menuId == 3))
-    {
-        sprintf(szErrStr, "No disc loaded in drive %d", menuId);
-        MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OK|MB_ICONWARNING);
-        return;
-    }
-    
-    // Read the catalogue
-    if (menuId == 0 || menuId == 1)
-        side = 0;
-    else
-        side = 1;
-    
-    success = dfs_get_catalogue(szDiscFile, heads, side, &dfsCat);
-    if (!success)
-    {
-        sprintf(szErrStr, "Failed to read catalogue from disc:\n  %s", szDiscFile);
-        MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OK|MB_ICONERROR);
-        return;
-    }
-    
-    // Show export dialog
-    if (DialogBox(hInst, MAKEINTRESOURCE(IDD_DISCEXPORT), m_hWnd, (DLGPROC)DiscExportDlgProc) != IDOK ||
-        numSelected == 0)
-    {
-        return;
-    }
-    
-    // Export the files
-    n = 0;
-    for (i = 0; i < numSelected; ++i)
-    {
-        success = dfs_export_file(szDiscFile, heads, side, &dfsCat,
-                                  filesSelected[i], szExportFolder, szErrStr);
-        if (success)
-        {
-            n++;
-        }
-        else
-        {
-            success = true;
-            if (MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OKCANCEL|MB_ICONWARNING) == IDCANCEL)
-            {
-                success = false;
-                break;
-            }
-        }
-    }
-    
-    sprintf(szErrStr, "Files successfully exported: %d", n);
-    MessageBox(m_hWnd, szErrStr, WindowTitle, MB_OK|MB_ICONINFORMATION);
-*/
-}
-
-
-// File import
-void BeebWin::ImportDiscFiles(int menuId)
-{
-    OSErr err = noErr;
-    char path[256];
-    bool success = true;
-    int drive;
-    int type;
-    char szDiscFile[MAX_PATH];
-    int heads;
-    int side;
-    char szErrStr[500];
-    char szFolder[MAX_PATH];
-    char fileSelection[4096];
-    char baseName[MAX_PATH];
-    char *fileName;
-    static char fileNames[DFS_MAX_CAT_SIZE*2][MAX_PATH]; // Allow user to select > cat size
-    int numFiles;
-    int i, n;
-    
-    if (menuId == 0 || menuId == 2)
-        drive = 0;
-    else
-        drive = 1;
-    
-    if (MachineType != 3 && NativeFDC)
-    {
-        // 8271 controller
-        Get8271DiscInfo(drive, szDiscFile, &heads);
-    }
-    else
-    {
-        // 1770 controller
-        Get1770DiscInfo(drive, &type, szDiscFile);
-        if (type == 0)
-            heads = 1;
-        else if (type == 1)
-            heads = 2;
-        else
-        {
-            // ADFS - not currently supported
-            fprintf(stderr, "Import to ADFS disc not supported\n");
-            return;
-        }
-    }
-    
-    // Check for no disk loaded
-    if (szDiscFile[0] == 0 || (heads == 1 && (menuId == 2 || menuId == 3)))
-    {
-        fprintf(stderr, "No disc loaded in drive %d\n", menuId);
-        return;
-    }
-    
-    // Read the catalogue
-    if (menuId == 0 || menuId == 1)
-        side = 0;
-    else
-        side = 1;
-    
-    success = dfs_get_catalogue(szDiscFile, heads, side, &dfsCat);
-    if (!success)
-    {
-        fprintf(stderr, "Failed to read catalogue from disc:\n  %s\n", szDiscFile);
-        return;
-    }
-    
-    // Get list of files to import
-#if 0//ACH - GetOneFile (DONE)
-    err = GetOneFileWithPreview(path, IFDFilterProc);
-#else
-    err = swift_GetOneFileWithPreview(path, 256, IFD);
+	const char *DiscString = getenv("BeebDiscLoad");
+	if (DiscString == nullptr)
+		DiscString = getenv("BeebDiscLoad0");
+	if (DiscString != nullptr)
+		LoadStartupDisc(0, DiscString);
+	else {
+#ifndef WIN32
+		LoadStartupDisc(0, "S:80:discims/test.ssd");
 #endif
-    if (err) return;
-    
-    // Parse the file selection string
-    strcpy(fileSelection, path);
-    // Only one file selected
-    fileName = strrchr(fileSelection, '/');
-    if (fileName != NULL)
-    {
-        *fileName = 0;
-        fileName++;
-    } else fileName = fileSelection;
-    
-    strcpy(szFolder, fileSelection);
-    
-    numFiles = 0;
-    while (numFiles < DFS_MAX_CAT_SIZE*2 && fileName[0] != 0)
-    {
-        // Strip .INF off
-        strcpy(baseName, fileName);
-        i = (int)strlen(baseName);
-        if (i > 4 && strcmp(baseName + i - 4, ".inf") == 0)
-            baseName[i - 4] = 0;
-        
-        // Check for duplicate
-        for (i = 0; i < numFiles; ++i)
-        {
-            if (strcmp(baseName, fileNames[i]) == 0)
-                break;
-        }
-        if (i == numFiles)
-        {
-            strcpy(fileNames[numFiles], baseName);
-            numFiles++;
-        }
-        
-        fileName = fileName + strlen(fileName) + 1;
-    }
-    
-    // Import the files
-    n = 0;
-    for (i = 0; i < numFiles; ++i)
-    {
-        success = dfs_import_file(szDiscFile, heads, side, &dfsCat, fileNames[i], szFolder, szErrStr);
-        if (success)
-        {
-            n++;
-        }
-        else
-        {
-            success = true;
-            fprintf(stderr, "%s\n", szErrStr);
-            success = false;
-            break;
-        }
-    }
-    
-    fprintf(stderr, "Files successfully imported: %d\n", n);
-    
-    // Re-read disc image
-    if (MachineType != 3 && NativeFDC)
-    {
-        // 8271 controller
-        Eject8271DiscImage(drive);
-        if (heads == 2)
-            LoadSimpleDSDiscImage(szDiscFile, drive, 80);
-        else
-            LoadSimpleDiscImage(szDiscFile, drive, 0, 80);
-    }
-    else
-    {
-        // 1770 controller
-        Close1770Disc(drive);
-        if (heads == 2)
-            Load1770DiscImage(szDiscFile, drive, 1);
-        else
-            Load1770DiscImage(szDiscFile, drive, 0);
-    }
+	}
+
+	DiscString = getenv("BeebDiscLoad1");
+	if (DiscString != nullptr)
+		LoadStartupDisc(1, DiscString);
+
+	if (getenv("BeebDiscWrites") != nullptr) {
+		DiscWriteEnable(0, true);
+		DiscWriteEnable(1, true);
+	}
+}
+
+/****************************************************************************/
+void BeebWin::LoadStartupDisc(int DriveNum, const char *DiscString)
+{
+	char DoubleSided;
+	int Tracks;
+	char Name[1024];
+	int scanfres;
+
+	if (scanfres = sscanf(DiscString, "%c:%d:%s", &DoubleSided, &Tracks, Name),
+		scanfres != 3) {
+		Report(MessageType::Error, "Incorrect format for BeebDiscLoad, "
+		                           "correct format is D|S|A:tracks:filename");
+	}
+	else {
+		switch (DoubleSided) {
+		case 'd':
+		case 'D':
+			if (MachineType == Model::Master128 || !NativeFDC) {
+				Load1770DiscImage(Name, DriveNum, DiscType::DSD);
+			}
+			else {
+				LoadSimpleDSDiscImage(Name, DriveNum, Tracks);
+			}
+			break;
+
+		case 'S':
+		case 's':
+			if (MachineType == Model::Master128 || !NativeFDC) {
+				Load1770DiscImage(Name, DriveNum, DiscType::SSD);
+			}
+			else {
+				LoadSimpleDiscImage(Name, DriveNum, 0, Tracks);
+			}
+			break;
+
+		case 'A':
+		case 'a':
+			if (MachineType == Model::Master128 || !NativeFDC) {
+				Load1770DiscImage(Name, DriveNum, DiscType::ADFS);
+			}
+			else {
+				Report(MessageType::Error, "The 8271 FDC cannot load the ADFS disc image "
+				                           "specified in the BeebDiscLoad environment variable");
+			}
+			break;
+
+		default:
+			Report(MessageType::Error, "BeebDiscLoad disc type incorrect, "
+			                           "use S for single sided, "
+			                           "D for double sided and A for ADFS");
+			break;
+		}
+	}
+}
+
+/****************************************************************************/
+bool BeebWin::RebootSystem()
+{
+	HANDLE hToken;
+	TOKEN_PRIVILEGES tkp;
+
+	if (!OpenProcessToken(GetCurrentProcess(),
+	                      TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+		return false;
+
+	LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME,
+	                     &tkp.Privileges[0].Luid);
+
+	tkp.PrivilegeCount = 1;  // one privilege to set
+	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, NULL, 0);
+	if (GetLastError() != ERROR_SUCCESS)
+		return false;
+
+	if (!ExitWindowsEx(EWX_REBOOT | EWX_FORCE,
+	                   SHTDN_REASON_MAJOR_OPERATINGSYSTEM |
+	                   SHTDN_REASON_MINOR_RECONFIG |
+	                   SHTDN_REASON_FLAG_PLANNED))
+		return false;
+
+	return true;
+}
+
+/****************************************************************************/
+bool BeebWin::CheckUserDataPath(bool Persist)
+{
+	bool success = true;
+	bool copy_user_files = false;
+	bool store_user_data_path = false;
+	char path[_MAX_PATH];
+
+	// Change all '/' to '\'
+	for (size_t i = 0; i < strlen(m_UserDataPath); ++i)
+		if (m_UserDataPath[i] == '/')
+			m_UserDataPath[i] = '\\';
+
+	// Check that the folder exists
+	DWORD att = GetFileAttributes(m_UserDataPath);
+
+	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
+	{
+		if (Report(MessageType::Question,
+		           "BeebEm data folder does not exist:\n  %s\n\nCreate the folder?",
+		           m_UserDataPath) != MessageResult::Yes)
+		{
+			// Use data dir installed with BeebEm
+			strcpy(m_UserDataPath, m_AppPath);
+			strcat(m_UserDataPath, "UserData\\");
+
+			store_user_data_path = true;
+		}
+		else
+		{
+			// Create the folder
+			int result = SHCreateDirectoryEx(nullptr, m_UserDataPath, nullptr);
+
+			if (result == ERROR_SUCCESS) {
+				copy_user_files = true;
+			}
+			else {
+				Report(MessageType::Error, "Failed to create BeebEm data folder:\n  %s",
+				       m_UserDataPath);
+				success = false;
+			}
+		}
+	}
+	else
+	{
+		// Check that essential files are in the user data folder
+		sprintf(path, "%sBeebFile", m_UserDataPath);
+		att = GetFileAttributes(path);
+		if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
+			copy_user_files = true;
+		if (!copy_user_files)
+		{
+			sprintf(path, "%sBeebState", m_UserDataPath);
+			att = GetFileAttributes(path);
+			if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
+				copy_user_files = true;
+		}
+		if (!copy_user_files)
+		{
+			sprintf(path, "%sEconet.cfg", m_UserDataPath);
+			att = GetFileAttributes(path);
+			if (att == INVALID_FILE_ATTRIBUTES)
+				copy_user_files = true;
+		}
+		if (!copy_user_files)
+		{
+			sprintf(path, "%sAUNMap", m_UserDataPath);
+			att = GetFileAttributes(path);
+			if (att == INVALID_FILE_ATTRIBUTES)
+				copy_user_files = true;
+		}
+#ifdef SPEECH_ENABLED
+		if (!copy_user_files)
+		{
+			sprintf(path, "%sPhroms.cfg", m_UserDataPath);
+			att = GetFileAttributes(path);
+			if (att == INVALID_FILE_ATTRIBUTES)
+				copy_user_files = true;
+		}
+#endif
+		if (!copy_user_files)
+		{
+			if (strcmp(RomFile, "Roms.cfg") == 0)
+			{
+				sprintf(path, "%sRoms.cfg", m_UserDataPath);
+				att = GetFileAttributes(path);
+				if (att == INVALID_FILE_ATTRIBUTES)
+					copy_user_files = true;
+			}
+		}
+
+		if (copy_user_files)
+		{
+			if (Report(MessageType::Question,
+			           "Essential or new files missing from BeebEm data folder:\n  %s"
+			           "\n\nCopy essential or new files into folder?",
+			           m_UserDataPath) != MessageResult::Yes)
+			{
+				success = false;
+			}
+		}
+	}
+
+	if (success)
+	{
+		// Get fully qualified user data path
+		char *f;
+		if (GetFullPathName(m_UserDataPath, _MAX_PATH, path, &f) != 0)
+			strcpy(m_UserDataPath, path);
+	}
+
+	if (success && copy_user_files)
+	{
+		SHFILEOPSTRUCT fileOp = {0};
+		fileOp.hwnd = m_hWnd;
+		fileOp.wFunc = FO_COPY;
+		fileOp.fFlags = 0;
+
+		strcpy(path, m_AppPath);
+		strcat(path, "UserData\\*.*");
+		path[strlen(path)+1] = 0; // need double 0
+		fileOp.pFrom = path;
+
+		m_UserDataPath[strlen(m_UserDataPath)+1] = 0; // need double 0
+		fileOp.pTo = m_UserDataPath;
+
+		if (SHFileOperation(&fileOp) || fileOp.fAnyOperationsAborted)
+		{
+			Report(MessageType::Error, "Copy failed.  Manually copy files from:\n  %s"
+			                           "\n\nTo BeebEm data folder:\n  %s",
+			       path, m_UserDataPath);
+			success = false;
+		}
+		else
+		{
+			// Wait for copy dialogs to disappear
+			Sleep(2000);
+		}
+	}
+
+	if (success)
+	{
+		// Check that roms file exists and create its full path
+		if (PathIsRelative(RomFile))
+		{
+			sprintf(path, "%s%s", m_UserDataPath, RomFile);
+			strcpy(RomFile, path);
+		}
+		att = GetFileAttributes(RomFile);
+		if (att == INVALID_FILE_ATTRIBUTES)
+		{
+			Report(MessageType::Error, "Cannot open ROMs file:\n  %s", RomFile);
+			success = false;
+		}
+	}
+
+	if (success)
+	{
+		// Fill out full path of prefs file
+		if (PathIsRelative(m_PrefsFile))
+		{
+			sprintf(path, "%s%s", m_UserDataPath, m_PrefsFile);
+			strcpy(m_PrefsFile, path);
+		}
+	}
+
+	if (success && Persist && (copy_user_files || store_user_data_path))
+	{
+		StoreUserDataPath();
+	}
+
+	return success;
+}
+
+void BeebWin::StoreUserDataPath()
+{
+	// Store user data path in registry
+	RegCreateKey(HKEY_CURRENT_USER, CFG_REG_KEY);
+	RegSetStringValue(HKEY_CURRENT_USER, CFG_REG_KEY,
+	                  "UserDataFolder", m_UserDataPath);
+}
+
+/****************************************************************************/
+
+// Selection of User Data Folder
+
+void BeebWin::SelectUserDataPath()
+{
+	std::string PathBackup;
+
+	FolderSelectDialog Dialog(
+		m_hWnd,
+		"Select folder for user data files:",
+		m_UserDataPath
+	);
+
+	FolderSelectDialog::Result result = Dialog.DoModal();
+
+	switch (result) {
+		case FolderSelectDialog::Result::OK:
+			PathBackup = m_UserDataPath;
+			strcpy(m_UserDataPath, Dialog.GetFolder().c_str());
+			strcat(m_UserDataPath, "\\");
+
+			// Check folder contents
+			if (!CheckUserDataPath(true))
+			{
+				strcpy(m_UserDataPath, PathBackup.c_str());
+			}
+			else
+			{
+				// Store the new path
+				StoreUserDataPath();
+
+				// Reset prefs and roms file paths
+				strcpy(m_PrefsFile, "Preferences.cfg");
+				strcpy(RomFile, "Roms.cfg");
+				CheckForLocalPrefs(m_UserDataPath, true);
+
+				// Load and apply prefs
+				LoadPreferences();
+				ApplyPrefs();
+			}
+			break;
+
+		case FolderSelectDialog::Result::InvalidFolder:
+			Report(MessageType::Warning, "Invalid folder selected");
+			break;
+	}
+}
+
+/****************************************************************************/
+void BeebWin::HandleTimer()
+{
+	int row,col;
+	char delay[10];
+
+	m_KeyboardTimerElapsed = true;
+
+	// Do nothing if emulation is not running (e.g. if Window is being moved)
+	if ((TotalCycles - m_KbdCmdLastCycles) / 2000 < m_KbdCmdDelay)
+	{
+		SetTimer(m_hWnd, 1, m_KbdCmdDelay, NULL);
+		return;
+	}
+	m_KbdCmdLastCycles = TotalCycles;
+
+	// Release previous key press (except shift/control)
+	if (m_KbdCmdPress &&
+		m_KbdCmdKey != VK_SHIFT && m_KbdCmdKey != VK_CONTROL)
+	{
+		TranslateKey(m_KbdCmdKey, true, row, col);
+		m_KbdCmdPress = false;
+		SetTimer(m_hWnd, 1, m_KbdCmdDelay, NULL);
+	}
+	else
+	{
+		m_KbdCmdPos++;
+		if (m_KbdCmd[m_KbdCmdPos] == 0)
+		{
+			KillTimer(m_hWnd, 1);
+		}
+		else
+		{
+			m_KbdCmdPress = true;
+
+			switch (m_KbdCmd[m_KbdCmdPos])
+			{
+			case '\\':
+				m_KbdCmdPos++;
+				switch (m_KbdCmd[m_KbdCmdPos])
+				{
+				case '\\': m_KbdCmdKey = VK_OEM_5; break;
+				case 'n': m_KbdCmdKey = VK_RETURN; break;
+				case 's': m_KbdCmdKey = VK_SHIFT; break;
+				case 'S': m_KbdCmdKey = VK_SHIFT; m_KbdCmdPress = false; break;
+				case 'c': m_KbdCmdKey = VK_CONTROL; break;
+				case 'C': m_KbdCmdKey = VK_CONTROL; m_KbdCmdPress = false; break;
+				case 'd':
+					m_KbdCmdKey = 0;
+					m_KbdCmdPos++;
+					delay[0] = m_KbdCmd[m_KbdCmdPos];
+					m_KbdCmdPos++;
+					delay[1] = m_KbdCmd[m_KbdCmdPos];
+					m_KbdCmdPos++;
+					delay[2] = m_KbdCmd[m_KbdCmdPos];
+					m_KbdCmdPos++;
+					delay[3] = m_KbdCmd[m_KbdCmdPos];
+					delay[4] = 0;
+					m_KbdCmdDelay = atoi(delay);
+					break;
+				default: m_KbdCmdKey = 0; break;
+				}
+				break;
+
+			case '`': m_KbdCmdKey = VK_OEM_8; break;
+			case '-': m_KbdCmdKey = VK_OEM_MINUS; break;
+			case '=': m_KbdCmdKey = VK_OEM_PLUS; break;
+			case '[': m_KbdCmdKey = VK_OEM_4; break;
+			case ']': m_KbdCmdKey = VK_OEM_6; break;
+			case ';': m_KbdCmdKey = VK_OEM_1; break;
+			case '\'': m_KbdCmdKey = VK_OEM_3; break;
+			case '#': m_KbdCmdKey = VK_OEM_7; break;
+			case ',': m_KbdCmdKey = VK_OEM_COMMA; break;
+			case '.': m_KbdCmdKey = VK_OEM_PERIOD; break;
+			case '/': m_KbdCmdKey = VK_OEM_2; break;
+			default: m_KbdCmdKey = m_KbdCmd[m_KbdCmdPos]; break;
+			}
+
+			if (m_KbdCmdKey != 0)
+			{
+				if (m_KbdCmdPress)
+					TranslateKey(m_KbdCmdKey, false, row, col);
+				else
+					TranslateKey(m_KbdCmdKey, true, row, col);
+			}
+
+			SetTimer(m_hWnd, 1, m_KbdCmdDelay, NULL);
+		}
+	}
+}
+
+/****************************************************************************/
+
+MessageResult BeebWin::Report(MessageType type, const char *format, ...)
+{
+	MessageResult Result = MessageResult::None;
+
+	va_list args;
+	va_start(args, format);
+
+	// Calculate required length, +1 is for NUL terminator
+	const int length = _vscprintf(format, args) + 1;
+
+	char *buffer = (char*)malloc(length);
+
+	if (buffer != nullptr)
+	{
+		vsprintf(buffer, format, args);
+
+		UINT Type = 0;
+
+		switch (type)
+		{
+			case MessageType::Error:
+			default:
+				Type = MB_ICONERROR;
+				break;
+
+			case MessageType::Warning:
+				Type = MB_ICONWARNING;
+				break;
+
+			case MessageType::Info:
+				Type = MB_ICONINFORMATION;
+				break;
+
+			case MessageType::Question:
+				Type = MB_ICONQUESTION | MB_YESNO;
+				break;
+
+			case MessageType::Confirm:
+				Type = MB_ICONWARNING | MB_OKCANCEL;
+		}
+
+		int ID = MessageBox(m_hWnd, buffer, WindowTitle, Type);
+
+		if (type == MessageType::Question)
+		{
+			switch (ID)
+			{
+				case IDYES:
+					Result = MessageResult::Yes;
+					break;
+
+				case IDNO:
+					Result = MessageResult::No;
+					break;
+
+				case IDOK:
+					Result = MessageResult::OK;
+					break;
+
+				case IDCANCEL:
+				default:
+					Result = MessageResult::Cancel;
+					break;
+			}
+		}
+
+		free(buffer);
+	}
+
+	va_end(args);
+
+	return Result;
+}
+
+/****************************************************************************/
+bool BeebWin::RegCreateKey(HKEY hKeyRoot, LPCSTR lpSubKey)
+{
+	bool rc = false;
+	HKEY hKeyResult;
+	if ((RegCreateKeyEx(hKeyRoot, lpSubKey, 0, NULL, 0, KEY_ALL_ACCESS,
+						NULL, &hKeyResult, NULL)) == ERROR_SUCCESS)
+	{
+		RegCloseKey(hKeyResult);
+		rc = true;
+	}
+	return rc;
+}
+
+bool BeebWin::RegGetBinaryValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue,
+                                void* pData, int* pnSize)
+{
+	bool rc = false;
+	HKEY hKeyResult;
+	DWORD dwType = REG_BINARY;
+	DWORD dwSize = *pnSize;
+	LONG lRes = 0;
+
+	if ((RegOpenKeyEx(hKeyRoot, lpSubKey, 0, KEY_ALL_ACCESS, &hKeyResult)) == ERROR_SUCCESS)
+	{
+		lRes = RegQueryValueEx(hKeyResult, lpValue, NULL, &dwType, (LPBYTE)pData, &dwSize);
+		if (lRes == ERROR_SUCCESS && dwType == REG_BINARY)
+		{
+			*pnSize = dwSize;
+			rc = true;
+		}
+		RegCloseKey(hKeyResult);
+	}
+
+	return rc;
+}
+
+bool BeebWin::RegSetBinaryValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue,
+                                const void* pData, int* pnSize)
+{
+	bool rc = false;
+	HKEY hKeyResult;
+	DWORD dwSize = *pnSize;
+	LONG  lRes = 0;
+
+	if ((RegOpenKeyEx(hKeyRoot, lpSubKey, 0, KEY_ALL_ACCESS, &hKeyResult)) == ERROR_SUCCESS)
+	{
+		lRes = RegSetValueEx(hKeyResult, lpValue, 0, REG_BINARY, reinterpret_cast<const BYTE*>(pData), dwSize);
+		if (lRes == ERROR_SUCCESS)
+		{
+			*pnSize = dwSize;
+			rc = true;
+		}
+		RegCloseKey(hKeyResult);
+	}
+
+	return rc;
+}
+
+bool BeebWin::RegGetStringValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue,
+                                LPSTR pData, DWORD dwSize)
+{
+	bool rc = false;
+	HKEY hKeyResult;
+	DWORD dwType = REG_SZ;
+	LONG lRes = 0;
+
+	if ((RegOpenKeyEx(hKeyRoot, lpSubKey, 0, KEY_ALL_ACCESS, &hKeyResult)) == ERROR_SUCCESS)
+	{
+		lRes = RegQueryValueEx(hKeyResult, lpValue, NULL, &dwType, (LPBYTE)pData, &dwSize);
+		if (lRes == ERROR_SUCCESS && dwType == REG_SZ)
+		{
+			rc = true;
+		}
+		RegCloseKey(hKeyResult);
+	}
+
+	return rc;
+}
+
+bool BeebWin::RegSetStringValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue,
+                                LPCSTR pData)
+{
+	bool rc = false;
+	HKEY hKeyResult;
+	DWORD dwSize = (DWORD)strlen(pData);
+	LONG  lRes = 0;
+
+	if ((RegOpenKeyEx(hKeyRoot, lpSubKey, 0, KEY_ALL_ACCESS, &hKeyResult)) == ERROR_SUCCESS)
+	{
+		lRes = RegSetValueEx(hKeyResult, lpValue, 0, REG_SZ, reinterpret_cast<const BYTE*>(pData), dwSize);
+		if (lRes == ERROR_SUCCESS)
+		{
+			rc = true;
+		}
+		RegCloseKey(hKeyResult);
+	}
+
+	return rc;
 }

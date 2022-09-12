@@ -33,18 +33,21 @@ class FolderSelectDialog
 		};
 
 	public:
+#ifdef BEEBWIN
 		FolderSelectDialog(
 			HWND hwndOwner,
 			const char *Title,
 			const char *InitialFolder
 		);
-
+#endif
 	public:
 		Result DoModal();
 
 		std::string GetFolder() const;
 
 	private:
+#ifdef BEEBWIN
+
 		static int CALLBACK BrowseCallbackProc(
 			HWND hWnd,
 			UINT uMsg,
@@ -57,6 +60,8 @@ class FolderSelectDialog
 		char m_Buffer[MAX_PATH];
 		std::string m_InitialFolder;
 		std::string m_Title;
+#endif
+    
 };
 
 #endif
