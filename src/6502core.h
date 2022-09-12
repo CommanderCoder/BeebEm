@@ -95,7 +95,7 @@ extern bool BasicHardwareOnly;
 void WriteInstructionCounts(const char *FileName);
 
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 extern int trace;
 extern int trace_186;
 extern int IgnoreIllegalInstructions;

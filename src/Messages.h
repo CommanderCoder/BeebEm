@@ -21,11 +21,13 @@ Boston, MA  02110-1301, USA.
 #ifndef MESSAGES_HEADER
 #define MESSAGES_HEADER
 
+#ifdef BEEBWIN
 #include <windows.h>
 
 const UINT WM_REINITDX                         = WM_APP;
 const UINT WM_USER_KEYBOARD_DIALOG_CLOSED      = WM_APP + 1;
 const UINT WM_SELECT_KEY_DIALOG_CLOSED         = WM_APP + 2;
 const UINT WM_USER_PORT_BREAKOUT_DIALOG_CLOSED = WM_APP + 3;
+#endif
 
 #endif

@@ -24,6 +24,9 @@ Boston, MA  02110-1301, USA.
 #ifndef TAPE_MAP_HEADER
 #define TAPE_MAP_HEADER
 
+#ifndef BEEBWIN
+#include <string>
+#endif
 #include <vector>
 
 struct TapeMapEntry

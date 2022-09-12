@@ -30,7 +30,7 @@ Boston, MA  02110-1301, USA.
 #include <map>
 #include <string>
 
-#ifndef OLDMAC
+#ifndef BEEBWIN
 #define _MAX_PATH 512
 #define MAX_PATH 512
 

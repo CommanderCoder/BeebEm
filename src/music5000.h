@@ -35,7 +35,9 @@ void Music5000Init();
 void Music5000Reset();
 void Music5000Write(int address, unsigned char value);
 bool Music5000Read(int address, unsigned char *value);
+#ifdef BEEBWIN
 void Music5000Update(UINT cycles);
+#endif
 void SaveMusic5000UEF(FILE *SUEF);
 void LoadMusic5000UEF(FILE *SUEF, int Version);
 void LoadMusic5000JIMPageRegUEF(FILE *SUEF);

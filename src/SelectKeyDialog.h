@@ -21,20 +21,25 @@ Boston, MA  02110-1301, USA.
 #ifndef SELECT_KEY_DIALOG_HEADER
 #define SELECT_KEY_DIALOG_HEADER
 
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 
 class SelectKeyDialog
 {
 	public:
 		SelectKeyDialog(
+#ifdef BEEBWIN
 			HINSTANCE hInstance,
 			HWND hwndParent,
-			const std::string& Title,
+#endif
+                        const std::string& Title,
 			const std::string& SelectedKey,
 			bool EnableShift = true
 		);
 
 		bool Open();
+#ifdef BEEBWIN
 		void Close(UINT nResultID);
 
 		bool HandleMessage(const MSG& msg);
@@ -42,8 +47,9 @@ class SelectKeyDialog
 		int Key() const;
 
 		static LPCSTR KeyName(int Key);
-
+#endif
 	private:
+#ifdef BEEBWIN
 		static INT_PTR CALLBACK sDlgProc(
 			HWND   hwnd,
 			UINT   nMessage,
@@ -62,6 +68,8 @@ class SelectKeyDialog
 		HINSTANCE m_hInstance;
 		HWND m_hwnd;
 		HWND m_hwndParent;
+#endif
+
 		std::string m_Title;
 		std::string m_SelectedKey;
 		bool m_EnableShift;
