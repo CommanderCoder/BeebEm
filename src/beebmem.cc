@@ -169,9 +169,7 @@ static int WrapAddr(int Address) {
     return Address;
   }
 
-#ifdef BEEBWIN
   Address += offsets[(IC32State & 0x30) >> 4];
-#endif
     Address &= 0x7fff;
 
   return Address;
@@ -409,7 +407,6 @@ unsigned char BeebReadMem(int Address) {
 	if (Address>=0xff00)
 		return(WholeRam[Address]);
 
-#ifdef BEEBWIN
 	/* IO space */
 
 	if (Address >= 0xfc00 && Address < 0xfe00) {
@@ -512,7 +509,6 @@ unsigned char BeebReadMem(int Address) {
 	if ((Address & ~7) == 0xfe28 && MachineType == Model::Master128) {
 		return(Read1770Register(Address & 0x7));
 	}
-#endif
 
 	if ((Address & ~3)==0xfe30) {
 		return(PagedRomReg); // report back ROMSEL - I'm sure the beeb allows ROMSEL read..
@@ -523,7 +519,6 @@ unsigned char BeebReadMem(int Address) {
 		return(ACCCON);
 	}
 
-#ifdef BEEBWIN
 	if ((Address & ~0x1f) == 0xfe80 && MachineType != Model::Master128 && NativeFDC) {
 		return Disc8271Read(Address & 0x7);
 	}
@@ -579,16 +574,17 @@ unsigned char BeebReadMem(int Address) {
 	}
 
 	if (MachineType != Model::Master128 && Address == EDCAddr && !NativeFDC) {
+#ifdef BEEBWIN
 		return(mainWin->GetDriveControl());
-	}
 #endif
+        
+    }
 
 	return(0xFF);
 } /* BeebReadMem */
 
 void DebugMemoryState()
 {
-#ifdef BEEBWIN
     char sram[60];
 	char* psram = sram;
 	int i = 0;
@@ -635,7 +631,6 @@ void DebugMemoryState()
 				(ACCCON & 0x01) != 0 ? "on" : "off");
 			break;
 	}
-#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -664,12 +659,10 @@ static void FiddleACCCON(unsigned char newValue) {
 //	newValue&=143;
 //	if ((newValue & 128)==128) DoInterrupt();
 	ACCCON=newValue & 127; // mask out the IRR bit so that interrupts dont occur repeatedly
-#ifdef BEEBWIN
 	if (newValue & 128) intStatus|=128; else intStatus&=127;
 	bool oldshd = Sh_Display;
 	Sh_Display = (ACCCON & 1) != 0;
     if (Sh_Display != oldshd) RedoMPTR();
-#endif
     Sh_CPUX = (ACCCON & 4) != 0;
 	Sh_CPUE = (ACCCON & 2) != 0;
 	FRAM = (ACCCON & 8) != 0;
@@ -816,9 +809,8 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		if (Address>=0xfe34 && Address<0xfe38) {
 			bool oldshd = Sh_Display;
 			Sh_Display = (Value & 0x80) != 0;
-#ifdef BEEBWIN
+
             if (Sh_Display!=oldshd) RedoMPTR();
-#endif
             return;
 		}
 	}
@@ -865,7 +857,6 @@ void BeebWriteMem(int Address, unsigned char Value) {
 // Master 128 End
 
 	/* IO space */
-#ifdef BEEBWIN
 
 	if (Address >= 0xfc00 && Address < 0xfe00) {
 		SyncIO();
@@ -943,7 +934,6 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		Write1770Register(Address & 7,Value);
 		return;
 	}
-#endif
 
 	if (Address>=0xfe30 && Address<0xfe34) {
 		DoRomChange(Value);
@@ -957,7 +947,6 @@ void BeebWriteMem(int Address, unsigned char Value) {
 		return;
 	}
 
-#ifdef BEEBWIN
 	if (((Address & ~0x1f) == 0xfe80) && (MachineType != Model::Master128) && NativeFDC) {
 		Disc8271Write((Address & 7), Value);
 		return;
@@ -1010,12 +999,13 @@ void BeebWriteMem(int Address, unsigned char Value) {
 	}
 
 	if (MachineType != Model::Master128 && Address == EDCAddr && !NativeFDC) {
+#ifdef BEEBWIN
 		mainWin->SetDriveControl(Value);
+#endif
 	}
 	if (MachineType != Model::Master128 && Address >= EFDCAddr && Address < (EFDCAddr + 4) && !NativeFDC) {
 		Write1770Register(Address-EFDCAddr,Value);
 	}
-#endif
 }
 
 bool ReadRomInfo(int bank, RomInfo* info)
@@ -1171,9 +1161,7 @@ void BeebReadRoms(void) {
 		if((extension = strrchr(fullname, '.')) != NULL)
 			*extension = 0;
 		strncat(fullname, ".map", _MAX_PATH);
-#ifdef BEEBWIN
 		DebugLoadMemoryMap(fullname, 16);
-#endif
         
     }
 	else {
@@ -1230,10 +1218,7 @@ void BeebReadRoms(void) {
 				if((extension = strrchr(fullname, '.')) != NULL)
 					*extension = 0;
 				strncat(fullname, ".map", _MAX_PATH);
-#ifdef BEEBWIN
-DebugLoadMemoryMap(fullname, bank);
-#endif
-                
+                DebugLoadMemoryMap(fullname, bank);
             }
 			else {
 #ifdef BEEBWIN
@@ -1282,9 +1267,7 @@ void BeebMemInit(bool LoadRoms, bool SkipIntegraBConfig) {
 
   if (LoadRoms) {
 	  // This shouldn't be required for sideways RAM.
-#ifdef BEEBWIN
 	  DebugInitMemoryMaps();
-#endif
       BeebReadRoms(); // Only load roms on start
   }
 
@@ -1296,7 +1279,6 @@ void BeebMemInit(bool LoadRoms, bool SkipIntegraBConfig) {
 /*-------------------------------------------------------------------------*/
 void SaveMemUEF(FILE *SUEF) {
     int bank;
-#ifdef BEEBWIN
 	switch (MachineType) {
 	case Model::B:
 	case Model::Master128:
@@ -1385,12 +1367,10 @@ void SaveMemUEF(FILE *SUEF) {
 			break;
 		}
 	}
-#endif
 
 }
 
 void LoadRomRegsUEF(FILE *SUEF) {
-#ifdef BEEBWIN
 
 	PagedRomReg = fget8(SUEF);
 	ROMSEL = PagedRomReg & 0xf;
@@ -1421,7 +1401,6 @@ void LoadRomRegsUEF(FILE *SUEF) {
 		FRAM = (ACCCON & 8) != 0;
 		break;
 	}
-#endif
 }
 
 void LoadMainMemUEF(FILE *SUEF) {
@@ -1429,8 +1408,6 @@ void LoadMainMemUEF(FILE *SUEF) {
 }
 
 void LoadShadMemUEF(FILE *SUEF) {
-#ifdef BEEBWIN
-
 	int SAddr;
 	switch (MachineType) {
 	case Model::IntegraB:
@@ -1444,8 +1421,6 @@ void LoadShadMemUEF(FILE *SUEF) {
 		fread(ShadowRAM+SAddr,1,32768,SUEF);
 		break;
 	}
-#endif
-    
 }
 
 void LoadPrivMemUEF(FILE *SUEF) {

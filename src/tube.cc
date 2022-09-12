@@ -195,13 +195,10 @@ void UpdateR3Interrupt(void) {
 }
 
 void UpdateHostR4Interrupt(void) {
-#ifdef BEEBWIN
 	if ((R1Status & TubeQ) && (R4HStatus & TubeDataAv))
 		intStatus|=(1<<tube);
 	else
 		intStatus&=~(1<<tube);
-#endif
-    
 }
 
 /*-------------------------------------------------------------------*/
@@ -221,10 +218,8 @@ unsigned char ReadTorchTubeFromHostSide(int IOAddr)
 {
 	unsigned char TmpData = 0xff;
 
-#ifdef BEEBWIN
 	if (!TorchTubeActive)
 		return MachineType == Model::Master128 ? 0xff : 0xfe;
-#endif
     
 	switch (IOAddr) {
 	case 0:
@@ -254,14 +249,12 @@ unsigned char ReadTorchTubeFromHostSide(int IOAddr)
 
 	// WriteLog("ReadTorchTubeFromHostSide - Addr = %02x, Value = %02x\n", (int)IOAddr, (int)TmpData);
 
-#ifdef BEEBWIN
     if (DebugEnabled)
 	{
 		DebugDisplayTraceF(DebugType::Tube, true,
 		                   "Tube: Read from host, addr %X value %02X",
 		                   (int)IOAddr, (int)TmpData);
 	}
-#endif
     
 	return TmpData;
 }
@@ -270,15 +263,13 @@ void WriteTorchTubeFromHostSide(int IOAddr,unsigned char IOData)
 {
 	// WriteLog("WriteTorchTubeFromHostSide - Addr = %02x, Value = %02x\n", (int)IOAddr, (int)IOData);
 
-#ifdef BEEBWIN
 	if (DebugEnabled)
 	{
 		DebugDisplayTraceF(DebugType::Tube, true,
 		                   "Tube: Write from host, addr %X value %02X",
 		                   IOAddr, (int)IOData);
 	}
-#endif
-    
+ 
 	if (IOAddr == 0x02 && IOData == 0xff)
 	{
 		TorchTubeActive = true;
@@ -347,14 +338,14 @@ unsigned char ReadTorchTubeFromParasiteSide(int IOAddr)
 
 	// WriteLog("ReadTorchTubeFromParasiteSide - Addr = %02x, Value = %02x\n", (int)IOAddr, (int)TmpData);
 
-#ifdef BEEBWIN
+
 	if (DebugEnabled)
 	{
 		DebugDisplayTraceF(DebugType::Tube, false,
 		                   "Tube: Read from para, addr %X value %02X",
 		                   IOAddr, (int)TmpData);
 	}
-#endif
+
 	return TmpData;
 }
 
@@ -362,14 +353,13 @@ void WriteTorchTubeFromParasiteSide(int IOAddr,unsigned char IOData)
 {
 	// WriteLog("WriteTorchTubeFromParasiteSide - Addr = %02x, Value = %02x\n", (int)IOAddr, (int)IOData);
 
-#ifdef BEEBWIN
 	if (DebugEnabled)
 	{
 		DebugDisplayTraceF(DebugType::Tube, false,
 		                   "Tube: Write from para, addr %X value %02X",
 		                   IOAddr, (int)IOData);
 	}
-#endif
+
 	switch (IOAddr) {
 	case 1:
 		R1PHData[0]=IOData;
@@ -385,10 +375,8 @@ void WriteTorchTubeFromParasiteSide(int IOAddr,unsigned char IOData)
 unsigned char ReadTubeFromHostSide(int IOAddr) {
 	unsigned char TmpData,TmpCntr;
 
-#ifdef BEEBWIN
 	if (TubeType == Tube::None)
 		return MachineType == Model::Master128 ? 0xff : 0xfe;
-#endif
     
 	switch (IOAddr) {
 	case 0:
@@ -442,21 +430,17 @@ unsigned char ReadTubeFromHostSide(int IOAddr) {
 		UpdateHostR4Interrupt();
 		break;
 
-#ifdef BEEBWIN
 	default:
 		return MachineType == Model::Master128 ? 0xff : 0xfe;
-#endif
             
     }
 
-#ifdef BEEBWIN
 	if (DebugEnabled && (old_readHIOAddr != IOAddr || old_readHTmpData != TmpData))
 	{
 		DebugDisplayTraceF(DebugType::Tube, true,
 		                   "Tube: Read from host, addr %X value %02X",
 		                   IOAddr, (int)TmpData);
 	}
-#endif
     
 	old_readHTmpData = TmpData;
 	old_readHIOAddr = IOAddr;
@@ -468,14 +452,12 @@ void WriteTubeFromHostSide(int IOAddr, unsigned char IOData) {
 	if (TubeType == Tube::None)
 		return;
 
-#ifdef BEEBWIN
 	if (DebugEnabled)
 	{
 		DebugDisplayTraceF(DebugType::Tube, true,
 		                   "Tube: Write from host, addr %X value %02X",
 		                   IOAddr, (int)IOData);
 	}
-#endif
     
 	switch (IOAddr) {
 	case 0:
@@ -601,14 +583,12 @@ unsigned char ReadTubeFromParasiteSide(int IOAddr) {
 
 	// UpdateInterrupts();
 
-#ifdef BEEBWIN
 	if (DebugEnabled && (old_readPIOAddr != IOAddr || old_readPTmpData != TmpData))
 	{
 		DebugDisplayTraceF(DebugType::Tube, false,
 		                   "Tube: Read from para, addr %X value %02X",
 		                   (int)IOAddr, (int)TmpData);
 	}
-#endif
     
 	old_readPTmpData = TmpData;
 	old_readPIOAddr = IOAddr;
@@ -625,14 +605,12 @@ void WriteTubeFromParasiteSide(int IOAddr, unsigned char IOData)
 		return;
 	}
 
-#ifdef BEEBWIN
 	if (DebugEnabled)
 	{
 		DebugDisplayTraceF(DebugType::Tube, false,
 		                   "Tube: Write from para, addr %X value %02X",
 		                   (int)IOAddr, (int)IOData);
 	}
-#endif
     
 	switch (IOAddr) {
 	case 0:
@@ -1416,9 +1394,7 @@ static void Reset65C02()
 
   //The fun part, the tube OS is copied from ROM to tube RAM before the processor starts processing
   //This makes the OS "ROM" writable in effect, but must be restored on each reset.
-#ifdef BEEBWIN
   strcpy(TubeRomName,RomPath);
-#endif
     strcat(TubeRomName,"beebfile/6502Tube.rom");
   TubeRom=fopen(TubeRomName,"rb");
   if (TubeRom!=NULL) {
@@ -1427,10 +1403,7 @@ static void Reset65C02()
   }
 
   TubeProgramCounter=TubeReadMem(0xfffc) | (TubeReadMem(0xfffd)<<8);
-#ifdef BEEBWIN
   TotalTubeCycles=TotalCycles/2*3;
-#endif
-    
 }
 
 /* Reset Tube */
@@ -1502,12 +1475,10 @@ void Exec65C02Instruction() {
 	static int tmpaddr;
 	static unsigned char OldTubeNMIStatus;
 
-#ifdef BEEBWIN
 	// Output debug info
 	if (DebugEnabled) {
 		DebugDisassembler(TubeProgramCounter, PreTPC, Accumulator, XReg, YReg, PSR, StackReg, false);
 	}
-#endif
     
 	// For the Master, check Shadow Ram Presence
 	// Note, this has to be done BEFORE reading an instruction due to Bit E and the PC
@@ -2494,19 +2465,16 @@ void WrapTubeCycles(void) {
 void SyncTubeProcessor(void) {
 	// This proc syncronises the two processors on a cycle based timing.
 	// Second pro runs at 3MHz
-#ifdef BEEBWIN
 	while (TotalTubeCycles<(TotalCycles/2*3)) {
 		Exec65C02Instruction();
 	}
-#endif
     
 }
 
 /*-------------------------------------------------------------------------*/
 void DebugTubeState(void)
 {
-#ifdef BEEBWIN
-	DebugDisplayInfo("");
+    DebugDisplayInfo("");
 
 	DebugDisplayInfoF("HostTube: R1=%02X R2=%02X R3=%02X R4=%02X R1n=%02X R3n=%02X",
 		(int)R1HStatus | R1Status,
@@ -2522,8 +2490,6 @@ void DebugTubeState(void)
 		(int)R3PStatus,
 		(int)R4PStatus,
 		(int)R3HPPtr);
-#endif
-    
 }
 
 /*-------------------------------------------------------------------------*/

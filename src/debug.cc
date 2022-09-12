@@ -120,7 +120,7 @@ static Watch Watches[MAX_BPS];
 static MemoryMap MemoryMaps[17];
 #ifdef BEEBWIN
 INT_PTR CALLBACK DebugDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
-#endif#ifdef BEEBWIN
+#endif
 
 std::deque<std::string> DebugHistory;
 int DebugHistoryIndex = 0;

@@ -38,12 +38,10 @@ bool inROM = true;
 
 unsigned char ReadZ80Mem(int addr)
 {
-#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		if (addr >= 0x8000) inROM = false;
 	}
-#endif
     
 	unsigned char t = (inROM) ? z80_rom[addr & 0x1fff] : z80_ram[addr & 0xffff];
 
@@ -112,7 +110,6 @@ void disp_regs()
 	char buff[64];
 	char str[256];
 
-#ifdef BEEBWIN
 	Z80_Disassemble(pc, buff);
 
 	sprintf(str, "AF=%04X ",af[0]);
@@ -144,7 +141,6 @@ void disp_regs()
 	sprintf(str + strlen(str), ":%02X,%02X,%02X,%02X\n",ReadZ80Mem(sp),ReadZ80Mem(sp+1),ReadZ80Mem(sp+2),ReadZ80Mem(sp+3));
 
 	WriteLog("%s\n", str);
-#endif
     
 }
 
@@ -154,7 +150,6 @@ unsigned char in(unsigned int addr)
 
 	addr &= 0xff;
 
-#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		value = ReadTubeFromParasiteSide((unsigned char)addr);
@@ -177,7 +172,6 @@ unsigned char in(unsigned int addr)
 
 		inROM = (addr & 4) == 0;
 	}
-#endif
     
 	return value;
 }
@@ -186,7 +180,6 @@ void out(unsigned int addr, unsigned char value)
 {
 	addr &= 255;
 
-#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		WriteTubeFromParasiteSide(addr, value);
@@ -200,7 +193,6 @@ void out(unsigned int addr, unsigned char value)
 
 		inROM = (addr & 4) == 0;
 	}
-#endif
 }
 
 void z80_execute()
@@ -211,16 +203,13 @@ void z80_execute()
 			disp_regs();
 	}
     
-#ifdef BEEBWIN
 	// Output debug info
 	if (DebugEnabled)
 		DebugDisassembler(pc, PreZPC, 0, 0, 0, 0, 0, false);
-#endif
     
 	PreZPC = pc;
 	pc = (WORD)simz80(pc);
 
-#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		if (TubeintStatus & (1 << R1))
@@ -237,14 +226,12 @@ void z80_execute()
 		else
 			set_Z80_nmi_line(false);
 	}
-#endif
 }
 
 void init_z80()
 {
 	char path[256];
 
-#ifdef BEEBWIN
 	WriteLog("init_z80()\n");
     
 	if (TubeType == Tube::AcornZ80)
@@ -293,7 +280,6 @@ void init_z80()
 			fclose(f);
 		}
 	}
-#endif
 
 	inROM = true;
 
@@ -314,11 +300,9 @@ void Debug_Z80()
 
 	for (int a = 0; a < 512; ++a)
 	{
-#ifdef BEEBWIN
 		int s = Z80_Disassemble(t, buff);
 		WriteLog("%04x : %s\n", t, buff);
         t += s;
-#endif
 	}
 
 	trace_z80 = true;
@@ -357,9 +341,7 @@ void PrintHex(int addr)
 		*p = 0;
 	}
 
-#ifdef BEEBWIN
 	WriteLog("%s\n", buff);
-#endif
     
 }
 

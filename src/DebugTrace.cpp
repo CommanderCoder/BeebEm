@@ -20,9 +20,24 @@ Boston, MA  02110-1301, USA.
 
 #ifdef BEEBWIN
 #include <windows.h>
+#else
+#include <stdlib.h>
 #endif
 #include <stdarg.h>
 #include <stdio.h>
+
+#ifndef BEEBWIN
+
+// version for mac
+int _vscprintf (const char * format, va_list pargs) {
+    int retval;
+    va_list argcopy;
+    va_copy(argcopy, pargs);
+    retval = vsnprintf(NULL, 0, format, argcopy);
+    va_end(argcopy);
+    return retval;
+ }
+#endif
 
 #include "DebugTrace.h"
 
@@ -33,7 +48,6 @@ void DebugTrace(const char *format, ...)
 	va_list args;
 	va_start(args, format);
 
-#ifdef BEEBWIN
 	// Calculate required length, +1 is for NUL terminator
 	const int length = _vscprintf(format, args) + 1;
 
@@ -42,10 +56,11 @@ void DebugTrace(const char *format, ...)
 	if (buffer != nullptr)
 	{
 		vsprintf(buffer, format, args);
-		OutputDebugString(buffer);
-		free(buffer);
-	}
+#ifdef BEEBWIN
+        OutputDebugString(buffer);
 #endif
+        free(buffer);
+	}
 
 	va_end(args);
     

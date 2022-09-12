@@ -155,10 +155,8 @@ void CSWClose()
 		free(csw_buff);
 		csw_buff = nullptr;
 		CSWFileOpen = false;
-#ifdef BEEBWIN
 		TxD = 0;
 		RxD = 0;
-#endif
 	}
 }
 
@@ -197,9 +195,7 @@ void CSWCreateTapeMap(std::vector<TapeMapEntry>& TapeMap)
 	bool std_last_block = true;
 	int last_tone = 0;
 
-#ifdef BEEBWIN
     Clk_Divide = 16;
-#endif
     
 	TapeMap.clear();
 
@@ -231,7 +227,6 @@ again:
 		{
 			// WriteLog("Decoded Block of length %d, starting at %d\n", block_ptr, start_time);
 			// HexDump(block, block_ptr);
-#ifdef BEEBWIN
 
 			if (block_ptr == 1 && block[0] == 0x80 && Clk_Divide != 64) // 300 baud block?
 			{
@@ -312,7 +307,6 @@ again:
 				TapeMap.emplace_back(desc, start_time);
 				std_last_block = false;
 			}
-#endif
 
 			// Data block recorded
 			blk_num = (blk_num + 1) & 255;
@@ -345,7 +339,6 @@ int csw_data()
 	int t = 0;
 	int j = 1;
 
-#ifdef BEEBWIN
     if (last != Clk_Divide)
 	{
 		// WriteLog("Baud Rate changed to %s\n", (Clk_Divide == 16) ? "1200" : "300");
@@ -354,7 +347,6 @@ int csw_data()
 
 	if (Clk_Divide == 16) j = 1; // 1200 baud
 	if (Clk_Divide == 64) j = 4; // 300 baud
-#endif
 
 	// JW 18/11/06
 	// For 300 baud, just average 4 samples
@@ -455,7 +447,6 @@ int CSWPoll()
 			{
 				// Not in tone any more - data start bit
 				// WriteLog("Entered data at %d\n", csw_pulsecount);
-#ifdef BEEBWIN
 				if (Clk_Divide == 64)
 				{
 					// Skip 300 baud data
@@ -473,7 +464,6 @@ int CSWPoll()
 					csw_data();
 					csw_data();
 				}
-#endif
 				csw_state = CSWState::Data;
 				csw_bit = 0;
 				csw_byte = 0;

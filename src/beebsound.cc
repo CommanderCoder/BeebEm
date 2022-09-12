@@ -135,8 +135,10 @@ bool PartSamples = true;
 
 SoundStreamer *pSoundStreamer = nullptr;
 
+#ifndef BEEBWIN
+#define PBYTE unsigned char*
+#endif
 /****************************************************************************/
-#ifdef BEEBWIN
 /* Writes sound data to a sound buffer */
 static void WriteToSoundBuffer(PBYTE lpbSoundData)
 {
@@ -145,21 +147,20 @@ static void WriteToSoundBuffer(PBYTE lpbSoundData)
 		pSoundStreamer->Stream(lpbSoundData);
 	}
 
+#ifdef BEEBWIN
 	if (aviWriter != nullptr)
 	{
 		HRESULT hResult = aviWriter->WriteSound(lpbSoundData, SoundBufferSize);
 
 		if (FAILED(hResult) && hResult != E_UNEXPECTED)
 		{
-#ifdef BEEBWIN
 			mainWin->Report(MessageType::Error, "Failed to write sound to AVI file");
-#endif
             delete aviWriter;
 			aviWriter = nullptr;
 		}
 	}
-}
 #endif
+}
 
 /****************************************************************************/
 /* DestTime is in samples */
@@ -392,9 +393,7 @@ void PlayUpTil(double DestTime)
 				exit(1);
 			}
 #else
-#ifdef BEEBWIN
             WriteToSoundBuffer(SoundBuf);
-#endif
 #endif
 			// buffer swapping no longer needed
 			bufptr=0;
