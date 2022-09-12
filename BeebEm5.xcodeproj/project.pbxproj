@@ -64,6 +64,12 @@
 		DCAD0F1F28CFB40000366E05 /* ArmDisassembler.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */; };
 		DCAD0F2328CFB4FA00366E05 /* Master512CoPro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0ECE28CD460000366E05 /* Master512CoPro.cpp */; };
 		DCAD0F2428CFB69D00366E05 /* teletext.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C324A33D3700840082 /* teletext.cc */; };
+		DCAD0F2628CFE9EF00366E05 /* discedit.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2B724A33D3600840082 /* discedit.cc */; };
+		DCAD0F2828CFEAE500366E05 /* DebugTrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0ECC28CD45FF00366E05 /* DebugTrace.cpp */; };
+		DCAD0F2928CFEB0800366E05 /* ide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0EB628CD45FE00366E05 /* ide.cpp */; };
+		DCAD0F2A28CFEB2900366E05 /* preferences.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0EC528CD45FF00366E05 /* preferences.cpp */; };
+		DCAD0F2B28CFEB6400366E05 /* i86.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D124A33D3700840082 /* i86.cc */; };
+		DCAD0F2C28CFEB9D00366E05 /* i386dasm.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BA24A33D3600840082 /* i386dasm.cc */; };
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
 		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
@@ -120,25 +126,25 @@
 		DC901C1328A3AA5E007C8407 /* create-dmg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "create-dmg"; sourceTree = "<group>"; };
 		DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapeControlViewController.swift; sourceTree = "<group>"; };
 		DC9D23FE28CC950900F29905 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = src/ARMulator/config.h; sourceTree = SOURCE_ROOT; };
-		DC9D23FF28CC950900F29905 /* arminit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = arminit.c; path = src/ARMulator/arminit.c; sourceTree = SOURCE_ROOT; };
+		DC9D23FF28CC950900F29905 /* arminit.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = arminit.c; path = src/ARMulator/arminit.c; sourceTree = SOURCE_ROOT; };
 		DC9D240028CC950900F29905 /* dbg_conf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dbg_conf.h; path = src/ARMulator/dbg_conf.h; sourceTree = SOURCE_ROOT; };
 		DC9D240128CC950900F29905 /* acconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = acconfig.h; path = src/ARMulator/acconfig.h; sourceTree = SOURCE_ROOT; };
 		DC9D240228CC950900F29905 /* armemu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armemu.h; path = src/ARMulator/armemu.h; sourceTree = SOURCE_ROOT; };
-		DC9D240328CC950900F29905 /* bag.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bag.c; path = src/ARMulator/bag.c; sourceTree = SOURCE_ROOT; };
+		DC9D240328CC950900F29905 /* bag.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = bag.c; path = src/ARMulator/bag.c; sourceTree = SOURCE_ROOT; };
 		DC9D240428CC950900F29905 /* dbg_hif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dbg_hif.h; path = src/ARMulator/dbg_hif.h; sourceTree = SOURCE_ROOT; };
 		DC9D240528CC950900F29905 /* armdefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armdefs.h; path = src/ARMulator/armdefs.h; sourceTree = SOURCE_ROOT; };
-		DC9D240628CC950900F29905 /* armsupp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = armsupp.c; path = src/ARMulator/armsupp.c; sourceTree = SOURCE_ROOT; };
-		DC9D240728CC950900F29905 /* armmem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = armmem.c; path = src/ARMulator/armmem.c; sourceTree = SOURCE_ROOT; };
+		DC9D240628CC950900F29905 /* armsupp.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = armsupp.c; path = src/ARMulator/armsupp.c; sourceTree = SOURCE_ROOT; };
+		DC9D240728CC950900F29905 /* armmem.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = armmem.c; path = src/ARMulator/armmem.c; sourceTree = SOURCE_ROOT; };
 		DC9D240828CC950900F29905 /* armos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armos.h; path = src/ARMulator/armos.h; sourceTree = SOURCE_ROOT; };
 		DC9D240928CC950900F29905 /* armopts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armopts.h; path = src/ARMulator/armopts.h; sourceTree = SOURCE_ROOT; };
 		DC9D240A28CC950900F29905 /* armfpe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armfpe.h; path = src/ARMulator/armfpe.h; sourceTree = SOURCE_ROOT; };
 		DC9D240B28CC950900F29905 /* dbg_rdi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dbg_rdi.h; path = src/ARMulator/dbg_rdi.h; sourceTree = SOURCE_ROOT; };
-		DC9D240C28CC950900F29905 /* armemu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = armemu.c; path = src/ARMulator/armemu.c; sourceTree = SOURCE_ROOT; };
+		DC9D240C28CC950900F29905 /* armemu.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = armemu.c; path = src/ARMulator/armemu.c; sourceTree = SOURCE_ROOT; };
 		DC9D240D28CC950900F29905 /* bag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bag.h; path = src/ARMulator/bag.h; sourceTree = SOURCE_ROOT; };
 		DC9D240E28CC950900F29905 /* ansidecl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ansidecl.h; path = src/ARMulator/ansidecl.h; sourceTree = SOURCE_ROOT; };
 		DC9D240F28CC950900F29905 /* armdis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = armdis.h; path = src/ARMulator/armdis.h; sourceTree = SOURCE_ROOT; };
 		DC9D241028CC950A00F29905 /* gdbhost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gdbhost.h; path = src/ARMulator/gdbhost.h; sourceTree = SOURCE_ROOT; };
-		DC9D241128CC950A00F29905 /* thumbemu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = thumbemu.c; path = src/ARMulator/thumbemu.c; sourceTree = SOURCE_ROOT; };
+		DC9D241128CC950A00F29905 /* thumbemu.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = thumbemu.c; path = src/ARMulator/thumbemu.c; sourceTree = SOURCE_ROOT; };
 		DC9D241228CC950A00F29905 /* armdis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = armdis.cpp; path = src/ARMulator/armdis.cpp; sourceTree = SOURCE_ROOT; };
 		DC9D241328CC950A00F29905 /* iwmmxt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iwmmxt.h; path = src/ARMulator/iwmmxt.h; sourceTree = SOURCE_ROOT; };
 		DC9D241428CC950A00F29905 /* dbg_cp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dbg_cp.h; path = src/ARMulator/dbg_cp.h; sourceTree = SOURCE_ROOT; };
@@ -433,6 +439,9 @@
 		DCAD0EF128CF136100366E05 /* WinFiles */ = {
 			isa = PBXGroup;
 			children = (
+				DCCCC2D024A33D3700840082 /* userkybd.cc */,
+				DCAD0EB528CD45FE00366E05 /* romconfig.cpp */,
+				DCAD0ECA28CD45FF00366E05 /* avi.cpp */,
 				DCAD0EFC28CF14A600366E05 /* beebwin.cc */,
 				DCAD0EFF28CF14A600366E05 /* beebwindx.cpp */,
 				DCAD0F0128CF14A600366E05 /* beebwinio.cpp */,
@@ -444,6 +453,24 @@
 				DCAD0F0228CF14A700366E05 /* FolderSelectDialog.cpp */,
 			);
 			name = WinFiles;
+			sourceTree = "<group>";
+		};
+		DCAD0F2728CFEAC400366E05 /* MacFiles */ = {
+			isa = PBXGroup;
+			children = (
+				DCCCC2B924A33D3600840082 /* plist.cc */,
+				DCCCC2C424A33D3700840082 /* audev-macosx.cc */,
+				DCAD0ED228CD460000366E05 /* GetFile.cc */,
+			);
+			name = MacFiles;
+			sourceTree = "<group>";
+		};
+		DCAD0F2E28CFEC2400366E05 /* CutFiles */ = {
+			isa = PBXGroup;
+			children = (
+				DCCCC2BB24A33D3600840082 /* speech.cc */,
+			);
+			name = CutFiles;
 			sourceTree = "<group>";
 		};
 		DCB0BD8E24CC8CAC009FEA9E /* WIP */ = {
@@ -535,6 +562,8 @@
 		DCCCC2B524A33A3000840082 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				DCAD0F2E28CFEC2400366E05 /* CutFiles */,
+				DCAD0F2728CFEAC400366E05 /* MacFiles */,
 				DCAD0EF128CF136100366E05 /* WinFiles */,
 				DC9D241C28CC952E00F29905 /* Hardware */,
 				DC9D23FD28CC94AA00F29905 /* ARMulator */,
@@ -547,19 +576,15 @@
 				DCCCC2C824A33D3700840082 /* Arm.cc */,
 				DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */,
 				DCCCC2D224A33D3700840082 /* atodconv.cc */,
-				DCCCC2C424A33D3700840082 /* audev-macosx.cc */,
 				DCCCC2CA24A33D3700840082 /* beebmem.cc */,
 				DCCCC2D424A33D3700840082 /* beebsound.cc */,
 				DCCCC2D824A33D3700840082 /* csw.cc */,
-				DCAD0ECA28CD45FF00366E05 /* avi.cpp */,
 				DCAD0ECC28CD45FF00366E05 /* DebugTrace.cpp */,
-				DCAD0ED228CD460000366E05 /* GetFile.cc */,
 				DCAD0EB628CD45FE00366E05 /* ide.cpp */,
 				DCAD0EBB28CD45FE00366E05 /* log.cpp */,
 				DCAD0ECE28CD460000366E05 /* Master512CoPro.cpp */,
 				DCAD0EB828CD45FE00366E05 /* music5000.cpp */,
 				DCAD0EC528CD45FF00366E05 /* preferences.cpp */,
-				DCAD0EB528CD45FE00366E05 /* romconfig.cpp */,
 				DCAD0ED128CD460000366E05 /* SoundStreamer.cpp */,
 				DCAD0EBD28CD45FE00366E05 /* SprowCoPro.cpp */,
 				DCAD0ED328CD460000366E05 /* StringUtils.cpp */,
@@ -571,20 +596,17 @@
 				DCCCC2D124A33D3700840082 /* i86.cc */,
 				DCCCC2BA24A33D3600840082 /* i386dasm.cc */,
 				DCCCC2CB24A33D3700840082 /* main.cc */,
-				DCCCC2B924A33D3600840082 /* plist.cc */,
 				DCCCC2C724A33D3700840082 /* printing.cc */,
 				DCCCC2C624A33D3700840082 /* sasi.cc */,
 				DCCCC2D724A33D3700840082 /* scsi.cc */,
 				DCCCC2D924A33D3700840082 /* serial.cc */,
 				DCCCC2DA24A33D3700840082 /* serialdevices.cc */,
-				DCCCC2BB24A33D3600840082 /* speech.cc */,
 				DCCCC2C324A33D3700840082 /* teletext.cc */,
 				DCCCC2D524A33D3700840082 /* uef.cc */,
 				DCCCC2CD24A33D3700840082 /* uefstate.cc */,
 				DCCCC2BC24A33D3600840082 /* uservia.cc */,
 				DCCCC2CF24A33D3700840082 /* sysvia.cc */,
 				DCCCC2BD24A33D3600840082 /* via.cc */,
-				DCCCC2D024A33D3700840082 /* userkybd.cc */,
 				DCCCC2BE24A33D3700840082 /* video.cc */,
 			);
 			name = Sources;
@@ -792,6 +814,7 @@
 				DCAD0F0D28CFA94F00366E05 /* sysvia.cc in Sources */,
 				DCAD0EF028CF12E800366E05 /* log.cpp in Sources */,
 				DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */,
+				DCAD0F2928CFEB0800366E05 /* ide.cpp in Sources */,
 				DC9D244028CCB77C00F29905 /* scsi.cc in Sources */,
 				DC907FDD24B52C8200B99036 /* TapeControlViewController.swift in Sources */,
 				DCAD0EE628CD52F300366E05 /* beebmem.cc in Sources */,
@@ -800,6 +823,7 @@
 				DC70E75E25A3AB3900A7FF3E /* BeebEm5-Bridging-Body.cpp in Sources */,
 				DCAD0F1F28CFB40000366E05 /* ArmDisassembler.cc in Sources */,
 				DC9D243F28CCADDA00F29905 /* sasi.cc in Sources */,
+				DCAD0F2B28CFEB6400366E05 /* i86.cc in Sources */,
 				DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */,
 				DCAD0F1C28CFB27400366E05 /* econet.cc in Sources */,
 				DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */,
@@ -820,6 +844,7 @@
 				DCAD0F1128CFA9AD00366E05 /* disc8271.cc in Sources */,
 				DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */,
 				DCAD0F2328CFB4FA00366E05 /* Master512CoPro.cpp in Sources */,
+				DCAD0F2828CFEAE500366E05 /* DebugTrace.cpp in Sources */,
 				DCAD0F1728CFAD2700366E05 /* serial.cc in Sources */,
 				DCAD0F0F28CFA98600366E05 /* uefstate.cc in Sources */,
 				DC692B27272E876400F8B465 /* KeyboardMappingViewController.swift in Sources */,
@@ -827,10 +852,13 @@
 				DCAD0EAA28CD44D100366E05 /* csw.cc in Sources */,
 				DC9D23FB28CC8A1100F29905 /* z80.cc in Sources */,
 				DCAD0F1928CFAFB400366E05 /* beebsound.cc in Sources */,
+				DCAD0F2A28CFEB2900366E05 /* preferences.cpp in Sources */,
 				DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */,
+				DCAD0F2628CFE9EF00366E05 /* discedit.cc in Sources */,
 				DCAD0ED628CD467C00366E05 /* TapeMap.cpp in Sources */,
 				DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */,
 				DCAD0F1828CFAE9300366E05 /* serialdevices.cc in Sources */,
+				DCAD0F2C28CFEB9D00366E05 /* i386dasm.cc in Sources */,
 				DC9D23FC28CC93E100F29905 /* z80dis.cc in Sources */,
 				DCAD0F1628CFABB200366E05 /* SoundStreamer.cpp in Sources */,
 				DCAD0F0C28CFA90800366E05 /* via.cc in Sources */,

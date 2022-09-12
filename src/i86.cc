@@ -252,8 +252,9 @@ int le, i;
 	}
 
 	sprintf(buff + strlen(buff), "%s", buffer); 
+#ifdef BEEBWIN
     WriteLog("%s\n", buff);
-
+#endif
 }
 
 int i186_execute(int num_cycles)
@@ -509,8 +510,11 @@ void MemoryDump(int addr, int count)
 			sprintf(info+strlen(info), "%c", v);
 		}
 
+#ifdef BEEBWIN
 		WriteLog("%s\n", info);
-	}
+#endif
+        
+    }
 
 }
 
@@ -525,7 +529,10 @@ UINT8 data;
 
         if (dma_src != 0x8a)
         {
+#ifdef BEEBWIN
             WriteLog("DMA_SRC Error = 0x%05x\n", dma_src);
+#endif
+            
         }
 
         program_write_byte_8(dma_dst, data);
@@ -544,7 +551,10 @@ UINT8 data;
 
         if (dma_dst != 0x8a)
         {
+#ifdef BEEBWIN
             WriteLog("DMA_DST Error = 0x%05x\n", dma_dst);
+#endif
+            
         }
 
         

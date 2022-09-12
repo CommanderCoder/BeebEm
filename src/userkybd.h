@@ -1,43 +1,35 @@
-/****************************************************************************/
-/*                               Beebem                                     */
-/*                               ------                                     */
-/* This program may be distributed freely within the following restrictions:*/
-/*                                                                          */
-/* 1) You may not charge for this program or for any part of it.            */
-/* 2) This copyright message must be distributed with all copies.           */
-/* 3) This program must be distributed complete with source code.  Binary   */
-/*    only distribution is not permitted.                                   */
-/* 4) The author offers no warrenties, or guarentees etc. - you use it at   */
-/*    your own risk.  If it messes something up or destroys your computer   */
-/*    thats YOUR problem.                                                   */
-/* 5) You may use small sections of code from this program in your own      */
-/*    applications - but you must acknowledge its use.  If you plan to use  */
-/*    large sections then please ask the author.                            */
-/*                                                                          */
-/* If you do not agree with any of the above then please do not use this    */
-/* program.                                                                 */
-/****************************************************************************/
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 1997  Laurie Whiffen
 
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
 
 #ifndef USERKYBD_HEADER
 #define USERKYBD_HEADER
 
+#ifdef BEEBWIN
+#include <windows.h>
+
 // Public declarations.
 
-extern int UserKeymap[256][2];
-extern WindowRef mUKWindow; 
+bool UserKeyboardDialog(HWND hwndParent);
 
-void UserKeyboardOpenDialog();
-void UserKeyboardCloseDialog();
+extern KeyMap UserKeymap;
+#endif
 
-bool LoadUserKeyboard( const char *path );
-void SaveUserKeyboard( char *path );
-
-void SetRowCol( int ctrlID );
-const char *KeyName( int Key );
-void GetKeysUsed( char *Keys );
-void SetBBCKeyForVKEY( int Key );
-
-int keyCodeForKeyString(char * keyString);
 
 #endif

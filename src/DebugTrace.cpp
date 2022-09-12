@@ -18,7 +18,9 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA  02110-1301, USA.
 ****************************************************************/
 
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -31,6 +33,7 @@ void DebugTrace(const char *format, ...)
 	va_list args;
 	va_start(args, format);
 
+#ifdef BEEBWIN
 	// Calculate required length, +1 is for NUL terminator
 	const int length = _vscprintf(format, args) + 1;
 
@@ -42,8 +45,10 @@ void DebugTrace(const char *format, ...)
 		OutputDebugString(buffer);
 		free(buffer);
 	}
+#endif
 
 	va_end(args);
+    
 }
 
 #endif

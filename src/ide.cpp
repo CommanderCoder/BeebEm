@@ -42,7 +42,9 @@ Offset  Description             Access
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 
 #include "6502core.h"
 #include "main.h"
@@ -83,12 +85,15 @@ void IDEReset()
 
 		if (IDEDisc[i] == nullptr)
 		{
-			char *error = _strerror(nullptr);
+#ifdef BEEBWIN
+            char *error = _strerror(nullptr);
 			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
 
 			mainWin->Report(MessageType::Error,
 											"Could not open IDE disc image:\n  %s\n\n%s", buff, error);
-		}
+#endif
+            
+        }
 	}
 }
 

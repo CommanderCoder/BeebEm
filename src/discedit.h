@@ -32,8 +32,6 @@ Boston, MA  02110-1301, USA.
 #define DFS_MAX_NAME_LEN         7
 #define DFS_SECTORS_PER_TRACK   10
 #define DFS_SECTOR_SIZE        256
-#define _MAX_PATH              256
-#define  MAX_PATH              256
 
 typedef struct
 {
