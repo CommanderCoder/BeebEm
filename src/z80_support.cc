@@ -38,7 +38,7 @@ bool inROM = true;
 
 unsigned char ReadZ80Mem(int addr)
 {
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		if (addr >= 0x8000) inROM = false;
@@ -112,7 +112,7 @@ void disp_regs()
 	char buff[64];
 	char str[256];
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	Z80_Disassemble(pc, buff);
 
 	sprintf(str, "AF=%04X ",af[0]);
@@ -154,7 +154,7 @@ unsigned char in(unsigned int addr)
 
 	addr &= 0xff;
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		value = ReadTubeFromParasiteSide((unsigned char)addr);
@@ -186,7 +186,7 @@ void out(unsigned int addr, unsigned char value)
 {
 	addr &= 255;
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		WriteTubeFromParasiteSide(addr, value);
@@ -211,7 +211,7 @@ void z80_execute()
 			disp_regs();
 	}
     
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	// Output debug info
 	if (DebugEnabled)
 		DebugDisassembler(pc, PreZPC, 0, 0, 0, 0, 0, false);
@@ -220,7 +220,7 @@ void z80_execute()
 	PreZPC = pc;
 	pc = (WORD)simz80(pc);
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	if (TubeType == Tube::AcornZ80)
 	{
 		if (TubeintStatus & (1 << R1))
@@ -244,7 +244,7 @@ void init_z80()
 {
 	char path[256];
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	WriteLog("init_z80()\n");
     
 	if (TubeType == Tube::AcornZ80)
@@ -314,7 +314,7 @@ void Debug_Z80()
 
 	for (int a = 0; a < 512; ++a)
 	{
-#ifdef OLDMAC
+#ifdef BEEBWIN
 		int s = Z80_Disassemble(t, buff);
 		WriteLog("%04x : %s\n", t, buff);
         t += s;
@@ -357,7 +357,7 @@ void PrintHex(int addr)
 		*p = 0;
 	}
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	WriteLog("%s\n", buff);
 #endif
     

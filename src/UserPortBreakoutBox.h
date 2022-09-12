@@ -26,7 +26,9 @@ Boston, MA  02110-1301, USA.
 #ifndef USER_PORT_BREAKOUT_BOX_HEADER
 #define USER_PORT_BREAKOUT_BOX_HEADER
 
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 
 /* User Port Breakout Box */
 
@@ -34,9 +36,11 @@ class UserPortBreakoutDialog
 {
 	public:
 		UserPortBreakoutDialog(
+#ifdef BEEBWIN
 			HINSTANCE hInstance,
 			HWND hwndParent
-		);
+#endif
+    );
 
 		bool Open();
 		void Close();
@@ -49,6 +53,7 @@ class UserPortBreakoutDialog
 		void ShowOutputs(unsigned char data);
 
 	private:
+#ifdef BEEBWIN
 		static INT_PTR CALLBACK sDlgProc(
 			HWND   hwnd,
 			UINT   nMessage,
@@ -62,16 +67,19 @@ class UserPortBreakoutDialog
 			WPARAM wParam,
 			LPARAM lParam
 		);
-
+#endif
 		void PromptForBitKeyInput(int bitKey);
 		bool GetValue(int ctrlID);
 		void SetValue(int ctrlID, bool State);
 
 	private:
+#ifdef BEEBWIN
+
 		HINSTANCE m_hInstance;
 		HWND m_hwnd;
 		HWND m_hwndParent;
-		int m_BitKey;
+#endif
+    int m_BitKey;
 		unsigned char m_LastInputData;
 		unsigned char m_LastOutputData;
 };

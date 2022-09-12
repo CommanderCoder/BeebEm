@@ -30,7 +30,7 @@ Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef OLDMAC
+#ifndef BEEBWIN
 #define _MAX_PATH 256
 #endif
 
