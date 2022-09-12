@@ -123,14 +123,14 @@ void SCSIReset()
     
 	for (int i = 0; i < 4; ++i)
 	{
-#ifdef OLDMAC
+#ifdef BEEBWIN
 		sprintf(buff, "%s\\scsi%d.dat", HardDrivePath, i);
 #endif
 		SCSIDisc[i] = fopen(buff, "rb+");
 
 		if (SCSIDisc[i] == nullptr)
 		{
-#ifdef OLDMAC
+#ifdef BEEBWIN
 			char *error = _strerror(nullptr);
 			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
 
@@ -144,7 +144,7 @@ void SCSIReset()
 
 		if (SCSIDisc[i] != nullptr)
 		{
-#ifdef OLDMAC
+#ifdef BEEBWIN
 			sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, i);
 #endif
             
@@ -195,7 +195,7 @@ void SCSIWrite(int Address, unsigned char Value)
 			if (Value == 0xff)
 			{
 				scsi.irq = true;
-#ifdef OLDMAC
+#ifdef BEEBWIN
 				intStatus |= (1 << hdc);
 #endif
                 scsi.status = 0x00;
@@ -203,7 +203,7 @@ void SCSIWrite(int Address, unsigned char Value)
 			else
 			{
 				scsi.irq = true;
-#ifdef OLDMAC
+#ifdef BEEBWIN
 				intStatus &= ~(1 << hdc);
 #endif
                 
@@ -414,7 +414,7 @@ static void BusFree()
 
 	scsi.phase = busfree;
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	LEDs.HDisc[0] = false;
 	LEDs.HDisc[1] = false;
 	LEDs.HDisc[2] = false;
@@ -455,7 +455,7 @@ static void Execute(void)
 
 	scsi.lun = (scsi.cmd[1]) >> 5;
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	LEDs.HDisc[scsi.lun] = 1;
 #endif
 	switch (scsi.cmd[0])
@@ -729,7 +729,7 @@ static int DiscModeSense(unsigned char *cdb, unsigned char *buf)
 	if (SCSIDisc[scsi.lun] == NULL) return 0;
 
 	char buff[256];
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, scsi.lun);
 #endif
 	FILE *f = fopen(buff, "rb");
@@ -775,7 +775,7 @@ static bool WriteGeometory(unsigned char *buf)
 	if (SCSIDisc[scsi.lun] == NULL) return false;
 
 	char buff[256];
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, scsi.lun);
 #endif
     
@@ -800,7 +800,7 @@ static bool DiscFormat(unsigned char * /* buf */)
 	}
 
 	char buff[256];
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dat", HardDrivePath, scsi.lun);
 #endif
 	SCSIDisc[scsi.lun] = fopen(buff, "wb");
@@ -809,7 +809,7 @@ static bool DiscFormat(unsigned char * /* buf */)
 
 	if (SCSIDisc[scsi.lun] == NULL) return false;
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, scsi.lun);
 #endif
 	FILE *f = fopen(buff, "rb");

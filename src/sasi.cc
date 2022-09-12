@@ -115,7 +115,7 @@ void SASIReset()
 
 	for (int i = 0; i < 1; ++i) // only one drive allowed under Torch Z80 ?
 	{
-#ifdef OLDMAC
+#ifdef BEEBWIN
 		sprintf(buff, "%s\\sasi%d.dat", HardDrivePath, i);
 #endif
 		if (SASIDisc[i] != NULL)
@@ -124,7 +124,7 @@ void SASIReset()
 			SASIDisc[i]=NULL;
 		}
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 		if (!SCSIDriveEnabled)
 			continue;
 #endif
@@ -133,7 +133,7 @@ void SASIReset()
 
 		if (SASIDisc[i] == nullptr)
 		{
-#ifdef OLDMAC
+#ifdef BEEBWIN
 			char *error = _strerror(nullptr);
 			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
 
@@ -148,7 +148,7 @@ void SASIReset()
 
 void SASIWrite(int Address, unsigned char Value)
 {
-#ifdef OLDMAC
+#ifdef BEEBWIN
     if (!SCSIDriveEnabled)
 		return;
 #endif
@@ -180,7 +180,7 @@ void SASIWrite(int Address, unsigned char Value)
 
 unsigned char SASIRead(int Address)
 {
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	if (!SCSIDriveEnabled)
 		return 0xff;
 #endif
@@ -373,7 +373,7 @@ static void SASIBusFree()
 
 	sasi.phase = busfree;
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	LEDs.HDisc[0] = 0;
 	LEDs.HDisc[1] = 0;
 	LEDs.HDisc[2] = 0;
@@ -409,7 +409,7 @@ static void SASIExecute()
 
 	sasi.lun = (sasi.cmd[1]) >> 5;
 
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	LEDs.HDisc[sasi.lun] = 1;
 #endif
     
@@ -695,7 +695,7 @@ static bool SASIDiscFormat(unsigned char *buf)
 	record |= buf[3];
 
 	char buff[256];
-#ifdef OLDMAC
+#ifdef BEEBWIN
 	sprintf(buff, "%s/sasi%d.dat", HardDrivePath, sasi.lun);
 #endif
     
