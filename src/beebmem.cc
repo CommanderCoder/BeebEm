@@ -61,14 +61,6 @@ Boston, MA  02110-1301, USA.
 #include "teletext.h"
 #include "music5000.h"
 
-#ifndef BEEBWIN
-
-
-//just for compiling
-Model MachineType;
-BeebWin* mainWin;
-
-#endif
 
 using namespace std;
 
