@@ -1260,7 +1260,6 @@ static void ClipboardREMVHandler()
 	if (GETVFLAG) {
 		// Examine buffer state
 
-#ifdef BEEBWIN
 		if (mainWin->m_ClipboardIndex < mainWin->m_ClipboardLength) {
 			Accumulator = mainWin->m_ClipboardBuffer[mainWin->m_ClipboardIndex];
 			PSR &= ~FlagC;
@@ -1268,12 +1267,10 @@ static void ClipboardREMVHandler()
 		else {
 			PSR |= FlagC;
 		}
-#endif
         
     }
 	else {
 		// Remove character from buffer
-#ifdef BEEBWIN
 		if (mainWin->m_ClipboardIndex < mainWin->m_ClipboardLength) {
 			unsigned char c = mainWin->m_ClipboardBuffer[mainWin->m_ClipboardIndex++];
 
@@ -1301,7 +1298,6 @@ static void ClipboardREMVHandler()
 			mainWin->ClearClipboardBuffer();
 			PSR |= FlagC;
 		}
-#endif
 	}
 
 	CurrentInstruction = 0x60; // RTS
@@ -1329,7 +1325,6 @@ static void ClipboardREMVHandler()
 
 static void ClipboardCNPVHandler()
 {
-#ifdef BEEBWIN
 	if (GETVFLAG) {
 		mainWin->ClearClipboardBuffer();
 	}
@@ -1344,7 +1339,6 @@ static void ClipboardCNPVHandler()
 			YReg = 0;
 		}
 	}
-#endif
 	CurrentInstruction = 0x60; // RTS
 }
 
@@ -1385,10 +1379,11 @@ void Exec6502Instruction(void) {
 		PrePC = ProgramCounter;
 
 		// Check for WRCHV, send char to speech output
-#ifdef BEEBWIN
 		if (mainWin->m_TextToSpeechEnabled &&
 			ProgramCounter == (WholeRam[0x20e] | (WholeRam[0x20f] << 8))) {
-			mainWin->SpeakChar(Accumulator);
+#ifdef BEEBWIN
+            mainWin->SpeakChar(Accumulator);
+#endif
 		}
 		else if (mainWin->m_ClipboardBuffer[0] != '\0') {
 			// Check for REMV (Remove from buffer vector) and CNPV (Count/purge buffer
@@ -1402,8 +1397,8 @@ void Exec6502Instruction(void) {
 				ClipboardCNPVHandler();
 			}
 		}
-#endif
-		if (CurrentInstruction == -1) {
+
+        if (CurrentInstruction == -1) {
 			// Read an instruction and post inc program counter
 			CurrentInstruction = ReadPaged(ProgramCounter++);
 		}
@@ -3118,19 +3113,19 @@ void Exec6502Instruction(void) {
 				z80_execute();
 				break;
 
-#ifdef BEEBWIN
 			case Tube::AcornArm: // TODO: 8MHz
 				arm->exec(4);
 				break;
 
 			case Tube::SprowArm: // 64MHz
+#ifdef BEEBWIN
 				#if _DEBUG
 				sprow->Execute(2);
 				#else
 				sprow->Execute(32 * Cycles);
 				#endif
-				break;
 #endif
+				break;
 			case Tube::Master512CoPro: // 8MHz
 				master512CoPro.Execute(4 * Cycles);
 				break;
