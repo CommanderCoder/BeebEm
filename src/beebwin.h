@@ -38,6 +38,9 @@ Boston, MA  02110-1301, USA.
 #include <d3dx9.h>
 #include <ddraw.h>
 #include <sapi.h>
+#else
+#define UINT uint32_t
+#define CHAR uint8_t
 #endif
 
 #include "disctype.h"
@@ -53,17 +56,14 @@ Boston, MA  02110-1301, USA.
 #define CFG_KEYBOARD_LAYOUT "SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout"
 #define CFG_SCANCODE_MAP "Scancode Map"
 
-typedef struct KeyMapping {
+typedef struct KeyMappingTag {
 	int row;    // Beeb row
 	int col;    // Beeb col
 	bool shift; // Beeb shift state
 } KeyMapping;
 
-#ifdef BEEBWIN
-typedef KeyMapping KeyMap[256][2]; // Indices are: [Virt key][shift state]
-#else //TARGET_API_MAC_OS8
-typedef KeyMapping BeebKeyMap[256][2]; // Indices are: [Virt key][shift state]
-#endif
+typedef KeyMapping bKeyMap[256][2]; // Indices are: [Virt key][shift state]
+
 
 extern const char *WindowTitle;
 
@@ -547,10 +547,8 @@ public:
 
 	void UpdateSoundStreamerMenu();
 
-#ifdef BEEBWIN
 	void CheckMenuItem(UINT id, bool checked);
 	void EnableMenuItem(UINT id, bool enabled);
-#endif
     
 	// DirectX - calls DDraw or DX9 fn
 	void InitDX(void);
@@ -625,22 +623,14 @@ public:
 
 	MessageResult Report(MessageType type, const char *format, ...);
 
+    bool ReadKeyMap(const char *filename, bKeyMap *keymap);
+    bool WriteKeyMap(const char *filename, bKeyMap *keymap);
 #ifdef BEEBWIN
-    bool ReadKeyMap(const char *filename, KeyMap *keymap);
-    bool WriteKeyMap(const char *filename, KeyMap *keymap);
 	bool RegCreateKey(HKEY hKeyRoot, LPCSTR lpSubKey);
 	bool RegGetBinaryValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue, void* pData, int* pnSize);
 	bool RegSetBinaryValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue, const void* pData, int* pnSize);
 	bool RegGetStringValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue, LPSTR pData, DWORD dwSize);
 	bool RegSetStringValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue, LPCSTR pData);
-#else
-    bool ReadKeyMap(const char *filename, BeebKeyMap *keymap);
-    bool WriteKeyMap(const char *filename, BeebKeyMap *keymap);
-    
-// See WM_KEYUP and WM_KEYDOWN
-    int KeyDown(int vkey);
-    int KeyUp(int vkey);
-
 #endif
     void EditROMConfig(void);
 

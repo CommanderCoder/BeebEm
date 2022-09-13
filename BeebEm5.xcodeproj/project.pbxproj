@@ -71,6 +71,11 @@
 		DCAD0F2C28CFEB9D00366E05 /* i386dasm.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BA24A33D3600840082 /* i386dasm.cc */; };
 		DCAD0F3A28D058FB00366E05 /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CB24A33D3700840082 /* main.cc */; };
 		DCAD0F3B28D0593B00366E05 /* printing.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C724A33D3700840082 /* printing.cc */; };
+		DCAD0F3F28D05E7000366E05 /* userkybd.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D024A33D3700840082 /* userkybd.cc */; };
+		DCAD0F4528D1410E00366E05 /* beebmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0F3C28D05BE000366E05 /* beebmain.cpp */; };
+		DCAD0F4628D1411400366E05 /* beebmainio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0F4028D1370D00366E05 /* beebmainio.cpp */; };
+		DCAD0F4728D1411D00366E05 /* romconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0EB528CD45FE00366E05 /* romconfig.cpp */; };
+		DCAD0F4928D1417900366E05 /* beebmainprefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */; };
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
 		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
@@ -213,6 +218,10 @@
 		DCAD0F0028CF14A600366E05 /* beebwinprefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebwinprefs.cpp; path = src/beebwinprefs.cpp; sourceTree = "<group>"; };
 		DCAD0F0128CF14A600366E05 /* beebwinio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebwinio.cpp; path = src/beebwinio.cpp; sourceTree = "<group>"; };
 		DCAD0F0228CF14A700366E05 /* FolderSelectDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FolderSelectDialog.cpp; path = src/FolderSelectDialog.cpp; sourceTree = "<group>"; };
+		DCAD0F3C28D05BE000366E05 /* beebmain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = beebmain.cpp; sourceTree = "<group>"; };
+		DCAD0F3E28D05D2600366E05 /* version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = version.h; path = src/version.h; sourceTree = "<group>"; };
+		DCAD0F4028D1370D00366E05 /* beebmainio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebmainio.cpp; path = src/beebmainio.cpp; sourceTree = "<group>"; };
+		DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = beebmainprefs.cpp; sourceTree = SOURCE_ROOT; };
 		DCCCC29B24A338ED00840082 /* BeebEm5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeebEm5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCCCC29E24A338ED00840082 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DCCCC2A224A338ED00840082 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -579,6 +588,9 @@
 				DCCCC2C824A33D3700840082 /* Arm.cc */,
 				DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */,
 				DCCCC2D224A33D3700840082 /* atodconv.cc */,
+				DCAD0F3C28D05BE000366E05 /* beebmain.cpp */,
+				DCAD0F4028D1370D00366E05 /* beebmainio.cpp */,
+				DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */,
 				DCCCC2CA24A33D3700840082 /* beebmem.cc */,
 				DCCCC2D424A33D3700840082 /* beebsound.cc */,
 				DCCCC2D824A33D3700840082 /* csw.cc */,
@@ -625,6 +637,7 @@
 		DCD4ADE624A4D54A0000C40A /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				DCAD0F3E28D05D2600366E05 /* version.h */,
 				DCAD0ECD28CD460000366E05 /* ARMulator.h */,
 				DCAD0EC628CD45FF00366E05 /* avi.h */,
 				DCAD0EBA28CD45FE00366E05 /* beebemrc.h */,
@@ -824,6 +837,7 @@
 				DCAD0F3B28D0593B00366E05 /* printing.cc in Sources */,
 				DCAD0F0E28CFA95200366E05 /* uservia.cc in Sources */,
 				DC70E75E25A3AB3900A7FF3E /* BeebEm5-Bridging-Body.cpp in Sources */,
+				DCAD0F4928D1417900366E05 /* beebmainprefs.cpp in Sources */,
 				DCAD0F1F28CFB40000366E05 /* ArmDisassembler.cc in Sources */,
 				DC9D243F28CCADDA00F29905 /* sasi.cc in Sources */,
 				DCAD0F2B28CFEB6400366E05 /* i86.cc in Sources */,
@@ -834,14 +848,17 @@
 				DCCCC30B24A3441800840082 /* Document.swift in Sources */,
 				DCAD0F1328CFAA5F00366E05 /* music5000.cpp in Sources */,
 				DCAD0F1B28CFB25A00366E05 /* 6502core.cc in Sources */,
+				DCAD0F3F28D05E7000366E05 /* userkybd.cc in Sources */,
 				DCAD0F1E28CFB3DE00366E05 /* Arm.cc in Sources */,
 				DCAD0F1528CFAB5D00366E05 /* video.cc in Sources */,
 				DCAD0ED728CD494A00366E05 /* StringUtils.cpp in Sources */,
 				DCAD0F2428CFB69D00366E05 /* teletext.cc in Sources */,
+				DCAD0F4728D1411D00366E05 /* romconfig.cpp in Sources */,
 				DCAD0F1428CFAB1C00366E05 /* atodconv.cc in Sources */,
 				DC8BE3B124CC797600D12E2B /* Colour.swift in Sources */,
 				DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */,
 				DCAD0EE828CF076F00366E05 /* debug.cc in Sources */,
+				DCAD0F4528D1410E00366E05 /* beebmain.cpp in Sources */,
 				DCE5E862267B362C00F3CD34 /* z80_support.cc in Sources */,
 				DCAD0F1128CFA9AD00366E05 /* disc8271.cc in Sources */,
 				DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */,
@@ -853,6 +870,7 @@
 				DCAD0F1228CFA9AD00366E05 /* disc1770.cc in Sources */,
 				DCAD0EAA28CD44D100366E05 /* csw.cc in Sources */,
 				DC9D23FB28CC8A1100F29905 /* z80.cc in Sources */,
+				DCAD0F4628D1411400366E05 /* beebmainio.cpp in Sources */,
 				DCAD0F1928CFAFB400366E05 /* beebsound.cc in Sources */,
 				DCAD0F2A28CFEB2900366E05 /* preferences.cpp in Sources */,
 				DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */,

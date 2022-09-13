@@ -28,8 +28,9 @@ Boston, MA  02110-1301, USA.
 
 bool UserKeyboardDialog(HWND hwndParent);
 
-extern KeyMap UserKeymap;
 #endif
+
+extern bKeyMap UserKeymap;
 
 
 #endif

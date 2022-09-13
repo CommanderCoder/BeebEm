@@ -21,29 +21,40 @@ Boston, MA  02110-1301, USA.
 // BeebWin ROM Configuration Dialog
 
 #include <stdio.h>
+#ifdef BEEBWIN
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
+#endif
 
 #include "beebemrc.h"
 #include "main.h"
 #include "beebwin.h"
 #include "beebmem.h"
-#include "filedialog.h"
 
+#ifdef BEEBWIN
+#include "filedialog.h"
+#endif
+
+#ifdef BEEBWIN
 static HWND hWndROMList = NULL;
 static HWND hWndModel = NULL;
+#endif
 static Model nModel = Model::B;
+#ifdef BEEBWIN
 static const LPCSTR szModel[] = { "BBC B", "Integra-B", "B Plus", "Master 128" };
+#endif
 static ROMConfigFile ROMCfg;
 static char szDefaultROMPath[MAX_PATH] = {0};
 static char szDefaultROMConfigPath[MAX_PATH] = {0};
 
+#ifdef BEEBWIN
 static INT_PTR CALLBACK ROMConfigDlgProc(
 	HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 static bool LoadROMConfigFile(HWND hWnd);
 static bool SaveROMConfigFile(HWND hWnd);
 static bool GetROMFile(HWND hWnd, char *pFileName);
+#endif
 static bool WriteROMFile(const char *filename, ROMConfigFile RomConfig);
 
 /****************************************************************************/
@@ -52,6 +63,7 @@ void BeebWin::EditROMConfig(void)
 	// Copy Rom config
 	memcpy(&ROMCfg, &RomConfig, sizeof(ROMConfigFile));
 
+#ifdef BEEBWIN
 	INT_PTR nResult = DialogBox(hInst, MAKEINTRESOURCE(IDD_ROMCONFIG), m_hWnd, ROMConfigDlgProc);
 	if (nResult == TRUE)
 	{
@@ -59,8 +71,11 @@ void BeebWin::EditROMConfig(void)
 		memcpy(&RomConfig, &ROMCfg, sizeof(ROMConfigFile));
 		BeebReadRoms();
 	}
+#endif
+    
 }
 
+#ifdef BEEBWIN
 /****************************************************************************/
 static int LVInsertColumn(
 	HWND hWnd, UINT uCol, const LPTSTR pszText, int iAlignment, UINT uWidth)
@@ -102,6 +117,7 @@ static void LVSetFocus(HWND hWnd)
 
 	SetFocus(hWnd);
 }
+#endif
 
 /****************************************************************************/
 static void UpdateROMField(int row)
@@ -122,12 +138,16 @@ static void UpdateROMField(int row)
 	strncpy(szROMFile, ROMCfg[static_cast<int>(nModel)][row], _MAX_PATH);
 	if (unplugged)
 		strncat(szROMFile, " (unplugged)", _MAX_PATH);
+#ifdef BEEBWIN
 	LVSetItemText(hWndROMList, row, 1, (LPTSTR)szROMFile);
+#endif
+    
 }
 
 /****************************************************************************/
 static void FillROMList(void)
 {
+#ifdef BEEBWIN
 
 	Edit_SetText(hWndModel, szModel[static_cast<int>(nModel)]);
 
@@ -147,7 +167,10 @@ static void FillROMList(void)
 		LVInsertItem(hWndROMList, row, 0, (LPTSTR)str, bank);
 		UpdateROMField(row);
 	}
+#endif
 }
+
+#ifdef BEEBWIN
 
 /****************************************************************************/
 static INT_PTR CALLBACK ROMConfigDlgProc(HWND hwndDlg, UINT message,
@@ -399,3 +422,4 @@ static bool GetROMFile(HWND hWnd, char *pFileName)
 
 	return success;
 }
+#endif

@@ -21,15 +21,20 @@ Boston, MA  02110-1301, USA.
 // User defined keyboard functionality.
 
 #include <stdio.h>
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 #include <string.h>
 #include <string>
 #include "main.h"
 #include "beebemrc.h"
 #include "userkybd.h"
+#ifdef BEEBWIN
 #include "SelectKeyDialog.h"
+#endif
 #include "Messages.h"
 
+#ifdef BEEBWIN
 static void SetKeyColour(COLORREF aColour);
 static void SelectKeyMapping(HWND hwnd, UINT ctrlID, HWND hwndCtrl);
 static void SetBBCKeyForVKEY(int Key, bool shift);
@@ -55,13 +60,16 @@ static HWND hwndBBCKey; // Holds the BBCKey control handle which is now selected
 static UINT selectedCtrlID; // Holds ctrlId of selected key (or 0 if none selected).
 static HWND hwndMain; // Holds the BeebWin window handle.
 static HWND hwndUserKeyboard;
+#endif
 
 static int BBCRow; // Used to store the Row and Col values while we wait
 static int BBCCol; // for a key press from the User.
 static bool doingShifted; // Selecting shifted or unshifted key press
 
 // Initialised to defaultMapping.
-KeyMap UserKeymap;
+bKeyMap UserKeymap;
+
+#ifdef BEEBWIN
 
 static const char* szSelectKeyDialogTitle[2] = {
 	"Press key for unshifted press...",
@@ -496,3 +504,4 @@ static std::string GetKeysUsed()
 
 	return Keys;
 }
+#endif
