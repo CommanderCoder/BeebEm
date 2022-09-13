@@ -33,7 +33,6 @@
 		DC9D243028CC952E00F29905 /* Watford.vcxproj in Resources */ = {isa = PBXBuildFile; fileRef = DC9D242428CC952E00F29905 /* Watford.vcxproj */; };
 		DC9D243228CC952E00F29905 /* OpusDDOS.vcxproj.filters in Resources */ = {isa = PBXBuildFile; fileRef = DC9D242828CC952E00F29905 /* OpusDDOS.vcxproj.filters */; };
 		DC9D243328CC952E00F29905 /* OpusDDOS.vcxproj in Resources */ = {isa = PBXBuildFile; fileRef = DC9D242A28CC952E00F29905 /* OpusDDOS.vcxproj */; };
-		DC9D243E28CCAD2F00F29905 /* printing.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C724A33D3700840082 /* printing.cc */; };
 		DC9D243F28CCADDA00F29905 /* sasi.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C624A33D3700840082 /* sasi.cc */; };
 		DC9D244028CCB77C00F29905 /* scsi.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D724A33D3700840082 /* scsi.cc */; };
 		DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */; };
@@ -70,7 +69,8 @@
 		DCAD0F2A28CFEB2900366E05 /* preferences.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0EC528CD45FF00366E05 /* preferences.cpp */; };
 		DCAD0F2B28CFEB6400366E05 /* i86.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D124A33D3700840082 /* i86.cc */; };
 		DCAD0F2C28CFEB9D00366E05 /* i386dasm.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BA24A33D3600840082 /* i386dasm.cc */; };
-		DCAD0F3928CFF64F00366E05 /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CB24A33D3700840082 /* main.cc */; };
+		DCAD0F3A28D058FB00366E05 /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CB24A33D3700840082 /* main.cc */; };
+		DCAD0F3B28D0593B00366E05 /* printing.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C724A33D3700840082 /* printing.cc */; };
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
 		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
@@ -440,6 +440,8 @@
 		DCAD0EF128CF136100366E05 /* WinFiles */ = {
 			isa = PBXGroup;
 			children = (
+				DCCCC2C724A33D3700840082 /* printing.cc */,
+				DCCCC2CB24A33D3700840082 /* main.cc */,
 				DCCCC2D024A33D3700840082 /* userkybd.cc */,
 				DCAD0EB528CD45FE00366E05 /* romconfig.cpp */,
 				DCAD0ECA28CD45FF00366E05 /* avi.cpp */,
@@ -596,8 +598,6 @@
 				DCCCC2DB24A33D3700840082 /* econet.cc */,
 				DCCCC2D124A33D3700840082 /* i86.cc */,
 				DCCCC2BA24A33D3600840082 /* i386dasm.cc */,
-				DCCCC2CB24A33D3700840082 /* main.cc */,
-				DCCCC2C724A33D3700840082 /* printing.cc */,
 				DCCCC2C624A33D3700840082 /* sasi.cc */,
 				DCCCC2D724A33D3700840082 /* scsi.cc */,
 				DCCCC2D924A33D3700840082 /* serial.cc */,
@@ -817,10 +817,11 @@
 				DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */,
 				DCAD0F2928CFEB0800366E05 /* ide.cpp in Sources */,
 				DC9D244028CCB77C00F29905 /* scsi.cc in Sources */,
-				DCAD0F3928CFF64F00366E05 /* main.cc in Sources */,
+				DCAD0F3A28D058FB00366E05 /* main.cc in Sources */,
 				DC907FDD24B52C8200B99036 /* TapeControlViewController.swift in Sources */,
 				DCAD0EE628CD52F300366E05 /* beebmem.cc in Sources */,
 				DCE19A40286E577E00CF6090 /* BeebSKView.swift in Sources */,
+				DCAD0F3B28D0593B00366E05 /* printing.cc in Sources */,
 				DCAD0F0E28CFA95200366E05 /* uservia.cc in Sources */,
 				DC70E75E25A3AB3900A7FF3E /* BeebEm5-Bridging-Body.cpp in Sources */,
 				DCAD0F1F28CFB40000366E05 /* ArmDisassembler.cc in Sources */,
@@ -842,7 +843,6 @@
 				DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */,
 				DCAD0EE828CF076F00366E05 /* debug.cc in Sources */,
 				DCE5E862267B362C00F3CD34 /* z80_support.cc in Sources */,
-				DC9D243E28CCAD2F00F29905 /* printing.cc in Sources */,
 				DCAD0F1128CFA9AD00366E05 /* disc8271.cc in Sources */,
 				DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */,
 				DCAD0F2328CFB4FA00366E05 /* Master512CoPro.cpp in Sources */,

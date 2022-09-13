@@ -102,14 +102,12 @@ void UserVIAWrite(int Address, unsigned char Value)
 
 	// DebugTrace("UserVIAWrite: Address=0x%02x Value=0x%02x\n", Address, Value);
 
-#ifdef BEEBWIN
 	if (DebugEnabled)
 	{
 		DebugDisplayTraceF(DebugType::UserVIA, true,
 		                   "UserVia: Write address %X value %02X",
 		                   Address & 0xf, Value);
 	}
-#endif
     
 	switch (Address)
 	{
@@ -391,14 +389,12 @@ unsigned char UserVIARead(int Address)
 			break;
 	}
 
-#ifdef BEEBWIN
 	if (DebugEnabled)
 	{
 	  DebugDisplayTraceF(DebugType::UserVIA, true,
 	                     "UserVia: Read address %X value %02X",
 	                     Address & 0xf, tmp & 0xff);
 	}
-#endif
     
 	return tmp;
 }
@@ -431,13 +427,10 @@ void UserVIA_poll_real()
 				UserVIAState.irb ^= 0x80; /* Toggle PB7 */
 			}
 
-#ifdef BEEBWIN
-
 			if ((UserVIAState.ier & 0x40) && CyclesToInt == NO_TIMER_INT_DUE)
 			{
 				CyclesToInt = 3 + UserVIAState.timer1c;
 			}
-#endif
 			UserVIAState.timer1hasshot = true;
 		}
 	}
@@ -456,12 +449,10 @@ void UserVIA_poll_real()
 			UserVIAState.ifr |= 0x20; /* Timer 2 interrupt */
 			UpdateIFRTopBit();
 
-#ifdef BEEBWIN
 			if ((UserVIAState.ier & 0x20) && CyclesToInt == NO_TIMER_INT_DUE)
 			{
 				CyclesToInt = 3 + UserVIAState.timer2c;
 			}
-#endif
 			UserVIAState.timer2hasshot = true; // Added by K.Lowe 24/08/03
 		}
 	}
@@ -487,11 +478,9 @@ void UserVIA_poll(unsigned int ncycles)
 		UserVIA_poll_real();
 	}
 
-#ifdef BEEBWIN
 	if (AMXMouseEnabled && AMXTrigger<=TotalCycles) AMXMouseMovement();
 	if (PrinterEnabled && PrinterTrigger<=TotalCycles) PrinterPoll();
 	if (SRTrigger<=TotalCycles) SRPoll();
-#endif
     
 }
 

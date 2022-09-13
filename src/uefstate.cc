@@ -89,14 +89,13 @@ UEFStateResult SaveUEFState(const char *StateName) {
 		fputc(UEFMajorVersion, UEFState);
 
 #ifdef BEEBWIN
-	mainWin->SaveEmuUEF(UEFState);
-        Save6502UEF(UEFState);
+        mainWin->SaveEmuUEF(UEFState);
 #endif
+        Save6502UEF(UEFState);
 		SaveMemUEF(UEFState);
 		SaveVideoUEF(UEFState);
 		SaveVIAUEF(UEFState);
 		SaveSoundUEF(UEFState);
-#ifdef BEEBWIN
 
 		if (MachineType != Model::Master128 && NativeFDC)
 			Save8271UEF(UEFState);
@@ -107,7 +106,6 @@ UEFStateResult SaveUEFState(const char *StateName) {
 			Save65C02UEF(UEFState);
 			Save65C02MemUEF(UEFState);
 		}
-#endif
 		SaveSerialUEF(UEFState);
 		SaveAtoDUEF(UEFState);
 		SaveMusic5000UEF(UEFState);

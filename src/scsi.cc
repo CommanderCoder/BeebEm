@@ -123,9 +123,7 @@ void SCSIReset()
     
 	for (int i = 0; i < 4; ++i)
 	{
-#ifdef BEEBWIN
 		sprintf(buff, "%s\\scsi%d.dat", HardDrivePath, i);
-#endif
 		SCSIDisc[i] = fopen(buff, "rb+");
 
 		if (SCSIDisc[i] == nullptr)
@@ -144,9 +142,7 @@ void SCSIReset()
 
 		if (SCSIDisc[i] != nullptr)
 		{
-#ifdef BEEBWIN
 			sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, i);
-#endif
             
 			FILE *f = fopen(buff, "rb");
 
@@ -195,18 +191,13 @@ void SCSIWrite(int Address, unsigned char Value)
 			if (Value == 0xff)
 			{
 				scsi.irq = true;
-#ifdef BEEBWIN
 				intStatus |= (1 << hdc);
-#endif
                 scsi.status = 0x00;
 			}
 			else
 			{
 				scsi.irq = true;
-#ifdef BEEBWIN
 				intStatus &= ~(1 << hdc);
-#endif
-                
             }
 
 			break;
@@ -729,9 +720,7 @@ static int DiscModeSense(unsigned char *cdb, unsigned char *buf)
 	if (SCSIDisc[scsi.lun] == NULL) return 0;
 
 	char buff[256];
-#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, scsi.lun);
-#endif
 	FILE *f = fopen(buff, "rb");
 
 	if (f == NULL) return 0;
@@ -775,9 +764,7 @@ static bool WriteGeometory(unsigned char *buf)
 	if (SCSIDisc[scsi.lun] == NULL) return false;
 
 	char buff[256];
-#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, scsi.lun);
-#endif
     
 	FILE *f = fopen(buff, "wb");
 
@@ -800,18 +787,14 @@ static bool DiscFormat(unsigned char * /* buf */)
 	}
 
 	char buff[256];
-#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dat", HardDrivePath, scsi.lun);
-#endif
 	SCSIDisc[scsi.lun] = fopen(buff, "wb");
 	if (SCSIDisc[scsi.lun] != NULL) fclose(SCSIDisc[scsi.lun]);
 	SCSIDisc[scsi.lun] = fopen(buff, "rb+");
 
 	if (SCSIDisc[scsi.lun] == NULL) return false;
 
-#ifdef BEEBWIN
 	sprintf(buff, "%s/scsi%d.dsc", HardDrivePath, scsi.lun);
-#endif
 	FILE *f = fopen(buff, "rb");
 
 	if (f != NULL)

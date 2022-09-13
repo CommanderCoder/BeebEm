@@ -76,7 +76,6 @@ void via_dumpstate(VIAState *ToDump) {
 
 void DebugViaState(const char *s, VIAState *v)
 {
-#ifdef BEEBWIN
 	DebugDisplayInfo("");
 
 	DebugDisplayInfoF("%s: ora=%02X orb=%02X ira=%02X irb=%02X ddra=%02X ddrb=%02X", s,
@@ -98,7 +97,6 @@ void DebugViaState(const char *s, VIAState *v)
 
 	DebugDisplayInfoF("%s: ca2=%d cb2=%d", s,
 		(int)v->ca2, (int)v->cb2);
-#endif
 }
 
 void SaveVIAUEF(FILE *SUEF) {

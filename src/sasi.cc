@@ -115,19 +115,15 @@ void SASIReset()
 
 	for (int i = 0; i < 1; ++i) // only one drive allowed under Torch Z80 ?
 	{
-#ifdef BEEBWIN
 		sprintf(buff, "%s\\sasi%d.dat", HardDrivePath, i);
-#endif
 		if (SASIDisc[i] != NULL)
 		{
 			fclose(SASIDisc[i]);
 			SASIDisc[i]=NULL;
 		}
 
-#ifdef BEEBWIN
 		if (!SCSIDriveEnabled)
 			continue;
-#endif
 
 		SASIDisc[i] = fopen(buff, "rb+");
 
@@ -148,10 +144,8 @@ void SASIReset()
 
 void SASIWrite(int Address, unsigned char Value)
 {
-#ifdef BEEBWIN
     if (!SCSIDriveEnabled)
 		return;
-#endif
     
 	// WriteLog("SASIWrite Address = 0x%02x, Value = 0x%02x, Phase = %d, PC = 0x%04x\n", Address, Value, sasi.phase, ProgramCounter);
 
@@ -180,10 +174,8 @@ void SASIWrite(int Address, unsigned char Value)
 
 unsigned char SASIRead(int Address)
 {
-#ifdef BEEBWIN
 	if (!SCSIDriveEnabled)
 		return 0xff;
-#endif
     
 	unsigned char data = 0xff;
 
@@ -695,9 +687,7 @@ static bool SASIDiscFormat(unsigned char *buf)
 	record |= buf[3];
 
 	char buff[256];
-#ifdef BEEBWIN
 	sprintf(buff, "%s/sasi%d.dat", HardDrivePath, sasi.lun);
-#endif
     
 	SASIDisc[sasi.lun] = fopen(buff, "wb");
 	if (SASIDisc[sasi.lun] != NULL) fclose(SASIDisc[sasi.lun]);
