@@ -37,8 +37,8 @@ Boston, MA  02110-1301, USA.
 
 #ifdef WIN32
 #include <windows.h>
-#include "main.h"
 #endif
+#include "main.h"
 
 #define ENABLE_LOG 0
 
@@ -1236,10 +1236,8 @@ static bool DriveHeadMotorUpdate(void) {
 		StopSoundSample(SAMPLE_DRIVE_MOTOR);
 		StopSoundSample(SAMPLE_HEAD_SEEK);
 
-#ifdef BEEBWIN
 		LEDs.Disc0 = false;
 		LEDs.Disc1 = false;
-#endif
         return true;
 	}
 
@@ -1250,10 +1248,8 @@ static bool DriveHeadMotorUpdate(void) {
 	}
 
 	if (!DriveHeadLoaded) {
-#ifdef BEEBWIN
 		if (Selects[0]) LEDs.Disc0 = true;
 		if (Selects[1]) LEDs.Disc1 = true;
-#endif
         
 		PlaySoundSample(SAMPLE_DRIVE_MOTOR, true);
 		DriveHeadLoaded = true;

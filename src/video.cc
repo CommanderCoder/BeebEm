@@ -1587,7 +1587,6 @@ void VideoLightPenStrobe()
 
 void VideoAddLEDs(void) {
 	// now add some keyboard leds
-#ifdef BEEBWIN
 	if (LEDs.ShowKB) {
 		if (MachineType == Model::Master128) {
 			mainWin->doLED(4, true);
@@ -1608,7 +1607,6 @@ void VideoAddLEDs(void) {
 		mainWin->doLED(618-adj,LEDs.Disc0);
 		mainWin->doLED(628-adj,LEDs.Disc1);
 	}
-#endif
     
 }
 

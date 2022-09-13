@@ -405,13 +405,10 @@ static void BusFree()
 
 	scsi.phase = busfree;
 
-#ifdef BEEBWIN
 	LEDs.HDisc[0] = false;
 	LEDs.HDisc[1] = false;
 	LEDs.HDisc[2] = false;
 	LEDs.HDisc[3] = false;
-#endif
-    
 }
 
 static void Selection(int /* data */)
@@ -446,9 +443,7 @@ static void Execute(void)
 
 	scsi.lun = (scsi.cmd[1]) >> 5;
 
-#ifdef BEEBWIN
 	LEDs.HDisc[scsi.lun] = 1;
-#endif
 	switch (scsi.cmd[0])
 	{
 		case 0x00:

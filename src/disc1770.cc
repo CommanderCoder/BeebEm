@@ -193,14 +193,12 @@ unsigned char Read1770Register(int Register) {
 }
 
 static void SetMotor(int Drive, bool State) {
-#ifdef BEEBWIN
 	if (Drive == 0) {
 		LEDs.Disc0 = State;
 	}
 	else {
 		LEDs.Disc1 = State;
 	}
-#endif
     
 	if (State) {
 		Status |= WD1770_STATUS_MOTOR_ON;

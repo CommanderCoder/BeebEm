@@ -200,10 +200,8 @@ static void IC32Write(unsigned char Value) {
   } else {
     IC32State&=0xff-(1<<bit);
   }
-#ifdef BEEBWIN
   LEDs.CapsLock=((IC32State&64)==0);
   LEDs.ShiftLock=((IC32State&128)==0);
-#endif
     /* hmm, CMOS RAM? */
   // Monday 5th February 2001 - Scrapped my CMOS code, and restarted as according to the bible of the god Tom Lees
   CMOS.Op = (IC32State & 2) != 0;

@@ -344,9 +344,7 @@ void SerialULAWrite(unsigned char Value)
 	// just the Rx and Tx baud rates, and the selectors.
 	CassetteRelay = (Value & 0x80) != 0;
 	TapeAudio.Enabled = CassetteRelay && (TapePlaying || TapeRecording);
-#ifdef BEEBWIN
 	LEDs.Motor = CassetteRelay;
-#endif
     
 	if (CassetteRelay)
 	{

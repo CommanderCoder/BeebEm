@@ -365,12 +365,10 @@ static void SASIBusFree()
 
 	sasi.phase = busfree;
 
-#ifdef BEEBWIN
 	LEDs.HDisc[0] = 0;
 	LEDs.HDisc[1] = 0;
 	LEDs.HDisc[2] = 0;
 	LEDs.HDisc[3] = 0;
-#endif
     
 }
 
@@ -401,9 +399,7 @@ static void SASIExecute()
 
 	sasi.lun = (sasi.cmd[1]) >> 5;
 
-#ifdef BEEBWIN
 	LEDs.HDisc[sasi.lun] = 1;
-#endif
     
 	switch (sasi.cmd[0])
 	{
