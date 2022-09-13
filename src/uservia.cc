@@ -141,10 +141,8 @@ void UserVIAWrite(int Address, unsigned char Value)
 				{
 					if (fputc(UserVIAState.ora, PrinterFileHandle) == EOF)
 					{
-#ifdef BEEBWIN
 						mainWin->Report(MessageType::Error,
 						                "Failed to write to printer file:\n  %s", PrinterFileName);
-#endif
                         
                     }
 					else
@@ -155,10 +153,8 @@ void UserVIAWrite(int Address, unsigned char Value)
 				}
 				else
 				{
-#ifdef BEEBWIN
 					// Write to clipboard
 					mainWin->CopyKey(UserVIAState.ora);
-#endif
                     SetTrigger(PRINTER_TRIGGER, PrinterTrigger);
 				}
 			}
@@ -639,9 +635,7 @@ void PrinterEnable(char *FileName) {
 	PrinterFileHandle = fopen(FileName, "wb");
 	if (PrinterFileHandle == NULL)
 	{
-#ifdef BEEBWIN
         mainWin->Report(MessageType::Error, "Failed to open printer:\n  %s", PrinterFileName);
-#endif
 	}
 	else
 	{

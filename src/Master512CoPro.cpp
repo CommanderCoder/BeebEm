@@ -3778,10 +3778,7 @@ void Master512CoPro::LoadBIOS()
 	}
 	else
 	{
-#ifdef BEEBWIN
 		mainWin->Report(MessageType::Error, "Could not open BIOS image file:\n %s", path);
-#endif
-        
     }
 }
 

@@ -497,11 +497,9 @@ void SerialPoll()
 					// Writing data
 					if (UEFWriter.PutData(TDR | UEF_DATA, TapeClock) != UEFResult::Success)
 					{
-#ifdef BEEBWIN
 						mainWin->Report(MessageType::Error,
 						                "Error writing to UEF file:\n  %s", TapeFileName);
 
-#endif
                         TapeControlStopRecording(true);
 					}
 
@@ -525,10 +523,8 @@ void SerialPoll()
 					// Tone
 					if (UEFWriter.PutData(UEF_CARRIER_TONE, TapeClock) != UEFResult::Success)
 					{
-#ifdef BEEBWIN
 						mainWin->Report(MessageType::Error,
 						                "Error writing to UEF file:\n  %s", TapeFileName);
-#endif
 						TapeControlStopRecording(true);
 					}
 
@@ -729,10 +725,7 @@ void SerialPoll()
 					}
 					else
 					{
-#ifdef BEEBWIN
 						mainWin->Report(MessageType::Error, "Serial Port Error");
-#endif
-                        
                     }
 				}
 				else
@@ -1369,10 +1362,8 @@ void LoadSerialUEF(FILE *SUEF)
 		{
 			if (!TapeControlEnabled)
 			{
-#ifdef BEEBWIN
 				mainWin->Report(MessageType::Error,
 				                "Cannot open UEF file:\n  %s", FileName);
-#endif
                 
             }
 		}

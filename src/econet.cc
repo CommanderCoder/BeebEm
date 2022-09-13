@@ -1840,7 +1840,5 @@ void EconetError(const char *errstr)
 		DebugDisplayTrace(DebugType::Econet, true, errstr);
 	}
 
-#ifdef BEEBWIN
 	mainWin->Report(MessageType::Error, errstr);
-#endif
 }

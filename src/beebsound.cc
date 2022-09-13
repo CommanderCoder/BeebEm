@@ -473,11 +473,9 @@ void LoadSoundSamples()
 			}
 			else
 			{
-#ifdef BEEBWIN
 				mainWin->Report(MessageType::Error,
 				                "Could not open sound sample file:\n  %s",
 				                FileName);
-#endif
                 
             }
 		}

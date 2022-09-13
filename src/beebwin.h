@@ -181,10 +181,12 @@ public:
 	void doLED(int sx,bool on);
 #ifdef BEEBWIN
 	void updateLines(HDC hDC, int starty, int nlines);
-    void updateLines(int starty, int nlines) {
-		updateLines(m_hDC, starty, nlines);
-	}
 #endif
+    void updateLines(int starty, int nlines) {
+#ifdef BEEBWIN
+		updateLines(m_hDC, starty, nlines);
+#endif
+	}
 
 	void doHorizLine(int Colour, int y, int sx, int width) {
 		if (TeletextEnabled) y/=TeletextStyle;

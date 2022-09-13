@@ -209,10 +209,8 @@ static void DoSelects(void) {
 
 /*--------------------------------------------------------------------------*/
 static void NotImp(const char *NotImpCom) {
-#ifdef BEEBWIN
     mainWin->Report(MessageType::Error,
                   "Disc operation '%s' not supported", NotImpCom);
-#endif
     
 }
 
@@ -1334,11 +1332,8 @@ void FreeDiscImage(int DriveNum) {
 void LoadSimpleDiscImage(const char *FileName, int DriveNum, int HeadNum, int Tracks) {
   FILE *infile=fopen(FileName,"rb");
   if (!infile) {
-#ifdef BEEBWIN
     mainWin->Report(MessageType::Error,
                     "Could not open disc file:\n  %s", FileName);
-
-#endif
       return;
   }
 
@@ -1390,16 +1385,12 @@ void LoadSimpleDSDiscImage(const char *FileName, int DriveNum, int Tracks) {
   FILE *infile=fopen(FileName,"rb");
 
   if (!infile) {
-#ifdef BEEBWIN
     mainWin->Report(MessageType::Error,
                     "Could not open disc file:\n  %s", FileName);
-#endif
     return;
   }
-#ifdef BEEBWIN
 
   mainWin->SetImageName(FileName, DriveNum, DiscType::DSD);
-#endif
     
   strcpy(FileNames[DriveNum], FileName);
   NumHeads[DriveNum] = 2;		/* 2 = 2*TRACKSPERDRIVE DSD image */
@@ -1444,11 +1435,9 @@ static bool SaveTrackImage(int DriveNum, int HeadNum, int TrackNum) {
   FILE *outfile=fopen(FileNames[DriveNum],"r+b");
 
   if (!outfile) {
-#ifdef BEEBWIN
     mainWin->Report(MessageType::Error,
                     "Could not open disc file for write:\n  %s", FileNames[DriveNum]);
 
-#endif
       return false;
   }
 
@@ -1498,10 +1487,8 @@ static bool SaveTrackImage(int DriveNum, int HeadNum, int TrackNum) {
   }
 
   if (!Success) {
-#ifdef BEEBWIN
     mainWin->Report(MessageType::Error,
                     "Failed writing to disc file:\n  %s", FileNames[DriveNum]);
-#endif
       
   }
 
@@ -1571,12 +1558,10 @@ void DiscWriteEnable(int DriveNum, bool WriteEnable) {
 
     if (!DiscOK)
     {
-#ifdef BEEBWIN
       mainWin->Report(MessageType::Error,
                       "WARNING - Invalid Disc Catalogue\n\n"
                       "This disc image will get corrupted if files are written to it.\n"
                       "Copy all the files to a new image to fix it.");
-#endif
         
     }
   }

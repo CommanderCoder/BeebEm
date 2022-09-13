@@ -1074,10 +1074,8 @@ bool ReadROMFile(const char *filename, ROMConfigFile ROMConfig)
 	fd = fopen(filename, "r");
 	if (!fd)
 	{
-#ifdef BEEBWIN
         mainWin->Report(MessageType::Error,
 		                "Cannot open ROM configuration file:\n  %s", filename);
-#endif
 		return false;
 	}
 
@@ -1108,11 +1106,9 @@ bool ReadROMFile(const char *filename, ROMConfigFile ROMConfig)
 
 	if (!success)
 	{
-#ifdef BEEBWIN
 		mainWin->Report(MessageType::Error,
 		                "Invalid ROM configuration file:\n  %s", filename);
 
-#endif
         memset(ROMConfig, 0, sizeof(ROMConfigFile));
 	}
 
@@ -1157,11 +1153,8 @@ void BeebReadRoms(void) {
         
     }
 	else {
-#ifdef BEEBWIN
 		mainWin->Report(MessageType::Error,
 		                "Cannot open specified OS ROM:\n %s", fullname);
-#endif
-        
     }
 
 	// read paged ROMs
@@ -1213,10 +1206,8 @@ void BeebReadRoms(void) {
                 DebugLoadMemoryMap(fullname, bank);
             }
 			else {
-#ifdef BEEBWIN
 				mainWin->Report(MessageType::Error,
 				                "Cannot open specified ROM:\n %s", fullname);
-#endif
                 
             }
 		}
