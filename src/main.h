@@ -49,7 +49,7 @@ size_t countof( T ( & arr )[ N ] )
 
 #define _countof countof
 #define _stricmp strcasecmp
-
+#define _strerror(x) strerror(errno)
 #endif
 
 #endif

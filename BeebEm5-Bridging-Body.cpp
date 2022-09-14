@@ -163,34 +163,6 @@ extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charC
 
 
 
-extern "C" void beeb_MainCpuLoop()
-{
-#if 0 //ACH- iswindowcollapsed
-    if ( (mainWin->m_FreezeWhenInactive) && (IsWindowCollapsed(mainWin->mWindow)) )
-    {
-        beeb_usleep(1000 * 500);        // sleep for 0.5 secs
-    }
-    else
-#endif
-    {
-#ifdef BEEBWIN
-        int c;
-        c = 20;
-
-    // Menu GUI more responsive if running less than real time
-        
-        if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
-        {
-            c = c * mainWin->m_RealTimeTarget;
-        }
-        
-        for (int i = 0; i < c; ++i)
-            Exec6502Instruction();
-#endif
-    }
-}
-
-
 
 int y = 0;
 const int width = 640;
@@ -214,11 +186,14 @@ extern "C" void beeb_video(int height, int width, struct CColour buffer[])
     y %= height-2;
 }
 
+// MAIN EQUIVALENT IS
+// beeb_main
+// beeb_MainCpuLoop
+// beeb_end
 
 extern "C" int beeb_main(int argc,char *argv[])
 {
-//void *token;
-int i;
+    int i;
 
     // NEED TO TURN OFF SANDBOXING IN ENTITLEMENTS FILE TO GET LOCAL FOLDERS TO WORK
     
@@ -325,6 +300,37 @@ int i;
 #endif
     return(0);
 }
+
+
+
+extern "C" void beeb_MainCpuLoop()
+{
+#if 0 //ACH- iswindowcollapsed
+    if ( (mainWin->m_FreezeWhenInactive) && (IsWindowCollapsed(mainWin->mWindow)) )
+    {
+        beeb_usleep(1000 * 500);        // sleep for 0.5 secs
+    }
+    else
+#endif
+    {
+#ifdef BEEBWIN
+        int c;
+        c = 20;
+
+    // Menu GUI more responsive if running less than real time
+        
+        if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
+        {
+            c = c * mainWin->m_RealTimeTarget;
+        }
+        
+        for (int i = 0; i < c; ++i)
+            Exec6502Instruction();
+#endif
+    }
+}
+
+
 
 
 extern "C" int beeb_end()

@@ -124,4 +124,56 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */,
 	return 0;
 }
 
+#else
+
+int mainMain()
+{
+    OpenLog();
+
+    mainWin = new(std::nothrow) BeebWin();
+
+    if (mainWin == nullptr)
+    {
+        return 1;
+    }
+
+    if (!mainWin->Initialise())
+    {
+        delete mainWin;
+        return 1;
+    }
+
+    // Create serial threads
+    SerialInit();
+
+    for (;;)
+    {
+        
+        // Windows MAIN
+        // keep processing instructions until WM_QUIT
+        // When there is a mesage or beeb is frozen, process Messages
+        // either to TranslateAccelerator
+        // Translates virtual key codes,Dispatches message to window
+        // to CurrentDialogue
+        
+
+        if (!mainWin->IsFrozen() && !mainWin->IsPaused()) {
+            Exec6502Instruction();
+        }
+    }
+
+    mainWin->KillDLLs();
+
+    CloseLog();
+
+    Kill_Serial();
+
+    delete mainWin;
+
+    return 0;
+}
+
+
 #endif
+
+

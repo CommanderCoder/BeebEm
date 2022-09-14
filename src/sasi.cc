@@ -129,13 +129,11 @@ void SASIReset()
 
 		if (SASIDisc[i] == nullptr)
 		{
-#ifdef BEEBWIN
 			char *error = _strerror(nullptr);
 			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
 
 			mainWin->Report(MessageType::Error,
 			                "Could not open Torch Z80 SASI disc image:\n  %s\n\n%s", buff, error);
-#endif
 		}
 	}
 

@@ -523,22 +523,22 @@
 		DCCCC29D24A338ED00840082 /* BeebEm5 */ = {
 			isa = PBXGroup;
 			children = (
-				DC49183A286AD7540023212A /* BeebEm5.entitlements */,
 				DCB0BD8E24CC8CAC009FEA9E /* WIP */,
-				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
-				DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */,
-				DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */,
-				DC8BE3AE24CC790000D12E2B /* Bitmap.swift */,
-				DC8BE3B024CC797600D12E2B /* Colour.swift */,
-				DC8BE3AC24CC78A600D12E2B /* NSImage+Bitmap.swift */,
-				DC8BE3B224CC7ADD00D12E2B /* Renderer.swift */,
+				DC49183A286AD7540023212A /* BeebEm5.entitlements */,
+				DCCCC2A924A338EE00840082 /* Info.plist */,
 				DCCCC2A424A338EE00840082 /* Assets.xcassets */,
 				DCCCC2A624A338EE00840082 /* Main.storyboard */,
-				DCCCC2A924A338EE00840082 /* Info.plist */,
+				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
+				DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */,
+				DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */,
+				DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */,
 				DC8716A324CC3A6800FA27DF /* BeebViewController.swift */,
 				DC4106F226E54DAC000A1E37 /* BeebApplication.swift */,
-				DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */,
 				DCE19A3F286E577E00CF6090 /* BeebSKView.swift */,
+				DC8BE3AC24CC78A600D12E2B /* NSImage+Bitmap.swift */,
+				DC8BE3AE24CC790000D12E2B /* Bitmap.swift */,
+				DC8BE3B024CC797600D12E2B /* Colour.swift */,
+				DC8BE3B224CC7ADD00D12E2B /* Renderer.swift */,
 			);
 			path = BeebEm5;
 			sourceTree = "<group>";

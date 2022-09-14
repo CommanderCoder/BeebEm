@@ -128,14 +128,11 @@ void SCSIReset()
 
 		if (SCSIDisc[i] == nullptr)
 		{
-#ifdef BEEBWIN
 			char *error = _strerror(nullptr);
 			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
 
 			mainWin->Report(MessageType::Error,
-			                "Could not open SCSI disc image:\n  %s\n\n%s", buff, error);
-#endif
-            
+			                "Could not open SCSI disc image:\n  %s\n\n%s", buff, error);            
         }
 
 		SCSISize[i] = 0;

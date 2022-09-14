@@ -85,13 +85,11 @@ void IDEReset()
 
 		if (IDEDisc[i] == nullptr)
 		{
-#ifdef BEEBWIN
             char *error = _strerror(nullptr);
 			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
 
 			mainWin->Report(MessageType::Error,
 											"Could not open IDE disc image:\n  %s\n\n%s", buff, error);
-#endif
             
         }
 	}
