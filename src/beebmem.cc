@@ -566,10 +566,7 @@ unsigned char BeebReadMem(int Address) {
 	}
 
 	if (MachineType != Model::Master128 && Address == EDCAddr && !NativeFDC) {
-#ifdef BEEBWIN
 		return(mainWin->GetDriveControl());
-#endif
-        
     }
 
 	return(0xFF);
@@ -991,9 +988,7 @@ void BeebWriteMem(int Address, unsigned char Value) {
 	}
 
 	if (MachineType != Model::Master128 && Address == EDCAddr && !NativeFDC) {
-#ifdef BEEBWIN
 		mainWin->SetDriveControl(Value);
-#endif
 	}
 	if (MachineType != Model::Master128 && Address >= EFDCAddr && Address < (EFDCAddr + 4) && !NativeFDC) {
 		Write1770Register(Address-EFDCAddr,Value);

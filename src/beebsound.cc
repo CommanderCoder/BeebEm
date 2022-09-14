@@ -422,10 +422,8 @@ static double CyclesToSamples(int BeebCycles) {
     tmp = (double)BeebCycles-(double)LastBeebCycle;
   }
 
-#ifdef BEEBWIN
   tmp /= mainWin->m_RealTimeTarget ? mainWin->m_RealTimeTarget : 1;
   /*fprintf(stderr,"Convert tmp=%f\n",tmp); */
-#endif
     
   LastBeebCycle = BeebCycles;
 
@@ -458,9 +456,7 @@ void LoadSoundSamples()
 	{
 		for (int i = 0; i < NUM_SOUND_SAMPLES; ++i)
 		{
-#ifdef BEEBWIN
 			strcpy(FileName, mainWin->GetAppPath());
-#endif
             strcat(FileName, SoundSamples[i].pFilename);
 			FILE *fd = fopen(FileName, "rb");
 			if (fd != NULL) {
