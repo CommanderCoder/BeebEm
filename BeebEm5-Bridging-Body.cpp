@@ -263,9 +263,9 @@ int i;
   if (SpeechDefault) tms5220_start();
   if (SoundEnabled) SoundInit();
   mainWin->ResetBeebSystem(MachineType,TubeEnabled,1);
+#endif
   mainWin->SetRomMenu();
   mainWin->SetSoundMenu();
-#endif
 #if 0 //ACH - main init events
 
   EventTypeSpec    eventTypes[7];

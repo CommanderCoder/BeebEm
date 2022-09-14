@@ -1072,18 +1072,17 @@ void CloseTape()
 
 	TapeFileName[0] = '\0';
 
-#ifdef BEEBWIN
     if (TapeControlEnabled)
 	{
+#ifdef BEEBWIN
 		SendMessage(hwndMap, LB_RESETCONTENT, 0, 0);
-	}
 #endif
+	}
     
 }
 
 void RewindTape()
 {
-#ifdef BEEBWIN
 	TapeControlStopRecording(true);
 
 	UEF_BUF = 0;
@@ -1091,6 +1090,7 @@ void RewindTape()
 	OldClock = 0;
 	SetTrigger(TAPECYCLES, TapeTrigger);
 
+#ifdef BEEBWIN
 	TapeControlUpdateCounter(TapeClock);
 #endif
 	csw_state = CSWState::WaitingForTone;
@@ -1262,7 +1262,6 @@ void TapeControlRecord()
 		// Query for new file name
 		char FileName[_MAX_PATH];
 
-#ifdef BEEBWIN
 		if (mainWin->NewTapeImage(FileName))
 		{
 			CloseTape();
@@ -1285,7 +1284,6 @@ void TapeControlRecord()
 				TapeFileName[0] = '\0';
 			}
 		}
-#endif
 	}
 }
 

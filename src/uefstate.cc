@@ -88,9 +88,7 @@ UEFStateResult SaveUEFState(const char *StateName) {
 		fputc(UEFMinorVersion, UEFState);
 		fputc(UEFMajorVersion, UEFState);
 
-#ifdef BEEBWIN
         mainWin->SaveEmuUEF(UEFState);
-#endif
         Save6502UEF(UEFState);
 		SaveMemUEF(UEFState);
 		SaveVideoUEF(UEFState);
@@ -151,9 +149,7 @@ UEFStateResult LoadUEFState(const char *StateName) {
 			Length=fget32(UEFState);
 			CPos=ftell(UEFState);
 
-#ifdef BEEBWIN
 			if (Block==0x046A) mainWin->LoadEmuUEF(UEFState,Version);
-#endif
             if (Block==0x0460) Load6502UEF(UEFState);
 			if (Block==0x0461) LoadRomRegsUEF(UEFState);
 			if (Block==0x0462) LoadMainMemUEF(UEFState);

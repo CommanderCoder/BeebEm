@@ -1263,7 +1263,6 @@ bool CreateADFSImage(const char *FileName, int Tracks) {
 void Save1770UEF(FILE *SUEF)
 {
 	extern char FDCDLL[256];
-#ifdef BEEBWIN
     extern char CDiscName[2][256];
 	char blank[256];
 	memset(blank,0,256);
@@ -1332,13 +1331,11 @@ void Save1770UEF(FILE *SUEF)
 	fputc(SelectedDensity,SUEF);
 	fputc(RotSect,SUEF);
 	fwrite(FDCDLL,1,256,SUEF);
-#endif
     }
 
 void Load1770UEF(FILE *SUEF, int Version)
 {
     extern char FDCDLL[256];
-#ifdef BEEBWIN
 	extern bool DiscLoaded[2];
 	char FileName[256];
 	bool Loaded = false;
@@ -1358,9 +1355,7 @@ void Load1770UEF(FILE *SUEF, int Version)
 	if (FileName[0]) {
 		// Load drive 0
 		Loaded = true;
-#ifdef BEEBWIN
 		mainWin->Load1770DiscImage(FileName, 0, DscType[0]);
-#endif
         if (Disc0 == nullptr)
 			LoadFailed = true;
 	}
@@ -1369,9 +1364,7 @@ void Load1770UEF(FILE *SUEF, int Version)
 	if (FileName[0]) {
 		// Load drive 1
 		Loaded = true;
-#ifdef BEEBWIN
 		mainWin->Load1770DiscImage(FileName, 1, DscType[1]);
-#endif
         if (Disc1 == nullptr)
 			LoadFailed = true;
 	}
@@ -1428,7 +1421,6 @@ void Load1770UEF(FILE *SUEF, int Version)
 			mainWin->LoadFDC(FDCDLL, false);            
         }
 	}
-#endif
 
 }
 
