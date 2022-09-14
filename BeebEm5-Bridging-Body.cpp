@@ -52,13 +52,13 @@ extern "C" void beeb_autorun(char* path)
 
 extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charCode)
 {
-#ifdef BEEBWIN
      static int ctrl = 0x0000;
      int LastShift, LastCtrl, LastCaps, LastCmd;
      int NewShift, NewCtrl=0, NewCaps;
      static int NewCmd = 0; //remember CMD pressed
      
-    
+#ifdef BEEBWIN
+
     switch (eventkind)
     {
         case kEventRawKeyDown:
@@ -197,9 +197,6 @@ extern "C" int beeb_main(int argc,char *argv[])
 
     // NEED TO TURN OFF SANDBOXING IN ENTITLEMENTS FILE TO GET LOCAL FOLDERS TO WORK
     
-#ifdef BEEBWIN
-  fprintf(stderr, "Version: %s %s\n", Version, VersionDate);
-#endif
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
         printf("Current working dir: %s\n", cwd);
@@ -207,127 +204,27 @@ extern "C" int beeb_main(int argc,char *argv[])
         perror("getcwd() error");
         return 1;
     }
-
-
   for (i = 0; i < argc; ++i)
     fprintf(stderr, "Arg %d = %s\n", i, argv[i]);
 
-#ifdef BEEBWIN
-  mainWin=new BeebWin();
-#endif
-#if 0 //ACH - main init hotkey
-
-  atexit(AtExitHandler);
-
-  if (PushSymbolicHotKeyMode != NULL)
-  {
-    token = PushSymbolicHotKeyMode(kHIHotKeyModeAllDisabled);
-  }
-
-
-  tlog = fopen("/users/jonwelch/trace.log", "wt");
-//  tlog = NULL;
-#endif
-    
-  done = 0;
-  
-#ifdef BEEBWIN
-    mainWin->Initialise(argv[0]);
-    
-//  SoundReset();
-  if (SpeechDefault) tms5220_start();
-  if (SoundEnabled) SoundInit();
-  mainWin->ResetBeebSystem(MachineType,TubeEnabled,1);
-#endif
-  mainWin->SetRomMenu();
-  mainWin->SetSoundMenu();
-#if 0 //ACH - main init events
-
-  EventTypeSpec    eventTypes[7];
-  EventHandlerUPP  handlerUPP;
-
-  eventTypes[0].eventClass = kEventClassKeyboard;
-  eventTypes[0].eventKind  = 1; // kEventRawKeyDown
-  eventTypes[1].eventClass = kEventClassKeyboard;
-  eventTypes[1].eventKind  = 3; // kEventRawKeyUp
-  eventTypes[2].eventClass = kEventClassKeyboard;
-  eventTypes[2].eventKind  = 4; // kEventRawKeyModifiersChanged
-
-  eventTypes[3].eventClass = kEventClassMouse;
-  eventTypes[3].eventKind  = kEventMouseDown;
-  eventTypes[4].eventClass = kEventClassMouse;
-  eventTypes[4].eventKind  = kEventMouseUp;
-  eventTypes[5].eventClass = kEventClassMouse;
-  eventTypes[5].eventKind  = kEventMouseMoved;
-  eventTypes[6].eventClass = kEventClassMouse;
-  eventTypes[6].eventKind  = kEventMouseDragged;
-
-  handlerUPP = NewEventHandlerUPP(EventHandler);
-  InstallApplicationEventHandler (handlerUPP,
-                                7, eventTypes,
-                                NULL, NULL);
-
-  AEInstallEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(AEodoc), 0, false);
-
-  EventTypeSpec events[] = {
-        { kEventClassWindow, kEventWindowClosed }
-  };
-
-  EventTypeSpec commands[] = {
-        { kEventClassCommand, kEventCommandProcess }
-  };
-
-  InstallWindowEventHandler (mainWin->mWindow,
-           NewEventHandlerUPP (MainWindowEventHandler),
-           GetEventTypeCount(events), events,
-           mainWin->mWindow, NULL);
-
-  InstallWindowEventHandler(mainWin->mWindow,
-            NewEventHandlerUPP (MainWindowCommandHandler),
-            GetEventTypeCount(commands), commands,
-            mainWin->mWindow, NULL);
-
-
-//  mainWin->StartRecordingVideo("jon.mov", nil);
-  
-  // Call the event loop
-  RunApplicationEventLoopWithCooperativeThreadSupport();
-#endif
-    
-#ifdef BEEBWIN
-    // autorun if a filepath was set
-    AutoRunFromPath();
-#endif
-    return(0);
+    return (  mainInit() );
 }
 
 
 
 extern "C" void beeb_MainCpuLoop()
 {
-#if 0 //ACH- iswindowcollapsed
-    if ( (mainWin->m_FreezeWhenInactive) && (IsWindowCollapsed(mainWin->mWindow)) )
-    {
-        beeb_usleep(1000 * 500);        // sleep for 0.5 secs
-    }
-    else
-#endif
-    {
-#ifdef BEEBWIN
-        int c;
-        c = 20;
+    int c = 20;
 
     // Menu GUI more responsive if running less than real time
-        
-        if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
-        {
-            c = c * mainWin->m_RealTimeTarget;
-        }
-        
-        for (int i = 0; i < c; ++i)
-            Exec6502Instruction();
-#endif
+    
+    if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
+    {
+        c = c * mainWin->m_RealTimeTarget;
     }
+    
+    for (int i = 0; i < c; ++i)
+        mainStep();
 }
 
 
@@ -337,19 +234,7 @@ extern "C" int beeb_end()
 {
   fprintf(stderr, "Shutting Down ...\n");
   
-#ifdef BEEBWIN
-  if (tlog) fclose(tlog);
-    
-  SoundReset();
-#endif
-
-#if 0 //ACH - symbolic hotkey
-  if (PopSymbolicHotKeyMode != NULL)
-  {
-     PopSymbolicHotKeyMode(token);
-  }
-#endif
-
+    mainEnd();
   return(0);
 } /* main */
 

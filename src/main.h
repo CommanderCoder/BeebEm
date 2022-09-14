@@ -33,6 +33,7 @@ Boston, MA  02110-1301, USA.
 
 extern Model MachineType;
 extern BeebWin *mainWin;
+
 #ifdef BEEBWIN
 extern HINSTANCE hInst;
 extern HWND hCurrentDialog;
@@ -50,6 +51,12 @@ size_t countof( T ( & arr )[ N ] )
 #define _countof countof
 #define _stricmp strcasecmp
 #define _strerror(x) strerror(errno)
+
+int _vscprintf (const char * format, va_list pargs);
+
+int mainInit();
+int mainStep();
+int mainEnd();
 #endif
 
 #endif

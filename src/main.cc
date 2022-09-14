@@ -126,7 +126,17 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */,
 
 #else
 
-int mainMain()
+int _vscprintf (const char * format, va_list pargs) {
+    int retval;
+    va_list argcopy;
+    va_copy(argcopy, pargs);
+    retval = vsnprintf(NULL, 0, format, argcopy);
+    va_end(argcopy);
+    return retval;
+ }
+
+
+int mainInit()
 {
     OpenLog();
 
@@ -140,28 +150,40 @@ int mainMain()
     if (!mainWin->Initialise())
     {
         delete mainWin;
+        mainWin=0;
         return 1;
     }
 
     // Create serial threads
     SerialInit();
+    
+    return 0;
+}
 
-    for (;;)
-    {
-        
-        // Windows MAIN
-        // keep processing instructions until WM_QUIT
-        // When there is a mesage or beeb is frozen, process Messages
-        // either to TranslateAccelerator
-        // Translates virtual key codes,Dispatches message to window
-        // to CurrentDialogue
-        
+int mainStep()
+//    for (;;)
+{
+    
+    // Windows MAIN
+    // keep processing instructions until WM_QUIT
+    // When there is a mesage or beeb is frozen, process Messages
+    // either to TranslateAccelerator
+    // Translates virtual key codes,Dispatches message to window
+    // to CurrentDialogue
+    
+    bool done = false;
+    if (done)
+        return 1;
 
-        if (!mainWin->IsFrozen() && !mainWin->IsPaused()) {
-            Exec6502Instruction();
-        }
+    if (!mainWin->IsFrozen() && !mainWin->IsPaused()) {
+        Exec6502Instruction();
     }
+    
+    return 0;
+}
 
+int mainEnd()
+{
     mainWin->KillDLLs();
 
     CloseLog();

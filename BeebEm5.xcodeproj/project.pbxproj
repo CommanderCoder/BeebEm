@@ -10,7 +10,6 @@
 		DC19F0FF273529CA004F0DDD /* led.png in Resources */ = {isa = PBXBuildFile; fileRef = DC19F0FE273529CA004F0DDD /* led.png */; };
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
 		DC41118225A2222A00E59712 /* Bugs.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC41118125A2222A00E59712 /* Bugs.rtf */; };
-		DC41118525A226BC00E59712 /* diskimg in Resources */ = {isa = PBXBuildFile; fileRef = DC41118425A226BC00E59712 /* diskimg */; };
 		DC692B27272E876400F8B465 /* KeyboardMappingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */; };
 		DC6A476924A54541007E4276 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476824A54541007E4276 /* libz.tbd */; };
 		DC6A476B24A54DA3007E4276 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */; };
@@ -64,7 +63,6 @@
 		DCAD0F2328CFB4FA00366E05 /* Master512CoPro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0ECE28CD460000366E05 /* Master512CoPro.cpp */; };
 		DCAD0F2428CFB69D00366E05 /* teletext.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C324A33D3700840082 /* teletext.cc */; };
 		DCAD0F2628CFE9EF00366E05 /* discedit.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2B724A33D3600840082 /* discedit.cc */; };
-		DCAD0F2828CFEAE500366E05 /* DebugTrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0ECC28CD45FF00366E05 /* DebugTrace.cpp */; };
 		DCAD0F2928CFEB0800366E05 /* ide.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0EB628CD45FE00366E05 /* ide.cpp */; };
 		DCAD0F2A28CFEB2900366E05 /* preferences.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0EC528CD45FF00366E05 /* preferences.cpp */; };
 		DCAD0F2B28CFEB6400366E05 /* i86.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D124A33D3700840082 /* i86.cc */; };
@@ -76,19 +74,13 @@
 		DCAD0F4728D1411D00366E05 /* romconfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0EB528CD45FE00366E05 /* romconfig.cpp */; };
 		DCAD0F4928D1417900366E05 /* beebmainprefs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */; };
 		DCAD0F4B28D1597300366E05 /* beebmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCAD0F4A28D1597300366E05 /* beebmain.cpp */; };
+		DCAD102228D1C2EA00366E05 /* UserData in Resources */ = {isa = PBXBuildFile; fileRef = DCAD102128D1C2EA00366E05 /* UserData */; };
 		DCCCC29F24A338ED00840082 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC29E24A338ED00840082 /* AppDelegate.swift */; };
 		DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A424A338EE00840082 /* Assets.xcassets */; };
 		DCCCC30B24A3441800840082 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2A224A338ED00840082 /* Document.swift */; };
 		DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC30E24A3DCC200840082 /* BeebAudio.swift */; };
-		DCD5DC182565E7CC00FB151D /* BeebFile in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC172565E7CC00FB151D /* BeebFile */; };
-		DCD5DC1B2565E7EF00FB151D /* beebstate in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC1A2565E7EF00FB151D /* beebstate */; };
 		DCD5DC2E2565E86F00FB151D /* RelayOn.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC2C2565E86F00FB151D /* RelayOn.snd */; };
 		DCD5DC2F2565E86F00FB151D /* RelayOff.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC2D2565E86F00FB151D /* RelayOff.snd */; };
-		DCD5DC322565E88600FB151D /* Phroms in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC312565E88600FB151D /* Phroms */; };
-		DCD5DC342565E8E000FB151D /* Econet.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F124AB1BE300CCD72E /* Econet.cfg */; };
-		DCD5DC352565E8E000FB151D /* Phroms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */; };
-		DCD5DC362565E8E000FB151D /* Roms_Torch.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */; };
-		DCD5DC372565E8E000FB151D /* Roms.cfg in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EA24AB1BE300CCD72E /* Roms.cfg */; };
 		DCD5DC382565E8E000FB151D /* beebem.ini in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EC24AB1BE300CCD72E /* beebem.ini */; };
 		DCD5DC392565E8E000FB151D /* DriveMotor.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC202565E83400FB151D /* DriveMotor.snd */; };
 		DCD5DC3A2565E8E000FB151D /* HeadLoad.snd in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC1E2565E83400FB151D /* HeadLoad.snd */; };
@@ -108,7 +100,6 @@
 		DC19F0FE273529CA004F0DDD /* led.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.png; sourceTree = "<group>"; };
 		DC4106F226E54DAC000A1E37 /* BeebApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebApplication.swift; sourceTree = "<group>"; };
 		DC41118125A2222A00E59712 /* Bugs.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Bugs.rtf; sourceTree = "<group>"; };
-		DC41118425A226BC00E59712 /* diskimg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = diskimg; sourceTree = "<group>"; };
 		DC49183A286AD7540023212A /* BeebEm5.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeebEm5.entitlements; sourceTree = "<group>"; };
 		DC59F1A224BE01D000687D2A /* beebem5-distribution */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "beebem5-distribution"; sourceTree = "<group>"; };
 		DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardMappingViewController.swift; sourceTree = "<group>"; };
@@ -116,14 +107,10 @@
 		DC6A476A24A54DA3007E4276 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		DC70E75625A3A65300A7FF3E /* upgradenotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = upgradenotes.rtf; sourceTree = "<group>"; };
 		DC70E75D25A3AB3900A7FF3E /* BeebEm5-Bridging-Body.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "BeebEm5-Bridging-Body.cpp"; sourceTree = "<group>"; };
-		DC85C5EA24AB1BE300CCD72E /* Roms.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms.cfg; sourceTree = "<group>"; };
-		DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Phroms.cfg; sourceTree = "<group>"; };
 		DC85C5EC24AB1BE300CCD72E /* beebem.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = beebem.ini; sourceTree = "<group>"; };
 		DC85C5ED24AB1BE300CCD72E /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYRIGHT.txt; sourceTree = "<group>"; };
 		DC85C5EF24AB1BE300CCD72E /* README_MAC.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README_MAC.txt; sourceTree = "<group>"; };
-		DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Roms_Torch.cfg; sourceTree = "<group>"; };
-		DC85C5F124AB1BE300CCD72E /* Econet.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Econet.cfg; sourceTree = "<group>"; };
 		DC8716A324CC3A6800FA27DF /* BeebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebViewController.swift; sourceTree = "<group>"; };
 		DC8BE3AC24CC78A600D12E2B /* NSImage+Bitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+Bitmap.swift"; sourceTree = "<group>"; };
 		DC8BE3AE24CC790000D12E2B /* Bitmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bitmap.swift; sourceTree = "<group>"; };
@@ -222,6 +209,8 @@
 		DCAD0F4028D1370D00366E05 /* beebmainio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebmainio.cpp; path = src/beebmainio.cpp; sourceTree = "<group>"; };
 		DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = beebmainprefs.cpp; sourceTree = SOURCE_ROOT; };
 		DCAD0F4A28D1597300366E05 /* beebmain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebmain.cpp; path = src/beebmain.cpp; sourceTree = "<group>"; };
+		DCAD102028D1C1ED00366E05 /* teletext.fnt */ = {isa = PBXFileReference; lastKnownFileType = file; path = teletext.fnt; sourceTree = "<group>"; };
+		DCAD102128D1C2EA00366E05 /* UserData */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UserData; sourceTree = "<group>"; };
 		DCCCC29B24A338ED00840082 /* BeebEm5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeebEm5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCCCC29E24A338ED00840082 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DCCCC2A224A338ED00840082 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -303,8 +292,6 @@
 		DCD4AE0E24A4D56F0000C40A /* instr86.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = instr86.h; path = src/instr86.h; sourceTree = "<group>"; };
 		DCD4AE0F24A4D5700000C40A /* viastate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = viastate.h; path = src/viastate.h; sourceTree = "<group>"; };
 		DCD4AE1224A4D5700000C40A /* mode7font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mode7font.h; path = src/mode7font.h; sourceTree = "<group>"; };
-		DCD5DC172565E7CC00FB151D /* BeebFile */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BeebFile; sourceTree = "<group>"; };
-		DCD5DC1A2565E7EF00FB151D /* beebstate */ = {isa = PBXFileReference; lastKnownFileType = folder; path = beebstate; sourceTree = "<group>"; };
 		DCD5DC1D2565E83300FB151D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		DCD5DC1E2565E83400FB151D /* HeadLoad.snd */ = {isa = PBXFileReference; lastKnownFileType = text; path = HeadLoad.snd; sourceTree = "<group>"; };
 		DCD5DC1F2565E83400FB151D /* HeadSeek.snd */ = {isa = PBXFileReference; lastKnownFileType = text; path = HeadSeek.snd; sourceTree = "<group>"; };
@@ -313,7 +300,6 @@
 		DCD5DC222565E83400FB151D /* HeadUnload.snd */ = {isa = PBXFileReference; lastKnownFileType = file; path = HeadUnload.snd; sourceTree = "<group>"; };
 		DCD5DC2C2565E86F00FB151D /* RelayOn.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RelayOn.snd; sourceTree = "<group>"; };
 		DCD5DC2D2565E86F00FB151D /* RelayOff.snd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RelayOff.snd; sourceTree = "<group>"; };
-		DCD5DC312565E88600FB151D /* Phroms */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Phroms; sourceTree = "<group>"; };
 		DCD5DC412565EE7600FB151D /* teletext.fnt */ = {isa = PBXFileReference; lastKnownFileType = file; path = teletext.fnt; sourceTree = "<group>"; };
 		DCE19A3F286E577E00CF6090 /* BeebSKView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebSKView.swift; sourceTree = "<group>"; };
 		DCE5E852267B34F500F3CD34 /* tube.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tube.h; path = src/tube.h; sourceTree = "<group>"; };
@@ -546,16 +532,10 @@
 		DCCCC2B024A338FB00840082 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				DC41118425A226BC00E59712 /* diskimg */,
-				DCD5DC1A2565E7EF00FB151D /* beebstate */,
-				DCD5DC172565E7CC00FB151D /* BeebFile */,
-				DC85C5F124AB1BE300CCD72E /* Econet.cfg */,
-				DC85C5EB24AB1BE300CCD72E /* Phroms.cfg */,
-				DC85C5F024AB1BE300CCD72E /* Roms_Torch.cfg */,
-				DC85C5EA24AB1BE300CCD72E /* Roms.cfg */,
+				DCAD102128D1C2EA00366E05 /* UserData */,
+				DCAD102028D1C1ED00366E05 /* teletext.fnt */,
 				DCD5DC2D2565E86F00FB151D /* RelayOff.snd */,
 				DCD5DC2C2565E86F00FB151D /* RelayOn.snd */,
-				DCD5DC312565E88600FB151D /* Phroms */,
 				DC85C5EC24AB1BE300CCD72E /* beebem.ini */,
 				DCD5DC202565E83400FB151D /* DriveMotor.snd */,
 				DCD5DC1E2565E83400FB151D /* HeadLoad.snd */,
@@ -784,10 +764,6 @@
 			files = (
 				DCD5DC432565EE9700FB151D /* teletext.fnt in Resources */,
 				DC9D243228CC952E00F29905 /* OpusDDOS.vcxproj.filters in Resources */,
-				DCD5DC342565E8E000FB151D /* Econet.cfg in Resources */,
-				DCD5DC352565E8E000FB151D /* Phroms.cfg in Resources */,
-				DCD5DC362565E8E000FB151D /* Roms_Torch.cfg in Resources */,
-				DCD5DC372565E8E000FB151D /* Roms.cfg in Resources */,
 				DCD5DC382565E8E000FB151D /* beebem.ini in Resources */,
 				DCD5DC392565E8E000FB151D /* DriveMotor.snd in Resources */,
 				DC9D242D28CC952E00F29905 /* Acorn1770.vcxproj.filters in Resources */,
@@ -802,16 +778,13 @@
 				DCD5DC2E2565E86F00FB151D /* RelayOn.snd in Resources */,
 				DCABC08C24BDF6A300C0D754 /* README_MAC.txt in Resources */,
 				DCCCC2A524A338EE00840082 /* Assets.xcassets in Resources */,
-				DC41118525A226BC00E59712 /* diskimg in Resources */,
 				DC41118225A2222A00E59712 /* Bugs.rtf in Resources */,
 				DC8716A524CC3AB300FA27DF /* Main.storyboard in Resources */,
 				DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */,
-				DCD5DC322565E88600FB151D /* Phroms in Resources */,
-				DCD5DC1B2565E7EF00FB151D /* beebstate in Resources */,
 				DCD5DC2F2565E86F00FB151D /* RelayOff.snd in Resources */,
 				DC9D243328CC952E00F29905 /* OpusDDOS.vcxproj in Resources */,
+				DCAD102228D1C2EA00366E05 /* UserData in Resources */,
 				DC19F0FF273529CA004F0DDD /* led.png in Resources */,
-				DCD5DC182565E7CC00FB151D /* BeebFile in Resources */,
 				DC9D242F28CC952E00F29905 /* Watford.vcxproj.filters in Resources */,
 				DC85C5F524AB1BE300CCD72E /* README.txt in Resources */,
 			);
@@ -863,7 +836,6 @@
 				DCAD0F1128CFA9AD00366E05 /* disc8271.cc in Sources */,
 				DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */,
 				DCAD0F2328CFB4FA00366E05 /* Master512CoPro.cpp in Sources */,
-				DCAD0F2828CFEAE500366E05 /* DebugTrace.cpp in Sources */,
 				DCAD0F1728CFAD2700366E05 /* serial.cc in Sources */,
 				DCAD0F0F28CFA98600366E05 /* uefstate.cc in Sources */,
 				DC692B27272E876400F8B465 /* KeyboardMappingViewController.swift in Sources */,

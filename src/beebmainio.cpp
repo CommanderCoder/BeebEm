@@ -1030,9 +1030,10 @@ void BeebWin::LoadFDC(char *DLLName, bool save) {
 			}
 		} 
 	}
-#endif
-	if (save)
+
+    if (save)
 		m_Preferences.SetStringValue(CfgName, DLLName);
+#endif
 
 	// Set menu options
 	if (NativeFDC) {

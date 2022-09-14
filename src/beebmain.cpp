@@ -5355,7 +5355,6 @@ MessageResult BeebWin::Report(MessageType type, const char *format, ...)
 	va_list args;
 	va_start(args, format);
 
-#ifdef BEEBWIN
 	// Calculate required length, +1 is for NUL terminator
 	const int length = _vscprintf(format, args) + 1;
 
@@ -5367,6 +5366,7 @@ MessageResult BeebWin::Report(MessageType type, const char *format, ...)
 
 		UINT Type = 0;
 
+#ifdef BEEBWIN
 		switch (type)
 		{
 			case MessageType::Error:
@@ -5414,10 +5414,12 @@ MessageResult BeebWin::Report(MessageType type, const char *format, ...)
 					break;
 			}
 		}
+#else
+        fprintf(stderr,buffer);
+#endif
 
 		free(buffer);
 	}
-#endif
 	va_end(args);
 
 	return Result;

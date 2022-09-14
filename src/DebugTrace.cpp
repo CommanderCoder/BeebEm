@@ -18,26 +18,10 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA  02110-1301, USA.
 ****************************************************************/
 
-#ifdef BEEBWIN
 #include <windows.h>
-#else
-#include <stdlib.h>
-#endif
 #include <stdarg.h>
 #include <stdio.h>
 
-#ifndef BEEBWIN
-
-// version for mac
-int _vscprintf (const char * format, va_list pargs) {
-    int retval;
-    va_list argcopy;
-    va_copy(argcopy, pargs);
-    retval = vsnprintf(NULL, 0, format, argcopy);
-    va_end(argcopy);
-    return retval;
- }
-#endif
 
 #include "DebugTrace.h"
 
@@ -56,9 +40,7 @@ void DebugTrace(const char *format, ...)
 	if (buffer != nullptr)
 	{
 		vsprintf(buffer, format, args);
-#ifdef BEEBWIN
         OutputDebugString(buffer);
-#endif
         free(buffer);
 	}
 

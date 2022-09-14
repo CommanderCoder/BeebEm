@@ -38,6 +38,8 @@ class BeebViewController: NSViewController {
     var screenFilename : String?
 //    var timer: Timer = Timer()
 
+    var BeebReady : Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
                 
@@ -90,7 +92,7 @@ class BeebViewController: NSViewController {
         }
         
         
-        setupBeeb()
+        BeebReady = setupBeeb()
         
         // two options NSTimer or CVDisplayLink
 //        timer = Timer.scheduledTimer(withTimeInterval: 1/120, repeats: true) { timer in
@@ -106,6 +108,10 @@ class BeebViewController: NSViewController {
 
     
     func update() {
+        if (!BeebReady)
+        {
+            return
+        }
         // draw to the renderer bitmap and then put that image
         // onto the imageview
         var renderer = Renderer(width: 640, height: 512)
@@ -183,13 +189,13 @@ class BeebViewController: NSViewController {
 
     
  
-    func setupBeeb()
+    func setupBeeb() -> Bool
     {
         width = 640
         height = 512
         
         //init_audio()
-        init_cpu()
+        return init_cpu()
     }
 
 }
@@ -199,7 +205,7 @@ class BeebViewController: NSViewController {
 // - CPU part of the controller
 extension BeebViewController{
     
-    func init_cpu()
+    func init_cpu() -> Bool
     {
         var commandline : [UnsafeMutablePointer<Int8>?] = []
         
@@ -211,13 +217,14 @@ extension BeebViewController{
         
         // pass the 'arr' into the closure as the variable p as unsafe mutable bytes - this is
         // so that beeb_main can modify them if necessary
-        commandline.withUnsafeMutableBytes { (p) -> () in
+        return
+        commandline.withUnsafeMutableBytes { (p) -> Bool in
             // find the base address of the UnsafeMutableRawBufferPointer (it is a UnsafeMutableRawPointer)
             // get the typed pointer to the base address assuming it is already bound to a type
             // in this case it will make pp : UnsafeMutablePointer<Int8>
             // self is the arr instance
             let pp = p.baseAddress?.assumingMemoryBound(to: UnsafeMutablePointer<Int8>?.self)
-            beeb_main(CommandLine.argc, pp)
+            return beeb_main(CommandLine.argc, pp) == 0
         }
     }
     
