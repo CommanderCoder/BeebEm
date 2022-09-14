@@ -89,12 +89,8 @@ static bool hasFileExt(const char* fileName, const char* fileExt)
 	const size_t fileExtLen = strlen(fileExt);
 	const size_t fileNameLen = strlen(fileName);
 
-#ifdef BEEBWIN
     return fileNameLen >= fileExtLen &&
 	       _stricmp(fileName + fileNameLen - fileExtLen, fileExt) == 0;
-#else
-    return false;
-#endif
 }
 
 /****************************************************************************/
@@ -1689,7 +1685,6 @@ void BeebWin::ImportDiscFiles(int menuId)
 	numFiles = 0;
 	while (numFiles < DFS_MAX_CAT_SIZE*2 && fileName[0] != 0)
 	{
-#ifdef BEEBWIN
 		// Strip .INF off
 		strcpy(baseName, fileName);
 		i = (int)strlen(baseName);
@@ -1702,7 +1697,6 @@ void BeebWin::ImportDiscFiles(int menuId)
 			if (_stricmp(baseName, fileNames[i]) == 0)
 				break;
 		}
-#endif
         if (i == numFiles)
 		{
 			strcpy(fileNames[numFiles], baseName);

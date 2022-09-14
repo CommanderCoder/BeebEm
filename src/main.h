@@ -39,4 +39,17 @@ extern HWND hCurrentDialog;
 extern HACCEL hCurrentAccelTable;
 #endif
 
+#ifndef BEEBWIN
+
+template < typename T, size_t N >
+size_t countof( T ( & arr )[ N ] )
+{
+    return std::extent< T[ N ] >::value;
+}
+
+#define _countof countof
+#define _stricmp strcasecmp
+
+#endif
+
 #endif

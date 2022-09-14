@@ -4591,7 +4591,6 @@ void BeebWin::FindCommandLineFile(char *CmdLineFile)
 		if (ext != NULL)
 		{
 			cont = true;
-#ifdef BEEBWIN
 			if (_stricmp(ext+1, "ssd") == 0)
 				ssd = true;
 			else if (_stricmp(ext+1, "dsd") == 0)
@@ -4613,7 +4612,6 @@ void BeebWin::FindCommandLineFile(char *CmdLineFile)
 
 				cont = false;
 			}
-#endif
             
         }
 	}
@@ -4729,7 +4727,6 @@ void BeebWin::HandleCommandLineFile(int drive, const char *CmdLineFile)
 		const char *ext = strrchr(FileName, '.');
 		if (ext != NULL)
 		{
-#ifdef BEEBWIN
 			cont = true;
 			if (_stricmp(ext+1, "ssd") == 0)
 				ssd = true;
@@ -4752,7 +4749,6 @@ void BeebWin::HandleCommandLineFile(int drive, const char *CmdLineFile)
 
 				cont = false;
 			}
-#endif
             
         }
 	}

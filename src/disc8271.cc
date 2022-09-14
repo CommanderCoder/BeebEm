@@ -466,12 +466,10 @@ static void DoVarLength_ReadDataCommand(void) {
   }
 
   // Reset shift state if it was set by Run Disc
-#ifdef BEEBWIN
   if (mainWin->m_ShiftBooted) {
     mainWin->m_ShiftBooted = false;
     BeebKeyUp(0, 0);
   }
-#endif
     
   Internal_CurrentTrack[Drive]=Params[0];
   CommandStatus.CurrentTrackPtr=GetTrackPtr(Params[0]);
@@ -1337,9 +1335,7 @@ void LoadSimpleDiscImage(const char *FileName, int DriveNum, int HeadNum, int Tr
       return;
   }
 
-#ifdef BEEBWIN
   mainWin->SetImageName(FileName, DriveNum, DiscType::SSD);
-#endif
     
   // JGH, 26-Dec-2011
   NumHeads[DriveNum] = 1; // 1 = TRACKSPERDRIVE SSD image
@@ -1673,7 +1669,6 @@ void Save8271UEF(FILE *SUEF)
 
 void Load8271UEF(FILE *SUEF)
 {
-#ifdef BEEBWIN
 
 	extern bool DiscLoaded[2];
 	char FileName[256];
@@ -1697,7 +1692,7 @@ void Load8271UEF(FILE *SUEF)
 			LoadSimpleDSDiscImage(FileName, 0, 80);
 		else
 			LoadSimpleDiscImage(FileName, 0, 0, 80);
-		if (DiscStore[0][0][0].Sectors == NULL)
+        if (DiscStore[0][0][0].Sectors == NULL)
 			LoadFailed = true;
 	}
 
@@ -1706,7 +1701,7 @@ void Load8271UEF(FILE *SUEF)
 		// Load drive 1
 		Loaded = true;
 		ext = strrchr(FileName, '.');
-		if (ext != NULL && _stricmp(ext+1, "dsd") == 0)
+        if (ext != NULL && _stricmp(ext+1, "dsd") == 0)
 			LoadSimpleDSDiscImage(FileName, 1, 80);
 		else
 			LoadSimpleDiscImage(FileName, 1, 0, 80);
@@ -1761,7 +1756,6 @@ void Load8271UEF(FILE *SUEF)
 		else
 			CommandStatus.CurrentSectorPtr=NULL;
 	}
-#endif
 
 }
 

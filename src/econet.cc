@@ -545,7 +545,6 @@ void ReadNetwork(void) {
 					} while (EcoName[i] != ' ' && i < strlen(EcoName) && j<80);
 					value[j] =0;
 					if (p==0) {
-#ifdef BEEBWIN
                         if (_stricmp("AUNMODE",value) == 0) q = 1;
 						if (_stricmp("LEARN",value) == 0) q = 2;
 						if (_stricmp("AUNSTRICT",value) == 0) q = 3;
@@ -555,7 +554,6 @@ void ReadNetwork(void) {
 						if (_stricmp("TIMEBETWEENBYTES",value) == 0) q = 7;
 						if (_stricmp("FOURWAYTIMEOUT",value) == 0) q = 8;
 						if (_stricmp("MASSAGENETS",value) == 0) q = 9;
-#endif
 						if ( q == 0 ) network[networkp].network = atoi(value);
 					}
 					if (p==1) {
@@ -640,10 +638,10 @@ void ReadNetwork(void) {
 							i++; j++;
 						} while (EcoName[i] != ' ' && i < strlen(EcoName) && j<80);
 						value[j] =0;
-#ifdef BEEBWIN
 						if (p==0) {
 							if (_stricmp("ADDMAP",value) == 0) q = 1;
 						}
+#ifdef BEEBWIN
 						if (p==1) {
 							if (q == 1 ) aunnet[aunnetp].inet_addr = inet_addr(value) & 0x00FFFFFF; // stored as lsb..msb ?!?!
 						}

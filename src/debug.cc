@@ -1837,13 +1837,10 @@ static void DebugExecuteCommand()
 
 void DebugInitMemoryMaps()
 {
-#ifdef BEEBWIN
 	for(int i = 0; i < _countof(MemoryMaps); i++)
 	{
 		MemoryMaps[i].count = 0;
 	}
-#endif
-    
 }
 
 bool DebugLoadMemoryMap(char* filename, int bank)
@@ -1864,7 +1861,6 @@ bool DebugLoadMemoryMap(char* filename, int bank)
 
 		char line[1024];
 
-#ifdef BEEBWIN
 		while(fgets(line, _countof(line), infile) != NULL)
 		{
 			DebugChompString(line);
@@ -1890,7 +1886,8 @@ bool DebugLoadMemoryMap(char* filename, int bank)
 					return false;
 				}
 				map->entries = newAddrInfo;
-			}
+                
+            }
 
 			AddrInfo* entry = &map->entries[map->count];
 
@@ -1911,7 +1908,6 @@ bool DebugLoadMemoryMap(char* filename, int bank)
 				return false;
 			}
 		}
-#endif
 		fclose(infile);
 	}
 
@@ -1931,7 +1927,6 @@ void DebugLoadLabels(char *filename)
 
 		char buf[1024];
 
-#ifdef BEEBWIN
 		while(fgets(buf, _countof(buf), infile) != NULL)
 		{
 			DebugChompString(buf);
@@ -1951,7 +1946,6 @@ void DebugLoadLabels(char *filename)
 
 			Labels.emplace_back(std::string(name), addr);
 		}
-#endif
 
 		DebugDisplayInfoF("Loaded %u labels from %s", Labels.size(), filename);
 		fclose(infile);
@@ -1971,14 +1965,12 @@ void DebugRunScript(const char *filename)
 
 		char buf[1024];
 
-#ifdef BEEBWIN
 		while(fgets(buf, _countof(buf), infile) != NULL)
 		{
 			DebugChompString(buf);
 			if(strlen(buf) > 0)
 				DebugParseCommand(buf);
 		}
-#endif
         fclose(infile);
 	}
 }
@@ -2111,7 +2103,6 @@ static void DebugHistoryAdd(char *command)
 {
 	// Do nothing if this is the same as the last command
 
-#ifdef BEEBWIN
 	if (DebugHistory.size() == 0 ||
 	    (DebugHistory.size() > 0 && _stricmp(DebugHistory[0].c_str(), command) != 0))
 	{
@@ -2123,7 +2114,6 @@ static void DebugHistoryAdd(char *command)
 			DebugHistory.pop_back();
 		}
 	}
-#endif
 	DebugHistoryIndex = -1;
 }
 
@@ -2160,7 +2150,6 @@ static void DebugHistoryMove(int delta)
 
 static void DebugSetCommandString(const char* str)
 {
-#ifdef BEEBWIN
 	if (DebugHistoryIndex == -1 &&
 	    DebugHistory.size() > 0 &&
 	    _stricmp(DebugHistory[0].c_str(), str) == 0)
@@ -2173,10 +2162,11 @@ static void DebugSetCommandString(const char* str)
 	}
 	else
 	{
+#ifdef BEEBWIN
 		SetDlgItemText(hwndDebug, IDC_DEBUGCOMMAND, str);
 		SendDlgItemMessage(hwndDebug, IDC_DEBUGCOMMAND, EM_SETSEL, strlen(str), strlen(str));
-	}
 #endif
+	}
     
 }
 
@@ -2205,7 +2195,6 @@ static void DebugParseCommand(char *command)
 		// Resolve labels:
 		while(args[0] != '\0')
 		{
-#ifdef BEEBWIN
 
 			if(args[0] == ' ' && args[1] == '.')
 			{
@@ -2229,7 +2218,6 @@ static void DebugParseCommand(char *command)
 				info[end] = args[0];
 				info[end+1] = '\0';
 			}
-#endif
 			args++;
 		}
 
@@ -2242,7 +2230,8 @@ static void DebugParseCommand(char *command)
 
 #ifdef BEEBWIN
 	SetDlgItemText(hwndDebug, IDC_DEBUGCOMMAND, "");
-
+#endif
+    
 	for(int i = 0; i < _countof(DebugCmdTable); i++)
 	{
 		if(_stricmp(DebugCmdTable[i].name, command) == 0)
@@ -2252,7 +2241,6 @@ static void DebugParseCommand(char *command)
 			return;
 		}
 	}
-#endif
 	DebugDisplayInfoF("Invalid command %s - try 'help'",command);
 }
 
@@ -2676,7 +2664,6 @@ static bool DebugCmdSet(char* args)
 	bool checked = false;
 	int dlgItem = 0;
 
-#ifdef BEEBWIN
 
 	if(sscanf(args,"%s %s",name,state) == 2)
 	{
@@ -2728,11 +2715,12 @@ static bool DebugCmdSet(char* args)
 		else
 			return false;
         
+#ifdef BEEBWIN
 		SetDlgItemChecked(hwndDebug, dlgItem, checked);
+#endif
 		return true;
 	}
 	else
-#endif
 		return false;
 }
 
@@ -2751,7 +2739,6 @@ static bool DebugCmdHelp(char* args)
 	char aliasInfo[300];
 	aliasInfo[0] = 0;
 
-#ifdef BEEBWIN
 	if(args[0] == '\0')
 	{
 		DebugDisplayInfo("- BeebEm debugger help -");
@@ -2845,7 +2832,6 @@ static bool DebugCmdHelp(char* args)
 		else
 			DebugDisplayInfoF("Help: Command %s was not recognised.", args);
 	}
-#endif
 
 	return true;
 }
@@ -2945,7 +2931,6 @@ static bool DebugCmdLabels(char *args)
 
 static bool DebugCmdWatch(char *args)
 {
-#ifdef BEEBWIN
 	Watch w;
 	char info[64];
 	int i;
@@ -2977,6 +2962,7 @@ static bool DebugCmdWatch(char *args)
 
 			sprintf(info, "%s%04X", (w.host ? "" : "p"), w.start);
 
+#ifdef BEEBWIN
 			// Check if watch in list
 			i = (int)SendMessage(hwndW, LB_FINDSTRING, 0, (LPARAM)info);
 			if (i != LB_ERR)
@@ -3001,6 +2987,7 @@ static bool DebugCmdWatch(char *args)
 				DebugUpdateWatches(true);
 			}
 			SetDlgItemText(hwndDebug, IDC_DEBUGCOMMAND, "");
+#endif
 		}
 		else
 		{
@@ -3011,7 +2998,6 @@ static bool DebugCmdWatch(char *args)
 	{
 		DebugDisplayInfo("You have too many watches!");
 	}
-#endif
 	return true;
 }
 
@@ -3021,7 +3007,6 @@ static bool DebugCmdToggleBreak(char *args)
 	Breakpoint bp;
 	char info[64];
 
-#ifdef BEEBWIN
 
 	memset(bp.name, 0, _countof(bp.name));
 	bp.start = bp.end = -1;
@@ -3032,6 +3017,7 @@ static bool DebugCmdToggleBreak(char *args)
 			sscanf(args, "%x %50c", &bp.start, bp.name) >= 1)
 		{
 			sprintf(info, "%04X", bp.start);
+#ifdef BEEBWIN
 			// Check if BP in list
 			i = (int)SendMessage(hwndBP, LB_FINDSTRING, 0, (LPARAM)info);
 			if (i != LB_ERR)
@@ -3066,6 +3052,7 @@ static bool DebugCmdToggleBreak(char *args)
 				SendMessage(hwndBP, LB_ADDSTRING, 0, (LPARAM)info);
 			}
 			SetDlgItemText(hwndDebug, IDC_DEBUGCOMMAND, "");
+#endif
 		}
 		else
 		{
@@ -3076,7 +3063,6 @@ static bool DebugCmdToggleBreak(char *args)
 	{
 		DebugDisplayInfo("You have too many breakpoints!");
 	}
-#endif
 	return true;
 }
 
