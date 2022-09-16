@@ -11,7 +11,7 @@ struct CColour{
     unsigned char a;
 };
 
-int beeb_main(int argc, char *argv[]);
+int beeb_main(long argc, char *argv[]);
 void beeb_MainCpuLoop();
 int beeb_end();
 void beeb_video(long height, long width, struct CColour buffer[]);

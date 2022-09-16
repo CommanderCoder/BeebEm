@@ -33,6 +33,8 @@ struct CColour{
     unsigned char a;
 };
 
+extern int __argc;
+extern char** __argv;
 
 extern OSStatus UKWindowCommandHandler(UInt32 cmdID);
 
@@ -190,23 +192,26 @@ extern "C" void beeb_video(int height, int width, struct CColour buffer[])
 // beeb_main
 // beeb_MainCpuLoop
 // beeb_end
+//
 
-extern "C" int beeb_main(int argc,char *argv[])
+
+extern "C" int beeb_main(long argc, char* argv[])
 {
-    int i;
-
     // NEED TO TURN OFF SANDBOXING IN ENTITLEMENTS FILE TO GET LOCAL FOLDERS TO WORK
+    // DON'T TURN OFF SANDBOXING - THIS IS UNSAFE - ALLOW USER FOLDERS
+
+    __argc = argc;
+    __argv = argv;
     
+    
+// show the path
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
         printf("Current working dir: %s\n", cwd);
     } else {
         perror("getcwd() error");
-        return 1;
     }
-  for (i = 0; i < argc; ++i)
-    fprintf(stderr, "Arg %d = %s\n", i, argv[i]);
-
+    
     return (  mainInit() );
 }
 

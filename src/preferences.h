@@ -39,8 +39,8 @@ typedef uint8_t BYTE;     // BYTE = unsigned 8 bit value
 #endif
 
 #ifndef BEEBWIN
-#define _MAX_PATH 512
-#define MAX_PATH 512
+#define _MAX_PATH PATH_MAX
+#define MAX_PATH PATH_MAX
 #endif
 
 

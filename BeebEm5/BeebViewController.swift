@@ -207,25 +207,16 @@ extension BeebViewController{
     
     func init_cpu() -> Bool
     {
-        var commandline : [UnsafeMutablePointer<Int8>?] = []
+
         
-        // convert the Strings to UnsafeMutablePointer<Int8>? suitable for passing to C
-        for a in 0 ..< Int(CommandLine.argc)
-        {
-            commandline.append(strdup(CommandLine.arguments[a]))
-        }
+//    https://stackoverflow.com/questions/63257460/swift-c-interop-passing-swift-argv-to-c-argv
         
-        // pass the 'arr' into the closure as the variable p as unsafe mutable bytes - this is
-        // so that beeb_main can modify them if necessary
-        return
-        commandline.withUnsafeMutableBytes { (p) -> Bool in
-            // find the base address of the UnsafeMutableRawBufferPointer (it is a UnsafeMutableRawPointer)
-            // get the typed pointer to the base address assuming it is already bound to a type
-            // in this case it will make pp : UnsafeMutablePointer<Int8>
-            // self is the arr instance
-            let pp = p.baseAddress?.assumingMemoryBound(to: UnsafeMutablePointer<Int8>?.self)
-            return beeb_main(CommandLine.argc, pp) == 0
-        }
+        let ret = CommandLine.unsafeArgv.withMemoryRebound(
+            to: UnsafeMutablePointer<Int8>?.self,
+            capacity: Int(CommandLine.argc) )
+                { ptr in beeb_main( Int(CommandLine.argc), ptr) }
+        return (ret != 0)
+        
     }
     
     func update_cpu()  // game update

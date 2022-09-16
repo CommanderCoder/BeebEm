@@ -30,8 +30,8 @@ Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef BEEBWIN
-#define _MAX_PATH 512
-#define MAX_PATH 512
+#define _MAX_PATH PATH_MAX
+#define MAX_PATH PATH_MAX
 #define _MAX_DRIVE 32
 #define _MAX_DIR 512
 #endif

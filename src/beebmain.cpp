@@ -164,6 +164,11 @@ static bKeyMap logicalMapping;
 /* Currently selected translation table */
 static bKeyMap *transTable = &defaultMapping;
 
+#ifndef BEEBWIN
+int __argc;
+char** __argv;
+#endif
+
 /****************************************************************************/
 BeebWin::BeebWin()
 {
@@ -266,10 +271,10 @@ BeebWin::BeebWin()
 	m_MouseCaptured = false;
 
 	/* Get the applications path - used for non-user files */
+#ifdef BEEBWIN
 	char app_path[_MAX_PATH];
 	char app_drive[_MAX_DRIVE];
 	char app_dir[_MAX_DIR];
-#ifdef BEEBWIN
 	GetModuleFileName(NULL, app_path, _MAX_PATH);
 	_splitpath(app_path, app_drive, app_dir, NULL, NULL);
 	_makepath(m_AppPath, app_drive, app_dir, NULL, NULL);
@@ -284,6 +289,22 @@ BeebWin::BeebWin()
 			strcat(m_UserDataPath, "\\BeebEm\\");
 		}
 	}
+#else
+    {
+        int i;
+        for (i = 0; i < __argc; ++i)
+            fprintf(stderr, "Arg %d = %s\n", i, __argv[i]);
+    }
+    
+    strncpy(m_AppPath, __argv[0], _MAX_PATH);
+
+    char *p = strstr(m_AppPath, "MacOS");        // Find MacOS folder
+    if (p) *p = 0; // terminate at this level
+
+    strcpy(m_UserDataPath, m_AppPath);
+
+    strcat(m_UserDataPath, "Resources/UserData/");
+
 #endif
 
 	m_CustomData = false;
@@ -4375,7 +4396,6 @@ void BeebWin::ParseCommandLine()
 
 	int i = 1;
 
-#ifdef BEEBWIN
 	while (i < __argc)
 	{
 		// Params with no arguments
@@ -4498,10 +4518,8 @@ void BeebWin::ParseCommandLine()
 				       __argv[i-1], __argv[i]);
 			}
 		}
-
 		++i;
 	}
-#endif
     
 }
 
@@ -5014,13 +5032,13 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 	bool store_user_data_path = false;
 	char path[_MAX_PATH];
 
+#ifdef BEEBWIN
 	// Change all '/' to '\'
 	for (size_t i = 0; i < strlen(m_UserDataPath); ++i)
 		if (m_UserDataPath[i] == '/')
 			m_UserDataPath[i] = '\\';
 
 	// Check that the folder exists
-#ifdef BEEBWIN
 	DWORD att = GetFileAttributes(m_UserDataPath);
 
 	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
@@ -5110,6 +5128,7 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 		}
 	}
 #endif
+    
 	if (success)
 	{
 		// Get fully qualified user data path
@@ -5157,10 +5176,12 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 #ifdef BEEBWIN
 		// Check that roms file exists and create its full path
 		if (PathIsRelative(RomFile))
+#endif
 		{
 			sprintf(path, "%s%s", m_UserDataPath, RomFile);
 			strcpy(RomFile, path);
 		}
+#ifdef BEEBWIN
 		att = GetFileAttributes(RomFile);
 		if (att == INVALID_FILE_ATTRIBUTES)
 		{
@@ -5175,11 +5196,11 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 #ifdef BEEBWIN
 		// Fill out full path of prefs file
 		if (PathIsRelative(m_PrefsFile))
+#endif
 		{
 			sprintf(path, "%s%s", m_UserDataPath, m_PrefsFile);
 			strcpy(m_PrefsFile, path);
 		}
-#endif
         
     }
 
