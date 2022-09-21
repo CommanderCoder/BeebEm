@@ -209,7 +209,6 @@
 		DCAD0F4028D1370D00366E05 /* beebmainio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebmainio.cpp; path = src/beebmainio.cpp; sourceTree = "<group>"; };
 		DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = beebmainprefs.cpp; sourceTree = SOURCE_ROOT; };
 		DCAD0F4A28D1597300366E05 /* beebmain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebmain.cpp; path = src/beebmain.cpp; sourceTree = "<group>"; };
-		DCAD102028D1C1ED00366E05 /* teletext.fnt */ = {isa = PBXFileReference; lastKnownFileType = file; path = teletext.fnt; sourceTree = "<group>"; };
 		DCAD102128D1C2EA00366E05 /* UserData */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UserData; sourceTree = "<group>"; };
 		DCCCC29B24A338ED00840082 /* BeebEm5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeebEm5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCCCC29E24A338ED00840082 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -533,7 +532,6 @@
 			isa = PBXGroup;
 			children = (
 				DCAD102128D1C2EA00366E05 /* UserData */,
-				DCAD102028D1C1ED00366E05 /* teletext.fnt */,
 				DCD5DC2D2565E86F00FB151D /* RelayOff.snd */,
 				DCD5DC2C2565E86F00FB151D /* RelayOn.snd */,
 				DC85C5EC24AB1BE300CCD72E /* beebem.ini */,

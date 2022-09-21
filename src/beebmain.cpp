@@ -167,6 +167,18 @@ static bKeyMap *transTable = &defaultMapping;
 #ifndef BEEBWIN
 int __argc;
 char** __argv;
+
+#include <Carbon/Carbon.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
+extern "C" void swift_GetBundleDirectory(const char* bundlePath, int length);
+extern "C" void swift_GetApplicationSupportDirectory(const char* appPath, int length);
+extern "C" void swift_GetResourcePath(const char* resourcePath, int length, const char* filename);
+extern "C" bool swift_CopyDirectoryRecursively(const char* sourcePath, const char* targetPath);
+
 #endif
 
 /****************************************************************************/
@@ -289,29 +301,28 @@ BeebWin::BeebWin()
 			strcat(m_UserDataPath, "\\BeebEm\\");
 		}
 	}
+    
+	m_CustomData = false;
+
+    
+    
 #else
     {
         int i;
         for (i = 0; i < __argc; ++i)
             fprintf(stderr, "Arg %d = %s\n", i, __argv[i]);
     }
-    
-    strncpy(m_AppPath, __argv[0], _MAX_PATH);
 
-    char *p = strstr(m_AppPath, "MacOS");        // Find MacOS folder
-    if (p) *p = 0; // terminate at this level
+    swift_GetBundleDirectory(m_AppPath, _MAX_PATH);
 
-    strcpy(m_UserDataPath, m_AppPath);
+    m_CustomData = false;
 
-    strcat(m_UserDataPath, "Resources/UserData/");
-
+//    swift_GetResourcePath(m_PrefsFile, _MAX_PATH, "UserData/Preferences.cfg");
+//    swift_GetResourcePath(RomFile, _MAX_PATH, "UserData/Roms.cfg");
 #endif
-
-	m_CustomData = false;
-
-	// Set default files, may be overridden by command line parameters.
-	strcpy(m_PrefsFile, "Preferences.cfg");
-	strcpy(RomFile, "Roms.cfg");
+    // Set default files, may be overridden by command line parameters.
+    strcpy(m_PrefsFile, "Preferences.cfg");
+    strcpy(RomFile, "Roms.cfg");
 }
 
 /****************************************************************************/
@@ -404,9 +415,9 @@ bool BeebWin::Initialise()
 		}
 	}
 
-	char fontFilename[_MAX_PATH];
+    char fontFilename[_MAX_PATH];
 	strcpy(fontFilename, GetAppPath());
-	strcat(fontFilename, "teletext.fnt");
+	strcat(fontFilename, "teletext.fnt");    
 
 	if (!BuildMode7Font(fontFilename))
 	{
@@ -5031,8 +5042,8 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 	bool copy_user_files = false;
 	bool store_user_data_path = false;
 	char path[_MAX_PATH];
-
 #ifdef BEEBWIN
+
 	// Change all '/' to '\'
 	for (size_t i = 0; i < strlen(m_UserDataPath); ++i)
 		if (m_UserDataPath[i] == '/')
@@ -5042,7 +5053,7 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 	DWORD att = GetFileAttributes(m_UserDataPath);
 
 	if (att == INVALID_FILE_ATTRIBUTES || !(att & FILE_ATTRIBUTE_DIRECTORY))
-	{
+    {
 		if (Report(MessageType::Question,
 		           "BeebEm data folder does not exist:\n  %s\n\nCreate the folder?",
 		           m_UserDataPath) != MessageResult::Yes)
@@ -5127,22 +5138,18 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 			}
 		}
 	}
-#endif
     
 	if (success)
 	{
 		// Get fully qualified user data path
 		char *f;
-#ifdef BEEBWIN
 		if (GetFullPathName(m_UserDataPath, _MAX_PATH, path, &f) != 0)
 			strcpy(m_UserDataPath, path);
-#endif
         
     }
 
 	if (success && copy_user_files)
 	{
-#ifdef BEEBWIN
 		SHFILEOPSTRUCT fileOp = {0};
 		fileOp.hwnd = m_hWnd;
 		fileOp.wFunc = FO_COPY;
@@ -5168,35 +5175,28 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 			// Wait for copy dialogs to disappear
 			Sleep(2000);
 		}
-#endif
 	}
 
 	if (success)
 	{
-#ifdef BEEBWIN
 		// Check that roms file exists and create its full path
 		if (PathIsRelative(RomFile))
-#endif
 		{
 			sprintf(path, "%s%s", m_UserDataPath, RomFile);
 			strcpy(RomFile, path);
 		}
-#ifdef BEEBWIN
 		att = GetFileAttributes(RomFile);
 		if (att == INVALID_FILE_ATTRIBUTES)
 		{
 			Report(MessageType::Error, "Cannot open ROMs file:\n  %s", RomFile);
 			success = false;
 		}
-#endif
 	}
 
 	if (success)
 	{
-#ifdef BEEBWIN
 		// Fill out full path of prefs file
 		if (PathIsRelative(m_PrefsFile))
-#endif
 		{
 			sprintf(path, "%s%s", m_UserDataPath, m_PrefsFile);
 			strcpy(m_PrefsFile, path);
@@ -5208,8 +5208,89 @@ bool BeebWin::CheckUserDataPath(bool Persist)
 	{
 		StoreUserDataPath();
 	}
+    return success;
 
-	return success;
+#else
+    strcpy(m_UserDataPath, m_AppPath);
+    strcat(m_UserDataPath, "/UserData/");
+    
+    // check if Application Support/BeebEm5/UserData exists
+    // if not, then create it and copy the files
+    // if it does, then all is good
+    // everything is copied into Application Support/BeebEm5
+    // and 'Resources' is no longer used, for the time being.
+    
+
+    struct stat info;
+
+//    if( stat( m_UserDataPath, &info ) != 0 )
+//        printf( "cannot access %s\n", m_UserDataPath );
+//    else if( info.st_mode & S_IFDIR )  // S_ISDIR() doesn't exist on my windows
+//        printf( "%s is a directory\n", m_UserDataPath );
+//    else
+//        printf( "%s is no directory\n", m_UserDataPath );
+    
+    bool foundDir = stat( m_UserDataPath, &info ) == 0 && (info.st_mode & S_IFDIR);
+    if (!foundDir)
+    {
+        // folder not found
+        mode_t mode = 0755;
+        int ret = mkdir(m_UserDataPath, mode);
+        copy_user_files=true;
+    }
+    else
+    {
+        // folder found
+        // now check other files exist
+        sprintf(path, "%sBeebFile", m_UserDataPath);
+        foundDir = stat( path, &info ) == 0 && (info.st_mode & S_IFDIR);
+        if (!foundDir)
+            copy_user_files = true;
+        if (!copy_user_files)
+        {
+            sprintf(path, "%sBeebState", m_UserDataPath);
+            foundDir = stat( path, &info ) == 0 && (info.st_mode & S_IFDIR);
+            if (!foundDir)
+                copy_user_files = true;
+        }
+        if (!copy_user_files)
+        {
+            if (strcmp(RomFile, "Roms.cfg") == 0)
+            {
+                sprintf(path, "%sRoms.cfg", m_UserDataPath);
+                if (stat( path, &info ) != 0) // path found
+                    copy_user_files = true;
+            }
+        }
+
+    }
+    if (success && copy_user_files)
+    {
+        char ud_path[_MAX_PATH];
+        swift_GetResourcePath(ud_path, _MAX_PATH, "UserData");
+        
+        // using SWIFT Foundation to copy all the files in UserData/*.*
+        // if this copy fails: success = false
+        success = swift_CopyDirectoryRecursively(ud_path,m_UserDataPath);
+    }
+
+    if (success)
+    {
+        // Check that roms file exists and create its full path
+        sprintf(path, "%s%s", m_UserDataPath, RomFile);
+        strcpy(RomFile, path);
+        if (stat( RomFile, &info ) != 0) // path not found
+            success = false;
+    }
+    
+    if (success)
+    {
+        // Fill out full path of prefs file
+        sprintf(path, "%s%s", m_UserDataPath, m_PrefsFile);
+        strcpy(m_PrefsFile, path);
+    }
+    return success;
+#endif
 }
 
 void BeebWin::StoreUserDataPath()

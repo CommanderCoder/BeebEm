@@ -92,6 +92,8 @@ class BeebViewController: NSViewController {
         }
         
         
+   
+        
         BeebReady = setupBeeb()
         
         // two options NSTimer or CVDisplayLink
@@ -215,7 +217,7 @@ extension BeebViewController{
             to: UnsafeMutablePointer<Int8>?.self,
             capacity: Int(CommandLine.argc) )
                 { ptr in beeb_main( Int(CommandLine.argc), ptr) }
-        return (ret != 0)
+        return (ret == 0)
         
     }
     

@@ -364,8 +364,126 @@ public func swift_buttonSetControlValue(_ cmd: UInt32, _ state: Int)
 }
 
 @_cdecl("swift_saveScreen")
-public func swift_saveScreen( text: UnsafePointer<CChar>)
+public func swift_saveScreen(_ text: UnsafePointer<CChar>)
 {
     print("\(#function) \(text)")
     beebViewControllerInstance?.screenFilename = String(cString: text);
+}
+
+
+// allow access to this in C
+@_cdecl("swift_GetResourcePath")
+public func swift_GetResourcePath( _ resourcePath: UnsafeMutablePointer<CChar>, _ length:Int, _ filename: UnsafePointer<CChar>)
+{
+    let filenameString = String(cString: filename)
+    print("\(#function) \(filenameString)")
+    
+    if let fileurl = Bundle.main.url(forResource:filenameString,withExtension: nil)
+    {
+        let path: String = fileurl.path
+                
+        // set the filepath back in the C code - fill with zeros first
+        resourcePath.assign(repeating: 0, count: length)
+        resourcePath.assign(from: path, count: path.count)
+    }
+    
+}
+
+
+// allow access to this in C
+@_cdecl("swift_GetBundleDirectory")
+public func swift_GetBundleDirectory( _ bundlePath: UnsafeMutablePointer<CChar>, _ length:Int)
+{
+    let dpath = Bundle.main.bundlePath+"/Contents/Resources/"
+    // set the filepath back in the C code - fill with zeros first
+    bundlePath.assign(repeating: 0, count: length)
+    bundlePath.assign(from: dpath, count: dpath.count)
+}
+
+// allow access to this in C
+@_cdecl("swift_GetApplicationSupportDirectory")
+public func swift_GetApplicationSupportDirectory( _ resourcePath: UnsafeMutablePointer<CChar>, _ length:Int)
+{
+    
+    /* discover Application Support and Resources folder
+     Opening files will always start at Documents or folder
+     https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/MacOSXDirectories/MacOSXDirectories.html#//apple_ref/doc/uid/TP40010672-CH10-SW1
+     
+     https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/AccessingFilesandDirectories/AccessingFilesandDirectories.html#//apple_ref/doc/uid/TP40010672-CH3-SW7
+     */
+    
+    
+//        let patharray = FileManager.default.urls(for: .applicationSupportDirectory,
+//                                                 in: .userDomainMask)
+//        let userDataDirectory = patharray[0].appendingPathComponent("UserData")
+//
+//        print (userDataDirectory.path)
+//
+//        let teletextpath = Bundle.main.url(forResource: "teletext", withExtension: "fnt")!
+//        let z80path = Bundle.main.url(forResource: "Z80", withExtension: "ROM",subdirectory: "UserData/BeebFile")!
+//        let rompath = Bundle.main.url(forResource: "Roms", withExtension: "cfg", subdirectory: "UserData")!
+//        let allpath = Bundle.main.urls( forResourcesWithExtension: nil, subdirectory: "UserData")!
+//
+//        print (teletextpath)
+//        print (z80path)
+//        print (rompath)
+//        print (allpath)
+
+//        if let fileContents = try? String(contentsOf: rompath) {
+//            // we loaded the file into a string!
+//            print(fileContents)
+//        }
+//
+//        if let fileContents = try? Data(contentsOf: z80path) {
+//            // we loaded the file into a binary datablock!
+//            print(fileContents.description)
+//            print(fileContents.base64EncodedString(options: .lineLength64Characters))
+//            print(String(decoding: fileContents, as: UTF8.self))
+//        }
+    
+    
+    
+    
+    do
+    {
+        //  Find Application Support directory
+        let fileManager = FileManager.default
+        let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        //  Create subdirectory
+        let directoryURL = appSupportURL.appendingPathComponent("BeebEm5")
+        try fileManager.createDirectory (at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+        
+        let dpath = directoryURL.path+"/"
+        // set the filepath back in the C code - fill with zeros first
+        resourcePath.assign(repeating: 0, count: length)
+        resourcePath.assign(from: dpath, count: dpath.count)
+
+    }
+    catch
+    {
+        print("Couldn't find the ApplicationSupportDirectory")
+    }
+}
+
+
+// allow access to this in C
+@_cdecl("swift_CopyDirectoryRecursively")
+public func swift_CopyDirectoryRecursively( _ sourcePath: UnsafePointer<CChar>, _ targetPath:UnsafePointer<CChar>) -> Bool
+{
+    let sourcePathStr = String(cString: sourcePath)
+    let targetPathStr = String(cString: targetPath)
+
+    print( "copy \(sourcePathStr) to \(targetPathStr)");
+    
+    do {
+        if FileManager.default.fileExists(atPath: targetPathStr) {
+            try FileManager.default.removeItem(atPath: targetPathStr)
+        }
+        try FileManager.default.copyItem(atPath: sourcePathStr, toPath:targetPathStr)
+    } catch (let error) {
+        print("Cannot copy item at \(sourcePathStr) to \(targetPathStr): \(error)")
+        return false
+    }
+    return true
+            
 }
