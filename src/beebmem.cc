@@ -1086,7 +1086,15 @@ bool ReadROMFile(const char *filename, ROMConfigFile ROMConfig)
 			{
 				if (strchr(line, 13)) *strchr(line, 13) = 0;
 				if (strchr(line, 10)) *strchr(line, 10) = 0;
-				strcpy(ROMConfig[model][bank], line);
+                
+#ifdef BEEBWIN
+                strcpy(ROMConfig[model][bank], line);
+#else
+                // switch the slashes
+                string path(line);
+                std::replace(path.begin(), path.end(), '\\', '/');
+                strcpy(ROMConfig[model][bank], path.c_str());
+#endif
 			}
 		}
 	}

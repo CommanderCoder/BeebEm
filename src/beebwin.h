@@ -39,8 +39,21 @@ Boston, MA  02110-1301, USA.
 #include <ddraw.h>
 #include <sapi.h>
 #else
+
 #define UINT uint32_t
 #define CHAR uint8_t
+
+// from Carbon
+struct RECT {
+  short               top;
+  short               left;
+  short               bottom;
+  short               right;
+};
+typedef struct RECT                     RECT;
+//typedef RECT *                          RECTPtr;
+
+
 #endif
 
 #include "disctype.h"
@@ -181,12 +194,13 @@ public:
 	void doLED(int sx,bool on);
 #ifdef BEEBWIN
 	void updateLines(HDC hDC, int starty, int nlines);
-#endif
     void updateLines(int starty, int nlines) {
-#ifdef BEEBWIN
 		updateLines(m_hDC, starty, nlines);
+    }
+#else
+    void updateLines(int starty, int nlines);
+    void Blt(RECT destR, RECT srcR);
 #endif
-	}
 
 	void doHorizLine(int Colour, int y, int sx, int width) {
 		if (TeletextEnabled) y/=TeletextStyle;

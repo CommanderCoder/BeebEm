@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DC19F0FF273529CA004F0DDD /* led.png in Resources */ = {isa = PBXBuildFile; fileRef = DC19F0FE273529CA004F0DDD /* led.png */; };
+		DC1F98AE28DC38E500A4C9D5 /* beebmainvid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DC1F98AC28DC38E500A4C9D5 /* beebmainvid.cpp */; };
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
 		DC41118225A2222A00E59712 /* Bugs.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC41118125A2222A00E59712 /* Bugs.rtf */; };
 		DC692B27272E876400F8B465 /* KeyboardMappingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */; };
@@ -91,6 +92,7 @@
 		DCD5DC432565EE9700FB151D /* teletext.fnt in Resources */ = {isa = PBXBuildFile; fileRef = DCD5DC412565EE7600FB151D /* teletext.fnt */; };
 		DCE19A40286E577E00CF6090 /* BeebSKView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE19A3F286E577E00CF6090 /* BeebSKView.swift */; };
 		DCE5E862267B362C00F3CD34 /* z80_support.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCE5E85F267B362C00F3CD34 /* z80_support.cc */; };
+		DCE7304828E05C4E0067BC36 /* beebmainspeech.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */; };
 		DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */; };
 /* End PBXBuildFile section */
 
@@ -98,6 +100,7 @@
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 		DC10ACE22567BA1300DA8E32 /* create_dmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_dmg.sh; sourceTree = "<group>"; };
 		DC19F0FE273529CA004F0DDD /* led.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.png; sourceTree = "<group>"; };
+		DC1F98AC28DC38E500A4C9D5 /* beebmainvid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = beebmainvid.cpp; path = src/beebmainvid.cpp; sourceTree = "<group>"; };
 		DC4106F226E54DAC000A1E37 /* BeebApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebApplication.swift; sourceTree = "<group>"; };
 		DC41118125A2222A00E59712 /* Bugs.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Bugs.rtf; sourceTree = "<group>"; };
 		DC49183A286AD7540023212A /* BeebEm5.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeebEm5.entitlements; sourceTree = "<group>"; };
@@ -310,6 +313,7 @@
 		DCE5E85E267B362B00F3CD34 /* z80mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = z80mem.h; path = src/z80mem.h; sourceTree = "<group>"; };
 		DCE5E85F267B362C00F3CD34 /* z80_support.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = z80_support.cc; path = src/z80_support.cc; sourceTree = "<group>"; };
 		DCE5E860267B362C00F3CD34 /* z80dis.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = z80dis.cc; path = src/z80dis.cc; sourceTree = "<group>"; };
+		DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = beebmainspeech.cpp; sourceTree = "<group>"; };
 		DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeebEm5-Bridging-Code.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -458,6 +462,8 @@
 				DCCCC2B924A33D3600840082 /* plist.cc */,
 				DCCCC2C424A33D3700840082 /* audev-macosx.cc */,
 				DCAD0ED228CD460000366E05 /* GetFile.cc */,
+				DC1F98AC28DC38E500A4C9D5 /* beebmainvid.cpp */,
+				DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */,
 			);
 			name = MacFiles;
 			sourceTree = "<group>";
@@ -798,6 +804,7 @@
 				DCAD0F1D28CFB37C00366E05 /* tube.cc in Sources */,
 				DCAD0F0D28CFA94F00366E05 /* sysvia.cc in Sources */,
 				DCAD0EF028CF12E800366E05 /* log.cpp in Sources */,
+				DC1F98AE28DC38E500A4C9D5 /* beebmainvid.cpp in Sources */,
 				DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */,
 				DCAD0F2928CFEB0800366E05 /* ide.cpp in Sources */,
 				DC9D244028CCB77C00F29905 /* scsi.cc in Sources */,
@@ -848,6 +855,7 @@
 				DCAD0ED628CD467C00366E05 /* TapeMap.cpp in Sources */,
 				DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */,
 				DCAD0F1828CFAE9300366E05 /* serialdevices.cc in Sources */,
+				DCE7304828E05C4E0067BC36 /* beebmainspeech.cpp in Sources */,
 				DCAD0F2C28CFEB9D00366E05 /* i386dasm.cc in Sources */,
 				DC9D23FC28CC93E100F29905 /* z80dis.cc in Sources */,
 				DCAD0F1628CFABB200366E05 /* SoundStreamer.cpp in Sources */,

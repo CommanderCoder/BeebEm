@@ -858,6 +858,11 @@ void BeebWin::CreateBitmap()
 
 	m_hBitmap = CreateDIBSection(m_hDCBitmap, (BITMAPINFO *)&m_bmi, DIB_RGB_COLORS,
 							(void**)&m_screen, NULL,0);
+#else
+    m_screen = (char *) malloc(800 * 512);
+
+    fprintf(stderr, "Base Address = %08lx\n", (unsigned long) m_screen);
+
 #endif //beebwin
 
 #endif
@@ -872,6 +877,9 @@ void BeebWin::CreateBitmap()
 		Report(MessageType::Error,
 		       "Cannot select the screen bitmap\nTry running in a 256 colour mode");
 	}
+#else
+    m_screen_blur = (char *) malloc(800 * 512);
+
 #endif
     
 }

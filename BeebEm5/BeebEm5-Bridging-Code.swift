@@ -394,7 +394,7 @@ public func swift_GetResourcePath( _ resourcePath: UnsafeMutablePointer<CChar>, 
 @_cdecl("swift_GetBundleDirectory")
 public func swift_GetBundleDirectory( _ bundlePath: UnsafeMutablePointer<CChar>, _ length:Int)
 {
-    let dpath = Bundle.main.bundlePath+"/Contents/Resources/"
+    let dpath : String = Bundle.main.resourcePath!+"/"
     // set the filepath back in the C code - fill with zeros first
     bundlePath.assign(repeating: 0, count: length)
     bundlePath.assign(from: dpath, count: dpath.count)
