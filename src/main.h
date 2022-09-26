@@ -57,6 +57,9 @@ int _vscprintf (const char * format, va_list pargs);
 int mainInit();
 int mainStep();
 int mainEnd();
+
+int BeebMainKeyUpDown(UINT, long,long);
+
 #endif
 
 #endif
