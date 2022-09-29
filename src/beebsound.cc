@@ -137,17 +137,51 @@ SoundStreamer *pSoundStreamer = nullptr;
 
 #ifndef BEEBWIN
 #define PBYTE unsigned char*
+
+extern "C" void swift_SoundStream(PBYTE buffer);
+extern "C" void swift_SoundInit();
+
 #endif
 /****************************************************************************/
 /* Writes sound data to a sound buffer */
 static void WriteToSoundBuffer(PBYTE lpbSoundData)
 {
+    
+    //NOTES
+
+    /*
+     https://gist.github.com/dimagimburg/54f24b24d08643b177804955483ac878
+     
+     AVAudioEngine
+     AVAudioPlayerNode
+     AVAudioPCMBuffer
+     */
+    
+    
+    /*
+     #define PREFSAMPLERATE 44100
+     #define MAXBUFSIZE 1024
+
+     extraopt_t dummyopt = {NULL, NULL};
+     int res;
+     
+     res = audev_init_device(NULL, PREFSAMPLERATE, 1, &dummyopt);
+
+     audev_play_buff(SoundBuf, bufptr);
+
+     audev_close_device();
+
+     */
+    
+
+//    printf("%s\n",lpbSoundData);
+
+#ifdef BEEBWIN
 	if (pSoundStreamer != nullptr)
 	{
 		pSoundStreamer->Stream(lpbSoundData);
 	}
 
-#ifdef BEEBWIN
 	if (aviWriter != nullptr)
 	{
 		HRESULT hResult = aviWriter->WriteSound(lpbSoundData, SoundBufferSize);
@@ -159,6 +193,8 @@ static void WriteToSoundBuffer(PBYTE lpbSoundData)
 			aviWriter = nullptr;
 		}
 	}
+#else
+    swift_SoundStream(lpbSoundData);
 #endif
 }
 
@@ -438,6 +474,7 @@ static double CyclesToSamples(int BeebCycles) {
 
 static void InitAudioDev()
 {
+#ifdef BEEBWIN
 	if (pSoundStreamer != nullptr)
 	{
 		delete pSoundStreamer;
@@ -446,6 +483,9 @@ static void InitAudioDev()
 	pSoundStreamer = CreateSoundStreamer(SoundSampleRate, 8, 1);
 
 	SoundEnabled = pSoundStreamer != nullptr;
+#else
+    swift_SoundInit();
+#endif
 }
 
 void LoadSoundSamples()
@@ -741,3 +781,4 @@ void SaveSoundUEF(FILE *SUEF) {
 	fput16(GenIndex[2],SUEF);
 	fput16(GenIndex[3],SUEF);
 }
+
