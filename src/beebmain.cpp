@@ -179,6 +179,24 @@ extern "C" void swift_GetApplicationSupportDirectory(const char* appPath, int le
 extern "C" void swift_GetResourcePath(const char* resourcePath, int length, const char* filename);
 extern "C" bool swift_CopyDirectoryRecursively(const char* sourcePath, const char* targetPath);
 
+
+long beeb_now() // milliseconds
+{
+    auto since_epoch = std::chrono::steady_clock::now().time_since_epoch();
+    auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch);
+    auto millis = milli.count();
+    return millis;
+}
+
+#define GetTickCount beeb_now
+
+// delay the next update of the cpu (i.e. Exec6502Instruction) by this accumulation of
+// this time
+extern "C" void swift_sleepCPU(unsigned long microseconds);
+
+
+
+
 #endif
 
 /****************************************************************************/
@@ -2255,9 +2273,7 @@ void BeebWin::doLED(int sx,bool on) {
 /****************************************************************************/
 void BeebWin::ResetTiming(void)
 {
-#ifdef BEEBWIN
 	m_LastTickCount = GetTickCount();
-#endif
     m_LastStatsTickCount = m_LastTickCount;
 	m_LastTotalCycles = TotalCycles;
 	m_LastStatsTotalCycles = TotalCycles;
@@ -2273,7 +2289,6 @@ bool BeebWin::UpdateTiming()
 {
 	bool UpdateScreen = false;
 
-#ifdef BEEBWIN
 	DWORD TickCount = GetTickCount();
 	/* Don't do anything if this is the first call or there has
 	   been a long pause due to menu commands, or when something
@@ -2320,7 +2335,12 @@ bool BeebWin::UpdateTiming()
 			}
 
 			DWORD SpareTicks = (DWORD)(nCycles / 2000) - Ticks;
-			Sleep(SpareTicks);
+#ifdef BEEBWIN
+            Sleep(SpareTicks);
+#else
+            swift_sleepCPU(SpareTicks + 500);
+#endif
+
 			m_MinFrameCount = 0;
 		}
 		else
@@ -2360,7 +2380,6 @@ bool BeebWin::UpdateTiming()
 	}
 
 	m_LastTickCount = TickCount;
-#endif
 
 	m_LastTotalCycles = TotalCycles;
 

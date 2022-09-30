@@ -44,6 +44,9 @@ Boston, MA  02110-1301, USA.
 extern char videobuffer[];
 
 #include <Carbon/Carbon.h>
+
+extern "C" void swift_SetWindowTitleWithCString(const char* title);
+
 #endif
 
 // NEW updateLines based on bufferblit
@@ -369,6 +372,43 @@ void BeebWin::updateLines(int starty, int nlines)
 /****************************************************************************/
 void BeebWin::UpdateSmoothing(void)
 {
+}
+
+
+static const char* pszReleaseCaptureMessage = "(Press Ctrl+Alt to release mouse)";
+
+bool BeebWin::ShouldDisplayTiming() const
+{
+#ifdef BEEBWIN
+    return m_ShowSpeedAndFPS && (m_DisplayRenderer == IDM_DISPGDI || !m_isFullScreen);
+#else
+    return m_ShowSpeedAndFPS;
+#endif
+}
+
+
+void BeebWin::DisplayTiming()
+{
+    if (ShouldDisplayTiming())
+    {
+        if (m_MouseCaptured)
+        {
+            sprintf(m_szTitle, "%s  Speed: %2.2f  fps: %2d  %s",
+                    WindowTitle, m_RelativeSpeed, (int)m_FramesPerSecond, pszReleaseCaptureMessage);
+        }
+        else
+        {
+            sprintf(m_szTitle, "%s  Speed: %2.2f  fps: %2d",
+                    WindowTitle, m_RelativeSpeed, (int)m_FramesPerSecond);
+        }
+
+#ifdef BEEBWIN
+        SetWindowText(m_hWnd, m_szTitle);
+#else
+        // set the window title via swift
+        swift_SetWindowTitleWithCString(m_szTitle);
+#endif
+    }
 }
 
 
