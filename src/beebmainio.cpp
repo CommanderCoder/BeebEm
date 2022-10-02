@@ -60,7 +60,7 @@ using std::max;
 #include "discedit.h"
 #include "version.h"
 
-#ifdef BEENWIN
+#ifdef BEEBWIN
 using namespace Gdiplus;
 #endif
 
@@ -72,9 +72,20 @@ extern bool DiscLoaded[2]; // Set to true when a disc image has been loaded.
 extern char CDiscName[2][256]; // Filename of disc current in drive 0 and 1;
 extern DiscType CDiscType[2]; // Current disc types
 extern char FDCDLL[256];
-#ifdef BEENWIN
+#ifdef BEEBWIN
 extern HMODULE hFDCBoard;
 extern AVIWriter *aviWriter;
+
+#else
+
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
+
+extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
+extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
+extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
+extern "C" void swift_SetWindowTitleWithCString(const char* title);
+extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
+
 #endif
 
 typedef void (*lGetBoardProperties)(struct DriveControlBlock *);
@@ -175,6 +186,9 @@ int BeebWin::ReadDisc(int Drive, bool bCheckForPrefs)
 #ifdef BEEBWIN
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), DefaultPath, filter);
 	gotName = fileDialog.Open();
+#else
+    bool err = swift_GetOneFileWithPreview(FileName, sizeof(FileName), DISC);
+    gotName = !err;
 #endif
 	if (gotName)
 	{
@@ -199,6 +213,9 @@ int BeebWin::ReadDisc(int Drive, bool bCheckForPrefs)
 
 #ifdef BEEBWIN
 		switch (fileDialog.GetFilterIndex())
+#else
+        switch (DISC+1)
+#endif
 		{
 		case 1:
 			{
@@ -225,7 +242,6 @@ int BeebWin::ReadDisc(int Drive, bool bCheckForPrefs)
 		case 6:
 			dsd = true;
 		}
-#endif
         
 		// Another Master 128 Update, brought to you by Richard Gellman
 		if (MachineType != Model::Master128)

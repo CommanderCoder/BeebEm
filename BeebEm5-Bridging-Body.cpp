@@ -21,6 +21,8 @@
 #include "uef.h"
 #include "csw.h"
 
+#include "beebemrcids.h"
+
 int done = 0;
 extern OSStatus TCWindowCommandHandler(UInt32 cmdID);
 extern FILE *tlog;
@@ -266,17 +268,19 @@ extern "C" void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char cha
 
 }
 
-
-extern "C" int beeb_HandleCommand(unsigned int cmdID)
+extern "C" void beeb_HandleCommand(unsigned int cmdID)
 {
-#ifdef BEEBWIN
     char* cmdCHR = (char*)&cmdID;
-    printf("HANDLECMD %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
-    return mainWin->HandleCommand(cmdID);
-#else
-    return 0;
-#endif
     
+    auto cmdRC = ID2RC.find(cmdID);
+    if (cmdRC != ID2RC.end())
+    {
+        printf("HANDLECMD %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+        mainWin->HandleCommand(cmdRC->second);
+    }
+    else
+        printf("NOT FOUND %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+
 }
 
 

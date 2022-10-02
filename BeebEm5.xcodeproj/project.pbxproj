@@ -98,6 +98,7 @@
 
 /* Begin PBXFileReference section */
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
+		DC0EB23F28E6CE6400F5B679 /* beebemrcids.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = beebemrcids.h; sourceTree = "<group>"; };
 		DC10ACE22567BA1300DA8E32 /* create_dmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_dmg.sh; sourceTree = "<group>"; };
 		DC19F0FE273529CA004F0DDD /* led.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.png; sourceTree = "<group>"; };
 		DC1F98AC28DC38E500A4C9D5 /* beebmainvid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = beebmainvid.cpp; path = src/beebmainvid.cpp; sourceTree = "<group>"; };
@@ -464,6 +465,7 @@
 				DCAD0ED228CD460000366E05 /* GetFile.cc */,
 				DC1F98AC28DC38E500A4C9D5 /* beebmainvid.cpp */,
 				DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */,
+				DC0EB23F28E6CE6400F5B679 /* beebemrcids.h */,
 			);
 			name = MacFiles;
 			sourceTree = "<group>";
