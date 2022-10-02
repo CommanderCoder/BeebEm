@@ -466,6 +466,8 @@
 				DC1F98AC28DC38E500A4C9D5 /* beebmainvid.cpp */,
 				DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */,
 				DC0EB23F28E6CE6400F5B679 /* beebemrcids.h */,
+				DCAD0F4028D1370D00366E05 /* beebmainio.cpp */,
+				DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */,
 			);
 			name = MacFiles;
 			sourceTree = "<group>";
@@ -575,8 +577,6 @@
 				DCCCC2C824A33D3700840082 /* Arm.cc */,
 				DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */,
 				DCCCC2D224A33D3700840082 /* atodconv.cc */,
-				DCAD0F4028D1370D00366E05 /* beebmainio.cpp */,
-				DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */,
 				DCCCC2CA24A33D3700840082 /* beebmem.cc */,
 				DCCCC2D424A33D3700840082 /* beebsound.cc */,
 				DCCCC2D824A33D3700840082 /* csw.cc */,
