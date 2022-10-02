@@ -169,13 +169,13 @@ void BeebWin::updateLines(int starty, int nlines)
             destRect.bottom -= yAdj;
         }
 
+        
         // Blit the whole of the secondary buffer onto the screen
         srcRect.left   = 0;
-        srcRect.top    = 0;
+        srcRect.top    = TeletextEnabled ? 0 : starty;
         srcRect.right  = TeletextEnabled ? 552 : ActualScreenWidth;
-        srcRect.bottom = TeletextEnabled ? TeletextLines : nlines;
+        srcRect.bottom = TeletextEnabled ? TeletextLines : starty+nlines;
     
-
         Blt(destRect, srcRect);
         
         
