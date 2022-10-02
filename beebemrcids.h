@@ -55,8 +55,8 @@ std::map<int,int> ID2RC =
 {'f0.1', IDM_FIXEDSPEED0_1 },
 {'monr', ID_MONITOR_RGB  },
 {'monb', ID_MONITOR_BW   },
-{'mong', ID_MONITOR_AMBER},
-{'mona', ID_MONITOR_GREEN},
+{'mona', ID_MONITOR_AMBER},
+{'mong', ID_MONITOR_GREEN},
 {'wrp0', IDM_WPDISC0},
 {'wrp1', IDM_WPDISC1},
 {'wpol', IDM_WPONLOAD},
@@ -199,7 +199,7 @@ std::map<int,int> ID2RC =
 {'cpyc', ID},
 {'invb', ID},
 {'swtd', ID},
-{'mbcn', ID},
+{'mbcn', ID_8271},
 {'mbca', ID}, //Acorn 1770 Controller
 {'mbco', ID}, //OPUS 1770 Controller - on DLL on windows
 {'mbcw', ID} //Watford 1770 - on DLL on windows

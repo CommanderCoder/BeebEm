@@ -551,7 +551,7 @@ public func swift_SoundInit()
                 let val2 = Float(val1)/Float(1<<30)
                 buffer.int32ChannelData!.pointee[i] = val1.littleEndian
 //                buffer.int32ChannelData!.pointee[i+1] = val1>>1
-                print(val,String(format:"%04X", val1),val2)
+//                print(val,String(format:"%04X", val1),val2)
             }
             else{
                 buffer.floatChannelData!.pointee[i] = (val * 0.5)
@@ -592,13 +592,13 @@ public func swift_SoundStream( _ soundbuffer: UnsafeMutablePointer<UInt8>)
         if beebAudioFormat.commonFormat == .pcmFormatInt32
         {
             let val1 = (Int32(val)-128)<<24
-            print(String(format:"%02X", val),val1)
+//            print(String(format:"%02X", val),val1)
             buffer.int32ChannelData!.pointee[i] = val1
         }
         else
         {
             let val1 = (Float(val)/Float(1<<9))-0.5
-            print(String(format:"%02X", val),val1)
+//            print(String(format:"%02X", val),val1)
             buffer.floatChannelData!.pointee[i] = val1
         }
         j+=1

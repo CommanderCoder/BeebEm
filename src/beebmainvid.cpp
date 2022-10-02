@@ -175,17 +175,8 @@ void BeebWin::updateLines(int starty, int nlines)
         srcRect.right  = TeletextEnabled ? 552 : ActualScreenWidth;
         srcRect.bottom = TeletextEnabled ? TeletextLines : nlines;
     
-#ifdef BEEBWIN
-        ddrval = m_DDS2Primary->Blt( &destRect, m_DDS2One, &srcRect, DDBLT_ASYNC, NULL);
-        if (ddrval == DDERR_SURFACELOST)
-        {
-            ddrval = m_DDS2Primary->Restore();
-            if (ddrval == DD_OK)
-                ddrval = m_DDS2Primary->Blt( &destRect, m_DDS2One, &srcRect, DDBLT_ASYNC, NULL );
-        }
-#else
+
         Blt(destRect, srcRect);
-#endif
         
         
         
@@ -478,8 +469,8 @@ void BeebWin::Blt(RECT destR, RECT srcR)
         pPtr32 = pRPtr32 + xAdj;
         for (i = 0; i < width; ++i)
         {
-//            uint32_t val = (uint32_t)m_RGB32[p[sx[i]]];
-            uint32_t val = (p[sx[i]]) > 0 ? 0xffffffff:0;
+            uint32_t val = (uint32_t)m_RGB32[p[sx[i]]];
+//            uint32_t val = (p[sx[i]]) > 0 ? 0xffffffff:0;
             // argb
 //            val |= 0xff003f00;
             *pPtr32++ = val;
@@ -523,8 +514,8 @@ void BeebWin::Blt(RECT destR, RECT srcR)
                 p = m_screen + (srcR.top + (int) (j * scaley)) * 800 + srcR.left;
                 pPtr32 = pRPtr32 + xAdj;
                 for (i = 0; i < width; ++i)
-//                    *pPtr32++ = m_RGB32[p[sx[i]]];
-                    *pPtr32++ = (p[sx[i]]) > 0 ? 0xffffffff:0;
+                    *pPtr32++ = m_RGB32[p[sx[i]]];
+//                    *pPtr32++ = (p[sx[i]]) > 0 ? 0xffffffff:0;
 
                 pRPtr32 += ppr;
                 
@@ -537,8 +528,8 @@ void BeebWin::Blt(RECT destR, RECT srcR)
                 pPtr16 = pRPtr16 + xAdj;
                 
                 for (i = 0; i < width; ++i)
-//                    *pPtr16++ = m_RGB16[p[sx[i]]];
-                    *pPtr16++ = (p[sx[i]]) > 0 ? 0xffff:0;
+                    *pPtr16++ = m_RGB16[p[sx[i]]];
+//                    *pPtr16++ = (p[sx[i]]) > 0 ? 0xffff:0;
 
                 pRPtr16 += ppr;
                 

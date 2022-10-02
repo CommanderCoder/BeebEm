@@ -817,7 +817,7 @@ void BeebWin::CreateBitmap()
 	m_bmi.bmiHeader.biClrUsed = 68;
 	m_bmi.bmiHeader.biClrImportant = 68;
 #endif
-    
+
 #ifdef USE_PALETTE
 	__int16 *pInts = (__int16 *)&m_bmi.bmiColors[0];
 
@@ -853,16 +853,13 @@ void BeebWin::CreateBitmap()
 			}
 		}
 
-#ifdef BEEBWIN
 		m_bmi.bmiColors[i].rgbRed   = (BYTE) (r * m_BlurIntensities[i >> 3] / 100.0 * 255);
 		m_bmi.bmiColors[i].rgbGreen = (BYTE) (g * m_BlurIntensities[i >> 3] / 100.0 * 255);
 		m_bmi.bmiColors[i].rgbBlue  = (BYTE) (b * m_BlurIntensities[i >> 3] / 100.0 * 255);
 		m_bmi.bmiColors[i].rgbReserved = 0;
-#endif
         
     }
 
-#ifdef BEEBWIN
 	// Red Leds - left is dark, right is lit.
 	m_bmi.bmiColors[LED_COL_BASE].rgbRed=80;		m_bmi.bmiColors[LED_COL_BASE+1].rgbRed=255;
 	m_bmi.bmiColors[LED_COL_BASE].rgbGreen=0;		m_bmi.bmiColors[LED_COL_BASE+1].rgbGreen=0;
@@ -874,6 +871,7 @@ void BeebWin::CreateBitmap()
 	m_bmi.bmiColors[LED_COL_BASE+2].rgbBlue=0;		m_bmi.bmiColors[LED_COL_BASE+3].rgbBlue=0;
 	m_bmi.bmiColors[LED_COL_BASE+2].rgbReserved=0;	m_bmi.bmiColors[LED_COL_BASE+3].rgbReserved=0;
 
+#ifdef BEEBWIN
 	m_hBitmap = CreateDIBSection(m_hDCBitmap, (BITMAPINFO *)&m_bmi, DIB_RGB_COLORS,
 							(void**)&m_screen, NULL,0);
 #else
@@ -881,6 +879,17 @@ void BeebWin::CreateBitmap()
 
     fprintf(stderr, "Base Address = %08lx\n", (unsigned long) m_screen);
 
+    
+    for (int i = 0; i < LED_COL_BASE + 4; ++i)
+    {
+      m_RGB32[i] = ((( ((m_bmi.bmiColors[i].rgbRed) << 8)  + (m_bmi.bmiColors[i].rgbGreen )) << 8) + (m_bmi.bmiColors[i].rgbBlue));
+      m_RGB32[i] |= 0xff000000;
+
+      m_RGB16[i] = ((( ((m_bmi.bmiColors[i].rgbRed >> 3) << 5)  + (m_bmi.bmiColors[i].rgbGreen >> 3)) << 5) + (m_bmi.bmiColors[i].rgbBlue >> 3));
+
+      printf("RGB32[%d] = %08x, RGB16[%d] = %04x\n", i, m_RGB32[i], i, m_RGB16[i]);
+    
+    }
 #endif //beebwin
 
 #endif

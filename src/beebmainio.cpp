@@ -1011,8 +1011,10 @@ void BeebWin::LoadFDC(char *DLLName, bool save) {
 #ifdef BEEBWIN
 	if (hFDCBoard!=NULL) FreeLibrary(hFDCBoard);
 	hFDCBoard = NULL;
-	NativeFDC = true;
+#endif
+    NativeFDC = true;
 
+#ifdef BEEBWIN
 	if (DLLName == NULL) {
 		if (!m_Preferences.GetStringValue(CfgName, FDCDLL))
 			strcpy(FDCDLL,"None");

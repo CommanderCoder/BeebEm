@@ -90,13 +90,36 @@ typedef union SixteenUChars {
 	EightByteType eightbytes[2];
 } SixteenUChars;
 
-#ifdef BEEBWIN
+#ifndef BEEBWIN
+// placeholder
+#define LONG u_int32_t
+typedef struct tagBITMAPINFOHEADER {
+  DWORD biSize;
+  LONG  biWidth;
+  LONG  biHeight;
+  WORD  biPlanes;
+  WORD  biBitCount;
+  DWORD biCompression;
+  DWORD biSizeImage;
+  LONG  biXPelsPerMeter;
+  LONG  biYPelsPerMeter;
+  DWORD biClrUsed;
+  DWORD biClrImportant;
+} BITMAPINFOHEADER, *LPBITMAPINFOHEADER, *PBITMAPINFOHEADER;
+
+typedef struct tagRGBQUAD {
+  BYTE rgbBlue;
+  BYTE rgbGreen;
+  BYTE rgbRed;
+  BYTE rgbReserved;
+} RGBQUAD;
+#endif
+
 typedef struct bmiData
 {
 	BITMAPINFOHEADER	bmiHeader;
 	RGBQUAD			bmiColors[256];
 } bmiData;
-#endif
 
 struct LEDType {
 	bool ShiftLock;
@@ -200,6 +223,9 @@ public:
 #else
     void updateLines(int starty, int nlines);
     void Blt(RECT destR, RECT srcR);
+    
+    int_fast32_t m_RGB32[256];
+    int_fast16_t m_RGB16[256];
 #endif
 
 	void doHorizLine(int Colour, int y, int sx, int width) {
@@ -425,8 +451,8 @@ public:
 	HGDIOBJ 	m_hOldObj;
 	HDC 		m_hDCBitmap;
 	HGDIOBJ 	m_hBitmap;
-	bmiData 	m_bmi;
 #endif
+	bmiData 	m_bmi;
     char m_szTitle[256];
 
 	int		m_ScreenRefreshCount;
