@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19529"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="20037"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -976,27 +976,27 @@
                                     <items>
                                         <menuItem title="BBC Model" id="CnC-ac-TGC">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="BBC Model" id="dyQ-6G-Gwy">
+                                            <menu key="submenu" title="BBC Model" autoenablesItems="NO" id="dyQ-6G-Gwy">
                                                 <items>
-                                                    <menuItem title="BBC Model B" identifier="bbcb" id="FKK-ra-usj">
+                                                    <menuItem title="BBC Model B" tag="1" identifier="bbcb" id="FKK-ra-usj">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="WaH-lQ-Q0E"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="BBC Model B + Integra-B" identifier="bbci" id="IDx-Gf-JA3">
+                                                    <menuItem title="BBC Model B + Integra-B" tag="2" identifier="bbci" id="IDx-Gf-JA3">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Poe-Jj-nDO"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="BBC Model B Plus" identifier="bbcp" id="STj-Dl-icc">
+                                                    <menuItem title="BBC Model B Plus" tag="3" identifier="bbcp" id="STj-Dl-icc">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Vj8-xV-7PY"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="BBC Master 128" state="on" identifier="bbcm" id="Fcd-SI-M29">
+                                                    <menuItem title="BBC Master 128" state="on" tag="4" identifier="bbcm" id="Fcd-SI-M29">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="tRW-8J-HMW"/>
@@ -1007,7 +1007,7 @@
                                         </menuItem>
                                         <menuItem title="Model B Floppy Controller" id="CDD-Xb-whJ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Model B Floppy Controller" id="CeE-xB-K1d">
+                                            <menu key="submenu" title="Model B Floppy Controller" autoenablesItems="NO" id="CeE-xB-K1d">
                                                 <items>
                                                     <menuItem title="Native 8271" state="on" identifier="mbcn" id="a2S-XO-Gnd">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
@@ -1069,7 +1069,7 @@
                                         <menuItem isSeparatorItem="YES" id="0Oe-qe-SWJ"/>
                                         <menuItem title="Allow ROM writes" id="yIh-5j-UMX">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Allow ROM writes" id="YgA-Vo-j1u">
+                                            <menu key="submenu" title="Allow ROM writes" autoenablesItems="NO" id="YgA-Vo-j1u">
                                                 <items>
                                                     <menuItem title="0 Empty" identifier="roma" id="dxO-6d-7Tz">
                                                         <modifierMask key="keyEquivalentModifierMask"/>

@@ -168,6 +168,8 @@ static bKeyMap *transTable = &defaultMapping;
 int __argc;
 char** __argv;
 
+#include "beebemrcids.h"
+
 #include <Carbon/Carbon.h>
 
 #include <sys/types.h>
@@ -178,7 +180,16 @@ extern "C" void swift_GetBundleDirectory(const char* bundlePath, int length);
 extern "C" void swift_GetApplicationSupportDirectory(const char* appPath, int length);
 extern "C" void swift_GetResourcePath(const char* resourcePath, int length, const char* filename);
 extern "C" bool swift_CopyDirectoryRecursively(const char* sourcePath, const char* targetPath);
+extern "C" void swift_saveScreen(const char * filename);
 
+
+extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
+extern "C" void swift_SetMenuEnable(unsigned int cmd, char enable);
+extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
+
+// delay the next update of the cpu (i.e. Exec6502Instruction) by this accumulation of
+// this time
+extern "C" void swift_sleepCPU(unsigned long microseconds);
 
 long beeb_now() // milliseconds
 {
@@ -190,9 +201,6 @@ long beeb_now() // milliseconds
 
 #define GetTickCount beeb_now
 
-// delay the next update of the cpu (i.e. Exec6502Instruction) by this accumulation of
-// this time
-extern "C" void swift_sleepCPU(unsigned long microseconds);
 
 
 
@@ -331,10 +339,17 @@ BeebWin::BeebWin()
             fprintf(stderr, "Arg %d = %s\n", i, __argv[i]);
     }
 
+    // Resources for the APP are in the bundle directory
+    //
     swift_GetBundleDirectory(m_AppPath, _MAX_PATH);
-
+    
+    // but this is copied to the local Application Support folder for BeebEm so that it can be modified
+    
+    
+    
     m_CustomData = false;
 
+//    swift_GetApplicationSupportDirectory(m_PrefsFile, _MAX_PATH);
 //    swift_GetResourcePath(m_PrefsFile, _MAX_PATH, "UserData/Preferences.cfg");
 //    swift_GetResourcePath(RomFile, _MAX_PATH, "UserData/Roms.cfg");
 #endif
@@ -887,7 +902,7 @@ void BeebWin::CreateBitmap()
 
       m_RGB16[i] = ((( ((m_bmi.bmiColors[i].rgbRed >> 3) << 5)  + (m_bmi.bmiColors[i].rgbGreen >> 3)) << 5) + (m_bmi.bmiColors[i].rgbBlue >> 3));
 
-      printf("RGB32[%d] = %08x, RGB16[%d] = %04x\n", i, m_RGB32[i], i, m_RGB16[i]);
+//      printf("RGB32[%d] = %08x, RGB16[%d] = %04x\n", i, m_RGB32[i], i, m_RGB16[i]);
     
     }
 #endif //beebwin
@@ -1024,6 +1039,16 @@ void BeebWin::CheckMenuItem(UINT id, bool checked)
 {
 #ifdef BEEBWIN
 	::CheckMenuItem(m_hMenu, id, checked ? MF_CHECKED : MF_UNCHECKED);
+#else
+    auto cmdID = RC2ID.find(id);
+    if (cmdID != RC2ID.end())
+    {
+        swift_SetMenuCheck(cmdID->second, checked);
+    }
+    else
+    {
+        Report(MessageType::Error, "cannot find menu item %d\n", id);
+    }
 #endif
     
 }
@@ -1032,6 +1057,16 @@ void BeebWin::EnableMenuItem(UINT id, bool enabled)
 {
 #ifdef BEEBWIN
 	::EnableMenuItem(m_hMenu, id, enabled ? MF_ENABLED : MF_GRAYED);
+#else
+    auto cmdID = RC2ID.find(id);
+    if (cmdID != RC2ID.end())
+    {
+        swift_SetMenuEnable(cmdID->second, enabled);
+    }
+    else
+    {
+        Report(MessageType::Error, "cannot find menu item %d\n", id);
+    }
 #endif
     
 }
@@ -1287,6 +1322,31 @@ void BeebWin::UpdateMonitorMenu() {
 	CheckMenuItem(ID_MONITOR_AMBER, m_PaletteType == PaletteType::Amber);
 }
 
+
+// set the tick on the menu with a 4 character identifier
+void beebwin_SetMenuCheck(UINT cmd, bool check)
+{
+    auto cmdID = RC2ID.find(cmd);
+    if (cmdID != RC2ID.end())
+    {
+        // check the selected item
+        swift_SetMenuCheck(cmdID->second, check);
+    }
+    
+}
+
+// set the tick on the menu with a 4 character identifier
+void beebwin_CheckMenuRadioItem(UINT first, UINT last, UINT cmd)
+{
+    for (UINT v = first; v <= last; v++)
+    {
+        // uncheck all the items in the 'radio'
+        beebwin_SetMenuCheck(v, false);
+    }
+    // check the selected item
+    beebwin_SetMenuCheck(cmd, true);
+}
+
 void BeebWin::UpdateModelMenu()
 {
 	static const std::map<Model, UINT> ModelMenuItems{
@@ -1306,8 +1366,15 @@ void BeebWin::UpdateModelMenu()
 		SelectedMenuItem,
 		MF_BYCOMMAND
 	);
-#endif
+#else
+    // switch between the items - assumes first and last are consecutive and
+    // that 'SelectedMenuItem' is within that range
+    beebwin_CheckMenuRadioItem(
+          ID_MODELB,
+          ID_MASTER128,
+          SelectedMenuItem);
     
+#endif
 	if (MachineType == Model::Master128) {
 		EnableMenuItem(ID_FDC_DLL, false);
 	}
@@ -4144,8 +4211,13 @@ void BeebWin::HandleCommand(int MenuId)
 	case IDM_CAPTURESCREEN:
 		// Prompt for file name.  Need to do this in WndProc otherwise
 		// dialog does not show in full screen mode.
-		if (GetImageFile(m_CaptureFileName))
-			CaptureBitmapPending(false);
+#ifdef BEEBWIN
+        if (GetImageFile(m_CaptureFileName))
+            CaptureBitmapPending(false);
+#else
+            // save to PICTURES folder
+            swift_saveScreen("BeebEm.png");
+#endif
 		break;
 
 	case IDM_VIDEORES1:
@@ -5379,9 +5451,10 @@ bool BeebWin::CheckUserDataPath(bool Persist)
     return success;
 
 #else
-    strcpy(m_UserDataPath, m_AppPath);
-    strcat(m_UserDataPath, "/UserData/");
-    
+//    strcpy(m_UserDataPath, m_AppPath);
+    swift_GetApplicationSupportDirectory(m_UserDataPath, _MAX_PATH);
+    strcat(m_UserDataPath, "UserData/");
+
     // check if Application Support/BeebEm5/UserData exists
     // if not, then create it and copy the files
     // if it does, then all is good

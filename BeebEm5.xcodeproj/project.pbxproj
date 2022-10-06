@@ -93,6 +93,7 @@
 		DCE19A40286E577E00CF6090 /* BeebSKView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE19A3F286E577E00CF6090 /* BeebSKView.swift */; };
 		DCE5E862267B362C00F3CD34 /* z80_support.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCE5E85F267B362C00F3CD34 /* z80_support.cc */; };
 		DCE7304828E05C4E0067BC36 /* beebmainspeech.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */; };
+		DCF3CDA228ECFB4600040892 /* beebemrcids.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCF3CDA128ECFB4500040892 /* beebemrcids.cpp */; };
 		DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */; };
 /* End PBXBuildFile section */
 
@@ -252,7 +253,6 @@
 		DCCCC2DA24A33D3700840082 /* serialdevices.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serialdevices.cc; path = src/serialdevices.cc; sourceTree = "<group>"; };
 		DCCCC2DB24A33D3700840082 /* econet.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = econet.cc; path = src/econet.cc; sourceTree = "<group>"; };
 		DCCCC2DC24A33D3700840082 /* ArmDisassembler.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ArmDisassembler.cc; path = src/ArmDisassembler.cc; sourceTree = "<group>"; };
-		DCCCC30424A33E0E00840082 /* defines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = defines.h; path = src/defines.h; sourceTree = "<group>"; };
 		DCCCC30524A33E2E00840082 /* Z Random BBC file.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "Z Random BBC file.icns"; path = "src/Z Random BBC file.icns"; sourceTree = "<group>"; };
 		DCCCC30E24A3DCC200840082 /* BeebAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeebAudio.swift; sourceTree = "<group>"; };
 		DCD4ADE724A4D56D0000C40A /* serial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = serial.h; path = src/serial.h; sourceTree = "<group>"; };
@@ -315,6 +315,7 @@
 		DCE5E85F267B362C00F3CD34 /* z80_support.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = z80_support.cc; path = src/z80_support.cc; sourceTree = "<group>"; };
 		DCE5E860267B362C00F3CD34 /* z80dis.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = z80dis.cc; path = src/z80dis.cc; sourceTree = "<group>"; };
 		DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = beebmainspeech.cpp; sourceTree = "<group>"; };
+		DCF3CDA128ECFB4500040892 /* beebemrcids.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = beebemrcids.cpp; path = src/beebemrcids.cpp; sourceTree = "<group>"; };
 		DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeebEm5-Bridging-Code.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -466,6 +467,7 @@
 				DC1F98AC28DC38E500A4C9D5 /* beebmainvid.cpp */,
 				DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */,
 				DC0EB23F28E6CE6400F5B679 /* beebemrcids.h */,
+				DCF3CDA128ECFB4500040892 /* beebemrcids.cpp */,
 				DCAD0F4028D1370D00366E05 /* beebmainio.cpp */,
 				DCAD0F4828D1417900366E05 /* beebmainprefs.cpp */,
 			);
@@ -660,7 +662,6 @@
 				DCD4ADF124A4D56E0000C40A /* beebwin.h */,
 				DCD4AE0924A4D56F0000C40A /* common.h */,
 				DCD4ADEF24A4D56E0000C40A /* csw.h */,
-				DCCCC30424A33E0E00840082 /* defines.h */,
 				DCD4ADFA24A4D56E0000C40A /* disc1770.h */,
 				DCD4ADF724A4D56E0000C40A /* disc8271.h */,
 				DCD4ADF224A4D56E0000C40A /* discedit.h */,
@@ -821,6 +822,7 @@
 				DCAD0F1F28CFB40000366E05 /* ArmDisassembler.cc in Sources */,
 				DC9D243F28CCADDA00F29905 /* sasi.cc in Sources */,
 				DCAD0F2B28CFEB6400366E05 /* i86.cc in Sources */,
+				DCF3CDA228ECFB4600040892 /* beebemrcids.cpp in Sources */,
 				DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */,
 				DCAD0F1C28CFB27400366E05 /* econet.cc in Sources */,
 				DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */,

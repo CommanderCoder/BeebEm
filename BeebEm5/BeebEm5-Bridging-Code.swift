@@ -11,7 +11,6 @@ import Cocoa
 import AVFoundation
 
 
-
 @objc enum FileFilter :Int {
     case DISC
     case UEF
@@ -98,17 +97,30 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
     return 1 // error
 }
 
+
+
 @_cdecl("swift_SaveFile")
-public func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int)
+func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int, fileexts: FileFilter) -> Bool
 {
     let dialog = NSSavePanel()
-
+    
     dialog.title                   = "Choose a file | BeebEm5"
     dialog.showsResizeIndicator    = true
     dialog.showsHiddenFiles        = false
-
+    switch fileexts {
+    case .DISC:
+        dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"];
+    case .UEF:
+        dialog.allowedFileTypes        = ["uef", "csw"];
+    case .IFD:
+        dialog.allowedFileTypes        = ["ssd", "dsd", "inf"];
+    case .KEYBOARD:
+        dialog.allowedFileTypes        = ["kmap"];
+    }
+    
+    
     if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
-        guard let result = dialog.url else { return } // Pathname of the file
+        guard let result = dialog.url else { return false} // Pathname of the file
 
         let path: String = result.path
         
@@ -120,9 +132,31 @@ public func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int)
         filepath.assign(from: path, count: path.count)
             
         print("Picked \(String(cString:filepath))")
+        return true
     
     }
+    return false
 }
+
+// allow access to this in C
+@_cdecl("swift_MoveFile")
+public func swift_MoveFile(srcpath : UnsafeMutablePointer<CChar>, destpath : UnsafeMutablePointer<CChar>) -> Bool
+{
+    let src = String(cString: srcpath)
+    let dest = String(cString: destpath)
+    do
+    {
+        try FileManager.default.moveItem(atPath: src, toPath: dest)
+    }
+    catch  {
+        print("Unexpected error: \(error).")
+        return false
+    }
+    return true
+}
+
+
+
 
 @_cdecl("swift_SetWindowTitleWithCString")
 public func swift_SetWindowTitleWithCString( title: UnsafePointer<CChar> )
@@ -178,13 +212,13 @@ extension NSView {
 
 func recurse(find id: String, menu: NSMenu) -> NSMenuItem? {
   for item in menu.items {
-      if item.identifier?.rawValue == id && item.isEnabled
+      if item.identifier?.rawValue == id //&& item.isEnabled
       {
-      return item
-    } else if let submenu = item.submenu {
-        if let item = recurse(find: id, menu: submenu) {
         return item
-      }
+      } else if let submenu = item.submenu {
+        if let item = recurse(find: id, menu: submenu) {
+            return item
+       }
     }
   }
   return nil
@@ -206,10 +240,33 @@ func menuItemByIdentifier(id: String) -> NSMenuItem? {
 public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 {
     let cmdSTR =  conv(cmd)
+
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
-//        print("smc",cmdSTR)
+        print("smc",cmdSTR,check)
         n.state = check ? .on : .off
+    }
+    else
+    {
+        print("smc not found: ",cmdSTR)
+    }
+}
+
+
+// grey the menu with a 4 character identifier
+@_cdecl("swift_SetMenuEnable")
+public func swift_SetMenuEnable(_ cmd: UInt32, _ enable: Bool)
+{
+    // There is a checkbox in the Menu's Inspector called "Auto Enables Items" that was overriding my code.
+    let cmdSTR =  conv(cmd)
+    if let n = menuItemByIdentifier(id:cmdSTR)
+    {
+        print("sme",cmdSTR,enable)
+        n.isEnabled = enable
+    }
+    else
+    {
+        print("sme not found: ",cmdSTR)
     }
 }
 
@@ -377,12 +434,12 @@ public func swift_saveScreen(_ text: UnsafePointer<CChar>)
 public func swift_GetResourcePath( _ resourcePath: UnsafeMutablePointer<CChar>, _ length:Int, _ filename: UnsafePointer<CChar>)
 {
     let filenameString = String(cString: filename)
-    print("\(#function) \(filenameString)")
     
     if let fileurl = Bundle.main.url(forResource:filenameString,withExtension: nil)
     {
         let path: String = fileurl.path
-                
+        print("\(#function) \(path)")
+
         // set the filepath back in the C code - fill with zeros first
         resourcePath.assign(repeating: 0, count: length)
         resourcePath.assign(from: path, count: path.count)
@@ -396,6 +453,7 @@ public func swift_GetResourcePath( _ resourcePath: UnsafeMutablePointer<CChar>, 
 public func swift_GetBundleDirectory( _ bundlePath: UnsafeMutablePointer<CChar>, _ length:Int)
 {
     let dpath : String = Bundle.main.resourcePath!+"/"
+    print("\(#function) \(dpath)")
     // set the filepath back in the C code - fill with zeros first
     bundlePath.assign(repeating: 0, count: length)
     bundlePath.assign(from: dpath, count: dpath.count)
@@ -615,3 +673,6 @@ public func swift_CloseAudio()
     audioBufferPlayer.stop()
     audioEngine.stop()
 }
+
+
+

@@ -80,11 +80,10 @@ extern AVIWriter *aviWriter;
 
 extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
 
-extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
 extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
-extern "C" int swift_SaveFile (const char *path, int bytes);//, FSSpec *fs);
-extern "C" void swift_SetWindowTitleWithCString(const char* title);
-extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
+extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
+extern "C" int swift_MoveFile (const char *src, const char *dest );
+
 
 #endif
 
@@ -344,6 +343,19 @@ void BeebWin::LoadTape(void)
 			LoadCSWTape(FileName);
 		}
 	}
+#else
+    int err = swift_GetOneFileWithPreview(FileName, 256, UEF);
+    
+    if (!err)
+    {
+        if (hasFileExt(FileName, ".uef")) {
+            LoadUEFTape(FileName);
+        }
+        else if (hasFileExt(FileName, ".csw")) {
+            LoadCSWTape(FileName);
+        }
+
+    }
 #endif
     
 }
@@ -447,9 +459,18 @@ void BeebWin::NewDiscImage(int Drive)
 			m_Preferences.SetStringValue("DiscsPath", DefaultPath);
 			m_Preferences.SetDWORDValue("DiscsFilter", filterIndex);
 		}
+#else
+    if (swift_SaveFile(FileName, sizeof(FileName), DISC)) {
+        if (filterIndex==0) filterIndex = 1;
+        if (strstr(FileName, "ssd")) filterIndex = 1;
+        if (strstr(FileName, "dsd")) filterIndex = 2;
+        if (strstr(FileName, "adf")) filterIndex = 5;
+        if (strstr(FileName, "adl")) filterIndex = 6;
+        
+#endif
 
 		/* Add a file extension if the user did not specify one */
-		if (strchr(FileName, '.') == NULL)
+		if (strchr(FileName+(strlen(FileName)-4), '.') == NULL)
 		{
 			if (filterIndex == 1 || filterIndex == 3)
 				strcat(FileName, ".ssd");
@@ -482,7 +503,6 @@ void BeebWin::NewDiscImage(int Drive)
 		DiscLoaded[Drive] = true;
 		strcpy(CDiscName[1],FileName);
 	}
-#endif
 }
 
 /****************************************************************************/
@@ -570,7 +590,8 @@ void BeebWin::SaveState()
 			DefaultPath[PathLength] = 0;
 			m_Preferences.SetStringValue("StatesPath", DefaultPath);
 		}
-
+#else
+    if (swift_SaveFile(FileName, sizeof(FileName), UEF)) {
 		// Add UEF extension if not already set and is UEF
 		if (!hasFileExt(FileName, ".uef"))
 		{
@@ -605,7 +626,9 @@ void BeebWin::RestoreState()
 			DefaultPath[PathLength] = 0;
 			m_Preferences.SetStringValue("StatesPath", DefaultPath);
 		}
-
+#else
+    if (swift_GetOneFileWithPreview(FileName, sizeof(FileName), UEF) == 0) {
+            
 		LoadUEFState(FileName);
 	}
 #endif
@@ -881,7 +904,11 @@ void BeebWin::QuickLoad()
 {
 	char FileName[_MAX_PATH];
 	strcpy(FileName, m_UserDataPath);
+#ifdef BEEBWIN
 	strcat(FileName, "beebstate\\quicksave.uef");
+#else
+    strcat(FileName, "beebstate/quicksave.uef");
+#endif
 	LoadUEFState(FileName);
 }
 
@@ -894,6 +921,7 @@ void BeebWin::QuickSave()
 	// Bump old quicksave files down
 	for (i = 1; i <= 9; ++i)
 	{
+#ifdef BEEBWIN
 		sprintf(FileName1, "%sbeebstate\\quicksave%d.uef", m_UserDataPath, i);
 
 		if (i == 9)
@@ -901,8 +929,16 @@ void BeebWin::QuickSave()
 		else
 			sprintf(FileName2, "%sbeebstate\\quicksave%d.uef", m_UserDataPath, i+1);
 
-#ifdef BEEBWIN
 		MoveFileEx(FileName2, FileName1, MOVEFILE_REPLACE_EXISTING);
+#else
+        sprintf(FileName1, "%sbeebstate/quicksave%d.uef", m_UserDataPath, i);
+
+        if (i == 9)
+            sprintf(FileName2, "%sbeebstate/quicksave.uef", m_UserDataPath);
+        else
+            sprintf(FileName2, "%sbeebstate/quicksave%d.uef", m_UserDataPath, i+1);
+
+        swift_MoveFile(FileName2, FileName1);
 #endif
         
     }
