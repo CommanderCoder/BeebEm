@@ -186,6 +186,7 @@ extern "C" void swift_saveScreen(const char * filename);
 extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
 extern "C" void swift_SetMenuEnable(unsigned int cmd, char enable);
 extern "C" int swift_SetMenuItemTextWithCString(unsigned int cmd, const char* text);
+extern "C" int swift_ModifyMenu(unsigned int cmd, unsigned int newitem, const char* itemtext);
 
 // delay the next update of the cpu (i.e. Exec6502Instruction) by this accumulation of
 // this time
@@ -1347,6 +1348,21 @@ void beebwin_CheckMenuRadioItem(UINT first, UINT last, UINT cmd)
     beebwin_SetMenuCheck(cmd, true);
 }
 
+void beebwin_ModifyMenu(
+                        UINT position,
+                        UINT newitem,
+                        CHAR* newtext)
+{
+    auto cmdID = RC2ID.find(position);
+    auto newID = RC2ID.find(newitem);
+    if (cmdID != RC2ID.end())
+    {
+        // check the selected item
+        swift_ModifyMenu(cmdID->second, newID->second, newtext);
+    }
+
+}
+
 void BeebWin::UpdateModelMenu()
 {
 	static const std::map<Model, UINT> ModelMenuItems{
@@ -1419,24 +1435,31 @@ void BeebWin::UpdateTubeMenu()
 		SelectedMenuItem,
 		MF_BYCOMMAND
 	);
+#else
+    beebwin_CheckMenuRadioItem(
+           IDM_TUBE_NONE,
+           IDM_TUBE_SPROWARM,
+          SelectedMenuItem);
 #endif
     
 }
 
 /****************************************************************************/
-
 void BeebWin::SetRomMenu(void)
 {
 	// Set the ROM Titles in the ROM/RAM menu.
 
 	for (int i = 0; i < 16; i++)
 	{
-#ifdef BEEBWIN
 		CHAR Title[19];
 
+#ifdef BEEBWIN
 		Title[0] = '&';
 		_itoa( i, &Title[1], 16 );
 		Title[2] = ' ';
+#else
+        sprintf(Title,"&%X ",i);
+#endif
 
 		// Get the Rom Title.
 		ReadRomTitle( i, &Title[3], sizeof( Title )-4);
@@ -1449,12 +1472,19 @@ void BeebWin::SetRomMenu(void)
 				strcpy( &Title[3], "Empty" );
 		}
 
+#ifdef BEEBWIN
 		ModifyMenu(m_hMenu, // handle of menu
 		           IDM_ALLOWWRITES_ROM0 + i,
 		           MF_BYCOMMAND, // menu item to modify
 		           // MF_STRING, // menu item flags
 		           IDM_ALLOWWRITES_ROM0 + i, // menu item identifier or pop-up menu handle
 		           Title); // menu item content
+#else
+        beebwin_ModifyMenu(
+                   IDM_ALLOWWRITES_ROM0 + i,
+                   IDM_ALLOWWRITES_ROM0 + i, // menu item identifier or pop-up menu handle
+                   Title); // menu item content
+
 #endif
 		/* Disable ROM and uncheck the Rom/RAM which are NOT writable */
 		EnableMenuItem(IDM_ALLOWWRITES_ROM0 + i, RomBankType[i] == BankType::Ram);

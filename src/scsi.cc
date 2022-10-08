@@ -123,13 +123,19 @@ void SCSIReset()
     
 	for (int i = 0; i < 4; ++i)
 	{
+#ifdef BEEBWIN
 		sprintf(buff, "%s\\scsi%d.dat", HardDrivePath, i);
+#else
+        sprintf(buff, "%s/scsi%d.dat", HardDrivePath, i);
+#endif
 		SCSIDisc[i] = fopen(buff, "rb+");
 
 		if (SCSIDisc[i] == nullptr)
 		{
 			char *error = _strerror(nullptr);
+#ifdef BEEBWIN
 			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
+#endif
 
 			mainWin->Report(MessageType::Error,
 			                "Could not open SCSI disc image:\n  %s\n\n%s", buff, error);            

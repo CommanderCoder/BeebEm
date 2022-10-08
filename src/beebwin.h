@@ -41,7 +41,7 @@ Boston, MA  02110-1301, USA.
 #else
 
 #define UINT uint32_t
-#define CHAR uint8_t
+#define CHAR char
 
 // from Carbon
 struct RECT {

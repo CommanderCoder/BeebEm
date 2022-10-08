@@ -253,6 +253,25 @@ public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 }
 
 
+// set the text on the menu with a 4 character identifier
+@_cdecl("swift_ModifyMenu")
+public func swift_ModifyMenu(_ cmd: UInt32, _ newitem: UInt32,  _ itemtext: UnsafePointer<CChar>)
+{
+    assert(cmd == newitem)
+
+    let cmdSTR =  conv(cmd)
+    var text = String(cString: itemtext)
+    if let n = menuItemByIdentifier(id:cmdSTR)
+    {
+        if (text.first == "&" )
+        {
+            text.removeFirst()
+            n.keyEquivalent = String(text.first!)
+        }
+        n.title = text
+    }
+}
+
 // grey the menu with a 4 character identifier
 @_cdecl("swift_SetMenuEnable")
 public func swift_SetMenuEnable(_ cmd: UInt32, _ enable: Bool)

@@ -115,7 +115,11 @@ void SASIReset()
 
 	for (int i = 0; i < 1; ++i) // only one drive allowed under Torch Z80 ?
 	{
+#ifdef BEEBWIN
 		sprintf(buff, "%s\\sasi%d.dat", HardDrivePath, i);
+#else
+        sprintf(buff, "%s/sasi%d.dat", HardDrivePath, i);
+#endif
 		if (SASIDisc[i] != NULL)
 		{
 			fclose(SASIDisc[i]);
