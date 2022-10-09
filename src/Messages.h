@@ -21,7 +21,7 @@ Boston, MA  02110-1301, USA.
 #ifndef MESSAGES_HEADER
 #define MESSAGES_HEADER
 
-#ifdef BEEBWIN
+#ifdef BEEBWIN // done
 #include <windows.h>
 
 const UINT WM_REINITDX                         = WM_APP;

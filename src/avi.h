@@ -24,7 +24,7 @@ Boston, MA  02110-1301, USA.
 // Mike Wyatt - Oct 2005
 //
 
-#ifdef BEEBWIN
+#ifdef BEEBWIN // done
 #include <vfw.h>
 #endif
 #include "beebwin.h"
@@ -35,7 +35,7 @@ public:
 	AVIWriter();
 	virtual ~AVIWriter();
 
-#ifdef BEEBWIN
+#ifdef BEEBWIN // done
 	// Open file
 	HRESULT Initialise(const CHAR *psFileName,
 	                   const WAVEFORMATEX *WaveFormat,

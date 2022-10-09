@@ -20,7 +20,7 @@ Boston, MA  02110-1301, USA.
 
 // Created by Jon Welch on 27/08/2006.
 
-#ifdef BEEBWIN
+#ifdef BEEBWIN // done
 #include <windows.h>
 #endif
 #include <stdio.h>

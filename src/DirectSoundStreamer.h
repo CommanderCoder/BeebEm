@@ -24,7 +24,7 @@ Boston, MA  02110-1301, USA.
 #ifndef DIRECT_SOUND_STREAMER_HEADER
 #define DIRECT_SOUND_STREAMER_HEADER
 
-#ifdef BEEBWIN
+#ifdef BEEBWIN // done
 #include <dsound.h>
 #endif
 
@@ -50,7 +50,7 @@ class DirectSoundStreamer : public SoundStreamer
 		virtual void Stream(const void*pSamples) override;
 
 	private:
-#ifdef BEEBWIN
+#ifdef BEEBWIN // done
 		IDirectSound* m_pDirectSound;
 		IDirectSoundBuffer* m_pDirectSoundBuffer;
 #endif

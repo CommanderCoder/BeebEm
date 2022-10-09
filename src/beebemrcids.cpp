@@ -23,6 +23,7 @@ std::map<int,int> ID2RC =
 {'bbci', ID_MODELBINT},
 {'bbcp', ID_MODELBPLUS},
 {'bbcm', ID_MASTER128},
+{'tnil', IDM_TUBE_NONE},
 {'tube', IDM_TUBE_ACORN65C02},
 //    {'t186', whatever happend to tube 186? },
 {'t512', IDM_TUBE_MASTER512  }, //new
@@ -75,10 +76,10 @@ std::map<int,int> ID2RC =
 {'volf', IDM_FULLVOLUME},
 {'sndc', IDM_SOUNDCHIP},
 {'sond', IDM_SOUNDONOFF},
-{'sped', IDM_SPEECH},
+{'sped', IDM_SPEECH}, //--gone
 {'enet', ID_ECONET},
 {'igil', ID},//Ignore Illegal Instructions - see OPCODES
-{'hard', ID},//Basic Hardware
+{'hard', ID_BASIC_HARDWARE_ONLY},//Basic Hardware
 {'docu', ID},//Documented Only
 {'extr', ID},//Common Extras
 {'full', ID},//Full Set
@@ -154,27 +155,28 @@ std::map<int,int> ID2RC =
 {'tpre', ID_REWINDTAPE},
 {'tpul', ID_UNLOCKTAPE},
 {'tpco', IDD_TAPECONTROL},
-{'dbgr', ID},
+{'dbgr', IDM_SHOWDEBUGGER},
 {'upbo', ID},
 {'uprm', ID},
 {'abou', IDM_ABOUT},
-{'kusr', ID},
-{'lukm', ID},
-{'sukm', ID},
-{'udkm', ID},
-{'dkm ', ID},
-{'vidc', ID},
-{'vide', ID},
+{'kusr', IDM_DEFINEKEYMAP},
+{'lukm', IDM_LOADKEYMAP},
+{'sukm', IDM_SAVEKEYMAP},
+{'udkm', IDM_USERKYBDMAPPING},
+{'dkm ', IDM_DEFAULTKYBDMAPPING},
+{'lkm ', IDM_LOGICALKYBDMAPPING},
+{'vidc', IDM_CAPTUREVIDEO},
+{'vide', IDM_ENDVIDEO},
 {'skp0', IDM_VIDEOSKIP0},
 {'skp1', IDM_VIDEOSKIP1},
 {'skp2', IDM_VIDEOSKIP2},
 {'skp3', IDM_VIDEOSKIP3},
 {'skp4', IDM_VIDEOSKIP4},
 {'skp5', IDM_VIDEOSKIP5},
-{'rec1', ID},
-{'rec2', ID},
-{'rec3', ID},
-{'rec4', ID},
+{'rec1', IDM_VIDEORES1},
+{'rec2', IDM_VIDEORES2},
+{'rec3', IDM_VIDEORES3},
+{'rec4', ID}, //--unused
 {'mbof', ID},
 {'mb2f', ID},
 {'mb4f', ID},
@@ -182,24 +184,29 @@ std::map<int,int> ID2RC =
 {'ejd0', IDM_EJECTDISC0},
 {'ejd1', IDM_EJECTDISC1},
 {'snev', ID},
-{'txte', ID},
-{'txtd', ID},
-{'txts', ID},
-{'hdre', ID_HARDDRIVE},
+{'txte', ID_TELETEXT},
+{'txtd', ID_TELETEXTFILES},
+{'txts', ID_TELETEXTLOCALHOST},
+{'txtc', ID_TELETEXTCUSTOM},
+{'flpe',ID_FLOPPYDRIVE},
+{'hdsc', ID_HARDDRIVE},
+{'hdde', ID_IDEDRIVE},
+{'hdre', IDM_SELECT_HARD_DRIVE_FOLDER},
 {'rs42', ID},
 {'sdts', ID},
 {'sdep', ID},
 {'sdsp', ID},
-{'page', ID},
-{'prns', ID},
-{'cpyc', ID},
-{'invb', ID},
+{'page', ID}, // page setup
+{'prns', ID}, // print window
+{'cpyc', ID}, // copy window to clipboard
+{'invb', ID}, // invertbackground
 {'swtd', IDM_CAPTURESCREEN},
 {'mbcn', ID_8271},
 {'mbca', ID}, //Acorn 1770 Controller
 {'mbco', ID}, //OPUS 1770 Controller - on DLL on windows
-{'mbcw', ID} //Watford 1770 - on DLL on windows
-    
+{'mbcw', ID}, //Watford 1770 - on DLL on windows
+    {'mrtc', ID_UPRM},
+    {'mrty', ID_RTCY2KADJUST}
 };
 
 std::map<int,int>

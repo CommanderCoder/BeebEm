@@ -1087,7 +1087,7 @@ bool ReadROMFile(const char *filename, ROMConfigFile ROMConfig)
 				if (strchr(line, 13)) *strchr(line, 13) = 0;
 				if (strchr(line, 10)) *strchr(line, 10) = 0;
                 
-#ifdef BEEBWIN
+#ifdef BEEBWIN // done
                 strcpy(ROMConfig[model][bank], line);
 #else
                 // switch the slashes
