@@ -14,6 +14,11 @@
 
 #define ID IDM_FULLSCREEN
 
+#define ID_FDC_ACORN                      39901
+#define ID_FDC_OPUS                       39902
+#define ID_FDC_WATFORD                    39903
+
+
 extern std::map<int,int> ID2RC;
 extern std::map<int,int> RC2ID;
 

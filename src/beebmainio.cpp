@@ -42,9 +42,14 @@ using std::max;
 #include "main.h"
 #include "6502core.h"
 #include "beebmem.h"
-#include "beebemrc.h"
 #ifdef BEEBWIN
+#include "beebemrc.h"
 #include "filedialog.h"
+#else
+#include "beebemrcids.h"
+#include "Acorn.h"
+#include "Opus.h"
+#include "Watford.h"
 #endif
 #include "uservia.h"
 #include "beebsound.h"
@@ -396,6 +401,7 @@ bool BeebWin::NewTapeImage(char *FileName)
 
 void BeebWin::SelectFDC()
 {
+#ifdef BEEBWIN
 	char DefaultPath[_MAX_PATH];
 	char FileName[256];
 	const char* filter = "FDC Extension Board Plugin DLL (*.dll)\0*.dll\0";
@@ -403,7 +409,6 @@ void BeebWin::SelectFDC()
 	strcpy(DefaultPath, m_AppPath);
 	strcat(DefaultPath, "Hardware");
 
-#ifdef BEEBWIN
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), DefaultPath, filter);
 	if (fileDialog.Open())
 	{
@@ -1047,10 +1052,11 @@ void BeebWin::LoadFDC(char *DLLName, bool save) {
 #ifdef BEEBWIN
 	if (hFDCBoard!=NULL) FreeLibrary(hFDCBoard);
 	hFDCBoard = NULL;
+#else
+    int menuid = ID_8271;
 #endif
     NativeFDC = true;
 
-#ifdef BEEBWIN
 	if (DLLName == NULL) {
 		if (!m_Preferences.GetStringValue(CfgName, FDCDLL))
 			strcpy(FDCDLL,"None");
@@ -1058,6 +1064,7 @@ void BeebWin::LoadFDC(char *DLLName, bool save) {
 	}
 
 	if (strcmp(DLLName, "None")) {
+#ifdef BEEBWIN
 		char path[_MAX_PATH];
 		strcpy(path, DLLName);
 		GetDataPath(m_AppPath, path);
@@ -1083,20 +1090,67 @@ void BeebWin::LoadFDC(char *DLLName, bool save) {
 				InvertTR00=ExtBoard.TR00_ActiveHigh;
 			}
 		} 
-	}
+#else
+        if (strcmp(DLLName,"Acorn") == 0)
+        {
+            AcornFDC::DriveControlBlock eb;
+            AcornFDC::GetBoardProperties(&eb);
+            EFDCAddr=eb.FDCAddress;
+            EDCAddr=eb.DCAddress;
+            InvertTR00=eb.TR00_ActiveHigh;
+            PSetDriveControl=(lSetDriveControl) AcornFDC::SetDriveControl;
+            PGetDriveControl=(lGetDriveControl) AcornFDC::GetDriveControl;
+            menuid=ID_FDC_ACORN;
+        }
+        else if (strcmp(DLLName,"Opus") == 0)
+        {
+            OpusFDC::DriveControlBlock eb;
+            OpusFDC::GetBoardProperties(&eb);
+            EFDCAddr=eb.FDCAddress;
+            EDCAddr=eb.DCAddress;
+            InvertTR00=eb.TR00_ActiveHigh;
+            PSetDriveControl=(lSetDriveControl) OpusFDC::SetDriveControl;
+            PGetDriveControl=(lGetDriveControl) OpusFDC::GetDriveControl;
+            menuid=ID_FDC_OPUS;
+        }
+        else if (strcmp(DLLName,"Watford") == 0)
+        {
+            WatfordFDC::DriveControlBlock eb;
+            WatfordFDC::GetBoardProperties(&eb);
+            EFDCAddr=eb.FDCAddress;
+            EDCAddr=eb.DCAddress;
+            InvertTR00=eb.TR00_ActiveHigh;
+            PSetDriveControl=(lSetDriveControl) WatfordFDC::SetDriveControl;
+            PGetDriveControl=(lGetDriveControl) WatfordFDC::GetDriveControl;
+            menuid=ID_FDC_WATFORD;
+        }
+        NativeFDC = false; // at last, a working DLL!
+#endif
+    }
 
     if (save)
-		m_Preferences.SetStringValue(CfgName, DLLName);
-#endif
+        m_Preferences.SetStringValue(CfgName, DLLName);
 
-	// Set menu options
-	if (NativeFDC) {
-		CheckMenuItem(ID_8271, true);
-		CheckMenuItem(ID_FDC_DLL, false);
-	} else {
-		CheckMenuItem(ID_8271, false);
-		CheckMenuItem(ID_FDC_DLL, true);
-	}
+    // Set menu options
+#ifdef BEEBWIN
+    if (NativeFDC) {
+        CheckMenuItem(ID_8271, true);
+        CheckMenuItem(ID_FDC_DLL, false);
+    } else {
+        CheckMenuItem(ID_8271, false);
+        CheckMenuItem(ID_FDC_DLL, true);
+    }
+#else
+    CheckMenuItem(ID_FDC_ACORN, false);
+    CheckMenuItem(ID_FDC_OPUS, false);
+    CheckMenuItem(ID_FDC_WATFORD, false);
+    if (NativeFDC) {
+        CheckMenuItem(ID_8271, true);
+    } else {
+        CheckMenuItem(ID_8271, false);
+        CheckMenuItem(menuid, true);
+    }
+#endif
 
 	DisplayCycles=7000000;
 	if (NativeFDC || MachineType == Model::Master128)

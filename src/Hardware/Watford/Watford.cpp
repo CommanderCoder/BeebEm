@@ -21,8 +21,13 @@ Boston, MA  02110-1301, USA.
 // Watford DDFS Board Drive Controller Chip DLL
 // (C) September 2001 - Richard Gellman
 
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 #include "Watford.h"
+#ifndef BEEBWIN
+namespace WatfordFDC {
+#endif
 
 char *WatfordName="Watford DDFS Extension board for BBC Model B";
 
@@ -60,3 +65,7 @@ EXPORT void GetBoardProperties(struct DriveControlBlock *FDBoard) {
 	FDBoard->BoardName=WatfordName;
 	FDBoard->TR00_ActiveHigh = true;
 }
+
+#ifndef BEEBWIN
+}
+#endif

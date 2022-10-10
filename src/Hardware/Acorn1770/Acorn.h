@@ -29,6 +29,12 @@ Boston, MA  02110-1301, USA.
 
 #define WIN_LEAN_AND_MEAN
 
+#ifndef BEEBWIN
+#undef EXPORT
+#define EXPORT ;
+namespace AcornFDC {
+#endif
+
 struct DriveControlBlock {
 	int FDCAddress; // 1770 FDC chip address
 	int DCAddress; // Drive Control Register Address
@@ -36,9 +42,15 @@ struct DriveControlBlock {
 	bool TR00_ActiveHigh;
 };
 
+
 EXPORT unsigned char SetDriveControl(unsigned char value);
 EXPORT unsigned char GetDriveControl(unsigned char value);
 EXPORT void GetBoardProperties(struct DriveControlBlock *FDBoard);
 
+
+#ifdef BEEBWIN
 #define DCB struct DriveControlBlock
-      
+#else
+}
+#endif
+

@@ -1374,7 +1374,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Options" autoenablesItems="NO" id="qX5-Aq-fzf">
                                     <items>
-                                        <menuItem title="Joystick" identifier="msea" id="8EQ-ua-287">
+                                        <menuItem title="Joystick" identifier="jstk" id="8EQ-ua-287">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="NMA-f5-nyG"/>
@@ -1475,7 +1475,7 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="3Ax-5d-nhK"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Preference Options" identifier="savp" id="WTM-Vp-8q0">
+                                        <menuItem title="Preference Options" identifier="prop" id="WTM-Vp-8q0">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="cKa-3N-tk9"/>

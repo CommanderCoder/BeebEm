@@ -21,8 +21,13 @@ Boston, MA  02110-1301, USA.
 // Opus DDFS Board Drive Controller Chip DLL
 // (C) September 2001 - Richard Gellman
 
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 #include "opus.h"
+#ifndef BEEBWIN
+namespace OpusFDC {
+#endif
 
 char *OpusName="Opus DDOS Extension board for BBC Model B";
 
@@ -59,3 +64,7 @@ EXPORT void GetBoardProperties(struct DriveControlBlock *FDBoard) {
 	FDBoard->BoardName=OpusName;
 	FDBoard->TR00_ActiveHigh = false;
 }
+
+#ifndef BEEBWIN
+}
+#endif

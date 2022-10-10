@@ -20,6 +20,9 @@
 		DC85C5F624AB1BE300CCD72E /* COPYRIGHT.txt in Resources */ = {isa = PBXBuildFile; fileRef = DC85C5EE24AB1BE300CCD72E /* COPYRIGHT.txt */; };
 		DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8716A324CC3A6800FA27DF /* BeebViewController.swift */; };
 		DC8716A524CC3AB300FA27DF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DCCCC2A624A338EE00840082 /* Main.storyboard */; };
+		DC8718A828F4965600D79793 /* Acorn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DC9D241E28CC952E00F29905 /* Acorn.cpp */; };
+		DC8718A928F49E9700D79793 /* Watford.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DC9D242628CC952E00F29905 /* Watford.cpp */; };
+		DC8718AA28F49E9B00D79793 /* opus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DC9D242B28CC952E00F29905 /* opus.cpp */; };
 		DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BE3AC24CC78A600D12E2B /* NSImage+Bitmap.swift */; };
 		DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BE3AE24CC790000D12E2B /* Bitmap.swift */; };
 		DC8BE3B124CC797600D12E2B /* Colour.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BE3B024CC797600D12E2B /* Colour.swift */; };
@@ -804,10 +807,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC8718AA28F49E9B00D79793 /* opus.cpp in Sources */,
 				DCAD0F1D28CFB37C00366E05 /* tube.cc in Sources */,
 				DCAD0F0D28CFA94F00366E05 /* sysvia.cc in Sources */,
 				DCAD0EF028CF12E800366E05 /* log.cpp in Sources */,
 				DC1F98AE28DC38E500A4C9D5 /* beebmainvid.cpp in Sources */,
+				DC8718A928F49E9700D79793 /* Watford.cpp in Sources */,
 				DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */,
 				DCAD0F2928CFEB0800366E05 /* ide.cpp in Sources */,
 				DC9D244028CCB77C00F29905 /* scsi.cc in Sources */,
@@ -855,6 +860,7 @@
 				DCAD0F1928CFAFB400366E05 /* beebsound.cc in Sources */,
 				DCAD0F2A28CFEB2900366E05 /* preferences.cpp in Sources */,
 				DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */,
+				DC8718A828F4965600D79793 /* Acorn.cpp in Sources */,
 				DCAD0F2628CFE9EF00366E05 /* discedit.cc in Sources */,
 				DCAD0ED628CD467C00366E05 /* TapeMap.cpp in Sources */,
 				DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */,

@@ -112,6 +112,7 @@ std::map<int,int> ID2RC =
 {'ledk', ID_SHOW_KBLEDS  },
 {'ledd', ID_SHOW_DISCLEDS},
 {'savp', IDM_SAVE_PREFS},
+{'prop', IDM_AUTOSAVE_PREFS_ALL},
 {'qukl', IDM_QUICKLOAD},
 {'quks', IDM_QUICKSAVE},
 {'rsts', IDM_LOADSTATE},
@@ -202,11 +203,15 @@ std::map<int,int> ID2RC =
 {'invb', ID}, // invertbackground
 {'swtd', IDM_CAPTURESCREEN},
 {'mbcn', ID_8271},
-{'mbca', ID}, //Acorn 1770 Controller
-{'mbco', ID}, //OPUS 1770 Controller - on DLL on windows
-{'mbcw', ID}, //Watford 1770 - on DLL on windows
+{'mbca', ID_FDC_ACORN}, //Acorn 1770 Controller
+{'mbco', ID_FDC_OPUS}, //OPUS 1770 Controller - on DLL on windows
+{'mbcw', ID_FDC_WATFORD}, //Watford 1770 - on DLL on windows
     {'mrtc', ID_UPRM},
-    {'mrty', ID_RTCY2KADJUST}
+    {'mrty', ID_RTCY2KADJUST},
+    {'jstk', IDM_JOYSTICK},
+    {'hcur', IDM_HIDECURSOR},
+    {'kf10', IDM_MAPFUNCS},
+    {'kdis', IDM_DISABLEKEYSALL},
 };
 
 std::map<int,int>

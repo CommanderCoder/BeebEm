@@ -21,8 +21,14 @@ Boston, MA  02110-1301, USA.
 // Acorn 1770 DFS Board Drive Controller Chip DLL
 // (C) September 2001 - Richard Gellman
 
+#ifdef BEEBWIN
 #include <windows.h>
+#endif
 #include "Acorn.h"
+
+#ifndef BEEBWIN
+namespace AcornFDC {
+#endif
 
 char *AcornName="Acorn 1770 DFS Extension board for BBC Model B";
 
@@ -57,3 +63,7 @@ EXPORT void GetBoardProperties(struct DriveControlBlock *FDBoard) {
 	FDBoard->BoardName=AcornName;
 	FDBoard->TR00_ActiveHigh = false;
 }
+
+#ifndef BEEBWIN
+}
+#endif

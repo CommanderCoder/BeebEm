@@ -1393,9 +1393,19 @@ void BeebWin::UpdateModelMenu()
 #endif
 	if (MachineType == Model::Master128) {
 		EnableMenuItem(ID_FDC_DLL, false);
+#ifndef BEEBWIN
+        EnableMenuItem(ID_FDC_ACORN, false);
+        EnableMenuItem(ID_FDC_OPUS, false);
+        EnableMenuItem(ID_FDC_WATFORD, false);
+#endif
 	}
 	else {
 		EnableMenuItem(ID_FDC_DLL, true);
+#ifndef BEEBWIN
+        EnableMenuItem(ID_FDC_ACORN, true);
+        EnableMenuItem(ID_FDC_OPUS, true);
+        EnableMenuItem(ID_FDC_WATFORD, true);
+#endif
 	}
 }
 
@@ -4098,17 +4108,38 @@ void BeebWin::HandleCommand(int MenuId)
 		UpdateLEDMenu();
 		break;
 
-	case ID_FDC_DLL:
+#ifdef BEEBWIN
+    case ID_FDC_DLL:
 		if (MachineType != Model::Master128)
 			SelectFDC();
 		break;
 
+#else
+    case ID_FDC_WATFORD:
+        if (MachineType != Model::Master128)
+            LoadFDC("Watford", true);
+        break;
+    case ID_FDC_ACORN:
+        if (MachineType != Model::Master128)
+            LoadFDC("Acorn", true);
+        break;
+    case ID_FDC_OPUS:
+        if (MachineType != Model::Master128)
+            LoadFDC("Opus", true);
+        break;
+#endif
+            
 	case ID_8271:
 		KillDLLs();
 		NativeFDC = true;
 		CheckMenuItem(ID_8271, true);
 		CheckMenuItem(ID_FDC_DLL, false);
-		if (MachineType != Model::Master128)
+#ifndef BEEBWIN
+        CheckMenuItem(ID_FDC_ACORN, false);
+        CheckMenuItem(ID_FDC_OPUS, false);
+        CheckMenuItem(ID_FDC_WATFORD, false);
+#endif
+        if (MachineType != Model::Master128)
 		{
 			char CfgName[20];
 			sprintf(CfgName, "FDCDLL%d", static_cast<int>(MachineType));
@@ -4193,14 +4224,14 @@ void BeebWin::HandleCommand(int MenuId)
 		CheckMenuItem(IDM_EXPVOLUME, SoundExponentialVolume);
 		break;
 
-#ifdef BEEBWIN
 	case IDM_SHOWDEBUGGER:
+#ifdef BEEBWIN
 		if (DebugEnabled)
 			DebugCloseDialog();
 		else
 			DebugOpenDialog(hInst, m_hWnd);
-		break;
 #endif
+		break;
             
 	case IDM_BLUR_OFF:
 	case IDM_BLUR_2:
