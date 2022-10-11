@@ -511,6 +511,7 @@ INLINE static void ADCInstrHandler(int16 operand) {
     if (MachineType == Model::Master128) {
         ZFlag = Accumulator == 0;
         NFlag = Accumulator & 128;
+        Cycles++;
     }
 
     SetPSR(FlagC | FlagZ | FlagV | FlagN,CFlag,ZFlag,0,0,0,VFlag,NFlag);
