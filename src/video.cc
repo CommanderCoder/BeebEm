@@ -673,10 +673,7 @@ static void VideoStartOfFrame(void) {
   if (VideoState.IsNewTVFrame)	// RTW - only calibrate timing once per frame
   {
     VideoState.IsNewTVFrame = false;
-#ifndef BEEBWIN
-      FrameNum = mainWin->StartOfFrame();
-#endif
-#ifdef WIN32
+#if defined(WIN32) || !defined(BEEBWIN)
     FrameNum = mainWin->StartOfFrame();
 #else
     /* If FrameNum hits 0 we actually refresh */

@@ -1260,13 +1260,13 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem title="SW RAM Board On/Off" identifier="enet" id="Ai0-FM-7kx">
+                                        <menuItem title="SW RAM Board On/Off" identifier="sram" id="Ai0-FM-7kx">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ipN-fE-KYB"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Edit ROM Configuration" identifier="enet" id="5Wi-bx-PEx">
+                                        <menuItem title="Edit ROM Configuration" identifier="erom" id="5Wi-bx-PEx">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="79q-iL-u7C"/>

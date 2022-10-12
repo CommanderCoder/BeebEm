@@ -91,21 +91,20 @@ class BeebViewController: NSViewController {
             sview.presentScene(scene)
         }
         
-        
-   
-        
         BeebReady = setupBeeb()
         
         // two options NSTimer or CVDisplayLink
-//        timer = Timer.scheduledTimer(withTimeInterval: 1/120, repeats: true) { timer in
-//            self.update()
+//        timer = Timer.scheduledTimer(withTimeInterval: 1.0/100000, repeats: true) { timer in
+//            // update the CPU
+//            self.update_cpu()
 //        }
-//
-        
+
         // avoid problems with heavy UIs
 //        RunLoop.current.add(timer, forMode: .common)
 
-        
+        // run the CPU update as fast as possible
+        // it will be put to sleep internally.
+        update_cpu()
     }
 
     
@@ -129,8 +128,13 @@ class BeebViewController: NSViewController {
         
         skimage.texture = SKTexture(image: bmImage)
 
-        // update the CPU
-        update_cpu()
+        // update the tape controller
+        tcViewControllerInstance?.update()
+
+        update_hardware_bridge()
+
+        // update the window label
+        NSApplication.shared.mainWindow?.title = CBridge.windowTitle
     }
 
     func savePNG(image: NSImage, filepath:String) {
@@ -154,20 +158,14 @@ class BeebViewController: NSViewController {
         //  Stop the display link.  A better place to stop the link is in
         //  the viewController or windowController within functions such as
         //  windowWillClose(_:)
-        
-        
+
         CVDisplayLinkStop(displayLink!)
 
 //        timer.invalidate()
         
         end_cpu()
-
     }
 
-    
-    
-    private var cpuUpdateSpeed: Double = 200.0
-    private var cpuDelaying = false
 
     private var width : Int = 0
     private var height : Int = 0
@@ -223,37 +221,19 @@ extension BeebViewController{
     
     func update_cpu()  // game update
     {
+        let d = DispatchQueue(label:"CPU")
         // GAME UPDATE is called from the DisplayLinkOutputCallback
         // and it is called on the main thread
-        
-        
-
-        // update the CPU - not now - but after the delay requested by the previous cpu cycle
-        if !cpuDelaying {
-            // update the tape controller
-            tcViewControllerInstance?.update()
-
-            // update the window label
-            if let mainwindow = NSApplication.shared.mainWindow {
-                mainwindow.title = CBridge.windowTitle
-            }
-            
-            update_hardware_bridge()
-
-            cpuDelaying = true
-            
-            // update the CPU after any calculated delay that came from the previous CPU update
-            DispatchQueue.main.asyncAfter(deadline: .now() + .microseconds(CBridge.nextCPU), execute: {
+        d.async {
+            while true {
+                // update the CPU - not now - but after the delay requested by the previous cpu cycle
+                Thread.sleep(forTimeInterval: Double(CBridge.nextCPU)/1000.0);
                 CBridge.nextCPU = 0
                 beeb_MainCpuLoop()
-                self.cpuDelaying = false
-            })
-            
+
+//                print("> "+String(Date.timeIntervalSinceReferenceDate))
+            }
         }
-//        else
-//        {
-//            print("asked to update while delaying the CPU \(DispatchTime.now() )" )
-//        }
     }
 
     func update_hardware_bridge()

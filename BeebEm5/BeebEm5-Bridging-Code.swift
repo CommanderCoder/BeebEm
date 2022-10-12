@@ -167,9 +167,8 @@ public func swift_SetWindowTitleWithCString( title: UnsafePointer<CChar> )
 @_cdecl("swift_sleepCPU")
 public func swift_sleepCPU( microseconds: Int)
 {
-    // increment the nextCPU time - but if this gets larger than a slow frame
-    // clamp it to that
-    CBridge.nextCPU = min(CBridge.nextCPU + microseconds, 1000000/25)
+    // increment the nextCPU time
+    CBridge.nextCPU += microseconds
 }
 
 // convert a string of 4 characters to a UInt32

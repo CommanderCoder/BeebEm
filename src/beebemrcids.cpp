@@ -212,6 +212,8 @@ std::map<int,int> ID2RC =
     {'hcur', IDM_HIDECURSOR},
     {'kf10', IDM_MAPFUNCS},
     {'kdis', IDM_DISABLEKEYSALL},
+    {'sram', IDM_SWRAMBOARD},
+    {'erom', IDM_ROMCONFIG},
 };
 
 std::map<int,int>

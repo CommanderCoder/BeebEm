@@ -2433,12 +2433,22 @@ bool BeebWin::UpdateTiming()
 	// Now we work out if BeebEm is running too fast or not
 	if (m_RealTimeTarget > 0.0)
 	{
+        // Ticks is actual realtime that has passed
 		DWORD Ticks = TickCount - m_TickBase;
+        // nCycles is number of cpu cycles that have been executed.
 		int nCycles = (int)((double)(TotalCycles - m_CycleBase) / m_RealTimeTarget);
 
-		if (Ticks <= (DWORD)(nCycles / 2000))
+        // CPU runs at 2mHz which is 2000 nCycles per Tick (microsecond)
+
+        // if less real time has passed than cpu is expected to have executed
+        // slow down the rate of Execute6502Instruction so that more
+        // real time can pass
+        //   otherwise
+        // more real time has passed than cpu time, need to increase
+        // rate of Execute6502Instruction so skip rendering frames
+        if (Ticks <= (DWORD)(nCycles / 2000))
 		{
-			// Need to slow down, show frame (max 50fps though)
+            // Need to slow down, show frame (max 50fps (20th of a second) though)
 			// and sleep a bit
 			if (TickCount >= m_LastFPSCount + 20)
 			{
@@ -2454,9 +2464,8 @@ bool BeebWin::UpdateTiming()
 #ifdef BEEBWIN
             Sleep(SpareTicks);
 #else
-            swift_sleepCPU(SpareTicks + 500);
+            swift_sleepCPU(SpareTicks);
 #endif
-
 			m_MinFrameCount = 0;
 		}
 		else

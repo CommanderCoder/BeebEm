@@ -115,17 +115,7 @@ extern "C" int beeb_main(long argc, char* argv[])
 
 extern "C" void beeb_MainCpuLoop()
 {
-    int c = 20;
-
-    // Menu GUI more responsive if running less than real time
-    
-    if ( (mainWin->m_RealTimeTarget != 0) && (mainWin->m_RealTimeTarget < 1) )
-    {
-        c = c * mainWin->m_RealTimeTarget;
-    }
-    
-    for (int i = 0; i < c; ++i)
-        mainStep();
+    mainStep();
 }
 
 
