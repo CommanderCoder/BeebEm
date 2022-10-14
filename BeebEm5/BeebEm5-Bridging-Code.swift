@@ -565,23 +565,29 @@ public func swift_CopyDirectoryRecursively( _ sourcePath: UnsafePointer<CChar>, 
             
 }
 
-// https://gist.github.com/dimagimburg/54f24b24d08643b177804955483ac878
+let SoundRate = 44100
+let SoundLength = SoundRate * 20/1000 // incoming sound length ;Int (@50 fps), rate / 50
+let BufferLength = 16384
 
-// the audio engine - MUST NOT DEALLOCATE SO OUTSIDE FUNC
+// the audio engine - MUST NOT DEALLOCATE hence OUTSIDE FUNC
 var audioEngine = AVAudioEngine()
 // the player used for scheduling from bufffer
 var audioBufferPlayer = AVAudioPlayerNode()
 
-//var beebAudioFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatInt32, sampleRate: 44100.0, channels: 2, interleaved: false)!
-var beebAudioFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatFloat32, sampleRate: 44100.0, channels: 2, interleaved: false)!
+//var beebAudioFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatInt32, sampleRate: SoundRate, channels: 2, interleaved: false)!
+var beebAudioFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatFloat32,
+                                    sampleRate: Double(SoundRate),
+                                    channels: 2,
+                                    interleaved: false)!
 
-//create the buffer with the correct format
-var buffer = AVAudioPCMBuffer(pcmFormat: beebAudioFormat, frameCapacity: 100)!
-//var buffer = AVAudioPCMBuffer(pcmFormat: audioBufferPlayer.outputFormat(forBus: 0), frameCapacity: 100)!
+
+//create the buffer with the correct format - give it enough room to hold onto as much data as needed
+var buffer = AVAudioPCMBuffer(pcmFormat: beebAudioFormat, frameCapacity: AVAudioFrameCount(BufferLength))!
+//var buffer = AVAudioPCMBuffer(pcmFormat: audioBufferPlayer.outputFormat(forBus: 0), frameCapacity: 2000)!
+
 // mixer - to configure the output
-// mixer has multiple inputs but one output - for mainmixer this goes to the audio output
+// mixer has multiple inputs but one output that has 2 channels - for mainmixer this goes to the audio output
 var mainMixer = audioEngine.mainMixerNode
-let mainMixerOutputFormat = mainMixer.outputFormat(forBus: 0)
 
 // allow access to this in C
 @_cdecl("swift_SoundInit")
@@ -590,49 +596,37 @@ public func swift_SoundInit()
     // audio input is from mic
     // audio player is from buffer/segments
     // audio output is to loudspeaker
+    
+    print (audioBufferPlayer.outputFormat(forBus: 0))
+    print (mainMixer.outputFormat(forBus: 0))
+    print (mainMixer.outputFormat(forBus: 0))
 
     print (beebAudioFormat)
-    print (audioBufferPlayer.outputFormat(forBus: 0))
-    
+    print (buffer.format)
+
+
     do {
 
         audioEngine.attach(audioBufferPlayer) // attach the player - which can play PCM or from files.
+        // schedule playing from the buffer, now, and looping, so doesn't complete
         audioEngine.connect(audioBufferPlayer, to: mainMixer, format: nil)  // connect player to the mixer using the player format
 
         // start the engine
         try audioEngine.start()
+
+        // twice as much room to hold audio to span the ends
+        buffer.frameLength = buffer.frameCapacity //number of VALID samples - must be no greater than frameCapacity
+        audioBufferPlayer.scheduleBuffer(buffer, at: nil, options: .loops, completionHandler: nil)
+
+        // 'buffer' is 44100,2ch, Float32 - so the 'audioBufferPlayer' follows this
+        // 'audioBufferPlayer' connects to mainMixer - so mainMixer follows this
+        // '
         
-//        // play the buffer immediately
+        // play the buffer immediately
         audioBufferPlayer.play()
 
-        buffer.frameLength = 100 //number of VALID samples - must be no greater than frameCapacity
+        
 
-//        print (int32format)
-//        // schedule playing from the buffer, now, and looping, so doesn't complete
-        audioBufferPlayer.scheduleBuffer(buffer, at: nil, options: .loops, completionHandler: nil)
-//
-
-     // generate sine wave - Mixer format will be created from the node it is connected to which is a player, which is playing a buffer
-        // mixer is automatically connected to the output
-//        let sr = Float(mainMixerOutputFormat.sampleRate)
-//        for i in stride(from:0, to: Int((buffer.frameLength)), by: Int.Stride(mainMixerOutputFormat.channelCount)) {
-        let sr = Float(beebAudioFormat.sampleRate)
-        for i in stride(from:0, to: Int((buffer.frameLength)), by: Int.Stride(beebAudioFormat.channelCount)) {
-            
-            var val = sinf(441.0*Float(i)*2*Float(Double.pi)/sr)
-            if beebAudioFormat.commonFormat == .pcmFormatInt32
-            {
-                // range is from 0 to INT32.max
-                let val1 = Int32(Double(val)*Double(1<<30))
-                let val2 = Float(val1)/Float(1<<30)
-                buffer.int32ChannelData!.pointee[i] = val1.littleEndian
-//                buffer.int32ChannelData!.pointee[i+1] = val1>>1
-//                print(val,String(format:"%04X", val1),val2)
-            }
-            else{
-                buffer.floatChannelData!.pointee[i] = (val * 0.5)
-            }
-         }
     }
     catch {
         print ("")
@@ -642,11 +636,60 @@ public func swift_SoundInit()
     
 }
 
+var bufferIndex = 0
+//44100 * 20/1000 = 882  = 44100 / 50fps
 
 // allow access to this in C
 @_cdecl("swift_SoundStream")
 public func swift_SoundStream( _ soundbuffer: UnsafeMutablePointer<UInt8>)
 {
+    // this comes through as a square wave with 8 bits mono
+    // at a sample rate of 44100 Hz
+    
+    let bytesPerSample = 1 //bits_per_sample / 8;
+    let channels = 1 // mono
+
+    let srcLen = SoundLength * bytesPerSample * channels;
+
+    for srcIndex in stride(from:0, to: srcLen, by: channels) {
+        let sval = soundbuffer[srcIndex]
+
+        if beebAudioFormat.commonFormat == .pcmFormatInt32
+        {
+            let val_i = (Int32(sval)-128)<<24
+    //            print(String(format:"%02X", sval),val_i)
+            buffer.int32ChannelData!.pointee[bufferIndex] = val_i
+        }
+        else
+        {
+            let val_f = (Float(sval)/Float(1<<8))-0.5
+//                print(String(format:"%02X", sval),val_f)
+            buffer.floatChannelData!.pointee[bufferIndex] = val_f
+        }
+
+        bufferIndex += 1
+        
+        bufferIndex %= Int(buffer.frameLength)
+    }
+
+    
+    
+    
+    
+    
+//    const int DEFAULT_SAMPLE_RATE = 44100;
+//    const int MAXBUFSIZE = 32768;
+//
+//    CreateSoundStreamer(SoundSampleRate, 8, 1);
+//    std::size_t rate,
+//                               std::size_t bits_per_sample,
+//                               std::size_t channels)
+    
+
+    
+    // have a buffer 4 times longer than needed
+    // copy the soundBuffer into a part of that buffer
+    
 //    soundbuffer.
 //    print(String(bytes: seq, encoding: .ascii ))
     
@@ -657,28 +700,7 @@ public func swift_SoundStream( _ soundbuffer: UnsafeMutablePointer<UInt8>)
     
     // BBC BASIC TEST
     // SOUND 1,-15,400,20
-    
-    // this comes through as a square wave on 8 bits mono
 
-    var j = 0
-    for i in stride(from:0, to: Int(buffer.frameLength), by: UInt32.Stride(beebAudioFormat.channelCount)) {
-        // samples are 8 bit
-        let val = soundbuffer[j]
-
-        if beebAudioFormat.commonFormat == .pcmFormatInt32
-        {
-            let val1 = (Int32(val)-128)<<24
-//            print(String(format:"%02X", val),val1)
-            buffer.int32ChannelData!.pointee[i] = val1
-        }
-        else
-        {
-            let val1 = (Float(val)/Float(1<<9))-0.5
-//            print(String(format:"%02X", val),val1)
-            buffer.floatChannelData!.pointee[i] = val1
-        }
-        j+=1
-     }
 
 }
 

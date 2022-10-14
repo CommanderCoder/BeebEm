@@ -146,36 +146,6 @@ extern "C" void swift_SoundInit();
 /* Writes sound data to a sound buffer */
 static void WriteToSoundBuffer(PBYTE lpbSoundData)
 {
-    
-    //NOTES
-
-    /*
-     https://gist.github.com/dimagimburg/54f24b24d08643b177804955483ac878
-     
-     AVAudioEngine
-     AVAudioPlayerNode
-     AVAudioPCMBuffer
-     */
-    
-    
-    /*
-     #define PREFSAMPLERATE 44100
-     #define MAXBUFSIZE 1024
-
-     extraopt_t dummyopt = {NULL, NULL};
-     int res;
-     
-     res = audev_init_device(NULL, PREFSAMPLERATE, 1, &dummyopt);
-
-     audev_play_buff(SoundBuf, bufptr);
-
-     audev_close_device();
-
-     */
-    
-
-//    printf("%s\n",lpbSoundData);
-
 #ifdef BEEBWIN
 	if (pSoundStreamer != nullptr)
 	{

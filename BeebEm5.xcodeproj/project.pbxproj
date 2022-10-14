@@ -109,6 +109,8 @@
 		DC4106F226E54DAC000A1E37 /* BeebApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebApplication.swift; sourceTree = "<group>"; };
 		DC41118125A2222A00E59712 /* Bugs.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Bugs.rtf; sourceTree = "<group>"; };
 		DC49183A286AD7540023212A /* BeebEm5.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeebEm5.entitlements; sourceTree = "<group>"; };
+		DC52212428F77B8F003EDA18 /* XAudio2Streamer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XAudio2Streamer.cpp; path = src/XAudio2Streamer.cpp; sourceTree = "<group>"; };
+		DC52212628F77BC6003EDA18 /* XAudio2Streamer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XAudio2Streamer.h; path = src/XAudio2Streamer.h; sourceTree = "<group>"; };
 		DC59F1A224BE01D000687D2A /* beebem5-distribution */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "beebem5-distribution"; sourceTree = "<group>"; };
 		DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardMappingViewController.swift; sourceTree = "<group>"; };
 		DC6A476824A54541007E4276 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -454,6 +456,8 @@
 				DCAD0F0028CF14A600366E05 /* beebwinprefs.cpp */,
 				DCAD0EFE28CF14A600366E05 /* beebwinspeech.cpp */,
 				DCAD0EFB28CF14A600366E05 /* DirectSoundStreamer.cpp */,
+				DC52212428F77B8F003EDA18 /* XAudio2Streamer.cpp */,
+				DC52212628F77BC6003EDA18 /* XAudio2Streamer.h */,
 				DCAD0EFD28CF14A600366E05 /* filedialog.cpp */,
 				DCAD0EE328CD515000366E05 /* UserPortBreakoutBox.cpp */,
 				DCAD0F0228CF14A700366E05 /* FolderSelectDialog.cpp */,
