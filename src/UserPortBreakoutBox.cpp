@@ -28,11 +28,17 @@ Boston, MA  02110-1301, USA.
 #include "SelectKeyDialog.h"
 #include "uservia.h"
 
+#include <Carbon/Carbon.h>
+
 /****************************************************************************/
 
 /* User Port Breakout Box */
 
+#ifdef BEEBWIN
 UserPortBreakoutDialog* userPortBreakoutDialog = nullptr;
+#else
+UserPortBreakoutDialog* userPortBreakoutDialog = new UserPortBreakoutDialog();
+#endif
 
 int BitKeys[8] = { 48, 49, 50, 51, 52, 53, 54, 55 };
 
@@ -44,12 +50,16 @@ static const UINT BitKeyButtonIDs[8] = {
 /****************************************************************************/
 
 UserPortBreakoutDialog::UserPortBreakoutDialog(
-	HINSTANCE hInstance,
+#ifdef BEEBWIN
+    HINSTANCE hInstance,
 	HWND hwndParent) :
 	m_hInstance(hInstance),
 	m_hwnd(nullptr),
 	m_hwndParent(hwndParent),
-	m_BitKey(0),
+#else
+    ):
+#endif
+    m_BitKey(0),
 	m_LastInputData(0),
 	m_LastOutputData(0)
 {
@@ -57,6 +67,7 @@ UserPortBreakoutDialog::UserPortBreakoutDialog(
 
 /****************************************************************************/
 
+#ifdef BEEBWIN
 bool UserPortBreakoutDialog::Open()
 {
 	if (m_hwnd != nullptr)
@@ -79,7 +90,7 @@ bool UserPortBreakoutDialog::Open()
 		return true;
 	}
 
-	return false;
+    return false;
 }
 
 /****************************************************************************/
@@ -103,6 +114,23 @@ void UserPortBreakoutDialog::Close()
 
 	PostMessage(m_hwndParent, WM_USER_PORT_BREAKOUT_DIALOG_CLOSED, 0, 0);
 }
+
+#else
+
+void BreakoutBoxOpenDialog()
+{
+    //WM_INITDIALOG
+    for (int i = 0; i < _countof(BitKeyButtonIDs); i++)
+    {
+        userPortBreakoutDialog->ShowBitKey(i, BitKeyButtonIDs[i]);
+    }
+}
+void BreakoutBoxCloseDialog()
+{
+}
+
+
+#endif
 
 /****************************************************************************/
 
@@ -152,6 +180,7 @@ bool UserPortBreakoutDialog::KeyUp(int Key)
 	return bit;
 }
 
+#ifdef BEEBWIN
 /****************************************************************************/
 
 INT_PTR CALLBACK UserPortBreakoutDialog::sDlgProc(
@@ -187,7 +216,7 @@ INT_PTR UserPortBreakoutDialog::DlgProc(
 
 	switch (nMessage)
 	{
-	case WM_INITDIALOG:
+        case WM_INITDIALOG:
 		for (int i = 0; i < _countof(BitKeyButtonIDs); i++)
 		{
 			ShowBitKey(i, BitKeyButtonIDs[i]);
@@ -195,13 +224,12 @@ INT_PTR UserPortBreakoutDialog::DlgProc(
 		return TRUE;
 
 	case WM_COMMAND:
-		switch (wParam)
+            switch (wParam)
 		{
 		case IDOK:
 		case IDCANCEL:
 			Close();
 			return TRUE;
-
 		case IDK_BIT0:
 			PromptForBitKeyInput(0);
 			break;
@@ -300,43 +328,74 @@ INT_PTR UserPortBreakoutDialog::DlgProc(
 		}
 		return TRUE;
 
-	case WM_SELECT_KEY_DIALOG_CLOSED:
+    case WM_SELECT_KEY_DIALOG_CLOSED:
 		if (wParam == IDOK)
 		{
-			// Assign the BBC key to the PC key.
-			BitKeys[m_BitKey] = selectKeyDialog->Key();
-			ShowBitKey(m_BitKey, BitKeyButtonIDs[m_BitKey]);
-		}
+        return true;
+            
+    }
 
-		delete selectKeyDialog;
-		selectKeyDialog = nullptr;
-
-		return TRUE;
-	}
-
-	return FALSE;
+    return FALSE;
 }
+#endif
+            
+
+
+#ifdef BEEBWIN
+
+int UserPortBreakoutDialog::Closed()
+{
+    // Assign the BBC key to the PC key.
+    BitKeys[m_BitKey] = keycode_last;
+    ShowBitKey(m_BitKey, BitKeyButtonIDs[m_BitKey]);
+
+    return true;
+}
+
+#else
+
+int UserPortBreakoutDialog::Closed()
+{
+    printf("Assign the BBC key to the PC key \n");
+    ShowBitKey(m_BitKey, BitKeyButtonIDs[m_BitKey]);
+
+    return true;
+}
+
+
+#endif
 
 /****************************************************************************/
 
 bool UserPortBreakoutDialog::GetValue(int ctrlID)
 {
+#ifdef BEEBWIN
 	return SendDlgItemMessage(m_hwnd, ctrlID, BM_GETCHECK, 0, 0) == BST_CHECKED;
+#else
+    printf("getvalue %d\n", ctrlID);
+    return false;
+#endif
 }
 
 /****************************************************************************/
 
 void UserPortBreakoutDialog::SetValue(int ctrlID, bool State)
 {
+#ifdef BEEBWIN
 	SendDlgItemMessage(m_hwnd, ctrlID, BM_SETCHECK, State ? 1 : 0, 0);
+#else
+    printf("setvalue %d %d\n", ctrlID, State ? 1 : 0);
+#endif
 }
 
 /****************************************************************************/
 
 void UserPortBreakoutDialog::ShowOutputs(unsigned char data)
 {
+#ifdef BEEBWIN
 	if (m_hwnd != nullptr)
-	{
+#endif
+    {
 		if (data != m_LastOutputData)
 		{
 			unsigned char changed_bits = data ^ m_LastOutputData;
@@ -357,8 +416,10 @@ void UserPortBreakoutDialog::ShowOutputs(unsigned char data)
 
 void UserPortBreakoutDialog::ShowInputs(unsigned char data)
 {
+#ifdef BEEBWIN
 	if (m_hwnd != nullptr)
-	{
+#endif
+    {
 		if (data != m_LastInputData)
 		{
 			unsigned char changed_bits = data ^ m_LastInputData;
@@ -379,7 +440,11 @@ void UserPortBreakoutDialog::ShowInputs(unsigned char data)
 
 void UserPortBreakoutDialog::ShowBitKey(int key, int ctrlID)
 {
+#ifdef BEEBWIN
 	SetDlgItemText(m_hwnd, ctrlID, SelectKeyDialog::KeyName(BitKeys[key]));
+#else
+    printf("showbitkey %d %s\n", ctrlID, SelectKeyDialog::KeyName(BitKeys[key]).c_str());
+#endif
 }
 
 /****************************************************************************/
@@ -390,7 +455,8 @@ void UserPortBreakoutDialog::PromptForBitKeyInput(int bitKey)
 
 	ShowBitKey(bitKey, BitKeyButtonIDs[bitKey]);
 
-	std::string UsedKey = SelectKeyDialog::KeyName(BitKeys[m_BitKey]);
+    std::string UsedKey = SelectKeyDialog::KeyName(BitKeys[m_BitKey]);
+#ifdef BEEBWIN
 
 	selectKeyDialog = new SelectKeyDialog(
 		m_hInstance,
@@ -401,4 +467,7 @@ void UserPortBreakoutDialog::PromptForBitKeyInput(int bitKey)
 	);
 
 	selectKeyDialog->Open();
+#else
+    printf("Press the key to use... %d\n", UsedKey.c_str());
+#endif
 }

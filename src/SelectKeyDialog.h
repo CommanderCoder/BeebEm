@@ -23,6 +23,12 @@ Boston, MA  02110-1301, USA.
 
 #ifdef BEEBWIN // done
 #include <windows.h>
+#else
+#define LPCSTR std::string
+#define BYTE __uint8_t
+#define WORD __uint16_t
+#define LOBYTE(w) ((BYTE)(w))
+#define HIBYTE(w) ((BYTE)(((WORD)(w) >> 8) & 0xFF))
 #endif
 
 class SelectKeyDialog
@@ -33,21 +39,21 @@ class SelectKeyDialog
 			HINSTANCE hInstance,
 			HWND hwndParent,
 #endif
-            onst std::string& Title,
+            const std::string& Title,
 			const std::string& SelectedKey,
 			bool EnableShift = true
 		);
 
-		bool Open();
 #ifdef BEEBWIN
+		bool Open();
 		void Close(UINT nResultID);
 
 		bool HandleMessage(const MSG& msg);
 
+#endif
 		int Key() const;
 
 		static LPCSTR KeyName(int Key);
-#endif
 	private:
 #ifdef BEEBWIN // done
 		static INT_PTR CALLBACK sDlgProc(

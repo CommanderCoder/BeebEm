@@ -29,9 +29,7 @@ Boston, MA  02110-1301, USA.
 #include "main.h"
 #include "beebemrc.h"
 #include "userkybd.h"
-#ifdef BEEBWIN
 #include "SelectKeyDialog.h"
-#endif
 #include "Messages.h"
 
 #ifdef BEEBWIN
@@ -60,6 +58,29 @@ static HWND hwndBBCKey; // Holds the BBCKey control handle which is now selected
 static UINT selectedCtrlID; // Holds ctrlId of selected key (or 0 if none selected).
 static HWND hwndMain; // Holds the BeebWin window handle.
 static HWND hwndUserKeyboard;
+#else
+
+#include <Carbon/Carbon.h>
+
+#define COLORREF int
+
+static void SetKeyColour(COLORREF aColour);
+static void SelectKeyMapping(UINT ctrlID, int hwndCtrl);
+static void SetRowCol(UINT ctrlID);
+static COLORREF GetKeyColour(UINT ctrlID);
+static std::string GetKeysUsed();
+
+void SetBBCKeyForVKEY(int Key, bool shift);
+
+static int hwndBBCKey; // Holds the BBCKey control handle which is now selected.
+static UINT selectedCtrlID; // Holds ctrlId of selected key (or 0 if none selected).
+
+// Colour used to highlight the selected key.
+static const COLORREF HighlightColour   = 0x00FF0080; // Purple
+static const COLORREF FunctionKeyColour = 0x000000FF; // Red
+static const COLORREF NormalKeyColour   = 0x00000000; // Black
+static COLORREF oldKeyColour;
+
 #endif
 
 static int BBCRow; // Used to store the Row and Col values while we wait
@@ -69,13 +90,13 @@ static bool doingShifted; // Selecting shifted or unshifted key press
 // Initialised to defaultMapping.
 bKeyMap UserKeymap;
 
-#ifdef BEEBWIN
 
 static const char* szSelectKeyDialogTitle[2] = {
 	"Press key for unshifted press...",
 	"Press key for shifted press..."
 };
 
+#ifdef BEEBWIN
 /****************************************************************************/
 
 bool UserKeyboardDialog(HWND hwndParent)
@@ -113,10 +134,20 @@ static void SetKeyColour(COLORREF aColour)
 	InvalidateRect(hwndBBCKey, nullptr, TRUE);
 	UpdateWindow(hwndBBCKey);
 }
+#else
+// MAC DOES THIS IN THE STORYBOARD
+static void SetKeyColour(COLORREF aColour)
+{
+    printf("setkeycolour %d %d\n", hwndBBCKey, aColour);
+}
+#endif
 
 /****************************************************************************/
-
+#ifdef BEEBWIN
 static void SelectKeyMapping(HWND hwnd, UINT ctrlID, HWND hwndCtrl)
+#else
+static void SelectKeyMapping(UINT ctrlID, int hwndCtrl)
+#endif
 {
 	// Set the placeholders.
 	SetRowCol(ctrlID);
@@ -130,6 +161,7 @@ static void SelectKeyMapping(HWND hwnd, UINT ctrlID, HWND hwndCtrl)
 
 	std::string UsedKeys = GetKeysUsed();
 
+#ifdef BEEBWIN
 	// Now ask the user to input the PC key to assign to the BBC key.
 	selectKeyDialog = new SelectKeyDialog(
 		hInst,
@@ -139,11 +171,18 @@ static void SelectKeyMapping(HWND hwnd, UINT ctrlID, HWND hwndCtrl)
 	);
 
 	selectKeyDialog->Open();
+#else
+    printf("openkeymap dialog %s %s\n",szSelectKeyDialogTitle[doingShifted ? 1 : 0],UsedKeys.c_str());
+#endif
 }
 
 /****************************************************************************/
 
+#ifdef BEEBWIN
 static void SetBBCKeyForVKEY(int Key, bool Shift)
+#else
+void SetBBCKeyForVKEY(int Key, bool Shift)
+#endif
 {
 	if (Key >= 0 && Key < 256)
 	{
@@ -253,12 +292,13 @@ static void SetRowCol(UINT ctrlID)
 
 /****************************************************************************/
 
+#ifdef BEEBWIN
 static INT_PTR CALLBACK UserKeyboardDlgProc(HWND   hwnd,
                                             UINT   nMessage,
                                             WPARAM wParam,
                                             LPARAM lParam)
 {
-	switch (nMessage)
+    switch (nMessage)
 	{
 	case WM_COMMAND:
 		switch (wParam)
@@ -323,11 +363,22 @@ static INT_PTR CALLBACK UserKeyboardDlgProc(HWND   hwnd,
 	default:
 		break;
 	}
-
 	return FALSE;
 }
 
+#else
+void UKWindowCommandHandler(UINT cmdID)
+{
+    SelectKeyMapping(cmdID,0);
+}
+
+
+
+
+#endif
+
 /****************************************************************************/
+#ifdef BEEBWIN
 
 static void OnDrawItem(UINT CtrlID, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
@@ -434,6 +485,7 @@ static void DrawText(HDC hDC, RECT rect, HWND hwndCtrl, COLORREF colour, bool De
 		        (int)strlen(text));
 	}
 }
+#endif
 
 /****************************************************************************/
 
@@ -492,6 +544,7 @@ static std::string GetKeysUsed()
 					}
 
 					Keys += SelectKeyDialog::KeyName(i);
+                    printf("%s\n", Keys.c_str());
 				}
 			}
 		}
@@ -504,4 +557,3 @@ static std::string GetKeysUsed()
 
 	return Keys;
 }
-#endif

@@ -32,6 +32,10 @@ Boston, MA  02110-1301, USA.
 
 /* User Port Breakout Box */
 
+extern void BreakoutBoxOpenDialog(void);
+extern void BreakoutBoxCloseDialog(void);
+
+
 class UserPortBreakoutDialog
 {
 	public:
@@ -44,10 +48,13 @@ class UserPortBreakoutDialog
 
 		bool Open();
 		void Close();
+#ifndef BEEBWIN
+    int Closed();
+#endif
 
 		bool KeyDown(int Key);
 		bool KeyUp(int Key);
-
+    
 		void ShowBitKey(int key, int ctrlID);
 		void ShowInputs(unsigned char data);
 		void ShowOutputs(unsigned char data);
@@ -67,6 +74,11 @@ class UserPortBreakoutDialog
 			WPARAM wParam,
 			LPARAM lParam
 		);
+#else
+    int DlgProc(
+         unsigned int   nMessage,
+        long wParam
+                 );
 #endif
 		void PromptForBitKeyInput(int bitKey);
 		bool GetValue(int ctrlID);
@@ -79,7 +91,7 @@ class UserPortBreakoutDialog
 		HWND m_hwnd;
 		HWND m_hwndParent;
 #endif
-    int m_BitKey;
+        int m_BitKey;
 		unsigned char m_LastInputData;
 		unsigned char m_LastOutputData;
 };

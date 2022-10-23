@@ -20,6 +20,9 @@ void beeb_handlekeys(long eventkind, unsigned long keycode, char charCode);
 void beeb_HandleCommand(unsigned int cmdID);
 //void beeb_setFilePath(const char* _path);
 
+void beeb_BreakoutBoxOpenDialog();
+void beeb_BreakoutBoxCloseDialog();
+
 
 long beeb_TCHandleCommand(unsigned int cmdID);
 void beeb_TapeControlOpenDialog();
@@ -33,7 +36,10 @@ int beeb_autorun(char *path);
 
 
 void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode);
-
 void beeb_uksetasstitle(const char* title);
 
+void beeb_bbhandlekeys(long eventkind, unsigned int keycode, char charCode);
+
+
 void WriteLog(const char *fmt, ...);
+

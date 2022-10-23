@@ -588,6 +588,7 @@ var buffer = AVAudioPCMBuffer(pcmFormat: beebAudioFormat, frameCapacity: AVAudio
 // mixer - to configure the output
 // mixer has multiple inputs but one output that has 2 channels - for mainmixer this goes to the audio output
 var mainMixer = audioEngine.mainMixerNode
+var successfullystarted = true
 
 // allow access to this in C
 @_cdecl("swift_SoundInit")
@@ -596,16 +597,17 @@ public func swift_SoundInit()
     // audio input is from mic
     // audio player is from buffer/segments
     // audio output is to loudspeaker
-    
-    print (audioBufferPlayer.outputFormat(forBus: 0))
-    print (mainMixer.outputFormat(forBus: 0))
-    print (mainMixer.outputFormat(forBus: 0))
-
-    print (beebAudioFormat)
-    print (buffer.format)
+    if !successfullystarted    {    return}
 
 
     do {
+        // probably shoudn't use BUS 0 by default
+        print (audioBufferPlayer.outputFormat(forBus: 0))
+        print (mainMixer.outputFormat(forBus: 0))
+        print (mainMixer.outputFormat(forBus: 0))
+
+        print (beebAudioFormat)
+        print (buffer.format)
 
         audioEngine.attach(audioBufferPlayer) // attach the player - which can play PCM or from files.
         // schedule playing from the buffer, now, and looping, so doesn't complete
@@ -625,7 +627,7 @@ public func swift_SoundInit()
         // play the buffer immediately
         audioBufferPlayer.play()
 
-        
+        successfullystarted = audioBufferPlayer.isPlaying
 
     }
     catch {
@@ -634,6 +636,9 @@ public func swift_SoundInit()
         print ("")
     }
     
+    
+    if !successfullystarted      {  swift_CloseAudio()}
+
 }
 
 var bufferIndex = 0
@@ -643,6 +648,8 @@ var bufferIndex = 0
 @_cdecl("swift_SoundStream")
 public func swift_SoundStream( _ soundbuffer: UnsafeMutablePointer<UInt8>)
 {
+    if !successfullystarted{ return}
+
     // this comes through as a square wave with 8 bits mono
     // at a sample rate of 44100 Hz
     

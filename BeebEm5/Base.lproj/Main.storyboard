@@ -1349,10 +1349,10 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="oa0-Ea-k4g"/>
-                                        <menuItem title="User Port Breakout box" identifier="upbo" id="pal-E8-XOQ">
+                                        <menuItem title="User Port Breakout box" id="pal-E8-XOQ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="6HW-6c-E7W"/>
+                                                <segue destination="aao-ZM-AXI" kind="show" id="v9V-x6-usa"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="User Port RTC Module" identifier="uprm" id="pVE-u1-k5X">
@@ -1408,6 +1408,7 @@
                                         <menuItem title="Define User Key Mapping" identifier="kusr" id="B1I-rl-rOd">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="b5A-c1-OKR"/>
                                                 <segue destination="Z3G-lH-LH8" kind="show" id="lQr-K2-Upq"/>
                                             </connections>
                                         </menuItem>
@@ -1455,7 +1456,20 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="PId-c7-O2m"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Disable Keys" identifier="kdis" id="6Ya-Lq-Zv2">
+                                        <menuItem title="Disable Keys" id="e3T-DH-mbH">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Disable Keys" id="vhZ-rd-lHB">
+                                                <items>
+                                                    <menuItem title="Escape Key" id="w9z-yY-sFq">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                    <menuItem title="All Keys Above" id="Ynp-NE-Nco">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem title="Old Disable Keys" identifier="kdis" id="6Ya-Lq-Zv2">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="CCD-kl-Ghz"/>
@@ -1475,7 +1489,26 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="3Ax-5d-nhK"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Preference Options" identifier="prop" id="WTM-Vp-8q0">
+                                        <menuItem title="Preference Options" id="dh5-rD-EfU">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Preference Options" id="qV7-XC-RBE">
+                                                <items>
+                                                    <menuItem title="Autosave CMOS RAM" id="PNy-RJ-pfu">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                    <menuItem title="Autosave All Prefs" id="ASs-2Z-i0j">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                    <menuItem title="Save Disc/Tape/State Folders" id="iKo-Sh-d3B">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                    <menuItem title="Select User Data Folder..." id="Hyc-P5-3vZ">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem title="Old Preference Options" identifier="prop" id="WTM-Vp-8q0">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="cKa-3N-tk9"/>
@@ -1536,7 +1569,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="514" y="-119"/>
+            <point key="canvasLocation" x="503" y="-230"/>
         </scene>
         <!--TapeControl Window Controller-->
         <scene sceneID="fZF-S2-gbQ">
@@ -2622,7 +2655,7 @@
                                     <real value="3.4028234663852886e+38"/>
                                 </customSpacing>
                             </stackView>
-                            <button identifier="reset" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXq-t9-maU">
+                            <button identifier="ukrs" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BXq-t9-maU">
                                 <rect key="frame" x="366" y="15" width="140" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="Reset To Default" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sh0-Ua-RgR">
@@ -3039,6 +3072,180 @@ DQ
                 <customObject id="2Tp-Fl-jBw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-60" y="1160"/>
+        </scene>
+        <!--BreakoutBox Window Controller-->
+        <scene sceneID="DBR-Wq-wVO">
+            <objects>
+                <windowController id="aao-ZM-AXI" userLabel="BreakoutBox Window Controller" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="qcp-sa-0aB" userLabel="BreakoutBox Scene Controller">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="196" y="239" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
+                        <view key="contentView" id="LGu-QF-xyV">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="aao-ZM-AXI" id="yj8-60-hO6"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="P2b-Xm-5Wy" kind="relationship" relationship="window.shadowedContentViewController" id="mSX-oM-Ldw"/>
+                    </connections>
+                </windowController>
+                <customObject id="dt8-20-VXH" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2060" y="372"/>
+        </scene>
+        <!--BreakoutBox View Controller-->
+        <scene sceneID="Wdi-wt-34l">
+            <objects>
+                <viewController id="P2b-Xm-5Wy" userLabel="BreakoutBox View Controller" customClass="BreakoutBoxViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="Adq-Ix-6vc" userLabel="BreakoutBox View Controller">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <button identifier="upb6" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3uh-5A-cRi">
+                                <rect key="frame" x="104" y="177" width="35" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit6" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" inset="2" id="x3X-HS-4Fm">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="upb5" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YeP-eA-Seg">
+                                <rect key="frame" x="143" y="177" width="35" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit5" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" inset="2" id="xAc-l3-Qdp">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="upb4" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sKB-hj-6D0">
+                                <rect key="frame" x="181" y="177" width="35" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit4" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" inset="2" id="pq4-4D-dfc">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="upb3" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ccN-Ic-yHt">
+                                <rect key="frame" x="221" y="177" width="35" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit3" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" inset="2" id="8km-gY-r1j">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="upb2" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5r4-Q0-lzM">
+                                <rect key="frame" x="267" y="177" width="35" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit2" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" inset="2" id="p6B-d9-syU">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="upb1" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NeS-GN-4bQ">
+                                <rect key="frame" x="307" y="177" width="33" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit1" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" inset="2" id="J83-KK-WUu">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="upb0" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tCG-MB-PHp">
+                                <rect key="frame" x="346" y="177" width="35" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit0" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" inset="2" id="oDT-1N-hsO">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="uprs" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i7V-oy-Izt">
+                                <rect key="frame" x="278" y="70" width="140" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Reset To Default" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Zvo-jH-Ol1">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="TCHandleCommand:" target="K2M-6c-8B5" id="zqT-Ho-Lny"/>
+                                </connections>
+                            </button>
+                            <textField identifier="ass" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1sr-9X-pgi">
+                                <rect key="frame" x="201" y="105" width="210" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" enabled="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="yUq-Kd-vQX">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XNd-EX-cpP">
+                                <rect key="frame" x="72" y="108" width="123" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Assigned to keys(s)" id="uGb-sK-SSG">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GlX-dj-ZGh">
+                                <rect key="frame" x="50" y="134" width="385" height="16"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Click a key then press the corresponding key on your keyboard" id="eaS-CR-PhR">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="R8f-uc-LoZ">
+                                <rect key="frame" x="213" y="31" width="74" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="OK" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="P4h-ae-QVn">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="performClose:" target="gvx-kf-Slz" id="xKV-2f-UYj"/>
+                                </connections>
+                            </button>
+                            <button identifier="upb7" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4hT-BN-fqY">
+                                <rect key="frame" x="64" y="177" width="34" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="square" title="Bit7" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" identifier="upb7" inset="2" id="kzp-WV-0Es">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button identifier="upc6" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gNE-nm-uM4">
+                                <rect key="frame" x="101" y="213" width="40" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="check" title="6" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="NLk-hK-6Nf">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <color key="bezelColor" name="systemPinkColor" catalog="System" colorSpace="catalog"/>
+                            </button>
+                            <button identifier="upc7" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tFQ-yW-1kH">
+                                <rect key="frame" x="61" y="212" width="40" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="check" title="7" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="NrA-W6-AHu">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <color key="bezelColor" name="systemBrownColor" catalog="System" colorSpace="catalog"/>
+                            </button>
+                        </subviews>
+                    </view>
+                </viewController>
+                <customObject id="gvx-kf-Slz" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2090" y="856"/>
         </scene>
     </scenes>
     <resources>

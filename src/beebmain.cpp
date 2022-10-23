@@ -192,15 +192,13 @@ extern "C" int swift_ModifyMenu(unsigned int cmd, unsigned int newitem, const ch
 // this time
 extern "C" void swift_sleepCPU(unsigned long microseconds);
 
-long beeb_now() // milliseconds
+long GetTickCount() // milliseconds
 {
     auto since_epoch = std::chrono::steady_clock::now().time_since_epoch();
     auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(since_epoch);
     auto millis = milli.count();
     return millis;
 }
-
-#define GetTickCount beeb_now
 
 
 

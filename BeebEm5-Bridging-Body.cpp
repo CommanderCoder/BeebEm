@@ -22,6 +22,7 @@
 #include "csw.h"
 
 #include "beebemrcids.h"
+#include "userportbreakoutbox.h"
 
 int done = 0;
 extern OSStatus TCWindowCommandHandler(UInt32 cmdID);
@@ -41,6 +42,8 @@ extern char** __argv;
 extern OSStatus UKWindowCommandHandler(UInt32 cmdID);
 
 extern BeebWin *mainWin;
+
+extern void SetBBCKeyForVKEY(int Key, bool shift);
 
 #ifdef BEEBWIN
 extern char AutoRunPath[];
@@ -131,6 +134,17 @@ extern "C" int beeb_end()
 
 
 
+extern "C" void beeb_BreakoutBoxOpenDialog()
+{
+    BreakoutBoxOpenDialog();
+}
+
+extern "C" void beeb_BreakoutBoxCloseDialog()
+{
+    BreakoutBoxCloseDialog();
+}
+
+
 extern "C" void beeb_TapeControlOpenDialog()
 {
 #ifdef BEEBWIN
@@ -154,22 +168,24 @@ extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
     printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
     return TCWindowCommandHandler(cmdID);
 #else
-    return 0L;
+    return 0;
 #endif
 }
     
 // user keyboard
 extern "C" long beeb_UKHandleCommand(unsigned int cmdID)
 {
-#ifdef BEEBWIN
-
     char* cmdCHR = (char*)&cmdID;
-    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
-    return UKWindowCommandHandler(cmdID);
-#else
-    return 0L;
-#endif
+    
+    auto cmdRC = ID2RC.find(cmdID);
+    if (cmdRC != ID2RC.end())
+    {
+        printf("HANDLECMD %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+        return UKWindowCommandHandler(cmdRC->second);
+    }
 
+    printf("NOT FOUND %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+    return 0;
 }
 
 extern "C" long beeb_getTableRowsCount(const char* tablename)
@@ -240,24 +256,6 @@ extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
 
 
 
-extern "C" void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode)
-{
-#ifdef BEEBWIN
-  switch (eventkind)
-  {
-      case kEventRawKeyDown:
-
-          fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
-          if (LastButton != 0)
-          {
-              SetBBCKeyForVKEY(keycode);
-              ShowKey(LastButton);
-          }
-  }
-#endif
-
-}
-
 extern "C" void beeb_HandleCommand(unsigned int cmdID)
 {
     char* cmdCHR = (char*)&cmdID;
@@ -276,4 +274,52 @@ extern "C" void beeb_HandleCommand(unsigned int cmdID)
 
 extern "C" void WriteLog(const char *fmt, ...)
 {
+}
+
+extern "C" void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode)
+{
+
+    switch (eventkind)
+    {
+            // TYPED A KEY - SO SET THE KEY
+            //
+        case kEventRawKeyDown:
+            
+            fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+                
+//            SetBBCKeyForVKEY(keycode, doingShifted);
+//            
+//            // SHOULD DO THE SHIFTED KEY TOO
+//            
+//            // THEN
+//            selectedCtrlID = 0;
+//
+//            // Show the key as not depressed, i.e., normal.
+//            SetKeyColour(oldKeyColour);
+
+    }
+
+}
+
+
+
+extern "C" void beeb_bbhandlekeys(long eventkind, unsigned int keycode, char charCode)
+{
+
+    switch (eventkind)
+    {
+            // TYPED A KEY - SO SET THE KEY
+            //
+        case kEventRawKeyDown:
+            
+            fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
+            userPortBreakoutDialog->KeyDown(charCode);
+            break;
+        case kEventRawKeyUp:
+            
+            fprintf(stderr, "Key released: code = %d, '%c'\n", keycode, charCode);
+            userPortBreakoutDialog->KeyUp(charCode);
+            break;
+    }
+
 }

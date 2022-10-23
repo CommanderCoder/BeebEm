@@ -34,9 +34,7 @@ Boston, MA  02110-1301, USA.
 #include "log.h"
 #include "main.h"
 #include "tube.h"
-#ifdef BEEBWIN
 #include "UserPortBreakoutBox.h"
-#endif
 
 /* Real Time Clock */
 bool RTC_Enabled = false;

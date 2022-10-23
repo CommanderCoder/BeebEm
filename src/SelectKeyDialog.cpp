@@ -20,7 +20,11 @@ Boston, MA  02110-1301, USA.
 
 // User defined keyboard functionality.
 
+#ifdef BEEBWIN
 #include <windows.h>
+#else
+#include <Carbon/Carbon.h>
+#endif
 #include <string>
 
 #include "main.h"
@@ -28,6 +32,7 @@ Boston, MA  02110-1301, USA.
 #include "SelectKeyDialog.h"
 #include "Messages.h"
 
+#ifdef BEEBWIN
 /****************************************************************************/
 
 static bool IsDlgItemChecked(HWND hDlg, int nIDDlgItem);
@@ -184,6 +189,8 @@ bool SelectKeyDialog::HandleMessage(const MSG& msg)
 	return false;
 }
 
+#else
+
 /****************************************************************************/
 
 int SelectKeyDialog::Key() const
@@ -192,12 +199,14 @@ int SelectKeyDialog::Key() const
 }
 
 /****************************************************************************/
+#endif
 
+#ifdef BEEBWIN
 static bool IsDlgItemChecked(HWND hDlg, int nIDDlgItem)
 {
 	return SendDlgItemMessage(hDlg, nIDDlgItem, BM_GETCHECK, 0, 0) == BST_CHECKED;
 }
-
+#else
 /****************************************************************************/
 
 LPCSTR SelectKeyDialog::KeyName(int Key)
@@ -275,3 +284,5 @@ LPCSTR SelectKeyDialog::KeyName(int Key)
 		return Character;
 	}
 }
+
+#endif
