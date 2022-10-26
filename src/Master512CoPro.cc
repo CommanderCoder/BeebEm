@@ -948,12 +948,12 @@ bool Master512CoPro::common_op(uint8_t op)
 
 		case 0x6a:
 		case 0x7a: // i_jp
-			JMP(PF);
+			JMP(PF != 0);
 			break;
 
 		case 0x6b:
 		case 0x7b: // i_jnp
-			JMP(!PF);
+			JMP(PF == 0);
 			break;
 
 		case 0x6c:
@@ -1738,7 +1738,7 @@ bool Master512CoPro::common_op(uint8_t op)
 
 		case 0xf0: // i_lock
 		case 0xf1: // 0xf1 is 0xf0; verified on real CPU
-			// //WriteLog("%06x: Warning - BUSLOCK\n", m_pc); // Why warn for using lock instruction?
+			//WriteLog("%06x: Warning - BUSLOCK\n", m_pc); // Why warn for using lock instruction?
 			// m_lock = true;
 			m_no_interrupt = 1;
 			CLK(NOP);
@@ -1763,7 +1763,7 @@ bool Master512CoPro::common_op(uint8_t op)
 				case 0xae:  CLK(OVERRIDE); if (c) do { i_scasb(); c--; } while (c>0 && !ZF && m_icount>0);   m_regs.w[CX]=c; m_seg_prefix = false; m_seg_prefix_next = false; break;
 				case 0xaf:  CLK(OVERRIDE); if (c) do { i_scasw(); c--; } while (c>0 && !ZF && m_icount>0);   m_regs.w[CX]=c; m_seg_prefix = false; m_seg_prefix_next = false; break;
 				default:
-					////WriteLog("%06x: REPNE invalid\n", m_pc);
+					WriteLog("%06x: REPNE invalid\n", m_pc);
 					// Decrement IP so the normal instruction will be executed next
 					m_ip--;
 					invalid = true;
@@ -1796,7 +1796,7 @@ bool Master512CoPro::common_op(uint8_t op)
 				case 0xae:  CLK(OVERRIDE); if (c) do { i_scasb(); c--; } while (c>0 && ZF && m_icount>0);    m_regs.w[CX]=c; m_seg_prefix = false; m_seg_prefix_next = false; break;
 				case 0xaf:  CLK(OVERRIDE); if (c) do { i_scasw(); c--; } while (c>0 && ZF && m_icount>0);    m_regs.w[CX]=c; m_seg_prefix = false; m_seg_prefix_next = false; break;
 				default:
-					////WriteLog("%06x: REPE invalid\n", m_pc);
+					WriteLog("%06x: REPE invalid\n", m_pc);
 					// Decrement IP so the normal instruction will be executed next
 					m_ip--;
 					invalid = true;
@@ -1811,7 +1811,7 @@ bool Master512CoPro::common_op(uint8_t op)
 			break;
 
 		case 0xf4: // i_hlt
-			////WriteLog("%06x: HALT\n", m_pc);
+			WriteLog("%06x: HALT\n", m_pc);
 			m_icount = 0;
 			m_halt = true;
 			break;
@@ -2071,7 +2071,7 @@ bool Master512CoPro::common_op(uint8_t op)
 					break;
 
 				default:
-					//WriteLog("%06x: FE Pre with unimplemented mod\n", m_pc);
+					WriteLog("%06x: FE Pre with unimplemented mod\n", m_pc);
 					break;
 				}
 			}
@@ -2136,7 +2136,7 @@ bool Master512CoPro::common_op(uint8_t op)
 
 				default:
 					m_icount -= 10;
-					//WriteLog("%06x: FF Pre with unimplemented mod\n", m_pc);
+					WriteLog("%06x: FF Pre with unimplemented mod\n", m_pc);
 					break;
 				}
 			}
@@ -2218,7 +2218,7 @@ void Master512CoPro::Reset()
 	m_sregs[CS] = 0xf000;
 	m_sregs[SS] = 0;
 	m_sregs[DS] = 0;
-	m_ip = 0xffff0;
+	m_ip = 0xfff0;
 	m_prev_ip = 0;
 	m_SignVal = 0;
 	m_AuxVal = 0;
@@ -2417,7 +2417,7 @@ void Master512CoPro::Execute(int Cycles)
 					if (tmp<low || tmp>high)
 						interrupt(5);
 					CLK(BOUND);
-					//WriteLog("%06x: bound %04x high %04x low %04x tmp\n", m_pc, high, low, tmp);
+					WriteLog("%06x: bound %04x high %04x low %04x tmp\n", m_pc, high, low, tmp);
 				}
 				break;
 
@@ -2486,7 +2486,7 @@ void Master512CoPro::Execute(int Cycles)
 					m_sregs[DS] = m_src;
 					break;
 				default:
-					//WriteLog("%06x: Mov Sreg - Invalid register\n", m_pc);
+					WriteLog("%06x: Mov Sreg - Invalid register\n", m_pc);
 					m_ip = m_prev_ip;
 					interrupt(6);
 					break;
@@ -2554,7 +2554,7 @@ void Master512CoPro::Execute(int Cycles)
 					PUSH(m_regs.w[BP]);
 					m_regs.w[BP] = m_regs.w[SP];
 					m_regs.w[SP] -= nb;
-					for (int i=1; i<level; i++)
+					for (unsigned int i = 1; i < level; i++)
 					{
 						PUSH(GetMemW(SS, m_regs.w[BP] - i * 2));
 					}
@@ -2684,7 +2684,7 @@ void Master512CoPro::Execute(int Cycles)
 				if (!common_op(op))
 				{
 					m_icount -= 10; // UD fault timing?
-					//WriteLog("%06x: Invalid Opcode %02x\n", m_pc, op);
+					WriteLog("%06x: Invalid Opcode %02x\n", m_pc, op);
 					m_ip = m_prev_ip;
 					interrupt(6); // 80186 has #UD
 					break;
