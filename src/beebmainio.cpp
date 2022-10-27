@@ -1238,12 +1238,10 @@ void BeebWin::LoadEmuUEF(FILE *SUEF, int Version) {
 		{
 			fread(fileName,1,256,SUEF);
 			GetDataPath(m_UserDataPath, fileName);
-#ifdef BEEBWIN
 			if (ReadKeyMap(fileName, &UserKeymap))
 				strcpy(m_UserKeyMapPath, fileName);
 			else
 				id = m_MenuIdKeyMapping;
-#endif
             
         }
 		CheckMenuItem(m_MenuIdKeyMapping, false);
@@ -1281,28 +1279,33 @@ void BeebWin::GetDataPath(const char *folder, char *path)
 void BeebWin::LoadUserKeyMap()
 {
 	char FileName[_MAX_PATH];
+#ifdef BEEBWIN
 	const char* filter = "Key Map File (*.kmap)\0*.kmap\0";
 
-#ifdef BEEBWIN
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), m_UserDataPath, filter);
 	if (fileDialog.Open())
-	{
-		if (ReadKeyMap(FileName, &UserKeymap))
-			strcpy(m_UserKeyMapPath, FileName);
-	}
+#else
+    if (swift_GetOneFileWithPreview(FileName, _MAX_PATH, KEYBOARD)==0)
 #endif
-    
+    {
+        if (ReadKeyMap(FileName, &UserKeymap))
+            strcpy(m_UserKeyMapPath, FileName);
+    }
+
 }
 
 /****************************************************************************/
 void BeebWin::SaveUserKeyMap()
 {
 	char FileName[_MAX_PATH];
+#ifdef BEEBWIN
 	const char* filter = "Key Map File (*.kmap)\0*.kmap\0";
 
-#ifdef BEEBWIN
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), m_UserDataPath, filter);
 	if (fileDialog.Save())
+#else
+    swift_SaveFile(FileName, _MAX_PATH, KEYBOARD);
+#endif
 	{
 		if (!hasFileExt(FileName, ".kmap"))
 		{
@@ -1314,7 +1317,6 @@ void BeebWin::SaveUserKeyMap()
 			strcpy(m_UserKeyMapPath, FileName);
 		}
 	}
-#endif
     
 }
 

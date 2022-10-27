@@ -74,9 +74,8 @@ class SelectKeyDialog
 		HINSTANCE m_hInstance;
 		HWND m_hwnd;
 		HWND m_hwndParent;
-#else
-    private:
 #endif
+    private:
 
 		std::string m_Title;
 		std::string m_SelectedKey;

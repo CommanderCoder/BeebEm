@@ -189,7 +189,7 @@ bool SelectKeyDialog::HandleMessage(const MSG& msg)
 	return false;
 }
 
-#else
+#endif
 
 /****************************************************************************/
 
@@ -199,14 +199,15 @@ int SelectKeyDialog::Key() const
 }
 
 /****************************************************************************/
-#endif
+
 
 #ifdef BEEBWIN
 static bool IsDlgItemChecked(HWND hDlg, int nIDDlgItem)
 {
 	return SendDlgItemMessage(hDlg, nIDDlgItem, BM_GETCHECK, 0, 0) == BST_CHECKED;
 }
-#else
+#endif
+
 /****************************************************************************/
 
 LPCSTR SelectKeyDialog::KeyName(int Key)
@@ -215,6 +216,7 @@ LPCSTR SelectKeyDialog::KeyName(int Key)
 
 	switch (Key)
 	{
+#ifdef BEEBWIN
 	case   8: return "Backspace";
 	case   9: return "Tab";
 	case  13: return "Enter";
@@ -277,12 +279,128 @@ LPCSTR SelectKeyDialog::KeyName(int Key)
 	case 221: return "]";
 	case 222: return "#";
 	case 223: return "`";
+    default:
+        Character[0] = (CHAR)LOBYTE(Key);
+        Character[1] = '\0';
+        return Character;
 
-	default:
-		Character[0] = (CHAR)LOBYTE(Key);
-		Character[1] = '\0';
-		return Character;
+#else
+        case     0    :    return    "A";
+        case     1    :    return    "S";
+        case     2    :    return    "D";
+        case     3    :    return    "F";
+        case     4    :    return    "H";
+        case     5    :    return    "G";
+        case     6    :    return    "Z";
+        case     7    :    return    "X";
+        case     8    :    return    "C";
+        case     9    :    return    "V";
+        case     10    :    return    "SectionSign";
+        case     11    :    return    "B";
+        case     12    :    return    "Q";
+        case     13    :    return    "W";
+        case     14    :    return    "E";
+        case     15    :    return    "R";
+        case     16    :    return    "Y";
+        case     17    :    return    "T";
+        case     18    :    return    "One";
+        case     19    :    return    "Two";
+        case     20    :    return    "Three";
+        case     21    :    return    "Four";
+        case     22    :    return    "Six";
+        case     23    :    return    "Five";
+        case     24    :    return    "Equal";
+        case     25    :    return    "Nine";
+        case     26    :    return    "Seven";
+        case     27    :    return    "Minus";
+        case     28    :    return    "Eight";
+        case     29    :    return    "Zero";
+        case     30    :    return    "RightBracket";
+        case     31    :    return    "O";
+        case     32    :    return    "U";
+        case     33    :    return    "LeftBracket";
+        case     34    :    return    "I";
+        case     35    :    return    "P";
+        case     36    :    return    "Return";
+        case     37    :    return    "L";
+        case     38    :    return    "J";
+        case     39    :    return    "Quote";
+        case     40    :    return    "K";
+        case     41    :    return    "Semicolon";
+        case     42    :    return    "Backslash";
+        case     43    :    return    "Comma";
+        case     44    :    return    "Slash";
+        case     45    :    return    "N";
+        case     46    :    return    "M";
+        case     47    :    return    "Period";
+        case     48    :    return    "Tab";
+        case     49    :    return    "Space";
+        case     50    :    return    "Grave";
+        case     51    :    return    "Delete";
+        case     52    :    return    "Linefeed";
+        case     53    :    return    "Escape";
+        case     55    :    return    "Command";
+        case     56    :    return    "Shift";
+        case     57    :    return    "CapsLock";
+        case     58    :    return    "Option";
+        case     59    :    return    "Control";
+        case     60    :    return    "RightShift";
+        case     61    :    return    "RightOption";
+        case     62    :    return    "RightControl";
+        case     63    :    return    "Function";
+        case     64    :    return    "F17";
+        case     65    :    return    "KeypadDecimal";
+        case     67    :    return    "KeypadMultiply";
+        case     69    :    return    "KeypadPlus";
+        case     71    :    return    "KeypadClear";
+        case     72    :    return    "VolumeUp";
+        case     73    :    return    "VolumeDown";
+        case     74    :    return    "Mute";
+        case     75    :    return    "KeypadDivide";
+        case     76    :    return    "KeypadEnter";
+        case     78    :    return    "KeypadMinus";
+        case     79    :    return    "F18";
+        case     80    :    return    "F19";
+        case     81    :    return    "KeypadEquals";
+        case     82    :    return    "Keypad0";
+        case     83    :    return    "Keypad1";
+        case     84    :    return    "Keypad2";
+        case     85    :    return    "Keypad3";
+        case     86    :    return    "Keypad4";
+        case     87    :    return    "Keypad5";
+        case     88    :    return    "Keypad6";
+        case     89    :    return    "Keypad7";
+        case     90    :    return    "F20";
+        case     91    :    return    "Keypad8";
+        case     92    :    return    "Keypad9";
+        case     96    :    return    "F5";
+        case     97    :    return    "F6";
+        case     98    :    return    "F7";
+        case     99    :    return    "F3";
+        case     100    :    return    "F8";
+        case     101    :    return    "F9";
+        case     103    :    return    "F11";
+        case     105    :    return    "F13";
+        case     106    :    return    "F16";
+        case     107    :    return    "F14";
+        case     109    :    return    "F10";
+        case     111    :    return    "F12";
+        case     113    :    return    "F15";
+        case     114    :    return    "Help/Insert";
+        case     115    :    return    "Home";
+        case     116    :    return    "PageUp";
+        case     117    :    return    "ForwardDelete";
+        case     118    :    return    "F4";
+        case     119    :    return    "End";
+        case     120    :    return    "F2";
+        case     121    :    return    "PageDown";
+        case     122    :    return    "F1";
+        case     123    :    return    "LeftArrow";
+        case     124    :    return    "RightArrow";
+        case     125    :    return    "DownArrow";
+        case     126    :    return    "UpArrow";
+        default:
+            return "UNFOUND";
+#endif
 	}
 }
-
-#endif

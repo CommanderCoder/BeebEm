@@ -34,7 +34,7 @@ class KeyboardMappingViewController: NSViewController {
         }
         
         kbViewControllerInstance = self
-
+        beeb_UserKeyboardOpen()
     }
     
     @objc
@@ -48,7 +48,18 @@ class KeyboardMappingViewController: NSViewController {
     @IBAction func UKHandleCommand(_ sender: NSButton) {
 //        let cmd: String = sender.identifier?.rawValue ?? "none"
         let cmd: String = sender.identifier?.rawValue.padding(toLength: 4, withPad: " ", startingAt: 0) ?? "none"
-        beeb_UKHandleCommand(conv(cmd));
+        
+        if (cmd == "ukrs")
+        {
+            // beeb_UKReset()
+            print ("beeb_UKReset()")
+        }
+        else
+
+        {
+            let p = conv(cmd)
+            beeb_UKHandleCommand(p)
+        }
     }
 
     // allow key detection

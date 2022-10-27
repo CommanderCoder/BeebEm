@@ -37,4 +37,16 @@ class BreakoutBoxViewController: NSViewController {
         beeb_BreakoutBoxCloseDialog()
     }
     
+    // for reset button
+    @IBAction func BBHandleCommand(_ sender: NSButton) {
+//        let cmd: String = sender.identifier?.rawValue ?? "none"
+        let cmd: String = sender.identifier?.rawValue.padding(toLength: 4, withPad: " ", startingAt: 0) ?? "none"
+        
+        if (cmd == "uprs")
+        {
+            // breakoutbox
+            // beeb_BBReset()
+            print ("beeb_BBReset()")
+        }
+    }
 }

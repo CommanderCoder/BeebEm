@@ -37,6 +37,7 @@ int beeb_autorun(char *path);
 
 void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode);
 void beeb_uksetasstitle(const char* title);
+void beeb_UserKeyboardOpen();
 
 void beeb_bbhandlekeys(long eventkind, unsigned int keycode, char charCode);
 

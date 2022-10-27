@@ -2663,7 +2663,7 @@
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="TCHandleCommand:" target="K2M-6c-8B5" id="NRb-Xm-a7w"/>
+                                    <action selector="UKHandleCommand:" target="K2M-6c-8B5" id="GqK-GU-ud1"/>
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FwW-EB-MoF">
@@ -3170,7 +3170,7 @@ DQ
                                     <font key="font" metaFont="system"/>
                                 </buttonCell>
                                 <connections>
-                                    <action selector="TCHandleCommand:" target="K2M-6c-8B5" id="zqT-Ho-Lny"/>
+                                    <action selector="BBHandleCommand:" target="P2b-Xm-5Wy" id="bX7-BQ-3xQ"/>
                                 </connections>
                             </button>
                             <textField identifier="ass" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1sr-9X-pgi">

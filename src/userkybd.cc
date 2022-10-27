@@ -81,6 +81,11 @@ static const COLORREF FunctionKeyColour = 0x000000FF; // Red
 static const COLORREF NormalKeyColour   = 0x00000000; // Black
 static COLORREF oldKeyColour;
 
+
+extern "C" void swift_uksetasstitle(const char* title);
+extern "C" void swift_buttonSetControlValue(unsigned int cmd, int state);
+
+
 #endif
 
 static int BBCRow; // Used to store the Row and Col values while we wait
@@ -103,7 +108,7 @@ bool UserKeyboardDialog(HWND hwndParent)
 {
 	// Initialise locals used during this window's life.
 	hwndMain = hwndParent;
-	selectedCtrlID = 0;
+    selectedCtrlID = 0;
 
 	// Open the dialog box. This is created as a modeless dialog so that
 	// the "select key" dialog box can handle key-press messages.
@@ -135,7 +140,12 @@ static void SetKeyColour(COLORREF aColour)
 	UpdateWindow(hwndBBCKey);
 }
 #else
-// MAC DOES THIS IN THE STORYBOARD
+void UserKeyboardDialog()
+{
+    selectedCtrlID = 0;
+}
+
+// This is to make the key look pressed
 static void SetKeyColour(COLORREF aColour)
 {
     printf("setkeycolour %d %d\n", hwndBBCKey, aColour);
@@ -152,6 +162,7 @@ static void SelectKeyMapping(UINT ctrlID, int hwndCtrl)
 	// Set the placeholders.
 	SetRowCol(ctrlID);
 
+#ifdef BEEBWIN
 	oldKeyColour = GetKeyColour(ctrlID);
 
 	hwndBBCKey = hwndCtrl;
@@ -161,7 +172,6 @@ static void SelectKeyMapping(UINT ctrlID, int hwndCtrl)
 
 	std::string UsedKeys = GetKeysUsed();
 
-#ifdef BEEBWIN
 	// Now ask the user to input the PC key to assign to the BBC key.
 	selectKeyDialog = new SelectKeyDialog(
 		hInst,
@@ -172,7 +182,19 @@ static void SelectKeyMapping(UINT ctrlID, int hwndCtrl)
 
 	selectKeyDialog->Open();
 #else
-    printf("openkeymap dialog %s %s\n",szSelectKeyDialogTitle[doingShifted ? 1 : 0],UsedKeys.c_str());
+    selectedCtrlID = ctrlID;
+
+    doingShifted = false;
+
+    std::string UsedKeys = GetKeysUsed();
+
+    // Make the key identified by ctrlID look pressed
+    
+    printf("openkeymap dialog %c %s %s\n",ctrlID, szSelectKeyDialogTitle[doingShifted ? 1 : 0],UsedKeys.c_str());
+    
+    // set the 'ass ' text to the UsedKeys value
+    swift_uksetasstitle(UsedKeys.c_str());
+
 #endif
 }
 
@@ -369,9 +391,34 @@ static INT_PTR CALLBACK UserKeyboardDlgProc(HWND   hwnd,
 #else
 void UKWindowCommandHandler(UINT cmdID)
 {
+    // a button has been selected on the User Keyboard dialog window
     SelectKeyMapping(cmdID,0);
 }
 
+void UKWindowKeyDown(UINT keycode)
+{
+    // Assign the BBC key to the PC key.
+    // the PC key pressed on this dialogue
+    SetBBCKeyForVKEY(
+        keycode,
+        doingShifted
+    );
+
+    // SHOULD DO THE SHIFTED KEY TOO
+
+
+    // Show the key as not depressed, i.e., normal.
+    swift_buttonSetControlValue(selectedCtrlID, 0);
+
+    // deselect the key
+    selectedCtrlID = 0;
+    
+    std::string UsedKeys = GetKeysUsed();
+
+    // set the 'ass ' text to the UsedKeys value
+    swift_uksetasstitle(UsedKeys.c_str());
+
+}
 
 
 
@@ -524,7 +571,11 @@ static std::string GetKeysUsed()
 	// First see if this key is defined.
 	if (BBCRow != 0 || BBCCol != 0)
 	{
-		for (int i = 1; i < 256; i++)
+#ifdef BEEBWIN
+        for (int i = 1; i < 256; i++)
+#else
+        for (int i = 0; i < 256; i++)
+#endif
 		{
 			for (int s = 0; s < 2; ++s)
 			{

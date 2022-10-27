@@ -43,7 +43,9 @@ extern OSStatus UKWindowCommandHandler(UInt32 cmdID);
 
 extern BeebWin *mainWin;
 
+extern void UserKeyboardDialog();
 extern void SetBBCKeyForVKEY(int Key, bool shift);
+extern void UKWindowKeyDown(UINT keycode);
 
 #ifdef BEEBWIN
 extern char AutoRunPath[];
@@ -276,6 +278,11 @@ extern "C" void WriteLog(const char *fmt, ...)
 {
 }
 
+extern "C" void beeb_UserKeyboardOpen()
+{
+    UserKeyboardDialog();
+}
+
 extern "C" void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char charCode)
 {
 
@@ -287,16 +294,7 @@ extern "C" void beeb_ukhandlekeys(long eventkind, unsigned int keycode, char cha
             
             fprintf(stderr, "Key pressed: code = %d, '%c'\n", keycode, charCode);
                 
-//            SetBBCKeyForVKEY(keycode, doingShifted);
-//            
-//            // SHOULD DO THE SHIFTED KEY TOO
-//            
-//            // THEN
-//            selectedCtrlID = 0;
-//
-//            // Show the key as not depressed, i.e., normal.
-//            SetKeyColour(oldKeyColour);
-
+            UKWindowKeyDown(keycode);
     }
 
 }
