@@ -37,9 +37,40 @@ class BreakoutBoxViewController: NSViewController {
         beeb_BreakoutBoxCloseDialog()
     }
     
-    // for reset button
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do view setup here.
+        
+        for case let btn as NSButton in btnBits.subviewsRecursive() {
+            
+            print("\(btn.title) {\(btn.identifier?.rawValue ?? "unknown")}")
+            btn.action = #selector(kbdbtnPressed)
+        }
+        
+//        bbViewControllerInstance = self
+    }
+    
+    @objc
+    func kbdbtnPressed(sender: NSButton!)
+    {
+        print("\(sender.title) Pressed {\(sender.identifier?.rawValue ?? "unknown")}")
+        BBHandleCommand(sender)
+    }
+
+
+    
+    @IBOutlet weak var btnBits: NSStackView!
+    // ADD THE ACTION TO ALL THE BUTTONS
+    @IBOutlet weak var ass: NSTextField!
+    // CHANGE THE TEXT
+    
+    
+    
+    
+    
+    // for bitbuttons and reset button
     @IBAction func BBHandleCommand(_ sender: NSButton) {
-//        let cmd: String = sender.identifier?.rawValue ?? "none"
         let cmd: String = sender.identifier?.rawValue.padding(toLength: 4, withPad: " ", startingAt: 0) ?? "none"
         
         if (cmd == "uprs")
@@ -48,5 +79,11 @@ class BreakoutBoxViewController: NSViewController {
             // beeb_BBReset()
             print ("beeb_BBReset()")
         }
+        else
+        {
+            let p = conv(cmd)
+            beeb_BBHandleCommand(p)
+        }
+
     }
 }

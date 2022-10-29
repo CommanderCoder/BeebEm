@@ -22,6 +22,7 @@ void beeb_HandleCommand(unsigned int cmdID);
 
 void beeb_BreakoutBoxOpenDialog();
 void beeb_BreakoutBoxCloseDialog();
+long beeb_BBHandleCommand(unsigned int cmdID);
 
 
 long beeb_TCHandleCommand(unsigned int cmdID);

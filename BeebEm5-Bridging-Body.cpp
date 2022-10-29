@@ -146,6 +146,17 @@ extern "C" void beeb_BreakoutBoxCloseDialog()
     BreakoutBoxCloseDialog();
 }
 
+extern "C" long beeb_BBHandleCommand(unsigned int cmdID)
+{
+    char* cmdCHR = (char*)&cmdID;
+    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+#ifdef BEEBWIN
+    return BBWindowCommandHandler(cmdID);
+#else
+    return 0;
+#endif
+
+}
 
 extern "C" void beeb_TapeControlOpenDialog()
 {
@@ -165,9 +176,9 @@ extern "C" void beeb_TapeControlCloseDialog()
 
 extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
 {
-#ifdef BEEBWIN
     char* cmdCHR = (char*)&cmdID;
     printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+#ifdef BEEBWIN
     return TCWindowCommandHandler(cmdID);
 #else
     return 0;

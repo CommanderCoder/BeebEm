@@ -23,6 +23,14 @@ class KeyboardMappingViewController: NSViewController {
     
     @IBOutlet weak var ass: NSTextField!
     
+    override func viewDidAppear() {
+        beeb_UserKeyboardOpen()
+    }
+    
+    override func viewDidDisappear() {
+//        beeb_UserKeyboardClosed()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
@@ -34,7 +42,6 @@ class KeyboardMappingViewController: NSViewController {
         }
         
         kbViewControllerInstance = self
-        beeb_UserKeyboardOpen()
     }
     
     @objc

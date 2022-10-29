@@ -83,7 +83,7 @@ extern AVIWriter *aviWriter;
 
 #else
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE };
 
 extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
 extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
@@ -1672,6 +1672,15 @@ void BeebWin::ExportDiscFiles(int menuId)
 	{
 		return;
 	}
+#else
+    // Need to set up a SAVE dialog with the list of files.
+    // see DiscExportDlgProc
+    
+    
+//    if (0!=swift_SaveFile(szDiscFile, MAX_PATH, DISCFILE))
+//    {
+//        return;
+//    }
 #endif
     
 	// Export the files
@@ -1779,6 +1788,11 @@ void BeebWin::ImportDiscFiles(int menuId)
 	{
 		return;
 	}
+#else
+    if (0 != swift_GetOneFileWithPreview(fileSelection, sizeof(fileSelection),DISCFILE))
+    {
+        return;
+    }
 #endif
     
 	// Parse the file selection string
@@ -1786,7 +1800,11 @@ void BeebWin::ImportDiscFiles(int menuId)
 	if (fileName[0] == 0)
 	{
 		// Only one file selected
+#ifdef BEEBWIN
 		fileName = strrchr(fileSelection, '\\');
+#else
+        fileName = strrchr(fileSelection, '/');
+#endif
 		if (fileName != NULL)
 			*fileName = 0;
 		fileName++;

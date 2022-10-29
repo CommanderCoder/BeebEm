@@ -16,6 +16,7 @@ import AVFoundation
     case UEF
     case IFD
     case KEYBOARD
+    case DISCFILE
 }
 
 
@@ -65,17 +66,22 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
     dialog.showsHiddenFiles        = false
     dialog.allowsMultipleSelection = false
     dialog.canChooseDirectories    = false
+    dialog.canChooseFiles    = true
+    dialog.allowsOtherFileTypes = true
+
     switch fileexts {
     case .DISC:
-        dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"];
+        dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"]
     case .UEF:
-        dialog.allowedFileTypes        = ["uef", "csw"];
+        dialog.allowedFileTypes        = ["uef", "csw"]
     case .IFD:
-        dialog.allowedFileTypes        = ["ssd", "dsd", "inf"];
+        dialog.allowedFileTypes        = ["ssd", "dsd", "inf"]
     case .KEYBOARD:
-        dialog.allowedFileTypes        = ["kmap"];
+        dialog.allowedFileTypes        = ["kmap"]
+    case .DISCFILE:
+        dialog.allowedFileTypes        = nil  // ["inf"]
     }
-
+    
     if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
         let result = dialog.url // Pathname of the file
 
@@ -107,15 +113,18 @@ func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int, fileexts
     dialog.title                   = "Choose a file | BeebEm5"
     dialog.showsResizeIndicator    = true
     dialog.showsHiddenFiles        = false
+    dialog.allowsOtherFileTypes    = true
     switch fileexts {
     case .DISC:
-        dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"];
+        dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"]
     case .UEF:
-        dialog.allowedFileTypes        = ["uef", "csw"];
+        dialog.allowedFileTypes        = ["uef", "csw"]
     case .IFD:
-        dialog.allowedFileTypes        = ["ssd", "dsd", "inf"];
+        dialog.allowedFileTypes        = ["ssd", "dsd", "inf"]
     case .KEYBOARD:
-        dialog.allowedFileTypes        = ["kmap"];
+        dialog.allowedFileTypes        = ["kmap"]
+    case .DISCFILE:
+        dialog.allowedFileTypes        = ["inf"]
     }
     
     

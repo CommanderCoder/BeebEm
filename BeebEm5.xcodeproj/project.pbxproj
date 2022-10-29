@@ -327,6 +327,7 @@
 		DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = beebmainspeech.cpp; sourceTree = "<group>"; };
 		DCF3CDA128ECFB4500040892 /* beebemrcids.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = beebemrcids.cpp; path = src/beebemrcids.cpp; sourceTree = "<group>"; };
 		DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeebEm5-Bridging-Code.swift"; sourceTree = "<group>"; };
+		DCFFFB9F290C4DBE00E59CBA /* todo.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = todo.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -508,6 +509,7 @@
 		DCCCC29224A338ED00840082 = {
 			isa = PBXGroup;
 			children = (
+				DCFFFB9F290C4DBE00E59CBA /* todo.md */,
 				DC70E75625A3A65300A7FF3E /* upgradenotes.rtf */,
 				DC41118125A2222A00E59712 /* Bugs.rtf */,
 				DCD5DC162565E6D500FB151D /* Icons */,

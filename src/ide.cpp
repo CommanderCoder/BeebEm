@@ -80,13 +80,19 @@ void IDEReset()
 	for (int i = 0; i < IDEDriveMax; ++i)
 	{
 		char buff[256];
+#ifdef BEEBWIN
 		sprintf(buff, "%s\\ide%d.dat", HardDrivePath, i);
-		IDEDisc[i] = fopen(buff, "rb+");
+#else
+        sprintf(buff, "%s/ide%d.dat", HardDrivePath, i);
+#endif
+        IDEDisc[i] = fopen(buff, "rb+");
 
 		if (IDEDisc[i] == nullptr)
 		{
             char *error = _strerror(nullptr);
-			error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
+#ifdef BEEBWIN
+            error[strlen(error) - 1] = '\0'; // Remove trailing '\n'
+#endif
 
 			mainWin->Report(MessageType::Error,
 											"Could not open IDE disc image:\n  %s\n\n%s", buff, error);
