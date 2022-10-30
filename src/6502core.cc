@@ -58,15 +58,6 @@
 
 extern Master512CoPro master512CoPro;
 
-
-int CPUDebug=0;
-int BeginDump=0;
-FILE *InstrLog;
-FILE *osclilog; //=fopen("/oscli.log","wt");
-
-static unsigned int InstrCount;
-int IgnoreIllegalInstructions = 1;
-
 static int CurrentInstruction;
 
 extern int DumpAfterEach;
@@ -75,7 +66,7 @@ extern CArm *arm;
 
 CycleCountT TotalCycles=0;
 
-extern int trace;
+static bool trace = false;
 int ProgramCounter;
 int PrePC;
 static int Accumulator,XReg,YReg;
@@ -86,7 +77,7 @@ int SwitchOnCycles=2000000; // Reset delay
 
 unsigned char intStatus=0; /* bit set (nums in IRQ_Nums) if interrupt being caused */
 unsigned char NMIStatus=0; /* bit set (nums in NMI_Nums) if NMI being caused */
-bool NMILock = false; /* Well I think NMI's are maskable - to stop repeated NMI's - the lock is released when an RTI is done */
+bool NMILock = false; // Well I think NMI's are maskable - to stop repeated NMI's - the lock is released when an RTI is done
 typedef int int16;
 INLINE static void SBCInstrHandler(int16 operand);
 
@@ -1216,7 +1207,6 @@ void DoNMI(void) {
   IRQCycles=7;
 } /* DoNMI */
 
-int i186_execute(int num_cycles);
 int DebugDisassembleInstruction(int addr, bool host, char *opstr);
 
 void Dis6502(char *str)
@@ -1297,7 +1287,6 @@ void Exec6502Instruction(void) {
             char str[128];
             Dis6502(str);
             WriteLog("%s\n", str);
-            trace--;
         }
 // TODO: Fix Me
 //        if (trace_186) {
@@ -2987,7 +2976,7 @@ void PollHardware(unsigned int nCycles) {
         AdjustTrigger(TapeTrigger);
         AdjustTrigger(EconetTrigger);
         AdjustTrigger(EconetFlagFillTimeoutTrigger);
-        if ( (EnableTube) && (TubeType == Tube::Acorn65C02) )
+        if (TubeType == Tube::Acorn65C02) 
             WrapTubeCycles();
     }
 
@@ -3042,18 +3031,17 @@ void Save6502UEF(FILE *SUEF) {
 }
 
 void Load6502UEF(FILE *SUEF) {
-
     ProgramCounter = fget16(SUEF);
-    Accumulator = fgetc(SUEF);
-    XReg = fgetc(SUEF);
-    YReg = fgetc(SUEF);
-    StackReg = fgetc(SUEF);
-    PSR = fgetc(SUEF);
+    Accumulator = fget8(SUEF);
+    XReg = fget8(SUEF);
+    YReg = fget8(SUEF);
+    StackReg = fget8(SUEF);
+    PSR = fget8(SUEF);
     // TotalCycles = fget32(SUEF);
-    fget32(SUEF); // Unused was Dlong
-    intStatus = fgetc(SUEF);
-    NMIStatus = fgetc(SUEF);
-    NMILock = fgetc(SUEF);
+    fget32(SUEF); // Unused, was: Dlong
+    intStatus = fget8(SUEF);
+    NMIStatus = fget8(SUEF);
+    NMILock = fget8(SUEF);
     // AtoDTrigger = Disc8271Trigger = AMXTrigger =
     //   PrinterTrigger = VideoTriggerCount = TotalCycles+100;
     // if (UseHostClock) SoundTrigger = TotalCycles+100;

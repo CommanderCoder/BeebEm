@@ -26,7 +26,7 @@
 #define CORE6502_HEADER
 
 #include "port.h"
-#include "stdio.h"
+#include <stdio.h>
 
 void DumpRegs(void);
 
@@ -55,10 +55,7 @@ typedef enum PSR_Flags
 	FlagN=128
 } PSR_Flags;
 
-extern int trace;
 extern int trace_186;
-extern int IgnoreIllegalInstructions;
-extern int BeginDump;
 
 extern unsigned char intStatus;
 extern unsigned char NMIStatus;
@@ -72,8 +69,8 @@ extern int DisplayCycles;
 extern int CyclesToInt;
 #define NO_TIMER_INT_DUE	-1000000
 
-#define SetTrigger(after,var) var=TotalCycles+after;
-#define IncTrigger(after,var) var+=(after);
+#define SetTrigger(after, var) var = TotalCycles + after;
+#define IncTrigger(after, var) var += (after);
 
 #define ClearTrigger(var) var=CycleCountTMax;
 
@@ -85,7 +82,7 @@ void Init6502core(void);
 
 /*-------------------------------------------------------------------------*/
 /* Execute one 6502 instruction, move program counter on                   */
-extern "C" void Exec6502Instruction(void);
+void Exec6502Instruction(void);
 
 void DoNMI(void);
 void core_dumpstate(void);
@@ -95,10 +92,10 @@ void Load6502UEF(FILE *SUEF);
 void SyncIO(void);
 void AdjustForIORead(void);
 void AdjustForIOWrite(void);
-int i186_execute(int num_cycles);
+
 extern int SwitchOnCycles; // Reset delay
 extern int OpCodes;
 extern bool BHardware;
 
-void WriteInstructionCounts(const char* Filename);
+void WriteInstructionCounts(const char* FileName);
 #endif
