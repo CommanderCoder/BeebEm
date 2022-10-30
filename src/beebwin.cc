@@ -1904,7 +1904,7 @@ void BeebWin::Initialise(char *home)
 		TranslateKeyMapping();
 	}
 	TouchScreenOpen();
-	IgnoreIllegalInstructions = 1;
+	//IgnoreIllegalInstructions = 1;
 
 	m_WriteProtectDisc[0] = !IsDiscWritable(0);
 	m_WriteProtectDisc[1] = !IsDiscWritable(1);
@@ -3430,7 +3430,7 @@ void BeebWin::InitMenu(void)
 	SetMenuCommandIDCheck('full', (OpCodes == 3) ? true : false);
 
 	SetMenuCommandIDCheck('hard', (BHardware) ? true : false);
-	SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
+	//SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
 	SetMenuCommandIDCheck('sfps', (m_ShowSpeedAndFPS) ? true : false);
 	SetMenuCommandIDCheck('sped', (SpeechEnabled) ? true : false);
 	SetMenuCommandIDCheck('sond', (SoundEnabled) ? true : false);
@@ -4200,18 +4200,18 @@ OSStatus err = noErr;
 			
 			break;
 			
-        case 'igil':
-            fprintf(stderr, "Ignore Illegal Instructions selected\n");
-			if (IgnoreIllegalInstructions)
-			{
-				IgnoreIllegalInstructions = false;
-			}
-			else
-			{
-				IgnoreIllegalInstructions = true;
-			}
-			SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
-            break;
+//        case 'igil':
+//           fprintf(stderr, "Ignore Illegal Instructions selected\n");
+//			if (IgnoreIllegalInstructions)
+//			{
+//				IgnoreIllegalInstructions = false;
+//			}
+//			else
+//			{
+//				IgnoreIllegalInstructions = true;
+//			}
+//			SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
+//            break;
 
         case 'hard':
             fprintf(stderr, "Basic Hardware selected\n");
