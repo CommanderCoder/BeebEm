@@ -104,6 +104,15 @@ static INT SampleRight;
 
 static SoundStreamer *pSoundStreamer = NULL;
 
+#ifndef BEEBWIN
+extern "C" int swift_GetSoundBufferLength(int outputType);
+
+#define PBYTE unsigned char*
+
+extern "C" void swift_SoundStream(PBYTE buffer, int outputType);
+extern "C" void swift_SoundInit();
+#endif
+
 void Music5000Init()
 {
 	static_assert(sizeof(WAVERAM) == RAM_SIZE, "WAVERAM size");
@@ -132,6 +141,7 @@ void Music5000Init()
 		}
 	}
 
+#ifdef BEEBWIN
 	// Init the streamer
 	delete pSoundStreamer;
 	pSoundStreamer = CreateSoundStreamer(46875, 16, 2);
@@ -151,13 +161,27 @@ void Music5000Init()
 			Music5000Enabled = false;
 		}
 	}
+#else
+    printf("M5000 init\n");
+    SampleBufSize = swift_GetSoundBufferLength(2);
+    if (SampleBuf)
+        free(SampleBuf);
+    SampleBuf = (INT16*)malloc(SampleBufSize * 4);
+    if (SampleBuf == NULL)
+    {
+        Music5000Enabled = false;
+    }
+#endif
 }
 
 void Music5000Reset()
 {
+    printf("M5000 reset\n");
+#ifdef BEEBWIN
 	delete pSoundStreamer;
 	pSoundStreamer = NULL;
-	JimPageSelectRegister = 0;
+#endif
+    JimPageSelectRegister = 0;
 }
 
 void Music5000Write(int address, unsigned char value)
@@ -226,6 +250,9 @@ void Music5000Update(UINT cycles)
 	UINT sign;
 	UINT pos;
 	INT sample;
+    
+    if (SampleBuf==NULL)
+        return;
 
 	// Convert 2MHz 6502 cycles to 6MHz Music5000 cycles
 	CycleCount += cycles * 3;
@@ -312,7 +339,12 @@ void Music5000Update(UINT cycles)
 
 			if (SampleWritePtr/2 >= SampleBufSize)
 			{
-				pSoundStreamer->Stream(SampleBuf);
+#ifdef BEEBWIN
+                pSoundStreamer->Stream(SampleBuf);
+#else
+//                printf("C 0x%x 0x%x\n", (INT16)SampleBuf[0] , (INT16)SampleBuf[1]);
+                swift_SoundStream((PBYTE)SampleBuf, 2);// outputtype 2 = 16 bit, 2 channel
+#endif
 				SampleWritePtr = 0;
 			}
 

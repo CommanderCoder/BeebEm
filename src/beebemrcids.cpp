@@ -202,6 +202,10 @@ std::map<int,int> ID2RC =
 {'cpyc', ID}, // copy window to clipboard
 {'invb', ID}, // invertbackground
 {'swtd', IDM_CAPTURESCREEN},
+    
+{'ttsp',IDM_TEXTTOSPEECH},
+{'mus5',IDM_MUSIC5000},
+    
 {'mbcn', ID_8271},
 {'mbca', ID_FDC_ACORN}, //Acorn 1770 Controller
 {'mbco', ID_FDC_OPUS}, //OPUS 1770 Controller - on DLL on windows

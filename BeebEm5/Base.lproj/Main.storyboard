@@ -949,14 +949,14 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="9cb-Zp-aJP"/>
-                                        <menuItem title="Text To Speech" identifier="snev" id="X3W-NZ-fnk">
+                                        <menuItem title="Text To Speech" identifier="ttsp" id="X3W-NZ-fnk">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ZKf-OO-egl"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="YAL-Lr-Tlf"/>
-                                        <menuItem title="Music 5000" identifier="snev" id="R6Q-xj-Q15">
+                                        <menuItem title="Music 5000" identifier="mus5" id="R6Q-xj-Q15">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ii3-YM-x0B"/>

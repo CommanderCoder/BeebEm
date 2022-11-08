@@ -138,7 +138,7 @@ SoundStreamer *pSoundStreamer = nullptr;
 #ifndef BEEBWIN
 #define PBYTE unsigned char*
 
-extern "C" void swift_SoundStream(PBYTE buffer);
+extern "C" void swift_SoundStream(PBYTE buffer, int outputType);// outputtype 1 = 8 bit, 1 channel, 2 = 16 bit, 2 channel
 extern "C" void swift_SoundInit();
 
 #endif
@@ -164,7 +164,7 @@ static void WriteToSoundBuffer(PBYTE lpbSoundData)
 		}
 	}
 #else
-    swift_SoundStream(lpbSoundData);
+    swift_SoundStream(lpbSoundData, 1); // outputtype 1 = 8 bit, 1 channel
 #endif
 }
 

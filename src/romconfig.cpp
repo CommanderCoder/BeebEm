@@ -71,6 +71,8 @@ void BeebWin::EditROMConfig(void)
 		memcpy(&RomConfig, &ROMCfg, sizeof(ROMConfigFile));
 		BeebReadRoms();
 	}
+#else
+    printf("EDIT ROM DIALOG\n");
 #endif
     
 }
