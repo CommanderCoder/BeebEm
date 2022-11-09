@@ -11,7 +11,8 @@ void WriteMyPropertyListToFile( CFPropertyListRef propertyList,
    Boolean status;
    SInt32 errorCode;
    // Convert the property list into XML data.
-   xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList );
+   //   xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList );
+   xmlData = CFPropertyListCreateData( kCFAllocatorDefault, propertyList, kCFPropertyListXMLFormat_v1_0, 0, nullptr );
    // Write the XML data to the file.
    status = CFURLWriteDataAndPropertiesToResource (
                fileURL,                  // URL to use
@@ -44,6 +45,7 @@ CFPropertyListRef CreateMyPropertyListFromFile( CFURLRef fileURL )
                resourceData,
                kCFPropertyListImmutable,
                &errorString);
+  //   propertyList = CFPropertyListCreateData( kCFAllocatorDefault, resourceData, kCFPropertyListXMLFormat_v1_0, kCFPropertyListImmutable, nullptr );
    CFRelease( resourceData );
    return propertyList;
 }
