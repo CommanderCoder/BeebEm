@@ -10,7 +10,6 @@ import Foundation
 import Cocoa
 import AVFoundation
 
-
 @objc enum FileFilter :Int {
     case DISC
     case UEF
@@ -914,5 +913,29 @@ public func swift_CloseAudio()
 
 }
 
+@_cdecl("swift_getPasteboard")
+public func swift_getPasteboard(_ text: UnsafeMutablePointer<CChar>, _ length: Int) -> Int
+{
+    let pasteboard = NSPasteboard.general
 
+    if let string = pasteboard.string(forType: .string) {
+        // text was found and placed in the "string" constant
+        
+        // set the filepath back in the C code - fill with zeros first
+        text.assign(repeating: 0, count: length)
+        text.assign(from: string, count: string.count)
+        return 1
+    }
+    return 0
+}
+
+
+@_cdecl("swift_setPasteboard")
+public func swift_setPasteboard(_ text: UnsafePointer<CChar>, _ length: UInt)
+{
+    let pasteboard = NSPasteboard.general
+
+    pasteboard.clearContents()
+    pasteboard.setString(String(cString:text), forType: .string)
+}
 

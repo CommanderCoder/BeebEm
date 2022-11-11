@@ -58,6 +58,10 @@ Boston, MA  02110-1301, USA.
 #include "SprowCoPro.h"
 #include "Master512CoPro.h"
 
+#ifndef BEEBWIN
+extern "C" void swift_sleepCPU(unsigned long microseconds);
+#endif
+
 #ifdef WIN32
 #define INLINE inline
 #else
@@ -1358,6 +1362,8 @@ void Exec6502Instruction(void) {
 		{
 #ifdef BEEBWIN
             Sleep(10);  // Ease up on CPU when halted
+#else
+            swift_sleepCPU(10);  // Ease up on CPU when halted
 #endif
             continue;
 		}

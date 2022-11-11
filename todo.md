@@ -13,7 +13,7 @@
 * Teletext
 * Sound volume
 * text to speech
-* music 5000 http://8bs.com/emum5000.htm#m500
+* music 5000 http://8bs.com/emum5000.htm#m500 - working but needs massive buffers.  need to figure out why the timing is off.
 * motion blur
 * printer
 * rs423
@@ -22,3 +22,4 @@
 * video capture
 * image capture
 * s/w ram board - edit rom dialogue required
+* copy/paste - done

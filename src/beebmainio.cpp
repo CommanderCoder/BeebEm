@@ -90,6 +90,9 @@ extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
 extern "C" int swift_MoveFile (const char *src, const char *dest );
 
 
+extern "C" int swift_setPasteboard ( const char* clipboard, int length);
+extern "C" int swift_getPasteboard ( char* clipboard, int length);
+
 #endif
 
 typedef void (*lGetBoardProperties)(struct DriveControlBlock *);
@@ -1462,6 +1465,12 @@ void BeebWin::doPaste()
 	}
 
 	CloseClipboard();
+#else
+    if (swift_getPasteboard(m_ClipboardBuffer,ClipboardBufferSize))
+    {
+        m_ClipboardIndex = 0;
+        m_ClipboardLength = (int)strlen(m_ClipboardBuffer);
+    }
 #endif
 }
 
@@ -1502,6 +1511,8 @@ void BeebWin::CopyKey(unsigned char Value)
 	SetClipboardData(CF_TEXT, hglbCopy);
 
 	CloseClipboard();
+#else
+    swift_setPasteboard(m_printerbuffer,m_printerbufferlen);
 #endif
 }
 
