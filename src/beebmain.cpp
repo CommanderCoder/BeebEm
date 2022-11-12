@@ -4481,7 +4481,8 @@ void BeebWin::HandleCommand(int MenuId)
 		break;
 	}
 
-        case IDM_DISABLEKEYSBREAK:
+#endif
+    case IDM_DISABLEKEYSBREAK:
 		m_DisableKeysBreak = !m_DisableKeysBreak;
 		UpdateDisableKeysMenu();
 		break;
@@ -4491,14 +4492,17 @@ void BeebWin::HandleCommand(int MenuId)
 		UpdateDisableKeysMenu();
 		break;
 
+#ifdef BEEBWIN
 	case IDM_DISABLEKEYSSHORTCUT:
 		m_DisableKeysShortcut = !m_DisableKeysShortcut;
 		UpdateDisableKeysMenu();
 		break;
+#endif
 
 	case IDM_DISABLEKEYSALL:
-		if (m_DisableKeysWindows && m_DisableKeysBreak &&
-			m_DisableKeysEscape && m_DisableKeysShortcut)
+#ifdef BEEBWIN
+        if (m_DisableKeysWindows && m_DisableKeysBreak &&
+        m_DisableKeysEscape && m_DisableKeysShortcut)
 		{
 			if (m_DisableKeysWindows)
 				HandleCommand(IDM_DISABLEKEYSWINDOWS);
@@ -4514,9 +4518,20 @@ void BeebWin::HandleCommand(int MenuId)
 			m_DisableKeysEscape = true;
 			m_DisableKeysShortcut = true;
 		}
+#else
+        if (m_DisableKeysEscape && m_DisableKeysBreak)
+        {
+            m_DisableKeysEscape = false;
+            m_DisableKeysBreak = false;
+        }
+        else
+        {
+            m_DisableKeysEscape = true;
+            m_DisableKeysBreak = true;
+        }
+#endif
 		UpdateDisableKeysMenu();
 		break;
-#endif
 	}
 
 	if (!StayMuted)

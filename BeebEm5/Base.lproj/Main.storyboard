@@ -1458,22 +1458,43 @@
                                         </menuItem>
                                         <menuItem title="Disable Keys" id="e3T-DH-mbH">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Disable Keys" id="vhZ-rd-lHB">
+                                            <menu key="submenu" title="Disable Keys" autoenablesItems="NO" id="vhZ-rd-lHB">
                                                 <items>
-                                                    <menuItem title="Escape Key" id="w9z-yY-sFq">
+                                                    <menuItem title="Break Key" state="on" identifier="kbrk" id="w9z-yY-sFq">
+                                                        <attributedString key="attributedTitle"/>
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="w7O-9P-WPM"/>
+                                                        </connections>
                                                     </menuItem>
-                                                    <menuItem title="All Keys Above" id="Ynp-NE-Nco">
+                                                    <menuItem title="Shortcut Key" state="on" hidden="YES" enabled="NO" identifier="ksht" id="78x-rr-sML">
+                                                        <attributedString key="attributedTitle"/>
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="NsY-F5-s4J"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Command Key" state="on" hidden="YES" enabled="NO" identifier="kwin" id="U9u-vY-Q9L">
+                                                        <attributedString key="attributedTitle"/>
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="duq-KJ-IrJ"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Escape Key" state="on" identifier="kesc" id="XRl-bs-Suj">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="uem-47-Dbd"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="All Keys Above" identifier="kdis" id="78K-C3-lfI">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Uwo-V0-E2T"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
-                                        </menuItem>
-                                        <menuItem title="Old Disable Keys" identifier="kdis" id="6Ya-Lq-Zv2">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="CCD-kl-Ghz"/>
-                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="3Lt-gs-dqO"/>
                                         <menuItem title="Debugger" identifier="dbgr" id="EGB-oy-uKF">

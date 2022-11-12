@@ -189,7 +189,7 @@ std::map<int,int> ID2RC =
 {'txtd', ID_TELETEXTFILES},
 {'txts', ID_TELETEXTLOCALHOST},
 {'txtc', ID_TELETEXTCUSTOM},
-{'flpe',ID_FLOPPYDRIVE},
+{'flpe', ID_FLOPPYDRIVE},
 {'hdsc', ID_HARDDRIVE},
 {'hdde', ID_IDEDRIVE},
 {'hdre', IDM_SELECT_HARD_DRIVE_FOLDER},
@@ -202,9 +202,9 @@ std::map<int,int> ID2RC =
 {'cpyc', ID}, // copy window to clipboard
 {'invb', ID}, // invertbackground
 {'swtd', IDM_CAPTURESCREEN},
-    
-{'ttsp',IDM_TEXTTOSPEECH},
-{'mus5',IDM_MUSIC5000},
+{'txvw', IDM_TEXTVIEW},
+{'ttsp', IDM_TEXTTOSPEECH},
+{'mus5', IDM_MUSIC5000},
     
 {'mbcn', ID_8271},
 {'mbca', ID_FDC_ACORN}, //Acorn 1770 Controller
@@ -215,6 +215,10 @@ std::map<int,int> ID2RC =
     {'hcur', IDM_HIDECURSOR},
     {'kf10', IDM_MAPFUNCS},
     {'kdis', IDM_DISABLEKEYSALL},
+    {'kwin', IDM_DISABLEKEYSWINDOWS},
+    {'ksht', IDM_DISABLEKEYSSHORTCUT},
+    {'kbrk', IDM_DISABLEKEYSBREAK},
+    {'kesc', IDM_DISABLEKEYSESCAPE},
     {'sram', IDM_SWRAMBOARD},
     {'erom', IDM_ROMCONFIG},
     // userportbreakout

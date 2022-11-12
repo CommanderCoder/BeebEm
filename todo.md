@@ -14,7 +14,7 @@
 * Sound volume
 * text to speech : use AVSpeechSynthesizer 
 * music 5000 http://8bs.com/emum5000.htm#m500 - working but needs massive buffers.  need to figure out why the timing is off.
-* motion blur
+* motion blur - done
 * printer
 * rs423
 * IDE HDD : https://acorn.huininga.nl/pub/software/BeebEm/BeebEm-4.14.68000-20160619/Help/harddisks.html
@@ -23,3 +23,4 @@
 * image capture
 * s/w ram board - edit rom dialogue required
 * copy/paste - done
+* textview - part of beebspeech

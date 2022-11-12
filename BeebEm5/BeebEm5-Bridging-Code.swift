@@ -272,12 +272,12 @@ public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
-        print("smc",cmdSTR,check)
+        print("\(#function)",cmdSTR,check)
         n.state = check ? .on : .off
     }
     else
     {
-        print("smc not found: ",cmdSTR)
+        print("\(#function) not found: ",cmdSTR)
     }
 }
 
@@ -309,12 +309,12 @@ public func swift_SetMenuEnable(_ cmd: UInt32, _ enable: Bool)
     let cmdSTR =  conv(cmd)
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
-        print("sme",cmdSTR,enable)
+        print("\(#function)",cmdSTR,enable)
         n.isEnabled = enable
     }
     else
     {
-        print("sme not found: ",cmdSTR)
+        print("\(#function) not found: ",cmdSTR)
     }
 }
 
