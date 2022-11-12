@@ -839,13 +839,13 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Sound Streamer" id="rNj-Yc-ubR">
                                                 <items>
-                                                    <menuItem title="XAudio 2" state="on" enabled="NO" identifier="tpcr" id="hTP-Zo-eBo">
+                                                    <menuItem title="XAudio 2" state="on" enabled="NO" id="hTP-Zo-eBo">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="d0W-44-rTu"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="DirectSound" enabled="NO" identifier="tpso" id="ZYw-7j-Xmx">
+                                                    <menuItem title="DirectSound" enabled="NO" id="ZYw-7j-Xmx">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Zgy-Ex-caf"/>
@@ -870,13 +870,13 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Sound Effects" id="tOM-zy-QcS">
                                                 <items>
-                                                    <menuItem title="Cassette Relay" state="on" identifier="tpcr" id="Wu5-IP-Xiv">
+                                                    <menuItem title="Cassette Relay" identifier="tpcr" id="Wu5-IP-Xiv">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4dH-iI-gLZ"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Cassette Input" state="on" identifier="tpso" id="Mar-tt-ip6">
+                                                    <menuItem title="Cassette Input" identifier="tpso" id="Mar-tt-ip6">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="HandleCommand:" target="Voe-Tx-rLC" id="vW9-Bw-FIx"/>
@@ -1349,7 +1349,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="oa0-Ea-k4g"/>
-                                        <menuItem title="User Port Breakout box" id="pal-E8-XOQ">
+                                        <menuItem title="User Port Breakout box" identifier="upbo" id="pal-E8-XOQ">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <segue destination="aao-ZM-AXI" kind="show" id="v9V-x6-usa"/>

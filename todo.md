@@ -2,17 +2,17 @@
 
 * breakout board
 * check User Def keyboard
-* cassette/HD leds
+* cassette/HD leds - DONE
 * disable keys
 * SPROW second processor
 * joystick/mousestick
 * debugger
 * preference options
-* RTC module
+* RTC module - done
 * Econet
 * Teletext
 * Sound volume
-* text to speech
+* text to speech : use AVSpeechSynthesizer 
 * music 5000 http://8bs.com/emum5000.htm#m500 - working but needs massive buffers.  need to figure out why the timing is off.
 * motion blur
 * printer

@@ -47,6 +47,21 @@ Boston, MA  02110-1301, USA.
 #endif
 #endif
 
+
+extern "C" enum class Model1 : unsigned char {
+    B,         // 0: BBC B
+    IntegraB,  // 1: BBC B with Integra B
+    BPlus,     // 2: BBC B+
+    Master128, // 3: BBC Master 128
+    Last
+};
+
+
+extern "C" enum KB_LEDS { CASS, CAPS, SHIFT, HD0, HD1, HD2, HD3, FD0, FD1 };
+extern "C" int swift_SetLED(KB_LEDS led, bool on);
+extern "C" int swift_SetMachineType(Model machinetype);
+
+
 using namespace std;
 
 /* Bit assignments in control reg:
@@ -1604,6 +1619,25 @@ void VideoAddLEDs(void) {
 		mainWin->doLED(628-adj,LEDs.Disc1);
 	}
     
+    
+    
+    // Swift LEDs here
+    swift_SetMachineType(MachineType);
+    if (MachineType == Model::Master128)
+        swift_SetLED(CASS,true);
+    else
+        swift_SetLED(CASS,LEDs.Motor);
+    
+    swift_SetLED(CAPS,LEDs.CapsLock);
+    swift_SetLED(SHIFT,LEDs.ShiftLock);
+
+    swift_SetLED(HD0,LEDs.HDisc[0]);
+    swift_SetLED(HD1,LEDs.HDisc[1]);
+    swift_SetLED(HD2,LEDs.HDisc[2]);
+    swift_SetLED(HD3,LEDs.HDisc[3]);
+    swift_SetLED(FD0,LEDs.Disc0);
+    swift_SetLED(FD1,LEDs.Disc1);
+
 }
 
 /*-------------------------------------------------------------------------*/

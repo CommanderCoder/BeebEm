@@ -19,6 +19,27 @@ import AVFoundation
 }
 
 
+@objc public enum MachineModel : UInt16 {
+    
+    case B = 0     // 0: BBC B
+    case IntegraB  // 1: BBC B with Integra B
+    case BPlus     // 2: BBC B+
+    case Master128 // 3: BBC Master 128
+
+}
+
+//option set (bit flags)
+struct MachineTypeFlags: OptionSet
+{
+    let rawValue: UInt16
+
+    static let B            = MachineTypeFlags(rawValue: 1 << MachineModel.B.rawValue)
+    static let IntegraB     = MachineTypeFlags(rawValue: 1 << MachineModel.IntegraB.rawValue)
+    static let BPlus        = MachineTypeFlags(rawValue: 1 << MachineModel.BPlus.rawValue)
+    static let Master128    = MachineTypeFlags(rawValue: 1 << MachineModel.Master128.rawValue)
+}
+
+
 @objc public enum KB_LEDs : UInt16 {
     case CASS = 0
     case CAPS
@@ -30,7 +51,6 @@ import AVFoundation
     case FD0
     case FD1
 }
-
 
 
 //option set (bit flags)
@@ -53,7 +73,7 @@ enum CBridge {
     static var windowTitle = "-"
     static var nextCPU = 0
     static var leds: LEDFlags = []
-    static var machineType = 0
+    static var machineType: MachineTypeFlags = []
 }
 
 // allow access to this in C
@@ -427,9 +447,11 @@ public func swift_SetLED(_ led: KB_LEDs, _ value: Bool)
 
 
 @_cdecl("swift_SetMachineType")
-public func swift_SetMachineType(_ type: Int)
+public func swift_SetMachineType(_ type: MachineModel)
 {
-    CBridge.machineType = type;
+    let mtf: MachineTypeFlags = MachineTypeFlags(rawValue: 1 << type.rawValue)
+
+    CBridge.machineType = mtf
 }
 
 @_cdecl("swift_uksetasstitle")

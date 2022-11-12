@@ -157,8 +157,8 @@ std::map<int,int> ID2RC =
 {'tpul', ID_UNLOCKTAPE},
 {'tpco', IDD_TAPECONTROL},
 {'dbgr', IDM_SHOWDEBUGGER},
-{'upbo', ID},
-{'uprm', ID},
+{'upbo', ID_BREAKOUT},
+{'uprm', ID_UPRM},
 {'abou', IDM_ABOUT},
 {'kusr', IDM_DEFINEKEYMAP},
 {'lukm', IDM_LOADKEYMAP},
@@ -210,7 +210,6 @@ std::map<int,int> ID2RC =
 {'mbca', ID_FDC_ACORN}, //Acorn 1770 Controller
 {'mbco', ID_FDC_OPUS}, //OPUS 1770 Controller - on DLL on windows
 {'mbcw', ID_FDC_WATFORD}, //Watford 1770 - on DLL on windows
-    {'mrtc', ID_UPRM},
     {'mrty', ID_RTCY2KADJUST},
     {'jstk', IDM_JOYSTICK},
     {'hcur', IDM_HIDECURSOR},
