@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -95,6 +95,7 @@
 		8B54204A2844224D00E50140 /* BeebEm5.profdata */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeebEm5.profdata; sourceTree = "<group>"; };
 		8B7A6B8C27707709002576FC /* Master512CoPro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Master512CoPro.h; path = src/Master512CoPro.h; sourceTree = "<group>"; };
 		8B7A6B8D27707721002576FC /* Master512CoPro.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Master512CoPro.cc; path = src/Master512CoPro.cc; sourceTree = "<group>"; };
+		8B8E4C01292AAFB500556B7A /* BeebEm5Debug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeebEm5Debug.entitlements; sourceTree = "<group>"; };
 		8B92DC29283FA427007E9581 /* AUNMap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AUNMap; sourceTree = "<group>"; };
 		8BC8CAD92770B24E006F0FAD /* log.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cc; path = src/log.cc; sourceTree = "<group>"; };
 		8BC8CADC2770B25C006F0FAD /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = src/log.h; sourceTree = "<group>"; };
@@ -313,11 +314,13 @@
 				DCCCC29B24A338ED00840082 /* BeebEm5.app */,
 			);
 			name = Products;
+			path = BeebEm5;
 			sourceTree = "<group>";
 		};
 		DCCCC29D24A338ED00840082 /* BeebEm5 */ = {
 			isa = PBXGroup;
 			children = (
+				8B8E4C01292AAFB500556B7A /* BeebEm5Debug.entitlements */,
 				DCB0BD8E24CC8CAC009FEA9E /* WIP */,
 				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
 				DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */,
@@ -512,8 +515,8 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1140;
-				LastUpgradeCheck = 1240;
-				ORGANIZATIONNAME = "Andrew Hague";
+				LastUpgradeCheck = 1410;
+				ORGANIZATIONNAME = "Sreve Inglis";
 				TargetAttributes = {
 					DCCCC29A24A338ED00840082 = {
 						CreatedOnToolsVersion = 11.4.1;
@@ -522,7 +525,7 @@
 				};
 			};
 			buildConfigurationList = DCCCC29624A338ED00840082 /* Build configuration list for PBXProject "BeebEm5" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -682,6 +685,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -744,6 +748,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -773,19 +778,21 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_USE_OPTIMIZATION_PROFILE = YES;
-				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5.entitlements;
+				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5Debug.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = BeebEm5/BeebEm5.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = N475JF2973;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				INFOPLIST_FILE = BeebEm5/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.commandercoder.BeebEm5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -806,8 +813,10 @@
 				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = BeebEm5/BeebEm5.entitlements;
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = N475JF2973;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				INFOPLIST_FILE = BeebEm5/Info.plist;
@@ -815,7 +824,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.commandercoder.BeebEm5;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -1312,7 +1312,6 @@ void Exec6502Instruction(void) {
         iFlagJustSet = false;
         Cycles = 0;
         IOCycles = 0;
-        BadCount = 0;
         IntDue = false;
 
         /* Read an instruction and post inc program couter */
