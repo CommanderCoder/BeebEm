@@ -25,9 +25,11 @@ class AppDelegate: NSObject, NSApplicationDelegate
     
     @IBAction func HandleCommand (_ sender: NSMenuItem) {
         
+        handlingCommand = true
         let cmd: String = sender.identifier?.rawValue ?? "none"
 //        print(cmd)
         beeb_HandleCommand(conv(cmd))
+        handlingCommand = false
     }
     
     @IBOutlet weak var tapeControlMenuItem: NSMenuItem!

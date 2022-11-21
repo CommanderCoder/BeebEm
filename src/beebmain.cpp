@@ -770,7 +770,6 @@ void BeebWin::CreateSprowCoPro()
 	strcpy(SprowROMPath, RomPath);
 	strcat(SprowROMPath, "BeebFile/Sprow.rom");
 
-#ifdef BEEBWIN
 	sprow = new CSprowCoPro();
 	CSprowCoPro::InitResult Result = sprow->Init(SprowROMPath);
 
@@ -788,20 +787,16 @@ void BeebWin::CreateSprowCoPro()
 		case CSprowCoPro::InitResult::Success:
 			break;
 	}
-#endif
     
 }
 
 void BeebWin::DestroySprowCoPro()
 {
-#ifdef BEEBWIN
 	if (sprow)
 	{
 		delete sprow;
 		sprow = nullptr;
 	}
-#endif
-    
 }
 
 /****************************************************************************/
@@ -1680,12 +1675,9 @@ int BeebMainKeyUpDown(UINT message, long wParam, long lParam)
                         {
                             R1Status = 0;
                             ResetTube();
-#ifdef BEEBWIN
                             // We don't want to throw the contents of memory away
                             // just tell the co-pro to reset itself.
                             sprow->Reset();
-#endif
-                            
                         }
 
                         Disc8271Reset();
@@ -3126,6 +3118,7 @@ void BeebWin::HandleCommand(int MenuId)
 	SetSound(SoundState::Muted);
 	bool StayMuted = false;
 
+    
 	switch (MenuId)
 	{
 	case IDM_RUNDISC:
@@ -4545,6 +4538,7 @@ void BeebWin::HandleCommand(int MenuId)
 		UpdateMonitorMenu();
 	}
 }
+
 
 void BeebWin::SetSoundMenu()
 {

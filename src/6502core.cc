@@ -3124,14 +3124,12 @@ void Exec6502Instruction(void) {
 				break;
 
 			case Tube::SprowArm: // 64MHz
-#ifdef BEEBWIN
 				#if _DEBUG
 				sprow->Execute(2);
 				#else
 				sprow->Execute(32 * Cycles);
 				#endif
-#endif
-				break;
+                break;
 			case Tube::Master512CoPro: // 8MHz
 				master512CoPro.Execute(4 * Cycles);
 				break;

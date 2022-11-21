@@ -53,6 +53,7 @@ class KeyboardMappingViewController: NSViewController {
         
     // for reset button
     @IBAction func UKHandleCommand(_ sender: NSButton) {
+        handlingCommand = true
 //        let cmd: String = sender.identifier?.rawValue ?? "none"
         let cmd: String = sender.identifier?.rawValue.padding(toLength: 4, withPad: " ", startingAt: 0) ?? "none"
         
@@ -62,11 +63,11 @@ class KeyboardMappingViewController: NSViewController {
             print ("beeb_UKReset()")
         }
         else
-
         {
             let p = conv(cmd)
             beeb_UKHandleCommand(p)
         }
+        handlingCommand = false
     }
 
     // allow key detection

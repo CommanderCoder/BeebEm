@@ -53,8 +53,10 @@ class TapeControlViewController: NSViewController {
     }
 
     @IBAction func TCHandleCommand(_ sender: NSButton) {
+        handlingCommand = true
         let cmd: String = sender.identifier?.rawValue ?? "none"
         beeb_TCHandleCommand(conv(cmd));
+        handlingCommand = false
     }
     
     

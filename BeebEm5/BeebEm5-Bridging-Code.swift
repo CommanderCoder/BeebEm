@@ -272,12 +272,12 @@ public func swift_SetMenuCheck(_ cmd: UInt32, _ check: Bool)
 
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
-        print("\(#function)",cmdSTR,check)
+//        print("\(#function)",cmdSTR,check)
         n.state = check ? .on : .off
     }
     else
     {
-        print("\(#function) not found: ",cmdSTR)
+//        print("\(#function) not found: ",cmdSTR)
     }
 }
 
@@ -309,12 +309,12 @@ public func swift_SetMenuEnable(_ cmd: UInt32, _ enable: Bool)
     let cmdSTR =  conv(cmd)
     if let n = menuItemByIdentifier(id:cmdSTR)
     {
-        print("\(#function)",cmdSTR,enable)
+//        print("\(#function)",cmdSTR,enable)
         n.isEnabled = enable
     }
     else
     {
-        print("\(#function) not found: ",cmdSTR)
+//        print("\(#function) not found: ",cmdSTR)
     }
 }
 
@@ -336,7 +336,7 @@ public func swift_SetMenuItemTextWithCString(_ cmd: UInt32, _ text: UnsafePointe
 @_cdecl("swift_UpdateItem")
 public func swift_UpdateItem(_ text: UnsafePointer<CChar>, _ b:Int)
 {
-    print("\(#function) \(String(cString:text)) \(b)")
+//    print("\(#function) \(String(cString:text)) \(b)")
     tcViewControllerInstance?.reloadFileList()
 }
 
@@ -344,7 +344,7 @@ public func swift_UpdateItem(_ text: UnsafePointer<CChar>, _ b:Int)
 @_cdecl("swift_SelectItem")
 public func swift_SelectItem(_ text: UnsafePointer<CChar>, _ b:Int, _ c: UnsafePointer<UInt>)
 {
-    print("\(#function) \(String(cString:text)) \(b) ")
+//    print("\(#function) \(String(cString:text)) \(b) ")
     tcViewControllerInstance?.selectRowInTable(UInt(b))
 }
 

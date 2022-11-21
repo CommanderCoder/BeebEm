@@ -200,11 +200,12 @@ class BeebViewController: NSViewController {
 
 }
 
-
+var handlingCommand = false
 
 // - CPU part of the controller
 extension BeebViewController{
     
+
     func init_cpu() -> Bool
     {
 
@@ -228,6 +229,10 @@ extension BeebViewController{
             while true {
                 // update the CPU - not now - but after the delay requested by the previous cpu cycle
                 Thread.sleep(forTimeInterval: Double(CBridge.nextCPU)/1000.0);
+                while handlingCommand
+                {
+                    // wait until command has been handled
+                }
                 CBridge.nextCPU = 0
                 beeb_MainCpuLoop()
 

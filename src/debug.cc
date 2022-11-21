@@ -1513,7 +1513,6 @@ bool DebugDisassembler(int addr, int prevAddr, int Accumulator, int XReg, int YR
 	AddrInfo addrInfo;
 	RomInfo romInfo;
 
-#ifdef BEEBWIN
 	// Update memory watches. Prevent emulator slowdown by limiting updates
 	// to every 100ms, or on timer wrap-around.
 	static DWORD LastTickCount = 0;
@@ -1524,7 +1523,6 @@ bool DebugDisassembler(int addr, int prevAddr, int Accumulator, int XReg, int YR
 		LastTickCount = TickCount;
 		DebugUpdateWatches(false);
 	}
-#endif
     
 	// If this is the host and we're debugging that and have no further
 	// instructions to execute, halt.

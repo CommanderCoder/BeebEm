@@ -71,6 +71,7 @@ class BreakoutBoxViewController: NSViewController {
     
     // for bitbuttons and reset button
     @IBAction func BBHandleCommand(_ sender: NSButton) {
+        handlingCommand = true
         let cmd: String = sender.identifier?.rawValue.padding(toLength: 4, withPad: " ", startingAt: 0) ?? "none"
         
         if (cmd == "uprs")
@@ -84,6 +85,7 @@ class BreakoutBoxViewController: NSViewController {
             let p = conv(cmd)
             beeb_BBHandleCommand(p)
         }
+        handlingCommand = false
 
     }
 }

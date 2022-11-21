@@ -138,4 +138,8 @@ void LoadIntegraBHiddenMemUEF(FILE *SUEF);
 //void LoadJIMPageRegUEF(FILE *SUEF);
 void DebugMemoryState();
 
+#ifndef BEEBWIN
+extern long GetTickCount();
+#endif
+
 #endif

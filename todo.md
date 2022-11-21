@@ -3,8 +3,8 @@
 * breakout board
 * check User Def keyboard
 * cassette/HD leds - DONE
-* disable keys
-* SPROW second processor
+* disable keys - DONE for BREAK and ESC
+* SPROW second processor -  added MODET, MODE32 and BEEBEM to the preprocessor; don't build armmem.cpp & armdis.cpp; because MENU handler and CPU update are on different threads, need to make sure to block CPU update until MENU has finished.
 * joystick/mousestick
 * debugger
 * preference options
