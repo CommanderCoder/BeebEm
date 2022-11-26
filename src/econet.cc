@@ -39,6 +39,15 @@ Boston, MA  02110-1301, USA.
 #include "6502core.h"
 #include "sysvia.h"
 
+#ifndef BEEBWIN
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+
+#endif
+
 // Configuration Options.
 // These, among others, are overridden in econet.cfg (see ReadNetwork() )
 
@@ -81,6 +90,16 @@ static unsigned long EconetListenIP = 0x0100007f;
 // IP settings:
 static SOCKET ListenSocket = INVALID_SOCKET; // Listen socket
 static SOCKET SendSocket = INVALID_SOCKET;
+#else
+#define SOCKET int
+#define closesocket close
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+static SOCKET ListenSocket = ENOTSOCK; // Listen socket
+static SOCKET SendSocket = ENOTSOCK;
+static long WSAGetLastError(){return errno;}
+static void WSACleanup(){}
+#define SOCKADDR sockaddr
 #endif
 static bool ReceiverSocketsOpen = false; // Used to flag line up and clock running
 
@@ -326,7 +345,6 @@ void EconetReset(void) {
 	FlagFillActive = false;
 	EconetFlagFillTimeoutTrigger = 0;
 
-#ifdef BEEBWIN
 	// kill anything that was in use
 	if (ReceiverSocketsOpen) {
 		if (!confSingleSocket) closesocket(SendSocket);
@@ -403,7 +421,11 @@ void EconetReset(void) {
 					memcpy(&localaddr, hent->h_addr_list[a], sizeof(struct in_addr));
 
 					if (network[i].inet_addr == inet_addr("127.0.0.1") ||
-					    network[i].inet_addr == localaddr.S_un.S_addr) {
+#ifdef BEEBWIN
+                        network[i].inet_addr == localaddr.S_un.S_addr) {
+#else
+                        network[i].inet_addr == localaddr.s_addr) {
+#endif
 						service.sin_port = htons(network[i].port);
 						service.sin_addr.s_addr = network[i].inet_addr;
 
@@ -427,6 +449,7 @@ void EconetReset(void) {
 						for (int a = 0; hent->h_addr_list[a] != NULL && EconetStationNumber == 0; ++a) {
 							memcpy(&localaddr, hent->h_addr_list[a], sizeof(struct in_addr));
 						
+#ifdef BEEBWIN
 							if (aunnet[j].inet_addr == (localaddr.S_un.S_addr & 0x00FFFFFF)) {
 								service.sin_port = htons(32768);
 								service.sin_addr.s_addr = localaddr.S_un.S_addr;
@@ -440,7 +463,23 @@ void EconetReset(void) {
 									networkp++;
 								}
 							}
-						}
+#else
+                            if (aunnet[j].inet_addr == (localaddr.s_addr & 0x00FFFFFF)) {
+                                service.sin_port = htons(32768);
+                                service.sin_addr.s_addr = localaddr.s_addr;
+
+                                if (bind(ListenSocket, (SOCKADDR*)&service, sizeof(service)) == 0) {
+                                    myaunnet = j;
+                                    network[networkp].inet_addr = EconetListenIP = localaddr.s_addr;
+                                    network[networkp].port = EconetListenPort = 32768;
+                                    network[networkp].station = EconetStationNumber = localaddr.s_addr >>24;
+                                    network[networkp].network = aunnet[j].network;
+                                    networkp++;
+                                }
+                            }
+#endif
+                            
+                        }
 					}
 				}
 
@@ -493,7 +532,6 @@ void EconetReset(void) {
 		WSACleanup();
 		return;
 	}
-#endif
 
 	ReceiverSocketsOpen = true;
 
@@ -577,9 +615,7 @@ void ReadNetwork(void) {
 						}
 
 					}
-#ifdef BEEBWIN
 					if (p==2) network[networkp].inet_addr = inet_addr(value);
-#endif
                     if (p==3) network[networkp].port = atoi(value);
 					do i++; while (EcoName[i] == ' ' && i < strlen(EcoName));
 					p++;
@@ -641,11 +677,9 @@ void ReadNetwork(void) {
 						if (p==0) {
 							if (_stricmp("ADDMAP",value) == 0) q = 1;
 						}
-#ifdef BEEBWIN
 						if (p==1) {
 							if (q == 1 ) aunnet[aunnetp].inet_addr = inet_addr(value) & 0x00FFFFFF; // stored as lsb..msb ?!?!
 						}
-#endif
                         if (p==2) {
 							if (q == 1 ) aunnet[aunnetp].network = (atoi(value) & inmask); //30jun strip b7
 						}
@@ -973,9 +1007,7 @@ bool EconetPoll_real(void) { // return NMI status
 					// first two bytes of BeebTx.buff contain the destination address
 					// (or one zero byte for broadcast)
 
-#ifdef BEEBWIN
 					sockaddr_in RecvAddr;
-#endif
                     bool SendMe = false;
 					int SendLen;
 					unsigned int i=0;
@@ -988,11 +1020,9 @@ bool EconetPoll_real(void) { // return NMI status
 						//
 						// ok, just send it to the local broadcast address.
 						// TODO lookup destnet in aunnet() and use proper ip address!
-#ifdef BEEBWIN
 						RecvAddr.sin_family = AF_INET;
 						RecvAddr.sin_port = htons(32768);
 						RecvAddr.sin_addr.s_addr = INADDR_BROADCAST; // ((EconetListenIP & 0x00FFFFFF) | 0xFF000000) ;
-#endif
                         SendMe = true;
 					} else {
 						do {
@@ -1037,15 +1067,12 @@ bool EconetPoll_real(void) { // return NMI status
 							}
 						}
 
-#ifdef BEEBWIN
                         RecvAddr.sin_family = AF_INET;
 						RecvAddr.sin_port = htons(network[i].port);
 						RecvAddr.sin_addr.s_addr = network[i].inet_addr;
-#endif
 					}
 
 					if (DebugEnabled) {
-#ifdef BEEBWIN
                         DebugDisplayTraceF(DebugType::Econet, true,
 						                   "Econet: TXLast set - Send %d byte packet to %02x %02x (%08X :%u)",
 						                   BeebTx.Pointer,
@@ -1053,7 +1080,6 @@ bool EconetPoll_real(void) { // return NMI status
 						                   (unsigned int)BeebTx.eh.deststn,
 						                   (unsigned int)RecvAddr.sin_addr.s_addr,
 						                   (unsigned int)htons(RecvAddr.sin_port));
-#endif
 						sprintf(info, "Econet: Packet data:");
 						for (unsigned int i = 0; i < BeebTx.Pointer; ++i) {
 							sprintf(info+strlen(info), " %02X", BeebTx.buff[i]);
@@ -1194,7 +1220,6 @@ bool EconetPoll_real(void) { // return NMI status
 
 					if (SendMe) {
 						if (DebugEnabled) DebugDisplayTrace(DebugType::Econet, true, "Econet: Sending a packet..");
-#ifdef BEEBWIN
 						if (confAUNmode) {
 							if (sendto(SendSocket, (char *) &EconetTx, SendLen, 0, 
 								(SOCKADDR *) &RecvAddr, sizeof(RecvAddr)) == SOCKET_ERROR) {
@@ -1212,7 +1237,6 @@ bool EconetPoll_real(void) { // return NMI status
 								EconetError(info);
 							}
 						}
-#endif
 						// Sending packet will mean peer goes into flag fill while
 						// it deals with it
 						FlagFillActive = true;
@@ -1265,7 +1289,6 @@ bool EconetPoll_real(void) { // return NMI status
 					    fourwaystage == FourWayStage::ImmediateSent ||
 					    fourwaystage == FourWayStage::DataSent)
 					{
-#ifdef BEEBWIN
 
 						// Try and get another packet from network
 						// Check if packet is waiting without blocking
@@ -1280,10 +1303,20 @@ bool EconetPoll_real(void) { // return NMI status
 							// Read the packet
 							int sizRcvAdr = sizeof(RecvAddr);
 							if (confAUNmode) {
-								RetVal = recvfrom(ListenSocket, (char *) EconetRx.raw, sizeof(EconetRx), 0, (SOCKADDR *) &RecvAddr, (int *) &sizRcvAdr);
-								EconetRx.BytesInBuffer = RetVal;
+#ifdef BEEBWIN
+                                RetVal = recvfrom(ListenSocket, (char *) EconetRx.raw, sizeof(EconetRx), 0,
+                                                  (SOCKADDR *) &RecvAddr, (int *) &sizRcvAdr);
+#else
+                                RetVal = recvfrom(ListenSocket, (char *) EconetRx.raw, sizeof(EconetRx), 0,
+                                                  (SOCKADDR *) &RecvAddr, (socklen_t *) &sizRcvAdr);
+#endif
+                                EconetRx.BytesInBuffer = RetVal;
 							} else {
+#ifdef BEEBWIN
 								RetVal = recvfrom(ListenSocket, (char *) BeebRx.buff, sizeof(BeebRx.buff), 0, (SOCKADDR *) &RecvAddr, (int *) &sizRcvAdr);
+#else
+                                RetVal = recvfrom(ListenSocket, (char *) BeebRx.buff, sizeof(BeebRx.buff), 0, (SOCKADDR *) &RecvAddr, (socklen_t *) &sizRcvAdr);
+#endif
 							}
 
 							if (RetVal > 0) {
@@ -1487,7 +1520,6 @@ bool EconetPoll_real(void) { // return NMI status
 						} else if (RetVal == SOCKET_ERROR) {
 							EconetError("Econet: Failed to check for new packet");
 						}
-#endif
 					}
 					// this bit fakes the bits of the 4-way handshake that AUN doesn't do.
 

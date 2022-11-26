@@ -61,7 +61,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Users/coder/Desktop/Emulator Projects/BeebEm5"
+      customWorkingDirectory = "/Users/coder/Desktop/Emulator Projects/BBC/BeebEm5"
       debugDocumentVersioning = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
