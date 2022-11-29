@@ -62,6 +62,25 @@ Control latch:
 #include "beebmem.h"
 #include "log.h"
 
+#ifndef BEEBWIN
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#define SOCKET int
+#define closesocket close
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+static long WSAGetLastError(){return errno;}
+static void WSACleanup(){}
+#define SOCKADDR sockaddr
+
+#endif
+
+
 #define ENABLE_LOG 0
 
 bool TeletextAdapterEnabled = false;
@@ -94,9 +113,7 @@ static int TeletextCurrentFrame = 0;
 
 static unsigned char row[16][64] = {0};
 
-#ifdef BEEBWIN
 static SOCKET TeletextSocket[4] = { INVALID_SOCKET, INVALID_SOCKET, INVALID_SOCKET, INVALID_SOCKET };
-#endif
 static bool TeletextSocketConnected[4] = { false, false, false, false };
 
 // Initiate connection on socket
@@ -105,7 +122,6 @@ static int TeletextConnect(int ch)
 {
     TeletextSocketConnected[ch] = false;
 
-#ifdef BEEBWIN
 
     TeletextSocket[ch] = socket(AF_INET, SOCK_STREAM, 0);
     if (TeletextSocket[ch] == INVALID_SOCKET)
@@ -125,7 +141,11 @@ static int TeletextConnect(int ch)
     }
 
     u_long iMode = 1;
+#ifdef BEENWIN
     ioctlsocket(TeletextSocket[ch], FIONBIO, &iMode); // non blocking
+#else
+    fcntl(TeletextSocket[ch],F_SETFL, O_NONBLOCK);
+#endif
 
     struct sockaddr_in teletext_serv_addr;
     teletext_serv_addr.sin_family = AF_INET; // address family Internet
@@ -134,7 +154,11 @@ static int TeletextConnect(int ch)
 
     if (connect(TeletextSocket[ch], (SOCKADDR *)&teletext_serv_addr, sizeof(teletext_serv_addr)) == SOCKET_ERROR)
     {
+#ifdef BEEBWIN
         if (WSAGetLastError() != WSAEWOULDBLOCK) // WSAEWOULDBLOCK is expected
+#else
+        if (WSAGetLastError() != EWOULDBLOCK) // WSAEWOULDBLOCK is expected
+#endif
         {
             if (DebugEnabled)
             {
@@ -148,7 +172,7 @@ static int TeletextConnect(int ch)
             return 1;
         }
     }
-#endif
+
     TeletextSocketConnected[ch] = true;
     return 0;
 }
@@ -211,7 +235,6 @@ void TeletextClose()
     /* close any connected teletext sockets or files */
     for (int ch = 0; ch < 4; ch++)
     {
-#ifdef BEEBWIN
 
         if (TeletextSocket[ch] != INVALID_SOCKET)
         {
@@ -231,7 +254,6 @@ void TeletextClose()
             fclose(TeletextFile[ch]);
             TeletextFile[ch] = nullptr;
         }
-#endif
     }
 }
 
@@ -353,7 +375,6 @@ void TeletextAdapterUpdate()
 
                 for (int i = 0; i < 4; i++)
                 {
-#ifdef BEEBWIN
 
                     if (TeletextSocket[i] != INVALID_SOCKET)
                     {
@@ -362,8 +383,13 @@ void TeletextAdapterUpdate()
                         if (result == SOCKET_ERROR)
                         {
                             int err = WSAGetLastError();
+#ifdef BEEBWIN
                             if (err == WSAEWOULDBLOCK)
                                 break; // not fatal, ignore
+#else
+                            if (err == EWOULDBLOCK)
+                                break; // not fatal, ignore
+#endif
 
                             if (DebugEnabled)
                             {
@@ -376,7 +402,6 @@ void TeletextAdapterUpdate()
                             TeletextSocket[i] = INVALID_SOCKET;
                         }
                     }
-#endif
                 }
 
                 if (TeletextEnable)

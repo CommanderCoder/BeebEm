@@ -46,6 +46,14 @@ Boston, MA  02110-1301, USA.
 #include <netdb.h>
 #include <unistd.h>
 
+#define SOCKET int
+#define closesocket close
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+static long WSAGetLastError(){return errno;}
+static void WSACleanup(){}
+#define SOCKADDR sockaddr
+
 #endif
 
 // Configuration Options.
@@ -91,15 +99,8 @@ static unsigned long EconetListenIP = 0x0100007f;
 static SOCKET ListenSocket = INVALID_SOCKET; // Listen socket
 static SOCKET SendSocket = INVALID_SOCKET;
 #else
-#define SOCKET int
-#define closesocket close
-#define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
 static SOCKET ListenSocket = ENOTSOCK; // Listen socket
 static SOCKET SendSocket = ENOTSOCK;
-static long WSAGetLastError(){return errno;}
-static void WSACleanup(){}
-#define SOCKADDR sockaddr
 #endif
 static bool ReceiverSocketsOpen = false; // Used to flag line up and clock running
 
