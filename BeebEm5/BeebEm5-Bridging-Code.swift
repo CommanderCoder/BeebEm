@@ -16,6 +16,7 @@ import AVFoundation
     case IFD
     case KEYBOARD
     case DISCFILE
+    case PRINTFILE
 }
 
 
@@ -101,6 +102,8 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
         dialog.allowedFileTypes        = ["kmap"]
     case .DISCFILE:
         dialog.allowedFileTypes        = nil  // ["inf"]
+    case .PRINTFILE:
+        break
     }
     
     if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
@@ -146,6 +149,8 @@ func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int, fileexts
         dialog.allowedFileTypes        = ["kmap"]
     case .DISCFILE:
         dialog.allowedFileTypes        = ["inf"]
+    case .PRINTFILE:
+        dialog.allowedFileTypes        = nil  // ["inf"]
     }
     
     

@@ -201,6 +201,20 @@ long GetTickCount() // milliseconds
 }
 
 
+void beebwin_ModifyMenu(
+                        UINT position,
+                        UINT newitem,
+                        CHAR* newtext)
+{
+    auto cmdID = RC2ID.find(position);
+    auto newID = RC2ID.find(newitem);
+    if (cmdID != RC2ID.end())
+    {
+        // check the selected item
+        swift_ModifyMenu(cmdID->second, newID->second, newtext);
+    }
+
+}
 
 
 
@@ -1124,6 +1138,8 @@ void BeebWin::InitMenu(void)
 	strcat(menu_string, m_PrinterFileName);
 #ifdef BEEBWIN
 	ModifyMenu(m_hMenu, IDM_PRINTER_FILE, MF_BYCOMMAND, IDM_PRINTER_FILE, menu_string);
+#else
+    beebwin_ModifyMenu(IDM_PRINTER_FILE, IDM_PRINTER_FILE, menu_string);
 #endif
     
 	// Comms -> RS423
@@ -1341,20 +1357,6 @@ void beebwin_CheckMenuRadioItem(UINT first, UINT last, UINT cmd)
     beebwin_SetMenuCheck(cmd, true);
 }
 
-void beebwin_ModifyMenu(
-                        UINT position,
-                        UINT newitem,
-                        CHAR* newtext)
-{
-    auto cmdID = RC2ID.find(position);
-    auto newID = RC2ID.find(newitem);
-    if (cmdID != RC2ID.end())
-    {
-        // check the selected item
-        swift_ModifyMenu(cmdID->second, newID->second, newtext);
-    }
-
-}
 
 void BeebWin::UpdateModelMenu()
 {
@@ -3230,6 +3232,8 @@ void BeebWin::HandleCommand(int MenuId)
             ModifyMenu(m_hMenu, IDM_PRINTER_FILE,
 				MF_BYCOMMAND, IDM_PRINTER_FILE,
 				menu_string);
+#else
+            beebwin_ModifyMenu(IDM_PRINTER_FILE, IDM_PRINTER_FILE, menu_string);
 #endif
 			if (MenuId != m_MenuIdPrinterPort)
 			{

@@ -15,8 +15,8 @@
 * text to speech : use AVSpeechSynthesizer 
 * music 5000 http://8bs.com/emum5000.htm#m500 - working but needs massive buffers.  need to figure out why the timing is off.
 * motion blur - done
-* printer
-* rs423
+* printer - done: sets up a file and writes bytes to that file
+* rs423 - using DCB, SetCommState and WaitCommEvent stuff and hSerialPort as a serial port file handle : mac to use 'unix' 
 * IDE HDD - not tested? https://acorn.huininga.nl/pub/software/BeebEm/BeebEm-4.14.68000-20160619/Help/harddisks.html
 * import/export files disc- import done : export requires a dialogue box
 * video capture - just quicktime

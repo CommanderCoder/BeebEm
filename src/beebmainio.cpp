@@ -83,7 +83,7 @@ extern AVIWriter *aviWriter;
 
 #else
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE };
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, PRINTFILE };
 
 extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
 extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
@@ -92,6 +92,11 @@ extern "C" int swift_MoveFile (const char *src, const char *dest );
 
 extern "C" int swift_setPasteboard ( const char* clipboard, int length);
 extern "C" int swift_getPasteboard ( char* clipboard, int length);
+
+extern void beebwin_ModifyMenu(
+                        UINT position,
+                        UINT newitem,
+                               CHAR* newtext);
 
 #endif
 
@@ -698,7 +703,7 @@ bool BeebWin::PrinterFile()
 	}
 	else
 	{
-		char drive[_MAX_DRIVE];
+        char drive[_MAX_DRIVE];
 		char dir[_MAX_DIR];
 		char fname[_MAX_FNAME];
 		char ext[_MAX_EXT];
@@ -713,6 +718,20 @@ bool BeebWin::PrinterFile()
 	{
 		strcpy(m_PrinterFileName, FileName);
 	}
+#else
+    if (strlen(m_PrinterFileName) == 0)
+    {
+        FileName[0] = '\0';
+    }
+    else
+    {
+        strcpy(FileName, m_PrinterFileName);
+    }
+
+    if (swift_SaveFile(FileName, sizeof(FileName), PRINTFILE)) {
+        strcpy(m_PrinterFileName, FileName);
+        changed = true;
+    }
 #endif
 	return(changed);
 }

@@ -34,6 +34,8 @@ Boston, MA  02110-1301, USA.
 #define MAX_PATH PATH_MAX
 #define _MAX_DRIVE 32
 #define _MAX_DIR 512
+#define _MAX_FNAME 96
+#define _MAX_EXT 32
 #endif
 
 typedef char ROMConfigFile[4][17][_MAX_PATH];
