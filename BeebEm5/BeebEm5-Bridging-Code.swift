@@ -336,29 +336,42 @@ public func swift_SetMenuItemTextWithCString(_ cmd: UInt32, _ text: UnsafePointe
     return 1
 }
 
+// Tape Control
 
-
-@_cdecl("swift_UpdateItem")
-public func swift_UpdateItem(_ text: UnsafePointer<CChar>, _ b:Int)
+@_cdecl("swift_TCReload")
+public func swift_TCReload()
 {
 //    print("\(#function) \(String(cString:text)) \(b)")
     tcViewControllerInstance?.reloadFileList()
 }
 
 
-@_cdecl("swift_SelectItem")
-public func swift_SelectItem(_ text: UnsafePointer<CChar>, _ b:Int, _ c: UnsafePointer<UInt>)
+@_cdecl("swift_TCSelectItem")
+public func swift_TCSelectItem( _ b:Int )
 {
 //    print("\(#function) \(String(cString:text)) \(b) ")
-    tcViewControllerInstance?.selectRowInTable(UInt(b))
+    tcViewControllerInstance!.selectRowInTable(UInt(b))
 }
 
-@_cdecl("swift_UEFNewFile")
-public func swift_UEFNewFile(_ text: UnsafePointer<CChar>)
+@_cdecl("swift_TCReturnItem")
+public func swift_TCReturnItem(_ text: UnsafePointer<CChar>) -> UInt
 {
-    print("\(#function) \(String(cString:text))")
-    tcViewControllerInstance?.reloadFileList()
+//    print("\(#function) \(String(cString:text)) \(b) ")
+    return tcViewControllerInstance!.returnRowInTable()
 }
+
+// Rom Config
+
+//@_cdecl("swift_RCSelectItem")
+//public func swift_TCSelectItem(_ text: UnsafePointer<CChar>, _ b:Int, _ c: UnsafePointer<UInt>)
+//{
+////    print("\(#function) \(String(cString:text)) \(b) ")
+//    tcViewControllerInstance?.selectRowInTable(UInt(b))
+//}
+//
+//@_cdecl("swift_RCSelectItem")
+//@_cdecl("swift_RCSelectItem")
+
 
 
 

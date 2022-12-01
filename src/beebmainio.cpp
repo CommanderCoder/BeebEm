@@ -385,6 +385,10 @@ bool BeebWin::NewTapeImage(char *FileName)
 	FileDialog fileDialog(m_hWnd, FileName, 256, DefaultPath, filter);
 
 	bool Result = fileDialog.Save();
+#else
+    
+    bool Result = swift_SaveFile(FileName, 256, UEF);
+#endif
 
 	if (Result)
 	{
@@ -400,9 +404,6 @@ bool BeebWin::NewTapeImage(char *FileName)
 	}
     
 	return Result;
-#else
-    return false;
-#endif
 }
 
 /*******************************************************************/

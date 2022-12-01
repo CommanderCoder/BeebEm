@@ -18,6 +18,7 @@
 		DC4EFA6329380782001E9292 /* userkybd.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D024A33D3700840082 /* userkybd.cc */; };
 		DC4EFA64293807AE001E9292 /* SelectKeyDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DC184470290364CD004285F9 /* SelectKeyDialog.cpp */; };
 		DC4EFA65293807D3001E9292 /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CB24A33D3700840082 /* main.cc */; };
+		DC4EFA6729382489001E9292 /* RomConfigViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4EFA6629382489001E9292 /* RomConfigViewController.swift */; };
 		DC52A0AE292A9A6E002FEDF6 /* bag.c in Sources */ = {isa = PBXBuildFile; fileRef = DC52A0A3292A9A6E002FEDF6 /* bag.c */; };
 		DC52A0AF292A9A6E002FEDF6 /* armsupp.c in Sources */ = {isa = PBXBuildFile; fileRef = DC52A0A5292A9A6E002FEDF6 /* armsupp.c */; };
 		DC52A0B0292A9A6E002FEDF6 /* thumbemu.c in Sources */ = {isa = PBXBuildFile; fileRef = DC52A0A6292A9A6E002FEDF6 /* thumbemu.c */; };
@@ -119,6 +120,7 @@
 		DC4106F226E54DAC000A1E37 /* BeebApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebApplication.swift; sourceTree = "<group>"; };
 		DC41118125A2222A00E59712 /* Bugs.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = Bugs.rtf; sourceTree = "<group>"; };
 		DC49183A286AD7540023212A /* BeebEm5.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeebEm5.entitlements; sourceTree = "<group>"; };
+		DC4EFA6629382489001E9292 /* RomConfigViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RomConfigViewController.swift; sourceTree = "<group>"; };
 		DC52212428F77B8F003EDA18 /* XAudio2Streamer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XAudio2Streamer.cpp; path = src/XAudio2Streamer.cpp; sourceTree = "<group>"; };
 		DC52212628F77BC6003EDA18 /* XAudio2Streamer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XAudio2Streamer.h; path = src/XAudio2Streamer.h; sourceTree = "<group>"; };
 		DC52A094292A9A6E002FEDF6 /* armmem.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = armmem.c; sourceTree = "<group>"; };
@@ -544,6 +546,7 @@
 				DCCCC2A624A338EE00840082 /* Main.storyboard */,
 				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
 				DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */,
+				DC4EFA6629382489001E9292 /* RomConfigViewController.swift */,
 				DC18446E2901FDED004285F9 /* BreakoutBoxViewController.swift */,
 				DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */,
 				DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */,
@@ -864,6 +867,7 @@
 				DCAD0F1E28CFB3DE00366E05 /* Arm.cc in Sources */,
 				DCAD0F1528CFAB5D00366E05 /* video.cc in Sources */,
 				DCAD0ED728CD494A00366E05 /* StringUtils.cpp in Sources */,
+				DC4EFA6729382489001E9292 /* RomConfigViewController.swift in Sources */,
 				DC491ED0292377800099DA93 /* SprowCoPro.cpp in Sources */,
 				DCAD0F2428CFB69D00366E05 /* teletext.cc in Sources */,
 				DCAD0F1428CFAB1C00366E05 /* atodconv.cc in Sources */,

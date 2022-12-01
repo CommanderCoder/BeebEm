@@ -27,8 +27,12 @@ class TapeControlViewController: NSViewController {
     }
     
     func selectRowInTable(_ row: UInt){
-        selectedRow = row-1 // needs to start at 0
+        selectedRow = row // needs to start at 0
         dirty |= 2
+    }
+    
+    func returnRowInTable() -> UInt {
+        return selectedRow // needs to start at 0
     }
     
     func reloadFileList() {
@@ -42,6 +46,7 @@ class TapeControlViewController: NSViewController {
         if let appDel = NSApplication.shared.delegate as? AppDelegate {
             appDel.tapeControlMenuItem.isEnabled = false;
         }
+        tableView.reloadData()
     }
 
     override func viewDidDisappear() {
@@ -106,8 +111,9 @@ extension TapeControlViewController: NSTableViewDelegate {
     var text: String = ""
     let cellIdentifier: NSUserInterfaceItemIdentifier = tableColumn!.identifier
     
-    text = String(cString: beeb_getTableCellData(conv(cellIdentifier.rawValue), row+1))
+    text = String(cString: beeb_getTableCellData(conv(cellIdentifier.rawValue), row))
 
+      print("TC \(cellIdentifier.rawValue) \(row) .. \(text)")
     // 3
     if let cell = tableView.makeView(withIdentifier: cellIdentifier , owner: nil) as? NSTableCellView {
       cell.textField?.stringValue = text
@@ -119,7 +125,7 @@ extension TapeControlViewController: NSTableViewDelegate {
     
     func tableViewSelectionDidChange(_ notification: Notification) {
         print("\(#function) \(tableView.selectedRow) \(notification.name)")
-        beeb_getTableCellData(3,tableView.selectedRow+1) // needs to start at 1
+        beeb_getTableCellData(3,tableView.selectedRow) // needs to start at 1
         
     }
 }

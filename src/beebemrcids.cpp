@@ -313,6 +313,14 @@ std::map<int,int> ID2RC =
     {']}  ',IDK_CLOSE_SQUARE},
     {'@   ',IDK_AT},
     {'uspd',IDK_UNDERSCORE},
+    
+    
+    
+    {'tppl', IDC_TCPLAY},
+    {'tpst', IDC_TCSTOP},
+    {'tpej', IDC_TCEJECT},
+    {'tprc', IDC_TCRECORD},
+
 };
 
 std::map<int,int>

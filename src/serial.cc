@@ -165,6 +165,16 @@ unsigned char SerialPort;
 static HANDLE hSerialThread = nullptr;
 static HANDLE hStatThread = nullptr;
 static HANDLE hSerialPort = INVALID_HANDLE_VALUE; // Serial port handle
+#else
+extern std::vector<TapeMapEntry> beeb_TapeMap;
+extern "C" void swift_TCSelectItem(long item);
+extern "C" void swift_TCReload();
+extern "C" unsigned int swift_TCReturnItem();
+
+extern "C" long swift_Alert(const char* line1, const char* line2, bool hasCancel);
+
+int beeb_TAPECYCLES(){return TAPECYCLES;}
+
 #endif
 
 static char nSerialPort[5]; // Serial port name
@@ -564,10 +574,8 @@ void SerialPoll()
 			if ((NEW_UEF_BUF != UEF_BUF || UEFRES_TYPE(NEW_UEF_BUF) == UEF_CARRIER_TONE || UEFRES_TYPE(NEW_UEF_BUF) == UEF_GAP) &&
 			    CassetteRelay && UEFFileOpen)
 			{
-#ifdef BEEBWIN
 				if (UEFRES_TYPE(UEF_BUF) != UEFRES_TYPE(NEW_UEF_BUF))
 					TapeControlUpdateCounter(TapeClock);
-#endif
                 
 				UEF_BUF = NEW_UEF_BUF;
 
@@ -618,10 +626,8 @@ void SerialPoll()
 				int Data = CSWPoll();
 				OldClock = TapeClock;
 
-#ifdef BEEBWIN
 				if (last_state != csw_state)
 					TapeControlUpdateCounter(csw_ptr);
-#endif
                 
 				if (csw_state == CSWState::WaitingForTone)
 				{
@@ -1010,13 +1016,10 @@ CSWResult LoadCSWTape(const char *FileName)
 
 		csw_ptr = 0;
 
-#ifdef BEEBWIN
 		if (TapeControlEnabled)
 		{
 			TapeControlAddMapLines();
 		}
-#endif
-        
     }
 
 	return Result;
@@ -1052,14 +1055,12 @@ UEFResult LoadUEFTape(const char *FileName)
 
 		TapeClock = Clock;
 
-#ifdef BEEBWIN
 		if (TapeControlEnabled)
 		{
 			TapeControlAddMapLines();
 		}
 
         TapeControlUpdateCounter(TapeClock);
-#endif
 	}
 
 	return Result;
@@ -1076,6 +1077,9 @@ void CloseTape()
 	{
 #ifdef BEEBWIN
 		SendMessage(hwndMap, LB_RESETCONTENT, 0, 0);
+#else
+        beeb_TapeMap.clear();
+        swift_TCReload();
 #endif
 	}
     
@@ -1090,9 +1094,7 @@ void RewindTape()
 	OldClock = 0;
 	SetTrigger(TAPECYCLES, TapeTrigger);
 
-#ifdef BEEBWIN
 	TapeControlUpdateCounter(TapeClock);
-#endif
 	csw_state = CSWState::WaitingForTone;
 	csw_bit = 0;
 	csw_pulselen = 0;
@@ -1140,28 +1142,45 @@ void TapeControlOpenDialog(HINSTANCE hinst, HWND /* hwndMain */)
 		TapeControlAddMapLines();
 	}
 }
+#else
+void TapeControlOpenDialog()
+{
+    TapeControlEnabled = true;
+    TapeControlAddMapLines();
+}
+#endif
+
 
 void TapeControlCloseDialog()
 {
+#ifdef BEEBWIN
 	DestroyWindow(hwndTapeControl);
-	hwndTapeControl = nullptr;
+    hwndTapeControl = nullptr;
 	hwndMap = nullptr;
 	TapeControlEnabled = false;
 	hCurrentDialog = nullptr;
-	TapeMap.empty();
+    TapeMap.empty();
+#else
+    TapeControlEnabled = false;
+    TapeMap.clear();
+#endif
 	TapePlaying = true;
 	TapeRecording = false;
 }
 
 void TapeControlAddMapLines()
 {
+#ifdef BEEBWIN
 	SendMessage(hwndMap, LB_RESETCONTENT, 0, 0);
 
 	for (const TapeMapEntry& line : TapeMap)
 	{
 		SendMessage(hwndMap, LB_ADDSTRING, 0, (LPARAM)line.desc.c_str());
 	}
-
+#else
+    // TapeMap for the tape controller are requested by beeb_getTableRowsCount() and beeb_getTableCellData()
+    beeb_TapeMap = TapeMap;
+#endif
 	TapeControlUpdateCounter(UEFFileOpen ? TapeClock : csw_ptr);
 }
 
@@ -1176,84 +1195,128 @@ void TapeControlUpdateCounter(int tape_time)
 		if (i > 0)
 			i--;
 
+#ifdef BEEBWIN
 		SendMessage(hwndMap, LB_SETCURSEL, (WPARAM)i, 0);
+#else
+        swift_TCSelectItem(i);
+#endif
 	}
+    
 }
+
+
+#ifdef BEEBWIN
 
 INT_PTR CALLBACK TapeControlDlgProc(HWND /* hwndDlg */, UINT message, WPARAM wParam, LPARAM /* lParam */)
 {
-	switch (message)
-	{
-		case WM_INITDIALOG:
-			return TRUE;
+    switch (message)
+    {
+        case WM_INITDIALOG:
+            return TRUE;
 
-		case WM_ACTIVATE:
-			if (LOWORD(wParam) == WA_INACTIVE)
-			{
-				hCurrentDialog = nullptr;
-			}
-			else
-			{
-				hCurrentDialog = hwndTapeControl;
-			}
-			return FALSE;
+        case WM_ACTIVATE:
+            if (LOWORD(wParam) == WA_INACTIVE)
+            {
+                hCurrentDialog = nullptr;
+            }
+            else
+            {
+                hCurrentDialog = hwndTapeControl;
+            }
+            return FALSE;
 
-		case WM_COMMAND:
-			switch (LOWORD(wParam))
-			{
-				case IDC_TCMAP:
-					if (HIWORD(wParam) == LBN_SELCHANGE)
-					{
-						LRESULT s = SendMessage(hwndMap, LB_GETCURSEL, 0, 0);
+        case WM_COMMAND:
+            switch (LOWORD(wParam))
+            {
+                case IDC_TCMAP:
+                    if (HIWORD(wParam) == LBN_SELCHANGE)
+                    {
+                        LRESULT s = SendMessage(hwndMap, LB_GETCURSEL, 0, 0);
 
-						if (s != LB_ERR && s >= 0 && s < (int)TapeMap.size())
-						{
-							if (CSWFileOpen)
-							{
-								csw_ptr = TapeMap[s].time;
-							}
-							else
-							{
-								TapeClock = TapeMap[s].time;
-							}
+                        if (s != LB_ERR && s >= 0 && s < (int)TapeMap.size())
+                        {
+                            if (CSWFileOpen)
+                            {
+                                csw_ptr = TapeMap[s].time;
+                            }
+                            else
+                            {
+                                TapeClock = TapeMap[s].time;
+                            }
 
-							OldClock = 0;
+                            OldClock = 0;
 
-							SetTrigger(TAPECYCLES, TapeTrigger);
-						}
-					}
-					return FALSE;
+                            SetTrigger(TAPECYCLES, TapeTrigger);
+                        }
+                    }
+                    return FALSE;
 
-				case IDC_TCPLAY:
-					TapePlaying = true;
-					TapeControlStopRecording(true);
-					TapeAudio.Enabled = CassetteRelay;
-					return TRUE;
+                case IDC_TCPLAY:
+                    TapePlaying = true;
+                    TapeControlStopRecording(true);
+                    TapeAudio.Enabled = CassetteRelay;
+                    return TRUE;
 
-				case IDC_TCSTOP:
-					TapePlaying = false;
-					TapeControlStopRecording(true);
-					TapeAudio.Enabled = false;
-					return TRUE;
+                case IDC_TCSTOP:
+                    TapePlaying = false;
+                    TapeControlStopRecording(true);
+                    TapeAudio.Enabled = false;
+                    return TRUE;
 
-				case IDC_TCEJECT:
-					TapeControlStopRecording(false);
-					TapeAudio.Enabled = false;
-					CloseTape();
-					return TRUE;
+                case IDC_TCEJECT:
+                    TapeControlStopRecording(false);
+                    TapeAudio.Enabled = false;
+                    CloseTape();
+                    return TRUE;
 
-				case IDC_TCRECORD:
-					TapeControlRecord();
-					return TRUE;
+                case IDC_TCRECORD:
+                    TapeControlRecord();
+                    return TRUE;
 
-				case IDCANCEL:
-					TapeControlCloseDialog();
-					return TRUE;
-			}
-	}
+                case IDCANCEL:
+                    TapeControlCloseDialog();
+                    return TRUE;
+            }
+    }
 
-	return FALSE;
+    return FALSE;
 }
+#else
+long TCWindowCommandHandler(UINT cmdID)
+{
+    switch(cmdID)
+    {
+        case IDC_TCMAP:// Select a row on the tape map
+            // Handled by tableViewSelectionDidChange()
+            return false;
+
+        case IDC_TCPLAY:
+            TapePlaying = true;
+            TapeControlStopRecording(true);
+            TapeAudio.Enabled = CassetteRelay;
+            return true;
+
+        case IDC_TCSTOP:
+            TapePlaying = false;
+            TapeControlStopRecording(true);
+            TapeAudio.Enabled = false;
+            return true;
+
+        case IDC_TCEJECT:
+            TapeControlStopRecording(false);
+            TapeAudio.Enabled = false;
+            CloseTape();
+            return true;
+
+        case IDC_TCRECORD:
+            TapeControlRecord();
+            return true;
+
+    }
+
+	return false;
+}
+#endif
 
 void TapeControlRecord()
 {
@@ -1287,7 +1350,6 @@ void TapeControlRecord()
 	}
 }
 
-#endif
 void TapeControlStopRecording(bool RefreshControl)
 {
 	if (TapeRecording)
@@ -1395,10 +1457,7 @@ void LoadSerialUEF(FILE *SUEF)
 			{
 				TapeClock = (int)((double)TapeClock * ((double)TapeClockSpeed / Speed));
 			}
-#ifdef BEEBWIN
 			TapeControlUpdateCounter(TapeClock);
-#endif
-            
         }
 	}
 }

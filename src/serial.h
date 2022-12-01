@@ -80,8 +80,9 @@ extern int TapeClockSpeed;
 void SetTapeSpeed(int speed);
 void SetUnlockTape(bool unlock);
 #ifdef BEEBWIN
-
 void TapeControlOpenDialog(HINSTANCE hinst, HWND hwndMain);
+#else
+void TapeControlOpenDialog();
 #endif
 void TapeControlAddMapLines();
 void TapeControlCloseDialog();

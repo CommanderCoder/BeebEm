@@ -14,6 +14,22 @@
          contextName = "BeebWin::UpdateTiming():beebwin.cc">
       </ContextState>
       <ContextState
+         contextName = "ViewBeeb.flagsChanged(with:):ViewBeeb.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "event.modifierFlags">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "PlayUpTil(double):beebsound.cc">
+         <PersistentStrings>
+            <PersistentString
+               value = "OurTime">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "swift_SetMenuCheck(_:_:):AppDelegate.swift">
          <PersistentStrings>
             <PersistentString
@@ -25,18 +41,15 @@
          contextName = "AppDelegate.HandleCommand(_:):AppDelegate.swift">
       </ContextState>
       <ContextState
-         contextName = "PlayUpTil(double):beebsound.cc">
+         contextName = "ViewBeeb.update_video():ViewBeeb.swift">
+      </ContextState>
+      <ContextState
+         contextName = "BeebWin::UpdatePalette(BeebWin::PaletteType):beebwin.cc">
          <PersistentStrings>
             <PersistentString
-               value = "OurTime">
+               value = "m_RGB32">
             </PersistentString>
          </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "::beeb_HandleCommand(unsigned int):beebwin.cc">
-      </ContextState>
-      <ContextState
-         contextName = "ViewBeeb.update_video():ViewBeeb.swift">
       </ContextState>
       <ContextState
          contextName = "BeebWin::updateLines(int, int):beebwin.cc">
@@ -59,23 +72,21 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "BeebWin::UpdatePalette(BeebWin::PaletteType):beebwin.cc">
-         <PersistentStrings>
-            <PersistentString
-               value = "m_RGB32">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "ViewBeeb.flagsChanged(with:):ViewBeeb.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "event.modifierFlags">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "::beeb_HandleCommand(unsigned int):beebwin.cc">
       </ContextState>
       <ContextState
          contextName = "BeebViewController.update_cpu():BeebViewController.swift">
+      </ContextState>
+      <ContextState
+         contextName = "CloseTape():serial.cc">
+         <PersistentStrings>
+            <PersistentString
+               value = "beeb_TapeMap">
+            </PersistentString>
+            <PersistentString
+               value = "TapeMap">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
    </ContextStates>
 </VariablesViewState>

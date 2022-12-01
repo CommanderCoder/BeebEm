@@ -27,7 +27,6 @@
 int done = 0;
 extern OSStatus TCWindowCommandHandler(UInt32 cmdID);
 extern FILE *tlog;
-extern unsigned char UEFOpen;
 
 struct CColour{
     unsigned char r;
@@ -46,6 +45,9 @@ extern BeebWin *mainWin;
 extern void UserKeyboardDialog();
 extern void SetBBCKeyForVKEY(int Key, bool shift);
 extern void UKWindowKeyDown(UINT keycode);
+
+std::vector<TapeMapEntry> beeb_TapeMap;
+extern int beeb_TAPECYCLES();
 
 #ifdef BEEBWIN
 extern char AutoRunPath[];
@@ -160,29 +162,30 @@ extern "C" long beeb_BBHandleCommand(unsigned int cmdID)
 
 extern "C" void beeb_TapeControlOpenDialog()
 {
-#ifdef BEEBWIN
     TapeControlOpenDialog();
-#endif
 }
 
 
 extern "C" void beeb_TapeControlCloseDialog()
 {
-#ifdef BEEBWIN
     TapeControlCloseDialog();
-#endif
 }
 
 
 extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
-{
+{    
     char* cmdCHR = (char*)&cmdID;
-    printf("%c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
-#ifdef BEEBWIN
-    return TCWindowCommandHandler(cmdID);
-#else
+    
+    auto cmdRC = ID2RC.find(cmdID);
+    if (cmdRC != ID2RC.end())
+    {
+        printf("TCHANDLECMD %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
+        return TCWindowCommandHandler(cmdRC->second);
+    }
+
+    printf("NOT FOUND %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
     return 0;
-#endif
+
 }
     
 // user keyboard
@@ -203,68 +206,59 @@ extern "C" long beeb_UKHandleCommand(unsigned int cmdID)
 
 extern "C" long beeb_getTableRowsCount(const char* tablename)
 {
-#ifdef BEEBWIN
+    printf("TD size %d\n", beeb_TapeMap.size());
 
-    if (UEFOpen)
-        return map_lines;
-#endif
-    return 0;
-
-
+    return beeb_TapeMap.size();
 }
 
-char temp[256];
 
+// cannot return value contained in a local variable - so this is global
+static std::string  temp;
 extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
 {
+    temp = "";
 //    char* propertyCHR = (char*)&property;
 
 //    printf("%c%c%c%c data %ld", propertyCHR[3], propertyCHR[2], propertyCHR[1], propertyCHR[0], itemID);
+    TapeMapEntry e = beeb_TapeMap [itemID];
+    printf("TD %s\n", e.desc.c_str());
     
-#ifdef BEEBWIN
-
+    if (e.desc.length()==0)
+        return "---";
     switch(property)
     {
         case 'NAME' :
-            
-            strcpy(temp, map_desc[itemID - 1]);
-            temp[12] = 0;
-            
+            temp = e.desc.substr(0,12);
             break;
 
         case 'BLCK' :
-            
-            strcpy(temp, map_desc[itemID - 1] + 13);
-            temp[2] = 0;
-            
+            temp = e.desc.substr(13,2);
             break;
 
         case 'LENG' :
-            
-            strcpy(temp, map_desc[itemID - 1] + 16);
-            
+            temp = e.desc.substr(16,std::string::npos);
             break;
             
         case 3 :
-            long s;
-            s = itemID - 1;
-            if (s >= 0 && s < map_lines)
-            {
-                if (CSWOpen)
+                if (itemID >= 0 && itemID < beeb_TapeMap.size())
                 {
-                    csw_ptr = map_time[s];
+                    if (CSWFileOpen)
+                    {
+                        csw_ptr = e.time;
+                    }
+                    else
+                    {
+                        TapeClock=e.time;
+                    }
+
+                    OldClock = 0;
+
+                    SetTrigger(beeb_TAPECYCLES(), TapeTrigger);
                 }
-                else
-                {
-                    TapeClock=map_time[s];
-                }
-                OldClock=0;
-                TapeTrigger=TotalCycles+TAPECYCLES;
-            }
             break;
     }
-#endif
-    return temp;
+
+    return temp.c_str();
 }
 
 
@@ -332,3 +326,4 @@ extern "C" void beeb_bbhandlekeys(long eventkind, unsigned int keycode, char cha
     }
 
 }
+
