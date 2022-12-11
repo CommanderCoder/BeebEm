@@ -51,16 +51,19 @@ Offset  Description             Access
 #include "beebwin.h"
 #include "beebmem.h"
 
-int IDERegs[8];
-int IDEStatus;
-int IDEError;
-int IDEData;
-FILE *IDEDisc[8]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-int IDEDrive;
 bool IDEDriveEnabled = false;
-int IDEnumSectors = 64;
-int IDEnumHeads = 4;
-const int IDEDriveMax = 4;
+
+static unsigned char IDERegs[8];
+static unsigned char IDEStatus;
+static unsigned char IDEError;
+static int IDEData;
+
+constexpr int IDEDriveMax = 4;
+
+static FILE *IDEDisc[IDEDriveMax]={ nullptr, nullptr, nullptr, nullptr };
+static int IDEDrive;
+static int IDEnumSectors = 64;
+static int IDEnumHeads = 4;
 
 static void DoIDESeek();
 static void DoIDEGeometry();
@@ -71,14 +74,14 @@ void IDEReset()
     IDEError = 0;
     IDEData = 0;
 
-    char buff[256];
     // NB: Only mount drives 0-IDEDriveMax
-    for (int i = 0; i < IDEDriveMax; ++i) {
-
+    for (int i = 0; i < IDEDriveMax; ++i)
+    {
+        char buff[256];
         sprintf(buff, "%s/diskimg/ide%d.dat", RomPath, i);
         IDEDisc[i] = fopen(buff, "rb+");
 
-        if (IDEDisc[i] == NULL) {
+        if (IDEDisc[i] == nullptr) {
             IDEDisc[i] = fopen(buff, "wb");
             if (IDEDisc[i] != NULL)
                 fclose(IDEDisc[i]);
@@ -87,7 +90,7 @@ void IDEReset()
     }
 }
 
-void IDEWrite(int Address, int Value)
+void IDEWrite(int Address, unsigned char Value)
 {
     IDERegs[Address] = Value;
     IDEError = 0;
@@ -106,13 +109,16 @@ void IDEWrite(int Address, int Value)
 
     if (Address == 0x00)                        // Write Data
     {
-        if (IDEData > 0)                        // If in data write cycle,
+        // If in data write cycle, write data byte to file
+        if (IDEData > 0)
         {
-            fputc(Value, IDEDisc[IDEDrive]);    // Write data byte to file
+            fputc(Value, IDEDisc[IDEDrive]);
             IDEData--;
-            if (IDEData == 0)                   // If written all data,
+
+            // If written all data, reset Data Ready
+            if (IDEData == 0)
             {
-                IDEStatus &= ~0x08;             // reset Data Ready
+                IDEStatus &= ~0x08;
             }
         }
     }
@@ -125,21 +131,29 @@ unsigned char IDERead(int Address)
     switch (Address)
     {
     case 0x00:          // Data register
-        if (IDEDrive >= IDEDriveMax) {          // This check must be here to allow
-            IDEData = 0;                        //  status registers to be read
-        } else {
-            if (IDEDisc[IDEDrive] == NULL) {
+        // This check must be here to allow status registers to be read 
+        if (IDEDrive >= IDEDriveMax) 
+        {
+            IDEData = 0;
+        }
+        else
+        {
+            if (IDEDisc[IDEDrive] == nullptr) 
+            {
                 IDEData = 0;
             }
         }
 
-        if (IDEData > 0)                        // If in data read cycle,
+        // If in data read cycle, read data byte from file
+        if (IDEData > 0)
         {
-            data = fgetc(IDEDisc[IDEDrive]);    // read data byte from file.
+            data = fgetc(IDEDisc[IDEDrive]);
             IDEData--;
-            if (IDEData == 0)                   // If read all data,
+
+            // If read all data, reset Data Ready
+            if (IDEData == 0)
             {
-                IDEStatus &= ~0x08;             // reset Data Ready
+                IDEStatus &= ~0x08;
             }
         }
         break;
@@ -196,6 +210,7 @@ void DoIDESeek()
     IDEData = IDERegs[2] * 256;                 // Number of sectors to read/write, * 256 = bytes
     Sector = IDERegs[3] - 1;                    // Sector number 0 - 63
     Track = (IDERegs[4] + IDERegs[5] * 256);    // Track number
+                                                
     if (IDEnumHeads < 5) {
       MS = Track / 8192;                        // Drive bit 0 (0/1 or 2/3)
       Track = Track & 8191;                     // Track 0 - 8191
@@ -211,13 +226,15 @@ void DoIDESeek()
     //  = (Track * 4L * 64L + Head * 64L + Sector ) * 256L; // Absolute position within file
     long pos = (Track * IDEnumHeads * IDEnumSectors + Head * IDEnumSectors + Sector) * 256L;
 
-    if (IDEDrive >= IDEDriveMax) {              // Drive out of range
+    if (IDEDrive >= IDEDriveMax) {
+        // Drive out of range
         IDEStatus = 0x01;                       // Not busy, error occured
         IDEError = 0x10;                        // Sector not found (no media present)
         return;
     }
 
-    if (IDEDisc[IDEDrive] == NULL) {            // No drive image present
+    if (IDEDisc[IDEDrive] == nullptr) {
+        // No drive image present
         IDEStatus = 0x01;                       // Not busy, error occured
         IDEError = 0x10;                        // Sector not found (no media present)
         return;
@@ -226,7 +243,6 @@ void DoIDESeek()
     fseek(IDEDisc[IDEDrive], pos, SEEK_SET);
     IDEStatus |= 0x08;                          // Data Ready
 }
-
 
 void DoIDEGeometry()
 {
