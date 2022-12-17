@@ -42,13 +42,17 @@ SoundStreamer::~SoundStreamer()
 
 void SoundStreamer::PlayAll()
 {
-	std::list<SoundStreamer*>::iterator li;
+    if (m_streamers.size() == 0)
+        return;
+    std::list<SoundStreamer*>::iterator li;
 	for (li = m_streamers.begin(); li != m_streamers.end(); li++)
 		(*li)->Play();
 }
 
 void SoundStreamer::PauseAll()
 {
+    if (m_streamers.size() == 0)
+        return;
 	std::list<SoundStreamer*>::iterator li;
 	for (li = m_streamers.begin(); li != m_streamers.end(); li++)
 		(*li)->Pause();

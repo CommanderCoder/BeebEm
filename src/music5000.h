@@ -29,7 +29,7 @@ Boston, MA  02110-1301, USA.
 
 extern bool Music5000Enabled;
 #ifndef BEEBWIN
-#define UINT unsigned int
+#define UINT uint32_t
 #endif
 
 #define Music5000Poll(cycles) { if (Music5000Enabled) Music5000Update(cycles); }

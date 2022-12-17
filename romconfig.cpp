@@ -39,21 +39,43 @@ Boston, MA  02110-1301, USA.
 #ifdef BEEBWIN
 static HWND hWndROMList = NULL;
 static HWND hWndModel = NULL;
+#else
+#define LPCSTR std::string
+#define LPTSTR char *
+#define LPARAM int
+#define TRUE true
+#define FALSE false
+#define HWND int
+static HWND hWndROMList = NULL;
+static HWND hWndModel = NULL;
+static HWND hwndDlg = NULL;
+
 #endif
 static Model nModel = Model::B;
-#ifdef BEEBWIN
 static const LPCSTR szModel[] = { "BBC B", "Integra-B", "B Plus", "Master 128" };
-#endif
 static ROMConfigFile ROMCfg;
 static char szDefaultROMPath[MAX_PATH] = {0};
 static char szDefaultROMConfigPath[MAX_PATH] = {0};
 
-#ifdef BEEBWIN
-static INT_PTR CALLBACK ROMConfigDlgProc(
-	HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 static bool LoadROMConfigFile(HWND hWnd);
 static bool SaveROMConfigFile(HWND hWnd);
 static bool GetROMFile(HWND hWnd, char *pFileName);
+#ifdef BEEBWIN
+static INT_PTR CALLBACK ROMConfigDlgProc(
+	HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
+#else
+static void FillROMList();
+
+extern "C" void swift_RCSetModelText(const LPTSTR n);
+extern "C" int swift_RCGetSelectionMark();
+extern "C" void swift_RCSetFocus();
+
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, PRINTFILE, ROMCFG };
+extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, const char *directory, FileFilter exts);
+extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
+
+RCItem beeb_RCTable[16][2];
+
 #endif
 static bool WriteROMFile(const char *filename, ROMConfigFile RomConfig);
 
@@ -72,10 +94,21 @@ void BeebWin::EditROMConfig(void)
 		BeebReadRoms();
 	}
 #else
-    printf("EDIT ROM DIALOG\n");
+    FillROMList();
 #endif
-    
 }
+
+#ifndef BEEBWIN
+void BeebWin::FinishROMConfig(void)
+{
+    // Copy in new config and read ROMs
+    memcpy(&RomConfig, &ROMCfg, sizeof(ROMConfigFile));
+    BeebReadRoms();
+}
+#endif
+
+
+
 
 #ifdef BEEBWIN
 /****************************************************************************/
@@ -90,10 +123,12 @@ static int LVInsertColumn(
 	lc.cx = uWidth;
 	return ListView_InsertColumn(hWnd, uCol, &lc);
 }
+#endif
 
 static int LVInsertItem(
 	HWND hWnd, UINT uRow, UINT uCol, const LPTSTR pszText, LPARAM lParam)
 {
+#ifdef BEEBWIN
 	LVITEM li = {0};
 	li.mask = LVIF_TEXT | LVIF_PARAM;
 	li.iItem = uRow;
@@ -101,16 +136,27 @@ static int LVInsertItem(
 	li.pszText = pszText;
 	li.lParam = (lParam ? lParam : uRow);
 	return ListView_InsertItem(hWnd, &li);
+#else
+    beeb_RCTable[uRow][uCol].name = pszText;
+    beeb_RCTable[uRow][uCol].bank = lParam;
+    return 0;
+#endif
 }
 
 static void LVSetItemText(
 	HWND hWnd, UINT uRow, UINT uCol, const LPTSTR pszText)
 {
+#ifdef BEEBWIN
 	ListView_SetItemText(hWnd, uRow, uCol, pszText);
+#else
+    // change the row/column data which is read by swift dialogue
+    beeb_RCTable[uRow][uCol].name = pszText;
+#endif
 }
 
 static void LVSetFocus(HWND hWnd)
 {
+#ifdef BEEBWIN
 	int row = ListView_GetSelectionMark(hWnd);
 	ListView_SetItemState(hWndROMList,
 	                      row,
@@ -118,8 +164,13 @@ static void LVSetFocus(HWND hWnd)
 	                      LVIS_SELECTED | LVIS_FOCUSED);
 
 	SetFocus(hWnd);
-}
+#else
+    swift_RCSetFocus();
 #endif
+}
+
+
+
 
 /****************************************************************************/
 static void UpdateROMField(int row)
@@ -140,24 +191,22 @@ static void UpdateROMField(int row)
 	strncpy(szROMFile, ROMCfg[static_cast<int>(nModel)][row], _MAX_PATH);
 	if (unplugged)
 		strncat(szROMFile, " (unplugged)", _MAX_PATH);
-#ifdef BEEBWIN
 	LVSetItemText(hWndROMList, row, 1, (LPTSTR)szROMFile);
-#endif
-    
 }
 
 /****************************************************************************/
 static void FillROMList(void)
 {
 #ifdef BEEBWIN
-
 	Edit_SetText(hWndModel, szModel[static_cast<int>(nModel)]);
 
 	ListView_DeleteAllItems(hWndROMList);
-
-	int row = 0;
-	LVInsertItem(hWndROMList, row, 0, (LPTSTR)"OS", 16);
-	LVSetItemText(hWndROMList, row, 1, (LPTSTR)ROMCfg[static_cast<int>(nModel)][0]);
+#else
+    swift_RCSetModelText(szModel[static_cast<int>(nModel)].c_str());
+#endif
+    int row = 0;
+    LVInsertItem(hWndROMList, row, 0, (LPTSTR)"OS", 16);
+    LVSetItemText(hWndROMList, row, 1, (LPTSTR)ROMCfg[static_cast<int>(nModel)][0]);
 
 	for (row = 1; row <= 16; ++row)
 	{
@@ -169,8 +218,8 @@ static void FillROMList(void)
 		LVInsertItem(hWndROMList, row, 0, (LPTSTR)str, bank);
 		UpdateROMField(row);
 	}
-#endif
 }
+
 
 #ifdef BEEBWIN
 
@@ -195,6 +244,14 @@ static INT_PTR CALLBACK ROMConfigDlgProc(HWND hwndDlg, UINT message,
 
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
+#else
+extern "C" bool RCWindowCommandHandler(int wParam)
+{
+    int row;
+    char *cfg;
+
+    switch (wParam)
+#endif
 			{
 			case IDC_BBCB:
 				nModel = Model::B;
@@ -214,12 +271,16 @@ static INT_PTR CALLBACK ROMConfigDlgProc(HWND hwndDlg, UINT message,
 				return TRUE;
 				
 			case IDC_SELECTROM:
+#ifdef BEEBWIN
 				row = ListView_GetSelectionMark(hWndROMList);
+#else
+                row = swift_RCGetSelectionMark();
+#endif
 				if (row >= 0 && row <= 16)
 				{
 					char szROMFile[MAX_PATH];
 					if (GetROMFile(hwndDlg, szROMFile))
-					{
+                    {
 						strcpy(ROMCfg[static_cast<int>(nModel)][row], szROMFile);
 						UpdateROMField(row);
 					}
@@ -227,7 +288,11 @@ static INT_PTR CALLBACK ROMConfigDlgProc(HWND hwndDlg, UINT message,
 				LVSetFocus(hWndROMList);
 				break;
 			case IDC_MARKWRITABLE:
-				row = ListView_GetSelectionMark(hWndROMList);
+#ifdef BEEBWIN
+                row = ListView_GetSelectionMark(hWndROMList);
+#else
+                row = swift_RCGetSelectionMark();
+#endif
 				if (row >= 1 && row <= 16)
 				{
 					cfg = ROMCfg[static_cast<int>(nModel)][row];
@@ -240,36 +305,44 @@ static INT_PTR CALLBACK ROMConfigDlgProc(HWND hwndDlg, UINT message,
 						UpdateROMField(row);
 					}
 				}
-				LVSetFocus(hWndROMList);
+                LVSetFocus(hWndROMList);
 				break;
 			case IDC_RAM:
-				row = ListView_GetSelectionMark(hWndROMList);
+#ifdef BEEBWIN
+                row = ListView_GetSelectionMark(hWndROMList);
+#else
+                row = swift_RCGetSelectionMark();
+#endif
 				if (row >= 1 && row <= 16)
 				{
 					strcpy(ROMCfg[static_cast<int>(nModel)][row], BANK_RAM);
 					UpdateROMField(row);
 				}
-				LVSetFocus(hWndROMList);
+                LVSetFocus(hWndROMList);
 				break;
 			case IDC_EMPTY:
-				row = ListView_GetSelectionMark(hWndROMList);
+#ifdef BEEBWIN
+                row = ListView_GetSelectionMark(hWndROMList);
+#else
+                row = swift_RCGetSelectionMark();
+#endif
 				if (row >= 1 && row <= 16)
 				{
 					strcpy(ROMCfg[static_cast<int>(nModel)][row], BANK_EMPTY);
 					UpdateROMField(row);
 				}
-				LVSetFocus(hWndROMList);
+                LVSetFocus(hWndROMList);
 				break;
 
 			case IDC_SAVE:
-				SaveROMConfigFile(hwndDlg);
-				LVSetFocus(hWndROMList);
+                SaveROMConfigFile(hwndDlg);
+                LVSetFocus(hWndROMList);
 				break;
 			case IDC_LOAD:
-				LoadROMConfigFile(hwndDlg);
-				LVSetFocus(hWndROMList);
+                LoadROMConfigFile(hwndDlg);
+                LVSetFocus(hWndROMList);
 				break;
-				
+#ifdef BEEBWIN
 			case IDOK:
 				EndDialog(hwndDlg, TRUE);
 				return TRUE;
@@ -279,6 +352,7 @@ static INT_PTR CALLBACK ROMConfigDlgProc(HWND hwndDlg, UINT message,
 				return TRUE;
 			}
 			break;
+#endif
 	}
 	return FALSE;
 }
@@ -300,8 +374,12 @@ static bool LoadROMConfigFile(HWND hWnd)
 	else
 		strcpy(DefaultPath, szROMConfigPath);
 
+#ifdef BEEBWIN
 	FileDialog fileDialog(hWnd, pFileName, MAX_PATH, DefaultPath, filter);
 	if (fileDialog.Open())
+#else
+    if (swift_GetOneFileWithPreview(pFileName, MAX_PATH, DefaultPath, ROMCFG)==0)
+#endif
 	{
 		// Save directory as default for next time
 		unsigned int PathLength = (unsigned int)(strrchr(pFileName, '\\') - pFileName);
@@ -322,7 +400,7 @@ static bool LoadROMConfigFile(HWND hWnd)
 	return success;
 }
 
-/****************************************************************************/
+    /****************************************************************************/
 static bool SaveROMConfigFile(HWND hWnd)
 {
 	char DefaultPath[MAX_PATH];
@@ -339,9 +417,13 @@ static bool SaveROMConfigFile(HWND hWnd)
 	else
 		strcpy(DefaultPath, szROMConfigPath);
 
+#ifdef BEEBWIN
 	FileDialog fileDialog(hWnd, pFileName, MAX_PATH, DefaultPath, filter);
 	if (fileDialog.Save())
-	{
+#else
+    if (swift_SaveFile(pFileName, MAX_PATH, ROMCFG))
+#endif
+    {
 		// Save directory as default for next time
 		unsigned int PathLength = (unsigned int)(strrchr(pFileName, '\\') - pFileName);
 		strncpy(szDefaultROMConfigPath, pFileName, PathLength);
@@ -405,11 +487,19 @@ static bool GetROMFile(HWND hWnd, char *pFileName)
 	else
 		strcpy(DefaultPath, szROMPath);
 
-	FileDialog fileDialog(hWnd, pFileName, MAX_PATH, DefaultPath, filter);
-	if (fileDialog.Open())
+#ifdef BEEBWIN
+    FileDialog fileDialog(hWnd, pFileName, MAX_PATH, DefaultPath, filter);
+    if (fileDialog.Open())
+#else
+    if (swift_GetOneFileWithPreview(pFileName, MAX_PATH, DefaultPath, ROMCFG)==0)
+#endif
 	{
 		// Save directory as default for next time
+#ifdef BEEBWIN
 		unsigned int PathLength = (unsigned int)(strrchr(pFileName, '\\') - pFileName);
+#else
+        unsigned int PathLength = (unsigned int)(strrchr(pFileName, '/') - pFileName);
+#endif
 		strncpy(szDefaultROMPath, pFileName, PathLength);
 		szDefaultROMPath[PathLength] = 0;
 
@@ -424,4 +514,6 @@ static bool GetROMFile(HWND hWnd, char *pFileName)
 
 	return success;
 }
-#endif
+
+
+

@@ -17,6 +17,7 @@ import AVFoundation
     case KEYBOARD
     case DISCFILE
     case PRINTFILE
+    case ROMCFG
 }
 
 
@@ -79,10 +80,10 @@ enum CBridge {
 
 // allow access to this in C
 @_cdecl("swift_GetOneFileWithPreview")
-func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: Int, fileexts : FileFilter) -> Int
+func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: Int, directory : UnsafeMutablePointer<CChar>, fileexts : FileFilter) -> Int
 {
     let dialog = NSOpenPanel()
-
+    
     dialog.title                   = "Choose a file | BeebEm5"
     dialog.showsResizeIndicator    = true
     dialog.showsHiddenFiles        = false
@@ -91,6 +92,12 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
     dialog.canChooseFiles    = true
     dialog.allowsOtherFileTypes = true
 
+
+    // FUTURE
+//    let launcherLogPath = NSString("~/Documents").expandingTildeInPath  // need to expand the path if it includes ~
+    let launcherLogPath = String( cString: directory)
+    dialog.directoryURL = NSURL.fileURL(withPath: launcherLogPath, isDirectory: true)
+    
     switch fileexts {
     case .DISC:
         dialog.allowedFileTypes        = ["ssd", "dsd", "wdd", "dos", "adl", "adf", "img"]
@@ -102,6 +109,8 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
         dialog.allowedFileTypes        = ["kmap"]
     case .DISCFILE:
         dialog.allowedFileTypes        = nil  // ["inf"]
+    case .ROMCFG:
+        dialog.allowedFileTypes        = ["rom"]
     case .PRINTFILE:
         break
     }
@@ -149,6 +158,8 @@ func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int, fileexts
         dialog.allowedFileTypes        = ["kmap"]
     case .DISCFILE:
         dialog.allowedFileTypes        = ["inf"]
+    case .ROMCFG:
+        dialog.allowedFileTypes        = ["rom"]
     case .PRINTFILE:
         dialog.allowedFileTypes        = nil  // ["inf"]
     }
@@ -342,7 +353,7 @@ public func swift_SetMenuItemTextWithCString(_ cmd: UInt32, _ text: UnsafePointe
 public func swift_TCReload()
 {
 //    print("\(#function) \(String(cString:text)) \(b)")
-    tcViewControllerInstance?.reloadFileList()
+    TapeControlViewController.tcViewControllerInstance!.reloadFileList()
 }
 
 
@@ -350,14 +361,14 @@ public func swift_TCReload()
 public func swift_TCSelectItem( _ b:Int )
 {
 //    print("\(#function) \(String(cString:text)) \(b) ")
-    tcViewControllerInstance!.selectRowInTable(UInt(b))
+    TapeControlViewController.tcViewControllerInstance!.selectRowInTable(UInt(b))
 }
 
 @_cdecl("swift_TCReturnItem")
 public func swift_TCReturnItem(_ text: UnsafePointer<CChar>) -> UInt
 {
 //    print("\(#function) \(String(cString:text)) \(b) ")
-    return tcViewControllerInstance!.returnRowInTable()
+    return TapeControlViewController.tcViewControllerInstance!.returnRowInTable()
 }
 
 // Rom Config
@@ -396,7 +407,7 @@ public func swift_Alert(_ text: UnsafePointer<CChar>, _ text2: UnsafePointer<CCh
     let res = a.runModal()
     let val = res == .alertFirstButtonReturn ? 1:2
     print(String(cString:text)+" "+String(cString:text2)+" "+String(hasCancel))
-    tcViewControllerInstance?.reloadFileList()
+    TapeControlViewController.tcViewControllerInstance!.reloadFileList()
     return val
 }
 
@@ -979,3 +990,29 @@ public func swift_setPasteboard(_ text: UnsafePointer<CChar>, _ length: UInt)
     pasteboard.setString(String(cString:text), forType: .string)
 }
 
+
+
+
+@_cdecl("swift_RCSetModelText")
+public func swift_RCSetModelText(_ n: UnsafePointer<CChar>)
+{
+    print(n)
+    let z = String( cString: n )
+    
+    // set model text
+    RomConfigViewController.rcViewControllerInstance!.setModelText(z)
+    RomConfigViewController.rcViewControllerInstance!.tableView.reloadData()
+
+}
+@_cdecl("swift_RCGetSelectionMark")
+public func  swift_RCGetSelectionMark() -> Int
+{
+    RomConfigViewController.rcViewControllerInstance!.tableView.reloadData()
+    return RomConfigViewController.rcViewControllerInstance!.returnRowInTable()
+}
+
+@_cdecl("swift_RCSetFocus")
+public func  swift_RCSetFocus()
+{
+    RomConfigViewController.rcViewControllerInstance!.setFocus();
+}

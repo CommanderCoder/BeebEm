@@ -2,6 +2,7 @@
 //  Use this file to import your target's public headers that you would like to expose to Swift.
 //
 
+#include "beebemrc.h"
 
 // BEEBEM - THIS SHOULD BE IN A SEPARATE HEADER WITH THE OTHER ONE!
 struct CColour{
@@ -45,3 +46,8 @@ void beeb_bbhandlekeys(long eventkind, unsigned int keycode, char charCode);
 
 void WriteLog(const char *fmt, ...);
 
+
+int RCWindowCommandHandler(int);
+void beeb_EditROMConfig();
+void beeb_FinishROMConfig();
+const char* beeb_getRCEntry(int row, int column);

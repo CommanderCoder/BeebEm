@@ -46,6 +46,8 @@ extern void UserKeyboardDialog();
 extern void SetBBCKeyForVKEY(int Key, bool shift);
 extern void UKWindowKeyDown(UINT keycode);
 
+extern RCItem beeb_RCTable[16][2];
+
 std::vector<TapeMapEntry> beeb_TapeMap;
 extern int beeb_TAPECYCLES();
 
@@ -202,6 +204,20 @@ extern "C" long beeb_UKHandleCommand(unsigned int cmdID)
 
     printf("NOT FOUND %c%c%c%c", cmdCHR[3], cmdCHR[2], cmdCHR[1], cmdCHR[0]);
     return 0;
+}
+
+extern "C" void beeb_EditROMConfig()
+{
+    mainWin->HandleCommand(IDM_ROMCONFIG);
+}
+
+extern "C" void beeb_FinishROMConfig()
+{
+    mainWin->FinishROMConfig();
+}
+extern "C" const char* beeb_getRCEntry(int row, int column)
+{
+    return beeb_RCTable[row][column].name.c_str();
 }
 
 extern "C" long beeb_getTableRowsCount(const char* tablename)

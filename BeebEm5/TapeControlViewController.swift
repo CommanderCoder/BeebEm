@@ -8,9 +8,10 @@
 
 import Cocoa
 
-weak var tcViewControllerInstance : TapeControlViewController?
 
 class TapeControlViewController: NSViewController {
+
+    static var tcViewControllerInstance : TapeControlViewController?
 
     @IBOutlet weak var tableView: NSTableView!
     
@@ -23,7 +24,7 @@ class TapeControlViewController: NSViewController {
         tableView.delegate = self
         tableView.dataSource = self
         
-        tcViewControllerInstance = self
+        TapeControlViewController.tcViewControllerInstance = self
     }
     
     func selectRowInTable(_ row: UInt){

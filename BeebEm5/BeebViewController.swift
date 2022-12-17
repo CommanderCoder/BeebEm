@@ -129,7 +129,7 @@ class BeebViewController: NSViewController {
         skimage.texture = SKTexture(image: bmImage)
 
         // update the tape controller
-        tcViewControllerInstance?.update()
+        TapeControlViewController.tcViewControllerInstance?.update()
 
         update_hardware_bridge()
 

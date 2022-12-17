@@ -51,8 +51,12 @@ struct RECT {
   short               right;
 };
 typedef struct RECT                     RECT;
-//typedef RECT *                          RECTPtr;
 
+// 16 rows and 2 columns (only column 0 needs the bank value)
+struct RCItem {
+    int bank;
+    std::string name;
+};
 
 #endif
 
@@ -673,6 +677,8 @@ public:
 	bool RegSetBinaryValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue, const void* pData, int* pnSize);
 	bool RegGetStringValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue, LPSTR pData, DWORD dwSize);
 	bool RegSetStringValue(HKEY hKeyRoot, LPCSTR lpSubKey, LPCSTR lpValue, LPCSTR pData);
+#else
+    void FinishROMConfig(void);
 #endif
     void EditROMConfig(void);
 

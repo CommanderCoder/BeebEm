@@ -83,9 +83,9 @@ extern AVIWriter *aviWriter;
 
 #else
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, PRINTFILE };
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, PRINTFILE, ROMCFG };
 
-extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
+extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, const char* directory, FileFilter exts);
 extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
 extern "C" int swift_MoveFile (const char *src, const char *dest );
 
@@ -199,7 +199,7 @@ int BeebWin::ReadDisc(int Drive, bool bCheckForPrefs)
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), DefaultPath, filter);
 	gotName = fileDialog.Open();
 #else
-    bool err = swift_GetOneFileWithPreview(FileName, sizeof(FileName), DISC);
+    bool err = swift_GetOneFileWithPreview(FileName, sizeof(FileName), DefaultPath, DISC);
     gotName = !err;
 #endif
 	if (gotName)
@@ -357,7 +357,7 @@ void BeebWin::LoadTape(void)
 		}
 	}
 #else
-    int err = swift_GetOneFileWithPreview(FileName, 256, UEF);
+    int err = swift_GetOneFileWithPreview(FileName, 256, DefaultPath, UEF);
     
     if (!err)
     {
@@ -641,7 +641,7 @@ void BeebWin::RestoreState()
 			m_Preferences.SetStringValue("StatesPath", DefaultPath);
 		}
 #else
-    if (swift_GetOneFileWithPreview(FileName, sizeof(FileName), UEF) == 0) {
+    if (swift_GetOneFileWithPreview(FileName, sizeof(FileName), DefaultPath, UEF) == 0) {
             
 		LoadUEFState(FileName);
 	}
@@ -1308,7 +1308,7 @@ void BeebWin::LoadUserKeyMap()
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), m_UserDataPath, filter);
 	if (fileDialog.Open())
 #else
-    if (swift_GetOneFileWithPreview(FileName, _MAX_PATH, KEYBOARD)==0)
+    if (swift_GetOneFileWithPreview(FileName, _MAX_PATH, m_UserDataPath, KEYBOARD)==0)
 #endif
     {
         if (ReadKeyMap(FileName, &UserKeymap))
@@ -1820,7 +1820,7 @@ void BeebWin::ImportDiscFiles(int menuId)
 		return;
 	}
 #else
-    if (0 != swift_GetOneFileWithPreview(fileSelection, sizeof(fileSelection),DISCFILE))
+    if (0 != swift_GetOneFileWithPreview(fileSelection, sizeof(fileSelection),szFolder,DISCFILE))
     {
         return;
     }
