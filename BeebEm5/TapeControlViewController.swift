@@ -69,18 +69,18 @@ class TapeControlViewController: NSViewController {
     func update() {
         switch dirty{
         case 1:
-            print("updating dirty \(dirty)")
+//            print("updating dirty \(dirty)")
             tableView.reloadData()
-            print("done dirty")
+//            print("done dirty")
         case 2:
-            print("updating dirty \(dirty)")
+//            print("updating dirty \(dirty)")
             tableView.selectRowIndexes(.init(integer:Int(selectedRow)), byExtendingSelection: false)
-            print("done dirty")
+//            print("done dirty")
         case 3:
-            print("updating dirty \(dirty)")
+//            print("updating dirty \(dirty)")
             tableView.reloadData()
             tableView.selectRowIndexes(.init(integer:Int(selectedRow)), byExtendingSelection: false)
-            print("done dirty")
+//            print("done dirty")
         default:
             () // or break
         }
@@ -114,7 +114,7 @@ extension TapeControlViewController: NSTableViewDelegate {
     
     text = String(cString: beeb_getTableCellData(conv(cellIdentifier.rawValue), row))
 
-      print("TC \(cellIdentifier.rawValue) \(row) .. \(text)")
+//      print("TC \(cellIdentifier.rawValue) \(row) .. \(text)")
     // 3
     if let cell = tableView.makeView(withIdentifier: cellIdentifier , owner: nil) as? NSTableCellView {
       cell.textField?.stringValue = text
@@ -125,7 +125,7 @@ extension TapeControlViewController: NSTableViewDelegate {
   }
     
     func tableViewSelectionDidChange(_ notification: Notification) {
-        print("\(#function) \(tableView.selectedRow) \(notification.name)")
+//        print("\(#function) \(tableView.selectedRow) \(notification.name)")
         beeb_getTableCellData(3,tableView.selectedRow) // needs to start at 1
         
     }

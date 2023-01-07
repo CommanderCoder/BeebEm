@@ -222,7 +222,7 @@ extern "C" const char* beeb_getRCEntry(int row, int column)
 
 extern "C" long beeb_getTableRowsCount(const char* tablename)
 {
-    printf("TD size %d\n", beeb_TapeMap.size());
+//    printf("TD size %d\n", beeb_TapeMap.size());
 
     return beeb_TapeMap.size();
 }
@@ -237,7 +237,7 @@ extern "C" const char* beeb_getTableCellData(UInt32 property, long itemID)
 
 //    printf("%c%c%c%c data %ld", propertyCHR[3], propertyCHR[2], propertyCHR[1], propertyCHR[0], itemID);
     TapeMapEntry e = beeb_TapeMap [itemID];
-    printf("TD %s\n", e.desc.c_str());
+//    printf("TD %s\n", e.desc.c_str());
     
     if (e.desc.length()==0)
         return "---";

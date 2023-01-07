@@ -425,7 +425,11 @@ static bool SaveROMConfigFile(HWND hWnd)
 #endif
     {
 		// Save directory as default for next time
+#ifdef BEEBWIN
 		unsigned int PathLength = (unsigned int)(strrchr(pFileName, '\\') - pFileName);
+#else
+        unsigned int PathLength = (unsigned int)(strrchr(pFileName, '/') - pFileName);
+#endif
 		strncpy(szDefaultROMConfigPath, pFileName, PathLength);
 		szDefaultROMConfigPath[PathLength] = 0;
 
