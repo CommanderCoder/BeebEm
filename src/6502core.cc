@@ -3042,7 +3042,7 @@ void Save6502UEF(FILE *SUEF) {
 }
 
 void Load6502UEF(FILE *SUEF) {
-    int Dlong;
+
     ProgramCounter = fget16(SUEF);
     Accumulator = fgetc(SUEF);
     XReg = fgetc(SUEF);
@@ -3050,7 +3050,7 @@ void Load6502UEF(FILE *SUEF) {
     StackReg = fgetc(SUEF);
     PSR = fgetc(SUEF);
     // TotalCycles = fget32(SUEF);
-    Dlong = fget32(SUEF);
+    fget32(SUEF); // Unused was Dlong
     intStatus = fgetc(SUEF);
     NMIStatus = fgetc(SUEF);
     NMILock = fgetc(SUEF);
