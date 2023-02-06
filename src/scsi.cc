@@ -746,7 +746,7 @@ bool WriteGeometory(unsigned char *buf)
 	if (SCSIDisc[scsi.lun] == NULL) return false;
 
 	char buff[256];
-    sprintf(buff, "%s/discimg/scsi%d.dsc", RomPath, scsi.lun);	
+    snprintf(buff, sizeof(buff), "%s/discimg/scsi%d.dsc", RomPath, scsi.lun);	
 	
 	FILE *f = fopen(buff, "wb");
 	
