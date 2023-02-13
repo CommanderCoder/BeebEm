@@ -21,8 +21,6 @@ void beeb_SetAMXPosition(unsigned int x, unsigned int y);
 int beeb_HandleCommand(unsigned int cmdID);
 void beeb_setFilePath(const char* _path);
 
-//void beeb_setAMXPosition(unsigned int x,unsigned int y);
-
 long beeb_TCHandleCommand(unsigned int cmdID);
 void beeb_TapeControlOpenDialog();
 void beeb_TapeControlCloseDialog();
