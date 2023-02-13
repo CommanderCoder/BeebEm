@@ -1223,15 +1223,15 @@ void Dis6502(char *str)
 {
     DebugDisassembleInstruction(ProgramCounter, true, str);
 
-    sprintf(str + strlen(str), "%02X %02X %02X ", Accumulator, XReg, YReg);
+    snprintf(str + strlen(str), sizeof(str), "%02X %02X %02X ", Accumulator, XReg, YReg);
 
-    sprintf(str + strlen(str), (PSR & FlagC) ? "C" : ".");
-    sprintf(str + strlen(str), (PSR & FlagZ) ? "Z" : ".");
-    sprintf(str + strlen(str), (PSR & FlagI) ? "I" : ".");
-    sprintf(str + strlen(str), (PSR & FlagD) ? "D" : ".");
-    sprintf(str + strlen(str), (PSR & FlagB) ? "B" : ".");
-    sprintf(str + strlen(str), (PSR & FlagV) ? "V" : ".");
-    sprintf(str + strlen(str), (PSR & FlagN) ? "N" : ".");
+    snprintf(str + strlen(str), sizeof(str), (PSR & FlagC) ? "C" : ".");
+    snprintf(str + strlen(str), sizeof(str), (PSR & FlagZ) ? "Z" : ".");
+    snprintf(str + strlen(str), sizeof(str), (PSR & FlagI) ? "I" : ".");
+    snprintf(str + strlen(str), sizeof(str), (PSR & FlagD) ? "D" : ".");
+    snprintf(str + strlen(str), sizeof(str), (PSR & FlagB) ? "B" : ".");
+    snprintf(str + strlen(str), sizeof(str), (PSR & FlagV) ? "V" : ".");
+    snprintf(str + strlen(str), sizeof(str), (PSR & FlagN) ? "N" : ".");
 }
 
 void MemoryDump6502(int addr, int count)
