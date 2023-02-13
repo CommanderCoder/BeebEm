@@ -5188,8 +5188,8 @@ OSStatus err = noErr;
 void BeebWin::NewDiscImage(int Drive)
 
 {
-char *path = 0;
-OSErr err = noErr;
+    char path[256];
+    OSErr err = noErr;
 
 	err = SaveFile(path, nil);
 
