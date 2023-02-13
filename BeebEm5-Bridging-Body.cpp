@@ -46,19 +46,15 @@ extern "C" void beeb_handlemouse(long eventkind)
     {
         // TODO: see main.cc for how it was done previously
         case mouseDown:
-            fprintf(stderr, "Left Mouse button down\n");
             AMXButtons |= AMX_LEFT_BUTTON;
             break;
         case mouseUp:
-            fprintf(stderr, "Left Mouse button up\n");
             AMXButtons &= ~AMX_LEFT_BUTTON;
             break;
         case 100:
-            fprintf(stderr, "Right Mouse buttom down\n");
             AMXButtons |= AMX_RIGHT_BUTTON;
             break;
         case 99:
-            fprintf(stderr, "Right Mouse button up\n");
             AMXButtons &= ~AMX_RIGHT_BUTTON;
             break;
             
