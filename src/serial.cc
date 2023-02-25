@@ -40,6 +40,7 @@ can be determined under normal use".
 #include "uefstate.h"
 #include "csw.h"
 #include "serialdevices.h"
+#include "beebmem.h"
 
 #define CASSETTE 0  // Device in 
 #define RS423 1		// use defines
@@ -115,7 +116,7 @@ void Write_ACIA_Control(unsigned char CReg) {
 	unsigned char bit;
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Write ACIA control %02X", (int)CReg);
+		snprintf(info, sizeof(info), "Serial: Write ACIA control %02X", (int)CReg);
 		DebugDisplayTrace(DEBUG_SERIAL, true, info);
 	}
 
@@ -164,7 +165,7 @@ void Write_ACIA_Control(unsigned char CReg) {
 void Write_ACIA_Tx_Data(unsigned char Data) {
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Write ACIA Tx %02X", (int)Data);
+		snprintf(info, sizeof(info),  "Serial: Write ACIA Tx %02X", (int)Data);
 		DebugDisplayTrace(DEBUG_SERIAL, true, info);
 	}
 
@@ -227,7 +228,7 @@ void Write_SERPROC(unsigned char Data) {
 	
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Write serial ULA %02X", (int)Data);
+		snprintf(info, sizeof(info), "Serial: Write serial ULA %02X", (int)Data);
 		DebugDisplayTrace(DEBUG_SERIAL, true, info);
 	}
 	SP_Control=Data;
@@ -266,7 +267,7 @@ unsigned char Read_ACIA_Status(void) {
 //	}
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Read ACIA status %02X", (int)ACIA_Status);
+		snprintf(info, sizeof(info), "Serial: Read ACIA status %02X", (int)ACIA_Status);
 		DebugDisplayTrace(DEBUG_SERIAL, true, info);
 	}
 
@@ -304,7 +305,7 @@ unsigned char Read_ACIA_Rx_Data(void) {
 	if (Data_Bits==7) TData&=127;
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Read ACIA Rx %02X", (int)TData);
+		snprintf(info, sizeof(info), "Serial: Read ACIA Rx %02X", (int)TData);
 		DebugDisplayTrace(DEBUG_SERIAL, true, info);
 	}
 	return(TData);
@@ -313,7 +314,7 @@ unsigned char Read_ACIA_Rx_Data(void) {
 unsigned char Read_SERPROC(void) {
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Read serial ULA %02X", (int)SP_Control);
+		snprintf(info, sizeof(info), "Serial: Read serial ULA %02X", (int)SP_Control);
 		DebugDisplayTrace(DEBUG_SERIAL, true, info);
 	}
 	return(SP_Control);
@@ -391,7 +392,7 @@ static int delay = 0;
 					if (!uef_putdata(TDR|UEF_DATA, TapeClock))
 					{
 						char errstr[256];
-						sprintf(errstr, "Error writing to UEF file:\n  %s", UEFTapeName);
+						snprintf(errstr, sizeof(errstr), "Error writing to UEF file:\n  %s", UEFTapeName);
 //						MessageBox(GETHWND,errstr,"BeebEm",MB_ICONERROR|MB_OK);
 						TapeControlStopRecording(true);
 					}
@@ -414,7 +415,7 @@ static int delay = 0;
 					if (!uef_putdata(UEF_HTONE, TapeClock))
 					{
 						char errstr[256];
-						sprintf(errstr, "Error writing to UEF file:\n  %s", UEFTapeName);
+						snprintf(errstr, sizeof(errstr), "Error writing to UEF file:\n  %s", UEFTapeName);
 //						MessageBox(GETHWND,errstr,"BeebEm",MB_ICONERROR|MB_OK);
 						TapeControlStopRecording(true);
 					}
@@ -1153,7 +1154,7 @@ void TapeControlOpenFile(char *UEFName)
 			if (!map_file(UEFName))
 			{
 				char errstr[256];
-				sprintf(errstr, "Cannot open UEF file:\n  %s", UEFName);
+				snprintf(errstr, sizeof(errstr), "Cannot open UEF file:\n  %s", UEFName);
 				return;
 			}
 		}
@@ -1257,7 +1258,7 @@ void SaveSerialUEF(FILE *SUEF)
 
 void LoadSerialUEF(FILE *SUEF)
 {
-	char FileName[256];
+	char FileName[_MAX_PATH];
 	int sp;
 
 	CloseUEF();
