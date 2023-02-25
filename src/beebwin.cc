@@ -626,79 +626,31 @@ BeebWin::~BeebWin()
 
 extern int done;
 
-void BeebWin::doHorizLine(unsigned long Col, int y, int sx, int width) 
+void BeebWin::doHorizLine(int Colour, int y, int sx, int width) 
 {
-    long d;
-    int e;
-char *p;
-
-	if (TeletextEnabled) 
-	{
-		e = sx + 80;
-	}
-	else
-	{
-		e = sx;
-	}
-
-	if (e < 0)
-	{
-		width = width - e;
-		e = 0;
-	}
-
-	if (e + width > 799) width = 800 - e;
-	if (width <= 0) return;
-
-	d = (y*800)+ e + ScreenAdjust;
-	if ((d+width)>(512*800)) return;
-	if (d<0) return;
-	p = m_screen + d;
-
-	memset(m_screen + d, (int)Col, width);
+	if (TeletextEnabled) y/=TeletextStyle; 
+    int d = (y*800)+sx+ScreenAdjust+(TeletextEnabled?36:0);
+    if ((d+width)>(500*800)) return;
+    if (d<0) return;
+	memset(m_screen + d, Colour, width);
 };
 
-void BeebWin::doInvHorizLine(unsigned long Col, int y, int sx, int width) 
+void BeebWin::doInvHorizLine(int Colour, int y, int sx, int width) 
 {
-long d;
-int e;
-char *vaddr;
-
-	if (TeletextEnabled)
-	{
-		e = sx + 80;
-	}
-	else
-	{
-		e = sx;
-	}
-
-	if (e < 0)
-	{
-		width = width - e;
-		e = 0;
-	}
-
-	if (e + width > 799) width = 800 - e;
-	if (width <= 0) return;
-
-	d = (y*800) + e + ScreenAdjust;
-
-	if ((d+width)>(512*800)) return;
-	if (d<0) return;
-	vaddr=m_screen+d;
-
-	for (int n=0;n<width;n++)
-	{
-		vaddr[n] ^= Col;
-	}
-	
+    if (TeletextEnabled) y/=TeletextStyle;
+    int d = (y*800)+sx+ScreenAdjust+(TeletextEnabled?36:0);
+    char *vaddr;
+    if ((d+width)>(500*800)) return;
+    if (d<0) return;
+    vaddr=m_screen+d;
+    for (int n = 0; n < width; n++) *(vaddr+n) ^= Colour;
 };
 
-void BeebWin::doUHorizLine(unsigned long Col, int y, int sx, int width) 
+void BeebWin::doUHorizLine(int Colour, int y, int sx, int width) 
 {
+    if (TeletextEnabled) y/=TeletextStyle;
 	if (y>500) return;
-    memset(m_screen + y*800 + sx, (int)Col, width);
+    memset(m_screen + (y*800) + sx, Colour, width);
 };
 
 EightUChars *BeebWin::GetLinePtr(int y) 

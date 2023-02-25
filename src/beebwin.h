@@ -105,9 +105,9 @@ public:
 	void bufferblit2(int starty, int nlines);
 	void DumpScreen(int offset);
 
-	void doHorizLine(unsigned long Col, int y, int sx, int width);
-	void doInvHorizLine(unsigned long Col, int y, int sx, int width);
-	void doUHorizLine(unsigned long Col, int y, int sx, int width);
+	void doHorizLine(int  Colour, int y, int sx, int width);
+	void doInvHorizLine(int Colour, int y, int sx, int width);
+	void doUHorizLine(int Colour, int y, int sx, int width);
 	void doHorizLine1(unsigned long Col, int y, int sx, int width);
 	void doInvHorizLine1(unsigned long Col, int y, int sx, int width);
 	void doUHorizLine1(unsigned long Col, int offset, int width);
