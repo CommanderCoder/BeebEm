@@ -10,7 +10,7 @@
 
 WindowRef mDebugWindow = NULL; 
 
-int DebugEnabled = false;        // Debug dialog visible
+bool DebugEnabled = false;        // Debug dialog visible
 
 static int DebugOn = 0;         // Debugging active?
 //static int LinesDisplayed = 0;  // Lines in info window
@@ -723,7 +723,7 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 	{
 		switch (type)
 		{
-			case DEBUG_VIDEO:
+			case DebugType::Video:
 				if (GetCheckBoxValue('dbvt') == true)
 					DebugDisplayInfo(info);
 				if (GetCheckBoxValue('dbvb') == true)
@@ -734,7 +734,7 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 					DebugDisplayInfo("- VIDEO BREAK -");
 				}
 					break;
-			case DEBUG_USERVIA:
+			case DebugType::UserVIA:
 				if (GetCheckBoxValue('dbut') == true)
 					DebugDisplayInfo(info);
 				if (GetCheckBoxValue('dbub') == true)
@@ -745,7 +745,7 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 					DebugDisplayInfo("- USER VIA BREAK -");
 				}
 					break;
-			case DEBUG_SYSVIA:
+			case DebugType::SysVIA:
 				if (GetCheckBoxValue('dbst') == true)
 					DebugDisplayInfo(info);
 				if (GetCheckBoxValue('dbsb') == true)
@@ -756,7 +756,7 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 					DebugDisplayInfo("- SYS VIA BREAK -");
 				}
 					break;
-			case DEBUG_TUBE:
+			case DebugType::Tube:
 				if ((DebugHost && host) || (DebugParasite && !host))
 				{
 					if (GetCheckBoxValue('dbtt') == true)
@@ -770,7 +770,7 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 					}
 				}
 				break;
-			case DEBUG_SERIAL:
+			case DebugType::Serial:
 				if (GetCheckBoxValue('dblt') == true)
 					DebugDisplayInfo(info);
 				if (GetCheckBoxValue('dblb') == true)
@@ -781,7 +781,7 @@ void DebugDisplayTrace(DebugType type, bool host, const char *info)
 					DebugDisplayInfo("- SERIAL BREAK -");
 				}
 				break;
-			case DEBUG_ECONET:
+			case DebugType::Econet:
 				if (GetCheckBoxValue('dbet') == true)
 					DebugDisplayInfo(info);
 				if (GetCheckBoxValue('dben') == true)

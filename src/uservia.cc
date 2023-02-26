@@ -99,8 +99,8 @@ static int lastValue = 0xff;
 
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "UsrVia: Write address %X value %02X", (int)(Address & 0xf), Value & 0xff);
-		DebugDisplayTrace(DEBUG_USERVIA, true, info);
+		snprintf(info, sizeof(info), "UsrVia: Write address %X value %02X", (int)(Address & 0xf), Value & 0xff);
+		DebugDisplayTrace(DebugType::UserVIA, true, info);
 	}
 
   switch (Address) {
@@ -417,8 +417,8 @@ unsigned char UserVIARead(int Address)
 
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "UsrVia: Read address %X value %02X", (int)(Address & 0xf), tmp & 0xff);
-		DebugDisplayTrace(DEBUG_USERVIA, true, info);
+		snprintf(info, sizeof(info), "UsrVia: Read address %X value %02X", (int)(Address & 0xf), tmp & 0xff);
+		DebugDisplayTrace(DebugType::UserVIA, true, info);
 	}
 
   return(tmp);

@@ -117,7 +117,7 @@ void Write_ACIA_Control(unsigned char CReg) {
 	if (DebugEnabled) {
 		char info[200];
 		snprintf(info, sizeof(info), "Serial: Write ACIA control %02X", (int)CReg);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 
 	ACIA_Control=CReg; // This is done for safe keeping
@@ -166,7 +166,7 @@ void Write_ACIA_Tx_Data(unsigned char Data) {
 	if (DebugEnabled) {
 		char info[200];
 		snprintf(info, sizeof(info),  "Serial: Write ACIA Tx %02X", (int)Data);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 
 	intStatus&=~(1<<serial);
@@ -229,7 +229,7 @@ void Write_SERPROC(unsigned char Data) {
 	if (DebugEnabled) {
 		char info[200];
 		snprintf(info, sizeof(info), "Serial: Write serial ULA %02X", (int)Data);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 	SP_Control=Data;
 	// Slightly easier this time.
@@ -268,7 +268,7 @@ unsigned char Read_ACIA_Status(void) {
 	if (DebugEnabled) {
 		char info[200];
 		snprintf(info, sizeof(info), "Serial: Read ACIA status %02X", (int)ACIA_Status);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 
 	return(ACIA_Status);
@@ -306,7 +306,7 @@ unsigned char Read_ACIA_Rx_Data(void) {
 	if (DebugEnabled) {
 		char info[200];
 		snprintf(info, sizeof(info), "Serial: Read ACIA Rx %02X", (int)TData);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 	return(TData);
 }
@@ -315,7 +315,7 @@ unsigned char Read_SERPROC(void) {
 	if (DebugEnabled) {
 		char info[200];
 		snprintf(info, sizeof(info), "Serial: Read serial ULA %02X", (int)SP_Control);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 	return(SP_Control);
 }

@@ -1,3 +1,24 @@
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 2004  Mike Wyatt
+Copyright (C) 2004  Rob O'Donnell
+Copyright (C) 2009  Steve Pick
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
 //
 // BeebEm debugger
 //
@@ -8,15 +29,30 @@
 #include "viastate.h"
 #include <MacTypes.h>
 
-extern int DebugEnabled;
+extern bool DebugEnabled;
 
-enum DebugType {
-	DEBUG_VIDEO,
-	DEBUG_USERVIA,
-	DEBUG_SYSVIA,
-	DEBUG_TUBE,
-	DEBUG_SERIAL,
-	DEBUG_ECONET
+//enum DebugType {
+//	DEBUG_VIDEO,
+//	DEBUG_USERVIA,
+//	DEBUG_SYSVIA,
+//	DEBUG_TUBE,
+//	DEBUG_SERIAL,
+//	DEBUG_ECONET
+//};
+
+enum class DebugType {
+    None,
+    Video, 
+    UserVIA,
+    SysVIA,
+    Tube,
+    Serial,
+    Econet,
+    Teletext,
+    RemoteServer,
+    Manual,
+    breakpoint,
+    BRK
 };
 
 int GetCheckBoxValue(OSType box);
