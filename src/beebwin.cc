@@ -420,7 +420,6 @@ bool bit = false;
 	
 	if(TranslateKey(vkey, true, row, col) < 0)
 	{
-        fprintf(stderr, "beebkey %d, %d, %d\n", vkey, row, col);
 		if(row==-2)
 		{ // Must do a reset!
 			Init6502core();
