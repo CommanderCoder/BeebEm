@@ -59,7 +59,7 @@ extern int trace_186;
 
 extern unsigned char intStatus;
 extern unsigned char NMIStatus;
-extern unsigned int Cycles;
+//extern unsigned int Cycles;
 extern int ProgramCounter;
 extern int PrePC;
 extern CycleCountT TotalCycles;
@@ -69,8 +69,8 @@ extern int DisplayCycles;
 extern int CyclesToInt;
 #define NO_TIMER_INT_DUE	-1000000
 
-#define SetTrigger(after, var) var = TotalCycles + after;
-#define IncTrigger(after, var) var += (after);
+#define SetTrigger(after, var) var = TotalCycles + (after)
+#define IncTrigger(after, var) var += (after)
 
 #define ClearTrigger(var) var=CycleCountTMax;
 
@@ -93,9 +93,8 @@ void SyncIO(void);
 void AdjustForIORead(void);
 void AdjustForIOWrite(void);
 
-extern int SwitchOnCycles; // Reset delay
 extern int OpCodes;
-extern bool BHardware;
+extern bool BasicHardwareOnly;
 
 void WriteInstructionCounts(const char* FileName);
 #endif

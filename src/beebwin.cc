@@ -1996,7 +1996,6 @@ void BeebWin::SetSoundMenu(void) {
 void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsigned char LoadRoms)
 {
 	BeebReleaseAllKeys();
-	SwitchOnCycles=0; // Reset delay
 	SoundChipReset();
 	SwitchOnSound();
 	EnableTube=TubeStatus;
@@ -2206,7 +2205,7 @@ CFStringRef pTitle;
 	AddDictNum(dict, CFSTR("ArmTube"), ArmTube);
 	AddDictNum(dict, CFSTR("AcornZ80"), AcornZ80);
 	AddDictNum(dict, CFSTR("OpCodes"), OpCodes);
-	AddDictNum(dict, CFSTR("BasicHardware"), BHardware);
+	AddDictNum(dict, CFSTR("BasicHardware"), BasicHardwareOnly);
 	AddDictNum(dict, CFSTR("TeletextHalfMode"), TeletextHalfMode);
 	AddDictNum(dict, CFSTR("SoundBlockSize"), SBSize);
 	AddDictNum(dict, CFSTR("isFullScreen"), m_isFullScreen);
@@ -2438,7 +2437,7 @@ int LEDByte;
 	ArmTube = GetDictNum(dict, CFSTR("ArmTube"), 0);
 	AcornZ80 = GetDictNum(dict, CFSTR("AcornZ80"), 0);
 	OpCodes = GetDictNum(dict, CFSTR("OpCodes"), 3);
-	BHardware = GetDictNum(dict, CFSTR("BasicHardware"), 0);
+	BasicHardwareOnly = GetDictNum(dict, CFSTR("BasicHardware"), 0);
 	TeletextHalfMode = GetDictNum(dict, CFSTR("teletextHalfMode"), 0);
 	SBSize = GetDictNum(dict, CFSTR("SoundBlockSize"), 0);
 	m_Invert = GetDictNum(dict, CFSTR("InvertBackground"), 0);
@@ -3428,7 +3427,7 @@ void BeebWin::InitMenu(void)
 	SetMenuCommandIDCheck('extr', (OpCodes == 2) ? true : false);
 	SetMenuCommandIDCheck('full', (OpCodes == 3) ? true : false);
 
-	SetMenuCommandIDCheck('hard', (BHardware) ? true : false);
+	SetMenuCommandIDCheck('hard', (BasicHardwareOnly) ? true : false);
 	//SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
 	SetMenuCommandIDCheck('sfps', (m_ShowSpeedAndFPS) ? true : false);
 	SetMenuCommandIDCheck('sped', (SpeechEnabled) ? true : false);
@@ -4137,7 +4136,7 @@ OSStatus err = noErr;
 
         case 'sndc':
             fprintf(stderr, "Sound Chip Enabled selected\n");
-			SoundChipEnabled = 1 - SoundChipEnabled;
+			SoundChipEnabled = !(SoundChipEnabled);
 			SetMenuCommandIDCheck('sndc', (SoundChipEnabled) ? true : false);
             break;
 
@@ -4185,7 +4184,7 @@ OSStatus err = noErr;
         case 'enet':
 			
             fprintf(stderr, "Econet on/off selected\n");
-			EconetEnabled = 1 - EconetEnabled;
+			EconetEnabled =!(EconetEnabled);
 			if (EconetEnabled)
 			{
 				ResetBeebSystem(MachineType, TubeEnabled, 0);
@@ -4214,8 +4213,8 @@ OSStatus err = noErr;
 
         case 'hard':
             fprintf(stderr, "Basic Hardware selected\n");
-			BHardware = 1 - BHardware;
-			SetMenuCommandIDCheck('hard', (BHardware) ? true : false);
+			BasicHardwareOnly = !(BasicHardwareOnly);
+			SetMenuCommandIDCheck('hard', (BasicHardwareOnly) ? true : false);
             break;
 
         case 'docu':
