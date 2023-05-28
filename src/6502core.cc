@@ -238,14 +238,13 @@ bool IntDue=false;
    to it (usually -ve) */
 int CyclesToInt = NO_TIMER_INT_DUE;
 
-static bool Branched;
-bool BasicHardwareOnly = false; // fall = all hardare, true = basic hardware
-                                // Branched - true if the instruction branched
+static bool Branched; // true if the instruction branched
+bool BasicHardwareOnly = false; // false = all hardware, true = basic hardware
 int OpCodes = 3; // 1 = documented only, 2 = commonoly used undocumenteds, 3 = full set
-
 // 1 if first cycle happened
 
-/* Get a two byte address from the program counter, and then post inc the program counter */
+// Get a two byte address from the program counter, and then post inc 
+// the program counter
 #define GETTWOBYTEFROMPC(var) \
     var = ReadPaged(ProgramCounter++); \
 var |= (ReadPaged(ProgramCounter++) << 8)
@@ -390,7 +389,7 @@ INLINE int SignExtendByte(signed char in) {
 INLINE static void SetPSRZN(const unsigned char in) {
     PSR&=~(FlagZ | FlagN);
     PSR|=((in==0)<<1) | (in & 128);
-}; /* SetPSRZN */
+}
 
 /*----------------------------------------------------------------------------*/
 /* Note: n is 128 for true - not 1                                            */
@@ -438,10 +437,8 @@ INLINE static void PushWord(int16 topush) {
 
 /*----------------------------------------------------------------------------*/
 INLINE static int16 PopWord() {
-    int16 RetValue;
-
-    RetValue = Pop();
-    RetValue |= (Pop() << 8);
+    int RetValue = Pop();
+    RetValue |= Pop() << 8;
     return RetValue; 
 }
 
@@ -468,8 +465,7 @@ INLINE static void ADCInstrHandler(int16 operand) {
         SetPSR(FlagC | FlagZ | FlagV | FlagN, (TmpResultC & 256)>0,
                 Accumulator==0,0,0,0,((Accumulator & 128) > 0) ^ (TmpResultV < 0),
                 Accumulator & 128);
-    }
-    else {
+    } else {
         /* Z flag determined from 2's compl result, not BCD result! */
         int TmpResult=Accumulator + operand + GETCFLAG;
         int ZFlag = (TmpResult & 0xff) == 0;
@@ -690,7 +686,7 @@ INLINE static void INCInstrHandler(int16 address) {
     PollVIAs(CyclesToMemWrite[CurrentInstruction] - 1);
     WritePaged(address,val);
     SetPSRZN(val);
-}
+} /* INCInstrHandler */
 
 INLINE static void INXInstrHandler(void) {
     XReg+=1;
@@ -784,8 +780,10 @@ INLINE static void RORInstrHandler(int16 address) {
 }
 
 INLINE static void RORInstrHandler_Acc(void) {
-    unsigned char oldVal=Accumulator;
-    unsigned char newVal=((unsigned int)oldVal>>1) & 127;
+    unsigned char oldVal,newVal;
+
+    oldVal=Accumulator;
+    newVal=((unsigned int)oldVal>>1) & 127;
     newVal+=GETCFLAG*128;
     Accumulator=newVal;
     SetPSRCZN(oldVal & 1,newVal==0,newVal & 128);
@@ -801,8 +799,7 @@ INLINE static void SBCInstrHandler(int16 operand) {
                 Accumulator == 0, 0, 0, 0,
                 ((Accumulator & 128) > 0) ^ ((TmpResultV & 256) != 0),
                 Accumulator & 128);
-    }
-    else {
+    } else {
         if (MachineType == Model::Master128 ) {
             // int ohn = operand & 0xf0;
             int oln = operand & 0x0f;
@@ -830,8 +827,7 @@ INLINE static void SBCInstrHandler(int16 operand) {
             SetPSR(FlagC | FlagZ | FlagV | FlagN, CFlag, ZFlag, 0, 0, 0, VFlag, NFlag);
 
             Cycles++;
-        }
-        else {
+        } else {
             /* Z flag determined from 2's compl result, not BCD result! */
             int TmpResult = Accumulator - operand - (1 - GETCFLAG);
             int ZFlag = ((TmpResult & 0xff) == 0);
@@ -1011,7 +1007,7 @@ INLINE static int16 ZeroPgXAddrModeHandler_Data(void) {
 /* Zero page wih X offset addressing mode handler                          */
 INLINE static int16 ZeroPgXAddrModeHandler_Address(void) {
     int EffectiveAddress=(ReadPaged(ProgramCounter++)+XReg) & 255;
-    return(EffectiveAddress);
+    return EffectiveAddress;
 } 
 
 /*-------------------------------------------------------------------------*/
@@ -1120,9 +1116,8 @@ INLINE static int16 IndAddrXModeHandler_Address(void) {
 /*-------------------------------------------------------------------------*/
 /* Zero page with Y offset addressing mode handler                         */
 INLINE static int16 ZeroPgYAddrModeHandler_Data(void) {
-    int EffectiveAddress;
-    EffectiveAddress=(ReadPaged(ProgramCounter++)+YReg) & 255;
-    return(WholeRam[EffectiveAddress]);
+    int EffectiveAddress=(ReadPaged(ProgramCounter++) + YReg) & 255;
+    return WholeRam[EffectiveAddress];
 } /* ZeroPgYAddrModeHandler */
 
 /*-------------------------------------------------------------------------*/
@@ -1152,8 +1147,8 @@ void Init6502core(void) {
     Accumulator = 0;
     XReg = 0;
     YReg = 0; 
-    StackReg = 0xff; /* Initial value ? */
-    PSR = FlagI; /* Interrupts off for starters */
+    StackReg = 0xff; // Initial value ?
+    PSR = FlagI; // Interrupts off for starters
 
     intStatus = 0;
     NMIStatus = 0;
@@ -1202,6 +1197,7 @@ void MemoryDump6502(int addr, int count)
 
     int s = addr & 0xffff0;
     int e = (addr + count - 1) | 0xf;
+
     if (e > 0xfffff)
         e = 0xfffff;
 
@@ -1278,8 +1274,11 @@ void Exec6502Instruction(void) {
         /* Read an instruction and post inc program couter */
         OldPC = ProgramCounter;
         PrePC = ProgramCounter;
-        // Need an instruction and post inc program counter
+
+        if (CurrentInstruction == -1) {
+        // Reed an instruction and post inc program counter
         CurrentInstruction = ReadPaged(ProgramCounter++);
+        }
 
         InstructionCount[CurrentInstruction]++;
 
@@ -1289,9 +1288,11 @@ void Exec6502Instruction(void) {
 
         switch (CurrentInstruction) {
             case 0x00:
+                // BRK
                 BRKInstrHandler();
                 break;
             case 0x01:
+                // ORA (zp,X)
                 ORAInstrHandler(IndXAddrModeHandler_Data());
                 break;
             case 0x02:
@@ -1299,7 +1300,7 @@ void Exec6502Instruction(void) {
             case 0x42:
             case 0x62:
                 if (MachineType == Model::Master128) {
-                    // NOP immediate
+                    // NOP imm
                     ReadPaged(ProgramCounter++);
                 }
                 else {
@@ -1464,7 +1465,7 @@ void Exec6502Instruction(void) {
                 break;
             case 0x1a:
                 if (MachineType == Model::Master128) {
-                    // INC
+                    // INC A
                     INAInstrHandler();
                 }
                 else {
@@ -1484,17 +1485,20 @@ void Exec6502Instruction(void) {
                 break;
             case 0x1c:
                 if (MachineType == Model::Master128) {
+                    // TRB abs
                     TRBInstrHandler(AbsAddrModeHandler_Address());
                 }
                 else {
-                    // undocumented instruction: NOP abs,X
+                    // Undocumented instruction: NOP abs,X
                     AbsXAddrModeHandler_Data();
                 }
                 break;
             case 0x1d:
+                // ORA abs,x
                 ORAInstrHandler(AbsXAddrModeHandler_Data());
                 break;
             case 0x1e:
+                // ASL abs,x
                 ASLInstrHandler(AbsXAddrModeHandler_Address());
                 break;
             case 0x1f:
@@ -2035,8 +2039,8 @@ void Exec6502Instruction(void) {
                 }
                 break;
             case 0x74:
-                // STZ zp,X
                 if (MachineType == Model::Master128) {
+                    // STZ zp,X
                     BEEBWRITEMEM_DIRECT(ZeroPgXAddrModeHandler_Address(), 0);
                 }
                 else {
@@ -2977,8 +2981,6 @@ void Exec6502Instruction(void) {
         }
         OldNMIStatus = NMIStatus;
 
-        //        if ((EnableTube) && (TubeType == Tube::Acorn65C02))
-        //            SyncTubeProcessor();
         switch (TubeType) {
             case Tube::Acorn65C02:  // 3MHz
                 SyncTubeProcessor();
