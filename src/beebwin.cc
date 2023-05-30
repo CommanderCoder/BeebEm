@@ -2629,6 +2629,51 @@ void BeebWin::TranslateTiming(int id)
 
 void BeebWin::AdjustSpeed(bool up)
 {
+    static const int speeds[] = {
+        IDM_FIXEDSPEED100,
+        IDM_FIXEDSPEED50,
+        IDM_FIXEDSPEED10,
+        IDM_FIXEDSPEED5,
+        IDM_FIXEDSPEED2,
+        IDM_FIXEDSPEED1_5,
+        IDM_FIXEDSPEED1_25,
+        IDM_FIXEDSPEED1_1,
+        IDM_REALTIME,
+        IDM_FIXEDSPEED0_9,
+        IDM_FIXEDSPEED0_75,
+        IDM_FIXEDSPEED0_5,
+        IDM_FIXEDSPEED0_25,
+        IDM_FIXEDSPEED0_1,
+        0
+    };
+
+    int s = 0;
+    int t = m_MenuIdTiming;
+
+    while (speeds[s] != 0 && speeds[s] != m_MenuIdTiming)
+        s++;
+
+    if (speeds[s] == 0)
+    {
+        t = IDM_REALTIME;
+    }
+    else if (up)
+    {
+        if (s > 0)
+            t = speeds[s-1];
+    }
+    else
+    {
+        if (speeds[s+1] != 0)
+            t = speeds[s+1];
+    }
+
+    if (t != m_MenuIdTiming)
+    {
+        m_MenuIdTiming = t;
+        TranslateTiming(t);
+    }
+
 }
 
 /****************************************************************************/
