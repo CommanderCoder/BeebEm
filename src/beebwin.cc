@@ -3209,7 +3209,6 @@ bool BeebWin::UpdateTiming(void)
 	/* Update stats every second */
 	if (TickCount >= m_LastStatsTickCount + 1000)
 	{
-
 		m_FramesPerSecond = m_ScreenRefreshCount;
 		m_ScreenRefreshCount = 0;
 		m_RelativeSpeed = ((TotalCycles - m_LastStatsTotalCycles) / 2000.0) /
@@ -3314,7 +3313,7 @@ CFStringRef pTitle;
 
 	if (m_ShowSpeedAndFPS && !m_isFullScreen)
 	{
-		sprintf(m_szTitle, "%s  Speed: %2.2f  fps: %2d",
+		snprintf(m_szTitle,sizeof(m_szTitle),  "%s  Speed: %2.2f  fps: %2d",
 				WindowTitle, m_RelativeSpeed, (int)m_FramesPerSecond);
 
 #if 0 //ACH - title (DONE)

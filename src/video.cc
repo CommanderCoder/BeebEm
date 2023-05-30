@@ -670,14 +670,11 @@ static void VideoStartOfFrame(void) {
     if (VideoState.IsNewTVFrame)  // RTW - only calibrate timing once per frame
     {
         VideoState.IsNewTVFrame = false;
-#ifdef WIN32
         FrameNum = mainWin->StartOfFrame();
-#else
         /* If FrameNum hits 0 we actually refresh */
         if (FrameNum--==0) {
             FrameNum=Video_RefreshFrequency-1;
         }
-#endif
 
         CursorFieldCount--;
         Mode7FlashTrigger--;
