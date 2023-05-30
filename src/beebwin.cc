@@ -3298,7 +3298,7 @@ bool BeebWin::UpdateTiming(void)
 //            printf("sleeping for %lums (bbc %dms, mac %ldms) \n", (SpareTicks + 500)/1000, Cycles/2000, Ticks);
 
             // hold up the emulator for microseconds (us)
-//			beeb_usleep( SpareTicks + 500);
+			beeb_usleep( SpareTicks + 500);
             beeb_nextupdate( SpareTicks + 500);
 
 			m_MinFrameCount = 0;
