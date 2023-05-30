@@ -375,10 +375,6 @@ else if (MachineType == Model::Master128) {
             return(0);
     }
 }
-// Master 128 End
-
-  if (Address>=0xff00)
-	  return(WholeRam[Address]);
   
   /* IO space */
   
@@ -387,7 +383,7 @@ else if (MachineType == Model::Master128) {
 	  AdjustForIORead();
   }
   
-  /* VIA's first - games seem to do really heavy reaing of these */
+  /* VIA's first - games seem to do really heavy reading of these */
   /* Can read from a via using either of the two 16 bytes blocks */
   if ((Address & ~0xf)==0xfe40 || (Address & ~0xf)==0xfe50) {
 	  SyncIO();
@@ -561,7 +557,7 @@ static void DoRomChange(int NewBank) {
   // Master Specific stuff   
   if (MachineType == Model::Master128) {
 	  PagedRomReg=NewBank;
-	  PRAM=(PagedRomReg & 128) != 0;
+	  PRAM=(PagedRomReg & 0x80) != 0;
   }
 
 }; /* DoRomChange */
@@ -1118,9 +1114,15 @@ void BeebMemInit(bool LoadRoms,bool SkipIntegraBConfig) {
   ACCCON=0;
   PRAM=FRAM=Sh_Display=Sh_CPUE=Sh_CPUX=0;
   memset(Private,0,0x3000);
-  Private[0x3b2]=4; // Default OSMODE to 4
+  Private[0x3b2] = 0x04; // Default OSMODE to 4
+  Private[0x3b5] = 0x14; // Default Century to 2000
+  Private[0x3b8] = 0xFF; // Default
+  Private[0x3b9] = 0xFF; // Default
+  Private[0x3ba] = 0x90; // Default
+  Private[0x3ff] = 0x0F; // Default RAM in bank locations 4, 5, 6 & 7
   memset(ShadowRam,0,0x5000);
-  MemSel=PrvEn=ShEn=Prvs1=Prvs4=Prvs8=HidAdd=0;
+  MemSel = PrvEn = ShEn = Prvs1 = Prvs4 = Prvs8 = false;
+  HidAdd=0;
   if (!SkipIntegraBConfig)
   {
 	  memset(Hidden,0,256);

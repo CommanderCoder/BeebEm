@@ -1275,10 +1275,8 @@ void Exec6502Instruction(void) {
         OldPC = ProgramCounter;
         PrePC = ProgramCounter;
 
-        if (CurrentInstruction == -1) {
         // Reed an instruction and post inc program counter
         CurrentInstruction = ReadPaged(ProgramCounter++);
-        }
 
         InstructionCount[CurrentInstruction]++;
 
