@@ -3,11 +3,15 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		DC19F0FF273529CA004F0DDD /* led.png in Resources */ = {isa = PBXBuildFile; fileRef = DC19F0FE273529CA004F0DDD /* led.png */; };
+		8B2705EC27E5F71E00AFA82E /* ide.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B2705EB27E5F71D00AFA82E /* ide.cc */; };
+		8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B7A6B8D27707721002576FC /* Master512CoPro.cc */; };
+		8B92DC2A283FA427007E9581 /* AUNMap in Resources */ = {isa = PBXBuildFile; fileRef = 8B92DC29283FA427007E9581 /* AUNMap */; };
+		8BC8CADA2770B24E006F0FAD /* log.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8BC8CAD92770B24E006F0FAD /* log.cc */; };
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
 		DC41118225A2222A00E59712 /* Bugs.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC41118125A2222A00E59712 /* Bugs.rtf */; };
 		DC41118525A226BC00E59712 /* diskimg in Resources */ = {isa = PBXBuildFile; fileRef = DC41118425A226BC00E59712 /* diskimg */; };
@@ -33,12 +37,10 @@
 		DC70E77125A3AE6200A7FF3E /* sysvia.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CF24A33D3700840082 /* sysvia.cc */; };
 		DC70E77225A3AE6200A7FF3E /* discedit.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2B724A33D3600840082 /* discedit.cc */; };
 		DC70E77325A3AE6200A7FF3E /* serial.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D924A33D3700840082 /* serial.cc */; };
-		DC70E77425A3AE6200A7FF3E /* i386dasm.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BA24A33D3600840082 /* i386dasm.cc */; };
 		DC70E77525A3AE6200A7FF3E /* disc1770.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C124A33D3700840082 /* disc1770.cc */; };
 		DC70E77625A3AE6200A7FF3E /* uefstate.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CD24A33D3700840082 /* uefstate.cc */; };
 		DC70E77825A3AE6200A7FF3E /* printing.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C724A33D3700840082 /* printing.cc */; };
 		DC70E77B25A3AE6200A7FF3E /* via.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2BD24A33D3600840082 /* via.cc */; };
-		DC70E77C25A3AE6200A7FF3E /* i86.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D124A33D3700840082 /* i86.cc */; };
 		DC70E77D25A3AE6200A7FF3E /* userkybd.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2D024A33D3700840082 /* userkybd.cc */; };
 		DC70E77E25A3AE6200A7FF3E /* audev-macosx.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2C424A33D3700840082 /* audev-macosx.cc */; };
 		DC70E77F25A3AE6200A7FF3E /* main.cc in Sources */ = {isa = PBXBuildFile; fileRef = DCCCC2CB24A33D3700840082 /* main.cc */; };
@@ -88,6 +90,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8B268E3926DD09DE006CD26F /* disctype.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = disctype.h; path = src/disctype.h; sourceTree = "<group>"; };
+		8B2705EB27E5F71D00AFA82E /* ide.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ide.cc; path = src/ide.cc; sourceTree = "<group>"; };
+		8B2705EE27E5F74700AFA82E /* ide.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ide.h; path = src/ide.h; sourceTree = "<group>"; };
+		8B31157E276E9AAA00B23CD7 /* model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = model.h; path = src/model.h; sourceTree = "<group>"; };
+		8B54204A2844224D00E50140 /* BeebEm5.profdata */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeebEm5.profdata; sourceTree = "<group>"; };
+		8B7A6B8C27707709002576FC /* Master512CoPro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Master512CoPro.h; path = src/Master512CoPro.h; sourceTree = "<group>"; };
+		8B7A6B8D27707721002576FC /* Master512CoPro.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Master512CoPro.cc; path = src/Master512CoPro.cc; sourceTree = "<group>"; };
+		8B8E4C01292AAFB500556B7A /* BeebEm5Debug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeebEm5Debug.entitlements; sourceTree = "<group>"; };
+		8B92DC29283FA427007E9581 /* AUNMap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AUNMap; sourceTree = "<group>"; };
+		8BC8CAD92770B24E006F0FAD /* log.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cc; path = src/log.cc; sourceTree = "<group>"; };
+		8BC8CADC2770B25C006F0FAD /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = src/log.h; sourceTree = "<group>"; };
 		DC04C64824BE059900D46EAC /* beebem5-distribution.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = "beebem5-distribution.zip"; sourceTree = "<group>"; };
 		DC10ACE22567BA1300DA8E32 /* create_dmg.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = create_dmg.sh; sourceTree = "<group>"; };
 		DC19F0FE273529CA004F0DDD /* led.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = led.png; sourceTree = "<group>"; };
@@ -120,8 +133,6 @@
 		DCABC09424BDFCFB00C0D754 /* make_distribution.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = make_distribution.sh; sourceTree = "<group>"; };
 		DCABC15924BDFE8600C0D754 /* beebem.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = beebem.png; path = src/beebem.png; sourceTree = "<group>"; };
 		DCABC15C24BDFEE800C0D754 /* beebem.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = beebem.icns; path = src/beebem.icns; sourceTree = "<group>"; };
-		DCABC15F24BDFF5B00C0D754 /* i86time.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = i86time.c; path = src/i86time.c; sourceTree = "<group>"; };
-		DCABC16024BDFF5B00C0D754 /* instr86.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = instr86.c; path = src/instr86.c; sourceTree = "<group>"; };
 		DCABC16124BDFF5C00C0D754 /* debug_org.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debug_org.cc; path = src/debug_org.cc; sourceTree = "<group>"; };
 		DCCCC29B24A338ED00840082 /* BeebEm5.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeebEm5.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCCCC29E24A338ED00840082 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -133,7 +144,6 @@
 		DCCCC2B624A33D3600840082 /* BeebEm5-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BeebEm5-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCCCC2B724A33D3600840082 /* discedit.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = discedit.cc; path = src/discedit.cc; sourceTree = "<group>"; };
 		DCCCC2B924A33D3600840082 /* plist.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = plist.cc; path = src/plist.cc; sourceTree = "<group>"; };
-		DCCCC2BA24A33D3600840082 /* i386dasm.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = i386dasm.cc; path = src/i386dasm.cc; sourceTree = "<group>"; };
 		DCCCC2BB24A33D3600840082 /* speech.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = speech.cc; path = src/speech.cc; sourceTree = "<group>"; };
 		DCCCC2BC24A33D3600840082 /* uservia.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uservia.cc; path = src/uservia.cc; sourceTree = "<group>"; };
 		DCCCC2BD24A33D3600840082 /* via.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = via.cc; path = src/via.cc; sourceTree = "<group>"; };
@@ -152,7 +162,6 @@
 		DCCCC2CE24A33D3700840082 /* disc8271.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = disc8271.cc; path = src/disc8271.cc; sourceTree = "<group>"; };
 		DCCCC2CF24A33D3700840082 /* sysvia.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sysvia.cc; path = src/sysvia.cc; sourceTree = "<group>"; };
 		DCCCC2D024A33D3700840082 /* userkybd.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = userkybd.cc; path = src/userkybd.cc; sourceTree = "<group>"; };
-		DCCCC2D124A33D3700840082 /* i86.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = i86.cc; path = src/i86.cc; sourceTree = "<group>"; };
 		DCCCC2D224A33D3700840082 /* atodconv.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = atodconv.cc; path = src/atodconv.cc; sourceTree = "<group>"; };
 		DCCCC2D324A33D3700840082 /* 6502core.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 6502core.cc; path = src/6502core.cc; sourceTree = "<group>"; };
 		DCCCC2D424A33D3700840082 /* beebsound.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = beebsound.cc; path = src/beebsound.cc; sourceTree = "<group>"; };
@@ -191,7 +200,6 @@
 		DCD4ADFE24A4D56E0000C40A /* scsi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scsi.h; path = src/scsi.h; sourceTree = "<group>"; };
 		DCD4ADFF24A4D56E0000C40A /* video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = video.h; path = src/video.h; sourceTree = "<group>"; };
 		DCD4AE0024A4D56F0000C40A /* beebsound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = beebsound.h; path = src/beebsound.h; sourceTree = "<group>"; };
-		DCD4AE0124A4D56F0000C40A /* i86.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = i86.h; path = src/i86.h; sourceTree = "<group>"; };
 		DCD4AE0224A4D56F0000C40A /* Arm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Arm.h; path = src/Arm.h; sourceTree = "<group>"; };
 		DCD4AE0324A4D56F0000C40A /* sasi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sasi.h; path = src/sasi.h; sourceTree = "<group>"; };
 		DCD4AE0424A4D56F0000C40A /* uservia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uservia.h; path = src/uservia.h; sourceTree = "<group>"; };
@@ -203,7 +211,6 @@
 		DCD4AE0A24A4D56F0000C40A /* sysvia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sysvia.h; path = src/sysvia.h; sourceTree = "<group>"; };
 		DCD4AE0B24A4D56F0000C40A /* TarmacGlobals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TarmacGlobals.h; path = src/TarmacGlobals.h; sourceTree = "<group>"; };
 		DCD4AE0C24A4D56F0000C40A /* beebmem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = beebmem.h; path = src/beebmem.h; sourceTree = "<group>"; };
-		DCD4AE0E24A4D56F0000C40A /* instr86.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = instr86.h; path = src/instr86.h; sourceTree = "<group>"; };
 		DCD4AE0F24A4D5700000C40A /* viastate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = viastate.h; path = src/viastate.h; sourceTree = "<group>"; };
 		DCD4AE1224A4D5700000C40A /* mode7font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mode7font.h; path = src/mode7font.h; sourceTree = "<group>"; };
 		DCD5DC172565E7CC00FB151D /* BeebFile */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BeebFile; sourceTree = "<group>"; };
@@ -244,6 +251,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8B5420492844224D00E50140 /* OptimizationProfiles */ = {
+			isa = PBXGroup;
+			children = (
+				8B54204A2844224D00E50140 /* BeebEm5.profdata */,
+			);
+			path = OptimizationProfiles;
+			sourceTree = "<group>";
+		};
 		DC6A476724A54540007E4276 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -269,8 +284,6 @@
 			isa = PBXGroup;
 			children = (
 				DCABC16124BDFF5C00C0D754 /* debug_org.cc */,
-				DCABC15F24BDFF5B00C0D754 /* i86time.c */,
-				DCABC16024BDFF5B00C0D754 /* instr86.c */,
 			);
 			name = OtherSources;
 			sourceTree = "<group>";
@@ -299,6 +312,7 @@
 				DCCCC29D24A338ED00840082 /* BeebEm5 */,
 				DCCCC29C24A338ED00840082 /* Products */,
 				DC6A476724A54540007E4276 /* Frameworks */,
+				8B5420492844224D00E50140 /* OptimizationProfiles */,
 			);
 			sourceTree = "<group>";
 		};
@@ -308,12 +322,14 @@
 				DCCCC29B24A338ED00840082 /* BeebEm5.app */,
 			);
 			name = Products;
+			path = BeebEm5;
 			sourceTree = "<group>";
 		};
 		DCCCC29D24A338ED00840082 /* BeebEm5 */ = {
 			isa = PBXGroup;
 			children = (
 				DC49183A286AD7540023212A /* BeebEm5.entitlements */,
+				8B8E4C01292AAFB500556B7A /* BeebEm5Debug.entitlements */,
 				DCB0BD8E24CC8CAC009FEA9E /* WIP */,
 				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
 				DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */,
@@ -336,6 +352,7 @@
 		DCCCC2B024A338FB00840082 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8B92DC29283FA427007E9581 /* AUNMap */,
 				DC41118425A226BC00E59712 /* diskimg */,
 				DCD5DC1A2565E7EF00FB151D /* beebstate */,
 				DCD5DC172565E7CC00FB151D /* BeebFile */,
@@ -364,6 +381,9 @@
 		DCCCC2B524A33A3000840082 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				8B2705EB27E5F71D00AFA82E /* ide.cc */,
+				8BC8CAD92770B24E006F0FAD /* log.cc */,
+				8B7A6B8D27707721002576FC /* Master512CoPro.cc */,
 				DCE5E85F267B362C00F3CD34 /* z80_support.cc */,
 				DCE5E85C267B362B00F3CD34 /* z80.cc */,
 				DCE5E85D267B362B00F3CD34 /* z80.h */,
@@ -386,8 +406,6 @@
 				DCCCC2B724A33D3600840082 /* discedit.cc */,
 				DCCCC2DB24A33D3700840082 /* econet.cc */,
 				DCCCC2C224A33D3700840082 /* GetFile.cc */,
-				DCCCC2D124A33D3700840082 /* i86.cc */,
-				DCCCC2BA24A33D3600840082 /* i386dasm.cc */,
 				DCCCC2CB24A33D3700840082 /* main.cc */,
 				DCCCC2B924A33D3600840082 /* plist.cc */,
 				DCCCC2C724A33D3700840082 /* printing.cc */,
@@ -420,6 +438,10 @@
 		DCD4ADE624A4D54A0000C40A /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				8B2705EE27E5F74700AFA82E /* ide.h */,
+				8BC8CADC2770B25C006F0FAD /* log.h */,
+				8B7A6B8C27707709002576FC /* Master512CoPro.h */,
+				8B31157E276E9AAA00B23CD7 /* model.h */,
 				DCD4ADFC24A4D56E0000C40A /* 6502core.h */,
 				DCD4AE0224A4D56F0000C40A /* Arm.h */,
 				DCD4ADF824A4D56E0000C40A /* ArmDisassembler.h */,
@@ -435,11 +457,10 @@
 				DCD4ADFA24A4D56E0000C40A /* disc1770.h */,
 				DCD4ADF724A4D56E0000C40A /* disc8271.h */,
 				DCD4ADF224A4D56E0000C40A /* discedit.h */,
+				8B268E3926DD09DE006CD26F /* disctype.h */,
 				DCD4ADE824A4D56E0000C40A /* ea.h */,
 				DCD4ADEE24A4D56E0000C40A /* econet.h */,
 				DCD4ADF924A4D56E0000C40A /* GetFile.h */,
-				DCD4AE0124A4D56F0000C40A /* i86.h */,
-				DCD4AE0E24A4D56F0000C40A /* instr86.h */,
 				DCD4AE0524A4D56F0000C40A /* main.h */,
 				DCD4AE1224A4D5700000C40A /* mode7font.h */,
 				DCD4ADF024A4D56E0000C40A /* osd_cpu.h */,
@@ -506,8 +527,8 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1140;
-				LastUpgradeCheck = 1210;
-				ORGANIZATIONNAME = "Andrew Hague";
+				LastUpgradeCheck = 1410;
+				ORGANIZATIONNAME = "Sreve Inglis";
 				TargetAttributes = {
 					DCCCC29A24A338ED00840082 = {
 						CreatedOnToolsVersion = 11.4.1;
@@ -516,7 +537,7 @@
 				};
 			};
 			buildConfigurationList = DCCCC29624A338ED00840082 /* Build configuration list for PBXProject "BeebEm5" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 10.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -538,6 +559,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B92DC2A283FA427007E9581 /* AUNMap in Resources */,
 				DCD5DC432565EE9700FB151D /* teletext.fnt in Resources */,
 				DCD5DC342565E8E000FB151D /* Econet.cfg in Resources */,
 				DCD5DC352565E8E000FB151D /* Phroms.cfg in Resources */,
@@ -584,6 +606,7 @@
 				DC8BE3B324CC7ADD00D12E2B /* Renderer.swift in Sources */,
 				DC907FDD24B52C8200B99036 /* TapeControlViewController.swift in Sources */,
 				DCE5E861267B362C00F3CD34 /* z80.cc in Sources */,
+				8B2705EC27E5F71E00AFA82E /* ide.cc in Sources */,
 				DC70E78425A3AE6200A7FF3E /* scsi.cc in Sources */,
 				DC70E76925A3AE6200A7FF3E /* speech.cc in Sources */,
 				DC70E78025A3AE6200A7FF3E /* uservia.cc in Sources */,
@@ -596,6 +619,8 @@
 				DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */,
 				DCE5E85A267B360500F3CD34 /* debug.cc in Sources */,
 				DC70E77C25A3AE6200A7FF3E /* i86.cc in Sources */,
+				DC8716A224CC3A5900FA27DF /* BeebImageView.swift in Sources */,
+				8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */,
 				DC70E76025A3AE6200A7FF3E /* beebmem.cc in Sources */,
 				DC70E78225A3AE6200A7FF3E /* 6502core.cc in Sources */,
 				DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */,
@@ -603,6 +628,7 @@
 				DC70E77825A3AE6200A7FF3E /* printing.cc in Sources */,
 				DC70E77F25A3AE6200A7FF3E /* main.cc in Sources */,
 				DC70E76625A3AE6200A7FF3E /* beebsound.cc in Sources */,
+				8BC8CADA2770B24E006F0FAD /* log.cc in Sources */,
 				DC70E77125A3AE6200A7FF3E /* sysvia.cc in Sources */,
 				DCCCC30B24A3441800840082 /* Document.swift in Sources */,
 				DCE5E863267B362C00F3CD34 /* z80dis.cc in Sources */,
@@ -614,7 +640,6 @@
 				DC8BE3AD24CC78A600D12E2B /* NSImage+Bitmap.swift in Sources */,
 				DC70E76F25A3AE6200A7FF3E /* econet.cc in Sources */,
 				DC70E77325A3AE6200A7FF3E /* serial.cc in Sources */,
-				DC70E77425A3AE6200A7FF3E /* i386dasm.cc in Sources */,
 				DC70E76425A3AE6200A7FF3E /* disc8271.cc in Sources */,
 				DC70E76225A3AE6200A7FF3E /* atodconv.cc in Sources */,
 				DC8BE3AF24CC790000D12E2B /* Bitmap.swift in Sources */,
@@ -674,7 +699,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -737,6 +764,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -752,6 +780,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -764,17 +793,23 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
+				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5Debug.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = BeebEm5/BeebEm5.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = C9ND6EMJ4W;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				INFOPLIST_FILE = BeebEm5/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.commandercoder.BeebEm5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -791,10 +826,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_ENTITLEMENTS = BeebEm5/BeebEm5.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = BeebEm5/BeebEm5.entitlements;
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = C9ND6EMJ4W;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				INFOPLIST_FILE = BeebEm5/Info.plist;
@@ -802,6 +841,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.commandercoder.BeebEm5;
 				PRODUCT_NAME = "$(TARGET_NAME)";

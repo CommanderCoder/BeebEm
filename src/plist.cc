@@ -1,25 +1,31 @@
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CFStream.h>
+#include <cassert>
+#include <cstddef>
 extern "C" {
 
 #include "plist.h"
 
-void WriteMyPropertyListToFile( CFPropertyListRef propertyList,
-            CFURLRef fileURL ) 
-{
-   CFDataRef xmlData;
-   Boolean status;
-   SInt32 errorCode;
-   // Convert the property list into XML data.
-   xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList );
+    void WriteMyPropertyListToFile( CFPropertyListRef propertyList,
+                CFURLRef fileURL ) 
+    {
+       CFDataRef xmlData;
+       Boolean status;
+       SInt32 errorCode;
+
+       // Convert the property list into XML data.
+       //   xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList );
+   xmlData = CFPropertyListCreateData( kCFAllocatorDefault, propertyList, kCFPropertyListXMLFormat_v1_0, 0, nullptr );
    // Write the XML data to the file.
    status = CFURLWriteDataAndPropertiesToResource (
-               fileURL,                  // URL to use
-               xmlData,                  // data to write
-               NULL,   
-               &errorCode);            
+           fileURL,                  // URL to use
+           xmlData,                  // data to write
+           NULL,   
+           &errorCode);            
    CFRelease(xmlData);
 }
+
 
 CFPropertyListRef CreateMyPropertyListFromFile( CFURLRef fileURL ) 
 {
@@ -44,6 +50,7 @@ CFPropertyListRef CreateMyPropertyListFromFile( CFURLRef fileURL )
                resourceData,
                kCFPropertyListImmutable,
                &errorString);
+  //   propertyList = CFPropertyListCreateData( kCFAllocatorDefault, resourceData, kCFPropertyListXMLFormat_v1_0, kCFPropertyListImmutable, nullptr );
    CFRelease( resourceData );
    return propertyList;
 }

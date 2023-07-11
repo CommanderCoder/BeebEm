@@ -1,4 +1,3 @@
-
 /****************************************************************************/
 /*              Beebem - (c) David Alan Gilbert 1994                        */
 /*              ------------------------------------                        */
@@ -34,10 +33,11 @@ extern WindowRef mBreakOutWindow;
 #endif
 extern VIAState UserVIAState;
 extern unsigned char WTDelay1,WTDelay2;
-extern int RTC_Enabled;
+extern bool RTC_Enabled;
+extern bool SWRAMBoardEnabled;
 
 void UserVIAWrite(int Address, int Value);
-int UserVIARead(int Address);
+unsigned char UserVIARead(int Address);
 void UserVIAReset(void);
 void UserVIA_poll(unsigned int ncycles);
 void BreakOutOpenDialog(void);
@@ -50,13 +50,13 @@ void SetValue(OSType box, int State);
 void uservia_dumpstate(void);
 
 /* AMX mouse enabled */
-extern int AMXMouseEnabled;
+extern bool AMXMouseEnabled;
 
 /* Map Left+Right button presses to a middle button press */
-extern int AMXLRForMiddle;
+extern bool AMXLRForMiddle;
 
 /* Number of cycles between each mouse interrupt */
-#define AMX_TRIGGER 1000
+#define AMX_TRIGGER 250
 extern int AMXTrigger;
 
 /* Checks if a movement interrupt should be generated */
@@ -67,6 +67,8 @@ extern int AMXTargetX;
 extern int AMXTargetY;
 extern int AMXCurrentX;
 extern int AMXCurrentY;
+extern int AMXDeltaX;
+extern int AMXDeltaY;
 
 /* Button states */
 #define AMX_LEFT_BUTTON 1
@@ -75,7 +77,7 @@ extern int AMXCurrentY;
 extern int AMXButtons;
 
 /* Printer enabled */
-extern int PrinterEnabled;
+extern bool PrinterEnabled;
 void PrinterEnable(char *FileName);
 void PrinterDisable();
 extern FILE *PrinterFileHandle;

@@ -40,6 +40,7 @@ can be determined under normal use".
 #include "uefstate.h"
 #include "csw.h"
 #include "serialdevices.h"
+#include "beebmem.h"
 
 #define CASSETTE 0  // Device in 
 #define RS423 1		// use defines
@@ -115,8 +116,8 @@ void Write_ACIA_Control(unsigned char CReg) {
 	unsigned char bit;
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Write ACIA control %02X", (int)CReg);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		snprintf(info, sizeof(info), "Serial: Write ACIA control %02X", (int)CReg);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 
 	ACIA_Control=CReg; // This is done for safe keeping
@@ -164,8 +165,8 @@ void Write_ACIA_Control(unsigned char CReg) {
 void Write_ACIA_Tx_Data(unsigned char Data) {
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Write ACIA Tx %02X", (int)Data);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		snprintf(info, sizeof(info),  "Serial: Write ACIA Tx %02X", (int)Data);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 
 	intStatus&=~(1<<serial);
@@ -227,8 +228,8 @@ void Write_SERPROC(unsigned char Data) {
 	
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Write serial ULA %02X", (int)Data);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		snprintf(info, sizeof(info), "Serial: Write serial ULA %02X", (int)Data);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 	SP_Control=Data;
 	// Slightly easier this time.
@@ -266,8 +267,8 @@ unsigned char Read_ACIA_Status(void) {
 //	}
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Read ACIA status %02X", (int)ACIA_Status);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		snprintf(info, sizeof(info), "Serial: Read ACIA status %02X", (int)ACIA_Status);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 
 	return(ACIA_Status);
@@ -304,8 +305,8 @@ unsigned char Read_ACIA_Rx_Data(void) {
 	if (Data_Bits==7) TData&=127;
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Read ACIA Rx %02X", (int)TData);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		snprintf(info, sizeof(info), "Serial: Read ACIA Rx %02X", (int)TData);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 	return(TData);
 }
@@ -313,8 +314,8 @@ unsigned char Read_ACIA_Rx_Data(void) {
 unsigned char Read_SERPROC(void) {
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "Serial: Read serial ULA %02X", (int)SP_Control);
-		DebugDisplayTrace(DEBUG_SERIAL, true, info);
+		snprintf(info, sizeof(info), "Serial: Read serial ULA %02X", (int)SP_Control);
+		DebugDisplayTrace(DebugType::Serial, true, info);
 	}
 	return(SP_Control);
 }
@@ -391,7 +392,7 @@ static int delay = 0;
 					if (!uef_putdata(TDR|UEF_DATA, TapeClock))
 					{
 						char errstr[256];
-						sprintf(errstr, "Error writing to UEF file:\n  %s", UEFTapeName);
+						snprintf(errstr, sizeof(errstr), "Error writing to UEF file:\n  %s", UEFTapeName);
 //						MessageBox(GETHWND,errstr,"BeebEm",MB_ICONERROR|MB_OK);
 						TapeControlStopRecording(true);
 					}
@@ -414,7 +415,7 @@ static int delay = 0;
 					if (!uef_putdata(UEF_HTONE, TapeClock))
 					{
 						char errstr[256];
-						sprintf(errstr, "Error writing to UEF file:\n  %s", UEFTapeName);
+						snprintf(errstr, sizeof(errstr), "Error writing to UEF file:\n  %s", UEFTapeName);
 //						MessageBox(GETHWND,errstr,"BeebEm",MB_ICONERROR|MB_OK);
 						TapeControlStopRecording(true);
 					}
@@ -502,7 +503,7 @@ static int delay = 0;
 
 			if (Cass_Relay == 1 && CSWOpen && TapeClock != OldClock)
 			{
-				int last_state = csw_state;
+				CSWState last_state = csw_state;
 				
 				CSW_BUF = csw_poll(TapeClock);
 				OldClock = TapeClock;
@@ -510,21 +511,21 @@ static int delay = 0;
 				if (last_state != csw_state)
 					TapeControlUpdateCounter(csw_ptr);
 
-				if (csw_state == 0)		// Waiting for tone
+				if (csw_state == CSWState::WaitingForTone)		// Waiting for tone
 				{
 					DCDI=1;
 					TapeAudio.Signal=0;
 				}
 				
 				// New data read in, so do something about it
-				if (csw_state == 1)		// In tone
+				if (csw_state == CSWState::Tone)		// In tone
 				{
 					DCDI=1;
 					TapeAudio.Signal=2;
 					TapeAudio.BytePos=11;
 				}
 
-				if ( (CSW_BUF >= 0) && (csw_state == 2) )
+                if ( (CSW_BUF >= 0) && (csw_state == CSWState::Data) )
 				{
 					DCDI=0;
 					HandleData(CSW_BUF);
@@ -641,7 +642,7 @@ void RewindTape(void) {
 	TapeTrigger=TotalCycles+TAPECYCLES;
 	TapeControlUpdateCounter(TapeClock);
 
-	csw_state = 0;
+	csw_state = CSWState::WaitingForTone;
 	csw_bit = 0;
 	csw_pulselen = 0;
 	csw_ptr = 0;
@@ -1153,7 +1154,7 @@ void TapeControlOpenFile(char *UEFName)
 			if (!map_file(UEFName))
 			{
 				char errstr[256];
-				sprintf(errstr, "Cannot open UEF file:\n  %s", UEFName);
+				snprintf(errstr, sizeof(errstr), "Cannot open UEF file:\n  %s", UEFName);
 				return;
 			}
 		}
@@ -1257,7 +1258,7 @@ void SaveSerialUEF(FILE *SUEF)
 
 void LoadSerialUEF(FILE *SUEF)
 {
-	char FileName[256];
+	char FileName[_MAX_PATH];
 	int sp;
 
 	CloseUEF();

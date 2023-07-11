@@ -27,8 +27,9 @@
 //#define MULTITHREAD
 
 #include "beebwin.h"
+#include "model.h"
 
-extern unsigned char MachineType;
+extern Model MachineType;
 extern BeebWin *mainWin;
 extern Boolean quitNow;
 extern const char *Version;

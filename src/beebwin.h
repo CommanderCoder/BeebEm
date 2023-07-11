@@ -31,6 +31,11 @@
 
 #include "port.h"
 #include "video.h"
+#include "disctype.h"
+
+#include "model.h"
+
+extern Model MachineType;
 
 typedef union {
 	unsigned char data[8];
@@ -100,9 +105,9 @@ public:
 	void bufferblit2(int starty, int nlines);
 	void DumpScreen(int offset);
 
-	void doHorizLine(unsigned long Col, int y, int sx, int width);
-	void doInvHorizLine(unsigned long Col, int y, int sx, int width);
-	void doUHorizLine(unsigned long Col, int y, int sx, int width);
+	void doHorizLine(int  Colour, int y, int sx, int width);
+	void doInvHorizLine(int Colour, int y, int sx, int width);
+	void doUHorizLine(int Colour, int y, int sx, int width);
 	void doHorizLine1(unsigned long Col, int y, int sx, int width);
 	void doInvHorizLine1(unsigned long Col, int y, int sx, int width);
 	void doUHorizLine1(unsigned long Col, int offset, int width);
@@ -114,7 +119,7 @@ public:
 	void UpdateModelType();
 	void SetSoundMenu(void);
 	void SetPBuff(void);
-	void SetImageName(char *DiscName,char Drive,char DType);
+	void SetImageName(const char *DiscName,int Drive,DiscType DType);
 	void SetTapeSpeedMenu(void);
 	void SetDiscWriteProtects(void);
 	void SetRomMenu(void);				// LRW  Added for individual ROM/Ram
@@ -127,7 +132,9 @@ public:
 	void doLED(int sx,bool on);
 
 	void RealizePalette(void) {};
-	void ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatus,unsigned char LoadRoms);
+	void ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsigned char LoadRoms);
+    
+    void CreateDiscImage(const char *Filename, int Drive, int Heads, int Tracks);
 
 	void TranslateFDC(void);
 	void TranslateTiming(int TimingId);
@@ -153,6 +160,9 @@ public:
 	void NewTapeImage(char *FileName);
 	void ReadDisc(int drive);
 	void LoadDisc(int drive, char *path);
+    void MReadRom(int rom);
+    void MLoadRom(int rom, char *path);
+    void MClearRom(int rom);
 	void LoadTapeFromPath(char *path);
 	OSStatus HandleCommand(UInt32 cmdID);
 	void SetMenuCommandIDCheck(UInt32 commandID, bool check);
@@ -258,6 +268,7 @@ public:
 	void SaveUserKeyMap (void);
 	void ImportDiscFiles(int menuId);
 	void ExportDiscFiles(int menuId);
+    void SaveCMOS(void);
 
 #if 0 //ACH - capture video
 public:

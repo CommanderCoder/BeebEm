@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <Carbon/Carbon.h>
 
+#include "model.h"
+
 #include "6502core.h"
 #include "beebmem.h"
 #include "beebsound.h"
@@ -54,7 +56,7 @@ int DumpAfterEach=0;
 #include "via.h"
 extern VIAState SysVIAState;
 BeebWin *mainWin;
-unsigned char MachineType;
+Model MachineType;
 Boolean quitNow;
 
 const char *Version="5.0a";

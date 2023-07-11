@@ -6,6 +6,11 @@
 windows 38da43f
 BeebEm5.xcodeproj/project.xcworkspace/xcshareddata
 Install/BeebEm5\ *
+Install/beebem5-distribution/BeebEm5.app
+tags
+BeebFile/M128/b-em-master-state.snp
+Install/beebem5-distribution.zip
+build/
 
 ## User settings
 xcuserdata/

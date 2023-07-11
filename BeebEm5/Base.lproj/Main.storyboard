@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19529"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -1066,6 +1065,12 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Ve5-Sm-Djx"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="SprowCoPro" identifier="tspr" id="R7Z-Hk-lJB">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="BOA-ZG-gbh"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="0Oe-qe-SWJ"/>
                                         <menuItem title="Allow ROM writes" id="yIh-5j-UMX">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -1170,6 +1175,229 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
+                                        <menuItem title="Roms" id="5nd-JB-Al1">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Roms" id="N3H-sA-VlR">
+                                                <items>
+                                                    <menuItem title="Load ROM" id="kyf-tL-iCb">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <menu key="submenu" title="Load ROM" id="Mxs-Ij-m1A">
+                                                            <items>
+                                                                <menuItem title="0 Empty" identifier="rona" id="Ejb-7I-Mba" propertyAccessControl="none">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="sTP-9e-IoM"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="1 Empty" identifier="ronb" id="lwZ-1k-UQY">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="jWb-wv-57O"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="2 Empty" identifier="ronc" id="K7z-3P-r0N">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="qg0-Uq-a12"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="3 Empty" identifier="rond" id="Z45-YT-ht9">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="c4l-iq-yyS"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="4 Empty" identifier="rone" id="Ih2-U9-9BF">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="42C-4D-nKW"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="5 Empty" identifier="ronf" id="wcX-gG-SUX">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="WmV-Ht-NsH"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="6 Empty" identifier="rong" id="SmH-4n-7aH">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="rOW-hf-sSo"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="7 Empty" state="on" identifier="ronh" id="xb5-4H-YVR">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="19Q-cT-Vas"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="8 Empty" identifier="roni" id="DL1-HD-DWP">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="AEY-Az-49s"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="9 Empty" identifier="ronj" id="gLg-uT-t7G">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="PfH-c4-M5x"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="a Empty" identifier="ronk" id="ybI-wt-ize">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="rxq-Ps-yW1"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="b Empty" identifier="ronl" id="4lF-fq-rUx">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="F6L-Ec-BhG"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="c Empty" identifier="ronm" id="sWM-75-6LD">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="myz-ij-jvT"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="d Empty" identifier="ronn" id="ahQ-2a-zXn">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="uyo-AV-phW"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="e Empty" identifier="rono" id="g4x-ZN-Lwd">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="HIf-gq-sSg"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="f Empty" identifier="ronp" id="7hB-hL-gQn">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="dFZ-WY-cbj"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                            </items>
+                                                        </menu>
+                                                    </menuItem>
+                                                    <menuItem title="Clear ROM" id="Zca-YT-t6U">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <menu key="submenu" title="Clear ROM" id="1Te-bN-PaO">
+                                                            <items>
+                                                                <menuItem title="0 Empty" identifier="roca" id="Va3-VI-69e">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="GMH-hA-Dk3"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="1 Empty" identifier="rocb" id="kY9-FK-LL7">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="uwK-4p-mtf"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="2 Empty" identifier="rocc" id="0C7-la-pbj">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ZZ3-5D-6hg"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="3 Empty" identifier="rocd" id="Duh-bu-qBb">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="cGK-EV-rcn"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="4 Empty" identifier="roce" id="F7J-WE-USy">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="yr9-Ln-Zp0"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="5 Empty" identifier="rocf" id="ysQ-Nk-kJf">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="yZU-eA-3Xt"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="6 Empty" identifier="rocg" id="if7-rw-MhV">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Whs-LP-dhC"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="7 Empty" identifier="roch" id="ApL-eA-gt2">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="VXq-p7-onk"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="8 Empty" identifier="roci" id="1OZ-Yh-X4i">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="idK-TS-PiJ"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="9 Empty" identifier="rocj" id="3ao-1Q-byQ">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="OGK-2u-wXK"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="a Empty" identifier="rock" id="X20-Rv-eiH">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="S5Y-Zp-13I"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="b Empty" identifier="rocl" id="pSI-Yg-h2M">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="wfi-31-a0e"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="c Empty" identifier="rocm" id="pu4-ME-x45">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="TeQ-9d-qpe"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="d Empty" identifier="rocn" id="Xn9-Ou-Y3P">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="dCY-j8-0qe"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="e Empty" identifier="roco" id="1mV-Me-A3e">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Fqy-jW-OtV"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="f Empty" identifier="rocp" id="xZc-vc-Wyj">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="HandleCommand:" target="Voe-Tx-rLC" id="rXv-aV-Oxe"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                            </items>
+                                                        </menu>
+                                                    </menuItem>
+                                                    <menuItem title="Mark as RAM" id="iZy-4K-TL1" userLabel="Mark as RAM">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <menu key="submenu" title="Mark as RAM" id="M1l-Y6-nmo">
+                                                            <items>
+                                                                <menuItem title="Item" id="bys-gG-Uql">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                </menuItem>
+                                                            </items>
+                                                        </menu>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="39z-hv-2GQ"/>
                                         <menuItem title="Ignore Illegal Instructions" state="on" identifier="igil" id="fnA-Ln-t6h">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -1209,13 +1437,6 @@
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="PLE-q2-8RC"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="EN6-j0-pOy"/>
-                                        <menuItem title="Econet On/Off" identifier="enet" id="oPA-sP-s8b">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="oyc-nB-QHc"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem title="Teletext Adapter" id="MTk-hS-vEs">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Teletext Adapter" id="xXa-Dw-oBJ">
@@ -1241,10 +1462,23 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="EN6-j0-pOy"/>
+                                        <menuItem title="Econet On/Off" identifier="enet" id="oPA-sP-s8b">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="oyc-nB-QHc"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Hard Drive On/Off" identifier="hdre" id="SQq-j9-CXc">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="wKz-jA-ne4"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="IDE Drive On/Off" identifier="idre" id="g4A-0C-frC">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="6Wa-nQ-ByX"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="oa0-Ea-k4g"/>
@@ -1688,7 +1922,7 @@
                 </windowController>
                 <customObject id="QYA-eN-qF7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="913" y="378"/>
+            <point key="canvasLocation" x="944" y="418"/>
         </scene>
         <!--Debugger View Controller-->
         <scene sceneID="lr1-bs-e2c">
@@ -1740,7 +1974,7 @@
             <objects>
                 <viewController id="K2M-6c-8B5" userLabel="KeyboardMapping View Controller" customClass="KeyboardMappingViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="sq3-bi-3ml">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="222"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <stackView distribution="fillEqually" orientation="vertical" alignment="centerX" spacing="4" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qLV-Ji-3mE">
@@ -2109,15 +2343,15 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button identifier="UP" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HOS-Hf-8LZ">
-                                                <rect key="frame" x="386" y="0.0" width="28" height="22"/>
+                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="HOS-Hf-8LZ">
+                                                <rect key="frame" x="392" y="0.0" width="28" height="22"/>
                                                 <buttonCell key="cell" type="square" title="UP" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="JdD-1Q-5Se">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                             </button>
-                                            <button identifier="DN" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6P7-wj-CGF">
-                                                <rect key="frame" x="420" y="0.0" width="29" height="22"/>
+                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6P7-wj-CGF">
+                                                <rect key="frame" x="426" y="0.0" width="30" height="22"/>
                                                 <buttonCell key="cell" type="square" title="DN" bezelStyle="shadowlessSquare" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xh4-1b-bCa">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="system"/>
@@ -2497,7 +2731,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FwW-EB-MoF">
-                                <rect key="frame" x="506" y="15" width="74" height="32"/>
+                                <rect key="frame" x="506" y="-63" width="74" height="32"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="push" title="OK" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qGC-Tq-O3T">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -2520,7 +2754,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fie-Kz-7Cy">
-                                <rect key="frame" x="25" y="25" width="123" height="16"/>
+                                <rect key="frame" x="25" y="-53" width="123" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Assigned to keys(s)" id="7hz-DC-Trg">
                                     <font key="font" metaFont="system"/>
@@ -2529,7 +2763,7 @@ DQ
                                 </textFieldCell>
                             </textField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gNH-rX-bHK">
-                                <rect key="frame" x="108" y="58" width="385" height="16"/>
+                                <rect key="frame" x="108" y="-20" width="385" height="16"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Click a key then press the corresponding key on your keyboard" id="Hix-HY-099">
                                     <font key="font" metaFont="system"/>

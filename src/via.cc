@@ -40,10 +40,12 @@ void VIAReset(VIAState *ToReset) {
   ToReset->ier=0x80; /* No interrupts enabled */
   ToReset->timer1l=ToReset->timer2l=0xffff;/*0xffff; */
   ToReset->timer1c=ToReset->timer2c=0xffff;/*0x1ffff; */
-  ToReset->timer1hasshot=0;
-  ToReset->timer2hasshot=0;
+  ToReset->timer1hasshot=false;
+  ToReset->timer2hasshot=false;
   ToReset->timer1adjust=0; //Added by Ken Lowe 24/08/03
   ToReset->timer2adjust=0;
+  ToReset->ca2 = false;
+  ToReset->cb2 = false;
 } /* VIAReset */
 
 /*-------------------------------------------------------------------------*/
@@ -126,6 +128,9 @@ void LoadViaUEF(FILE *SUEF) {
 	VIAPtr->timer1hasshot=fgetc(SUEF);
 	VIAPtr->timer2hasshot=fgetc(SUEF);
 	if (!VIAType) IC32State=fgetc(SUEF);
+
+    VIAPtr->ca2 = ((VIAPtr->pcr & PCR_CA2_CONTROL) == PCR_CA2_OUTPUT_HIGH);
+    VIAPtr->cb2 = ((VIAPtr->pcr & PCR_CB2_CONTROL) == PCR_CB2_OUTPUT_HIGH);
 }
 
 #endif

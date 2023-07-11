@@ -108,6 +108,7 @@ int UserKeymap[256][2]={
 // And ASCII to a VKEY if necessary; original code here: http://ritter.ist.psu.edu/projects/RUI/macosx/rui.c 
 int keyCodeForKeyString(char * keyString)
 {
+    fprintf(stderr, "KeyCodeForKeyString\n");
     if (strcmp(keyString, "a") == 0) return 0;
     if (strcmp(keyString, "s") == 0) return 1;
     if (strcmp(keyString, "d") == 0) return 2;
@@ -689,7 +690,7 @@ void SetRowCol( int ctrlID )
 	case '\\|  ': BBCRow = 7; BBCCol = 8; break;
 	case ']}  ': BBCRow = 5; BBCCol = 8; break;
 	case '@   ': BBCRow = 4; BBCCol = 7; break;
-	case '_£  ': BBCRow = 2; BBCCol = 8; break;
+	case '\_\£  ': BBCRow = 2; BBCCol = 8; break;
 	
 	default:
 		BBCRow = 0; BBCCol = 0;

@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "model.h"
 #include "main.h"
 #include "beebwin.h"
 #include "port.h"
@@ -59,14 +60,24 @@
 #include "csw.h"
 #include "serialdevices.h"
 #include "Arm.h"
-#include "printing.h"
+#include "Printing.h"
 #include "discedit.h"
+#include "disctype.h"
+#include "disc1770.h"
+#include "ide.h"
+
+#include "Master512CoPro.h"
+
+extern Master512CoPro master512CoPro;
+extern unsigned char Roms[16][16384];
 
 // #include "keytable_2"
 
 #include<thread>
 #include<chrono>
 #include<iostream>
+
+extern unsigned char CMOSRAM[64]; // 50 Bytes CMOS RAM
 
 long beeb_now() // milliseconds
 {
@@ -129,12 +140,12 @@ bool m_PageFlipping=0;
 
 bool DiscLoaded[2]={false,false}; // Set to TRUE when a disc image has been loaded.
 char CDiscName[2][256]; // Filename of disc current in drive 0 and 1;
-char CDiscType[2]; // Current disc types
+DiscType CDiscType[2]; // Current disc types
 
 static const char *WindowTitle = "BeebEm - BBC Model B / Master 128 Emulator";
 
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD };
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, ROM };
 
 extern "C" void swift_SetMenuCheck(unsigned int cmd, char check);
 extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, FileFilter exts);
@@ -414,10 +425,10 @@ bool bit = false;
 		if(row==-2)
 		{ // Must do a reset!
 			Init6502core();
-			if ( (EnableTube) && (TubeEnabled) ) Init65C02core();
-			if (Tube186Enabled) i86_main();
+			if ( (EnableTube) && (TubeType == Tube::Acorn65C02) ) Init65C02core();
+			if (TubeType == Tube::Master512CoPro) master512CoPro.Reset();
 			Enable_Z80 = 0;
-			if (TorchTube || AcornZ80)
+            if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80)
 			{
 				R1Status = 0;
 				ResetTube();
@@ -425,7 +436,7 @@ bool bit = false;
 				Enable_Z80 = 1;
 			}
 			Enable_Arm = 0;
-			if (ArmTube)
+            if (TubeType == Tube::AcornArm)
 			{
 				R1Status = 0;
 				ResetTube();
@@ -433,11 +444,12 @@ bool bit = false;
 				arm = new CArm;
 				Enable_Arm = 1;
 			}
-			Disc8271_reset();
+			Disc8271Reset();
 			Reset1770();
 			if (EconetEnabled) EconetReset();
-			if (HardDriveEnabled) SCSIReset();
-			if (HardDriveEnabled) SASIReset();
+            if (SCSIDriveEnabled) SCSIReset();
+            if (SCSIDriveEnabled) SASIReset();
+            if (IDEDriveEnabled) IDEReset();
 			if (TeleTextAdapterEnabled) TeleTextInit();
 
 			//SoundChipReset();
@@ -461,6 +473,7 @@ int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
 
 	if (keyUp)
 	{
+        fprintf(stderr, "Keyup %d\n", vkey);
 		// Key released, lookup beeb row + col that this vkey 
 		// mapped to when it was pressed.  Need to release
 		// both shifted and non-shifted presses.
@@ -484,6 +497,7 @@ int BeebWin::TranslateKey(int vkey, int keyUp, int &row, int &col)
 
 		row = transTable[vkey][0];
 		col = transTable[vkey][1];
+        fprintf(stderr, "new vkey %d\n",vkey);
 
 		if (m_KeyMapAS)
 		{
@@ -613,79 +627,31 @@ BeebWin::~BeebWin()
 
 extern int done;
 
-void BeebWin::doHorizLine(unsigned long Col, int y, int sx, int width) 
+void BeebWin::doHorizLine(int Colour, int y, int sx, int width) 
 {
-    long d;
-    int e;
-char *p;
-
-	if (TeletextEnabled) 
-	{
-		e = sx + 80;
-	}
-	else
-	{
-		e = sx;
-	}
-
-	if (e < 0)
-	{
-		width = width - e;
-		e = 0;
-	}
-
-	if (e + width > 799) width = 800 - e;
-	if (width <= 0) return;
-
-	d = (y*800)+ e + ScreenAdjust;
-	if ((d+width)>(512*800)) return;
-	if (d<0) return;
-	p = m_screen + d;
-
-	memset(m_screen + d, (int)Col, width);
+	if (TeletextEnabled) y/=TeletextStyle; 
+    int d = (y*800)+sx+ScreenAdjust+(TeletextEnabled?36:0);
+    if ((d+width)>(500*800)) return;
+    if (d<0) return;
+	memset(m_screen + d, Colour, width);
 };
 
-void BeebWin::doInvHorizLine(unsigned long Col, int y, int sx, int width) 
+void BeebWin::doInvHorizLine(int Colour, int y, int sx, int width) 
 {
-long d;
-int e;
-char *vaddr;
-
-	if (TeletextEnabled)
-	{
-		e = sx + 80;
-	}
-	else
-	{
-		e = sx;
-	}
-
-	if (e < 0)
-	{
-		width = width - e;
-		e = 0;
-	}
-
-	if (e + width > 799) width = 800 - e;
-	if (width <= 0) return;
-
-	d = (y*800) + e + ScreenAdjust;
-
-	if ((d+width)>(512*800)) return;
-	if (d<0) return;
-	vaddr=m_screen+d;
-
-	for (int n=0;n<width;n++)
-	{
-		vaddr[n] ^= Col;
-	}
-	
+    if (TeletextEnabled) y/=TeletextStyle;
+    int d = (y*800)+sx+ScreenAdjust+(TeletextEnabled?36:0);
+    char *vaddr;
+    if ((d+width)>(500*800)) return;
+    if (d<0) return;
+    vaddr=m_screen+d;
+    for (int n = 0; n < width; n++) *(vaddr+n) ^= Colour;
 };
 
-void BeebWin::doUHorizLine(unsigned long Col, int y, int sx, int width) 
+void BeebWin::doUHorizLine(int Colour, int y, int sx, int width) 
 {
+    if (TeletextEnabled) y/=TeletextStyle;
 	if (y>500) return;
-    memset(m_screen + y*800 + sx, (int)Col, width);
+    memset(m_screen + (y*800) + sx, Colour, width);
 };
 
 EightUChars *BeebWin::GetLinePtr(int y) 
@@ -1920,6 +1886,7 @@ void BeebWin::Initialise(char *home)
 
 	LoadPreferences();
 
+
 	// load the default user keymap if it is present
 	char defaultUserKeymapPath [256];
 	sprintf(defaultUserKeymapPath, "%sdefault.kmap", RomPath);
@@ -1930,7 +1897,7 @@ void BeebWin::Initialise(char *home)
 		TranslateKeyMapping();
 	}
 	TouchScreenOpen();
-	IgnoreIllegalInstructions = 1;
+	//IgnoreIllegalInstructions = 1;
 
 	m_WriteProtectDisc[0] = !IsDiscWritable(0);
 	m_WriteProtectDisc[1] = !IsDiscWritable(1);
@@ -1997,31 +1964,42 @@ OSStatus		err;
         {
             fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
         }
+        // New load rom menu - had to use rona 5 digit codes don't work
+        err = swift_SetMenuItemTextWithCString('rona' + i, Title);
+        if (err)
+        {
+            fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
+        }
+
+        err = swift_SetMenuItemTextWithCString('roca' + i, Title);
+        if (err)
+        {
+            fprintf(stderr, "Cannot find menu for Rom title %d\n", i);
+        }
+#
 #endif
 		
 		SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
 	}
 }
 
-
 void BeebWin::SetSoundMenu(void) {
 }
 
 /****************************************************************************/
-void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatus,unsigned char LoadRoms) 
+void BeebWin::ResetBeebSystem(Model NewModelType,unsigned char TubeStatus,unsigned char LoadRoms)
 {
 	BeebReleaseAllKeys();
-	SwitchOnCycles=0; // Reset delay
 	SoundChipReset();
 	SwitchOnSound();
 	EnableTube=TubeStatus;
 	MachineType=NewModelType;
 	BeebMemInit(LoadRoms,m_ShiftBooted);
 	Init6502core();
-	if (EnableTube) Init65C02core();
-	if (Tube186Enabled) i86_main();
+    if (TubeType == Tube::Acorn65C02) Init65C02core();
+    if (TubeType == Tube::Master512CoPro) master512CoPro.Reset();
 	Enable_Z80 = 0;
-	if (TorchTube || AcornZ80)
+    if (TubeType == Tube::TorchZ80 || TubeType == Tube::AcornZ80)
 	{
 		R1Status = 0;
 		ResetTube();
@@ -2029,7 +2007,7 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 		Enable_Z80 = 1;
 	}
 	Enable_Arm = 0;
-	if (ArmTube)
+    if (TubeType == Tube::AcornArm)
 	{
 		R1Status = 0;
 		ResetTube();
@@ -2040,7 +2018,7 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	SysVIAReset();
 	UserVIAReset();
 	VideoInit();
-	Disc8271_reset();
+	Disc8271Reset();
 	if (EconetEnabled) EconetReset();
 	Reset1770();
 	AtoDInit();
@@ -2050,18 +2028,19 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	FreeDiscImage(1);
 	Close1770Disc(0);
 	Close1770Disc(1);
-    if (HardDriveEnabled) SCSIReset();
-    if (HardDriveEnabled) SASIReset();
+    if (SCSIDriveEnabled) SCSIReset();
+    if (SCSIDriveEnabled) SASIReset();
+    if (IDEDriveEnabled) IDEReset();
     if (TeleTextAdapterEnabled) TeleTextInit();
-	if (MachineType==3) InvertTR00=false;
-	if ((MachineType!=3) && (NativeFDC)) {
+	if (MachineType == Model::Master128) InvertTR00=false;
+	if ((MachineType!= Model::Master128) && (NativeFDC)) {
 		// 8271 disc
-		if ((DiscLoaded[0]) && (CDiscType[0]==0)) LoadSimpleDiscImage(CDiscName[0],0,0,80);
-		if ((DiscLoaded[0]) && (CDiscType[0]==1)) LoadSimpleDSDiscImage(CDiscName[0],0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==0)) LoadSimpleDiscImage(CDiscName[1],1,0,80);
-		if ((DiscLoaded[1]) && (CDiscType[1]==1)) LoadSimpleDSDiscImage(CDiscName[1],1,80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[0], 0 ,0, 80);
+		if ((DiscLoaded[0]) && (CDiscType[0]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[0], (int)0, (int)80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::SSD)) LoadSimpleDiscImage(CDiscName[1], 1, 0, 80);
+		if ((DiscLoaded[1]) && (CDiscType[1]== DiscType::DSD)) LoadSimpleDSDiscImage(CDiscName[1], (int)1, (int)80);
 	}
-	if (((MachineType!=3) && (!NativeFDC)) || (MachineType==3)) {
+	if (((MachineType!= Model::Master128) && (!NativeFDC)) || (MachineType == Model::Master128)) {
 		// 1770 Disc
 		if (DiscLoaded[0]) Load1770DiscImage(CDiscName[0],0,CDiscType[0]);
 		if (DiscLoaded[1]) Load1770DiscImage(CDiscName[1],1,CDiscType[1]);
@@ -2070,10 +2049,10 @@ void BeebWin::ResetBeebSystem(unsigned char NewModelType,unsigned char TubeStatu
 	InitMenu();
 }
 
-void BeebWin::SetImageName(char *DiscName,char Drive,char DType) {
-//MenuRef			menu = nil;
-//MenuItemIndex	j;
-//OSStatus		err;
+void BeebWin::SetImageName(const char *DiscName,int Drive,DiscType DType) {
+// MenuRef			menu = nil;
+// MenuItemIndex	j;
+// OSStatus		err;
 char			*fname;
 char			Title[100];
 
@@ -2121,7 +2100,7 @@ char			Title[100];
 	Close1770Disc(Drive);
 	
 	strcpy(CDiscName[Drive], "");
-	CDiscType[Drive] = 0;
+	CDiscType[Drive] = DiscType::SSD;
 	DiscLoaded[Drive] = FALSE;
 
 	sprintf(Title, "Eject Disc %d", Drive);
@@ -2154,6 +2133,22 @@ char			Title[100];
 	
 }
 
+void BeebWin::SaveCMOS()
+{
+    char TmpPath[256];
+    FILE *CMDF3;
+    unsigned char CMA3;
+    
+    // Save the contents of the CMOS Ram
+    strcpy(TmpPath,RomPath); strcat(TmpPath,"/beebstate/cmos.ram");
+    if ((CMDF3 = fopen(TmpPath,"wb"))!=NULL) {
+        for(CMA3=0xe;CMA3<64;CMA3++) {
+            fputc(CMOSRAM[CMA3],CMDF3);
+        }
+        fclose(CMDF3);
+    }
+}
+
 /****************************************************************************/
 void BeebWin::SavePreferences()
 {
@@ -2175,7 +2170,28 @@ CFStringRef pTitle;
 // Because the values are retained as they are placed into the
 //  dictionary, we can release any allocated objects here.
 
-	AddDictNum(dict, CFSTR("MachineType"), MachineType);
+    int dumb_machineType = 0;
+    switch (MachineType)
+    {
+        case Model::B :
+            dumb_machineType = 0;
+            break;
+        case Model::IntegraB :
+            dumb_machineType = 1;
+            break;
+        case Model::BPlus :
+            dumb_machineType = 2;
+            break;
+        case Model::Master128 :
+            dumb_machineType = 3;
+            break;
+        case Model::Last :
+            dumb_machineType = 0;
+            break;
+    }
+    
+    
+    AddDictNum(dict, CFSTR("MachineType"), dumb_machineType);
 	AddDictNum(dict, CFSTR("ShowFPS"), m_ShowSpeedAndFPS);
 	AddDictNum(dict, CFSTR("TubeEnabled"), TubeEnabled);
 	AddDictNum(dict, CFSTR("Tube186Enabled"), Tube186Enabled);
@@ -2183,8 +2199,8 @@ CFStringRef pTitle;
 	AddDictNum(dict, CFSTR("ArmTube"), ArmTube);
 	AddDictNum(dict, CFSTR("AcornZ80"), AcornZ80);
 	AddDictNum(dict, CFSTR("OpCodes"), OpCodes);
-	AddDictNum(dict, CFSTR("BasicHardware"), BHardware);
-	AddDictNum(dict, CFSTR("TeletextHalfMode"), THalfMode);
+	AddDictNum(dict, CFSTR("BasicHardware"), BasicHardwareOnly);
+	AddDictNum(dict, CFSTR("TeletextHalfMode"), TeletextHalfMode);
 	AddDictNum(dict, CFSTR("SoundBlockSize"), SBSize);
 	AddDictNum(dict, CFSTR("isFullScreen"), m_isFullScreen);
 	AddDictNum(dict, CFSTR("MaintainAspectRatio"), m_maintainAspectRatio);
@@ -2224,7 +2240,8 @@ CFStringRef pTitle;
 	AddDictNum(dict, CFSTR("TeleTextAdapterEnabled"), TeleTextAdapterEnabled);
 	AddDictNum(dict, CFSTR("TeleTextData"), TeleTextData);
 	AddDictNum(dict, CFSTR("TeleTextServer"), TeleTextServer);
-	AddDictNum(dict, CFSTR("HardDriveEnabled"), HardDriveEnabled);
+    AddDictNum(dict, CFSTR("HardDriveEnabled"), SCSIDriveEnabled);
+    AddDictNum(dict, CFSTR("IDEDriveEnabled"), IDEDriveEnabled);
 	AddDictNum(dict, CFSTR("SerialPortEnabled"), SerialPortEnabled);
 	AddDictNum(dict, CFSTR("EthernetPortEnabled"), EthernetPortEnabled);
 	AddDictNum(dict, CFSTR("TouchScreenEnabled"), TouchScreenEnabled);
@@ -2320,8 +2337,29 @@ int LEDByte;
 	FDCType = GetDictNum(dict, CFSTR("FDCType"), 0);
 	TranslateFDC();
 
+    int dumb_machineType = 0;
+    
 	m_WriteProtectOnLoad = GetDictNum(dict, CFSTR("WriteProtectOnLoad"), 1);
-	MachineType = GetDictNum(dict, CFSTR("MachineType"), 3);
+	dumb_machineType = GetDictNum(dict, CFSTR("MachineType"), 3);
+    
+    switch (dumb_machineType)
+    {
+        case 0:
+            MachineType = Model::B;
+            break;
+        case 1:
+            MachineType = Model::IntegraB;
+            break;
+        case 2:
+            MachineType = Model::BPlus;
+            break;
+        case 3:
+            MachineType = Model::Master128;
+            break;
+        case 4:
+            MachineType = Model::B;
+    }
+    
 	m_isFullScreen = GetDictNum(dict, CFSTR("isFullScreen"), 0);
 	m_maintainAspectRatio = GetDictNum(dict, CFSTR("MaintainAspectRatio"), 1);
 	m_MenuIdWinSize = GetDictNum(dict, CFSTR("WindowSize"), 4);
@@ -2385,15 +2423,16 @@ int LEDByte;
 	TeleTextAdapterEnabled = GetDictNum(dict, CFSTR("TeleTextAdapterEnabled"), 0);
 	TeleTextData = GetDictNum(dict, CFSTR("TeleTextData"), 0);
 	TeleTextServer = GetDictNum(dict, CFSTR("TeleTextServer"), 0);
-	HardDriveEnabled = GetDictNum(dict, CFSTR("HardDriveEnabled"), 0);
+    SCSIDriveEnabled = GetDictNum(dict, CFSTR("HardDriveEnabled"), 0);
+    IDEDriveEnabled = GetDictNum(dict, CFSTR("IDEDriveEnabled"), 0);
 	TubeEnabled = GetDictNum(dict, CFSTR("TubeEnabled"), 0);
 	Tube186Enabled = GetDictNum(dict, CFSTR("Tube186Enabled"), 0);
 	TorchTube = GetDictNum(dict, CFSTR("TorchTube"), 0);
 	ArmTube = GetDictNum(dict, CFSTR("ArmTube"), 0);
 	AcornZ80 = GetDictNum(dict, CFSTR("AcornZ80"), 0);
-	OpCodes = GetDictNum(dict, CFSTR("OpCodes"), 2);
-	BHardware = GetDictNum(dict, CFSTR("BasicHardware"), 0);
-	THalfMode = GetDictNum(dict, CFSTR("TeletextHalfMode"), 0);
+	OpCodes = GetDictNum(dict, CFSTR("OpCodes"), 3);
+	BasicHardwareOnly = GetDictNum(dict, CFSTR("BasicHardware"), 0);
+	TeletextHalfMode = GetDictNum(dict, CFSTR("teletextHalfMode"), 0);
 	SBSize = GetDictNum(dict, CFSTR("SoundBlockSize"), 0);
 	m_Invert = GetDictNum(dict, CFSTR("InvertBackground"), 0);
 
@@ -2584,6 +2623,51 @@ void BeebWin::TranslateTiming(int id)
 
 void BeebWin::AdjustSpeed(bool up)
 {
+    static const int speeds[] = {
+        IDM_FIXEDSPEED100,
+        IDM_FIXEDSPEED50,
+        IDM_FIXEDSPEED10,
+        IDM_FIXEDSPEED5,
+        IDM_FIXEDSPEED2,
+        IDM_FIXEDSPEED1_5,
+        IDM_FIXEDSPEED1_25,
+        IDM_FIXEDSPEED1_1,
+        IDM_REALTIME,
+        IDM_FIXEDSPEED0_9,
+        IDM_FIXEDSPEED0_75,
+        IDM_FIXEDSPEED0_5,
+        IDM_FIXEDSPEED0_25,
+        IDM_FIXEDSPEED0_1,
+        0
+    };
+
+    int s = 0;
+    int t = m_MenuIdTiming;
+
+    while (speeds[s] != 0 && speeds[s] != m_MenuIdTiming)
+        s++;
+
+    if (speeds[s] == 0)
+    {
+        t = IDM_REALTIME;
+    }
+    else if (up)
+    {
+        if (s > 0)
+            t = speeds[s-1];
+    }
+    else
+    {
+        if (speeds[s+1] != 0)
+            t = speeds[s+1];
+    }
+
+    if (t != m_MenuIdTiming)
+    {
+        m_MenuIdTiming = t;
+        TranslateTiming(t);
+    }
+
 }
 
 /****************************************************************************/
@@ -2991,6 +3075,45 @@ char path[256];
 	LoadDisc(drive, path);
 }
 
+// Test steve - SAI
+void BeebWin::MReadRom(int rom)
+{
+    OSErr err = noErr;
+    char path[256];
+
+    err = swift_GetOneFileWithPreview(path, 256 , ROM);
+    if (err) return;
+    MLoadRom(rom, path);
+    SetRomMenu();
+}
+
+void BeebWin::MLoadRom(int rom, char *path)
+{
+    FILE *InFile;
+
+    InFile=fopen(path ,"rb");
+    
+    if	(InFile!=NULL) { fread(Roms[rom],1,16384,InFile); fclose(InFile); }
+    else {
+        fprintf(stderr, "Cannot open specified ROM: %s\n",path);
+    }
+
+}
+
+void BeebWin::MClearRom(int rom)
+{
+    char Title[19];
+
+    for (int i=1; i < 16385; i++) {
+        Roms[rom][i] = 0;
+    }
+		ReadRomTitle(rom, &Title[2], sizeof (Title) - 3);
+			strcpy(&Title[2], "Empty");
+}
+
+// End of test
+
+
 
 void BeebWin::LoadTape()
 {
@@ -3037,21 +3160,21 @@ bool wdd = false;
 	if (strstr(path, ".IMG")) img = true;
 	if (strstr(path, ".DOS")) dos = true;
 	
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		if (dsd)
 		{
 			if (NativeFDC)
 				LoadSimpleDSDiscImage(path, drive, 80);
 			else
-				Load1770DiscImage(path, drive, 1);		// 1 = dsd
+				Load1770DiscImage(path, drive, DiscType::DSD);		// 1 = dsd
 		}
 		if (ssd || img)
 		{
 			if (NativeFDC)
 				LoadSimpleDiscImage(path,drive, 0, 80);
 			else
-				Load1770DiscImage(path, drive, 0);		// 0 = ssd
+				Load1770DiscImage(path, drive, DiscType::SSD);		// 0 = ssd
 		}
 		if (adfs)
 		{
@@ -3060,7 +3183,7 @@ bool wdd = false;
 				fprintf(stderr, "The native 8271 FDC cannot read ADFS discs\n");
 			}
 			else
-				Load1770DiscImage(path, drive, 2);					// 2 = adfs
+				Load1770DiscImage(path, drive, DiscType::ADFS);					// 2 = adfs
 		}
 		if (wdd)
 		{
@@ -3069,24 +3192,24 @@ bool wdd = false;
 				fprintf(stderr, "The native 8271 FDC cannot read Watford Double Density discs\n");
 			}
 			else
-				Load1770DiscImage(path, drive, 5);					// 5 = watford double density
+				Load1770DiscImage(path, drive, DiscType::DSD);					// 5 = watford double density
 		}
 	}
 			
-	if (MachineType == 3)
+	if (MachineType == Model::Master128)
 	{
 		if (dsd)
-			Load1770DiscImage(path, drive, 1);						// 1 = dsd
+			Load1770DiscImage(path, drive, DiscType::DSD);						// 1 = dsd
 		if (ssd)
-			Load1770DiscImage(path, drive, 0);						// 0 = ssd
+			Load1770DiscImage(path, drive, DiscType::SSD);						// 0 = ssd
 		if (adfs)
-			Load1770DiscImage(path, drive, 2);						// ADFS
+			Load1770DiscImage(path, drive, DiscType::ADFS);						// ADFS
 		if (img)
-			Load1770DiscImage(path, drive, 3);						// 800K DOS PLUS
+			Load1770DiscImage(path, drive, DiscType::DOS);						// 800K DOS PLUS
 		if (dos)
-			Load1770DiscImage(path, drive, 4);						// 720K DOS PLUS
+			Load1770DiscImage(path, drive, DiscType::DOS);						// 720K DOS PLUS
 		if (wdd)
-			Load1770DiscImage(path, drive, 5);						// 720K WATFORD DOUBLE DENSITY
+			Load1770DiscImage(path, drive, DiscType::DSD);						// 720K WATFORD DOUBLE DENSITY
 	}
 						
 	if (m_WriteProtectOnLoad != m_WriteProtectDisc[drive])
@@ -3125,7 +3248,6 @@ bool BeebWin::UpdateTiming(void)
 	/* Update stats every second */
 	if (TickCount >= m_LastStatsTickCount + 1000)
 	{
-
 		m_FramesPerSecond = m_ScreenRefreshCount;
 		m_ScreenRefreshCount = 0;
 		m_RelativeSpeed = ((TotalCycles - m_LastStatsTotalCycles) / 2000.0) /
@@ -3170,7 +3292,7 @@ bool BeebWin::UpdateTiming(void)
 //            printf("sleeping for %lums (bbc %dms, mac %ldms) \n", (SpareTicks + 500)/1000, Cycles/2000, Ticks);
 
             // hold up the emulator for microseconds (us)
-//			beeb_usleep( SpareTicks + 500);
+			beeb_usleep( SpareTicks + 500);
             beeb_nextupdate( SpareTicks + 500);
 
 			m_MinFrameCount = 0;
@@ -3283,7 +3405,7 @@ int BeebWin::StartOfFrame(void)
 void BeebWin::ToggleWriteProtect(int Drive)
 {
 
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		if (m_WriteProtectDisc[Drive])
 		{
@@ -3302,7 +3424,7 @@ void BeebWin::ToggleWriteProtect(int Drive)
 			SetMenuCommandIDCheck('wrp1', (m_WriteProtectDisc[1]) ? true : false);
 	}
 
-	if ((MachineType == 3) || ((MachineType == 0) && (!NativeFDC)))
+	if ((MachineType == Model::Master128) || ((MachineType == Model::B) && (!NativeFDC)))
 	{
 		DWriteable[Drive] = 1 - DWriteable[Drive];
 
@@ -3318,7 +3440,7 @@ void BeebWin::ToggleWriteProtect(int Drive)
 void BeebWin::SetDiscWriteProtects(void)
 {
 
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		m_WriteProtectDisc[0] = !IsDiscWritable(0);
 		m_WriteProtectDisc[1] = !IsDiscWritable(1);
@@ -3345,8 +3467,8 @@ void BeebWin::InitMenu(void)
 	SetMenuCommandIDCheck('extr', (OpCodes == 2) ? true : false);
 	SetMenuCommandIDCheck('full', (OpCodes == 3) ? true : false);
 
-	SetMenuCommandIDCheck('hard', (BHardware) ? true : false);
-	SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
+	SetMenuCommandIDCheck('hard', (BasicHardwareOnly) ? true : false);
+	//SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
 	SetMenuCommandIDCheck('sfps', (m_ShowSpeedAndFPS) ? true : false);
 	SetMenuCommandIDCheck('sped', (SpeechEnabled) ? true : false);
 	SetMenuCommandIDCheck('sond', (SoundEnabled) ? true : false);
@@ -3360,7 +3482,8 @@ void BeebWin::InitMenu(void)
 	SetMenuCommandIDCheck('txte', (TeleTextAdapterEnabled) ? true : false);
 	SetMenuCommandIDCheck('txtd', (TeleTextData) ? true : false);
 	SetMenuCommandIDCheck('txts', (TeleTextServer) ? true : false);
-	SetMenuCommandIDCheck('hdre', (HardDriveEnabled) ? true : false);
+    SetMenuCommandIDCheck('hdre', (SCSIDriveEnabled) ? true : false);
+    SetMenuCommandIDCheck('idre', (IDEDriveEnabled) ? true : false);
 	SetMenuCommandIDCheck('invb', (m_Invert) ? true : false);
 	
 	SetMenuCommandIDCheck('tpso', TapeSoundEnabled ? true : false);
@@ -3404,7 +3527,7 @@ void BeebWin::InitMenu(void)
     }
 #endif
 
-	if (MachineType != 3)
+	if (MachineType != Model::Master128)
 	{
 		SetMenuCommandIDCheck('wrp0', (m_WriteProtectDisc[0]) ? true : false);
 		SetMenuCommandIDCheck('wrp1', (m_WriteProtectDisc[1]) ? true : false);
@@ -3482,10 +3605,10 @@ void BeebWin::UpdateMonitorMenu(void)
 
 void BeebWin::UpdateModelType(void)
 {
-	SetMenuCommandIDCheck('bbcb', (MachineType == 0) ? true : false);
-	SetMenuCommandIDCheck('bbci', (MachineType == 1) ? true : false);
-	SetMenuCommandIDCheck('bbcp', (MachineType == 2) ? true : false);
-	SetMenuCommandIDCheck('bbcm', (MachineType == 3) ? true : false);
+	SetMenuCommandIDCheck('bbcb', (MachineType == Model::B) ? true : false);
+	SetMenuCommandIDCheck('bbci', (MachineType == Model::IntegraB) ? true : false);
+	SetMenuCommandIDCheck('bbcp', (MachineType == Model::BPlus) ? true : false);
+	SetMenuCommandIDCheck('bbcm', (MachineType == Model::Master128) ? true : false);
 }
 
 void BeebWin::UpdateEconetMenu(void)
@@ -3689,39 +3812,44 @@ OSStatus err = noErr;
             break;
         case 'bbcb':
             fprintf(stderr, "BBC B selected\n");
-			if (MachineType != 0)
+			if (MachineType != Model::B)
 			{
-				ResetBeebSystem(0, EnableTube, 1);
+				ResetBeebSystem(Model::B, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
         case 'bbci':
             fprintf(stderr, "BBC B Integra selected\n");
-			if (MachineType != 1)
+			if (MachineType != Model::IntegraB)
 			{
-				ResetBeebSystem(1, EnableTube, 1);
+				ResetBeebSystem( Model::IntegraB, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
         case 'bbcp':
             fprintf(stderr, "BBC B Plus selected\n");
-			if (MachineType != 2)
+			if (MachineType != Model::BPlus)
 			{
-				ResetBeebSystem(2, EnableTube, 1);
+				ResetBeebSystem( Model::BPlus, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
         case 'bbcm':
             fprintf(stderr, "BBC Master 128 selected\n");
-			if (MachineType != 3)
+			if (MachineType != Model::Master128)
 			{
-				ResetBeebSystem(3, EnableTube, 1);
+				ResetBeebSystem( Model::Master128, EnableTube, 1);
 				UpdateModelType();
 			}
             break;
         case 'tube':
             fprintf(stderr, "Tube selected\n");
 			TubeEnabled = 1 - TubeEnabled;
+            if (TubeEnabled == 1) {
+                TubeType = Tube::Acorn65C02;
+                } else {
+                TubeType = Tube::None;
+                }
 			Tube186Enabled = 0;
 			TorchTube = 0;
 			AcornZ80 = 0;
@@ -3736,6 +3864,11 @@ OSStatus err = noErr;
         case 't186':
             fprintf(stderr, "Tube 80186 selected\n");
 			Tube186Enabled = 1 - Tube186Enabled;
+            if (Tube186Enabled == 1) {
+                TubeType = Tube::Master512CoPro;
+            } else {
+                TubeType = Tube::None;
+            }
 			TubeEnabled = 0;
 			TorchTube = 0;
 			ArmTube = 0;
@@ -3750,6 +3883,11 @@ OSStatus err = noErr;
         case 'tz80':
             fprintf(stderr, "Torch Z80 Tube selected\n");
 			TorchTube = 1 - TorchTube;
+            if (TorchTube == 1) {
+                TubeType = Tube::TorchZ80;
+            } else {
+                TubeType = Tube::None;
+            }
 			Tube186Enabled = 0;
 			TubeEnabled = 0;
 			ArmTube = 0;
@@ -3764,6 +3902,11 @@ OSStatus err = noErr;
         case 'tarm':
             fprintf(stderr, "Arm Tube selected\n");
 			ArmTube = 1 - ArmTube;
+            if (ArmTube == 1) {
+                TubeType = Tube::AcornArm;
+            } else {
+                TubeType = Tube::None;
+            }
 			Tube186Enabled = 0;
 			TubeEnabled = 0;
 			AcornZ80 = 0;
@@ -3778,7 +3921,12 @@ OSStatus err = noErr;
         case 'az80':
             fprintf(stderr, "Acorn Z80 Tube selected\n");
 			AcornZ80 = 1 - AcornZ80;
-			Tube186Enabled = 0;
+            if (AcornZ80 == 1) {
+                TubeType = Tube::AcornZ80;
+            } else {
+                TubeType = Tube::None;
+            }
+            Tube186Enabled = 0;
 			TubeEnabled = 0;
 			TorchTube = 0;
 			ArmTube = 0;
@@ -3788,6 +3936,9 @@ OSStatus err = noErr;
 			SetMenuCommandIDCheck('tarm', (ArmTube) ? true : false);
 			SetMenuCommandIDCheck('tz80', (TorchTube) ? true : false);
 			SetMenuCommandIDCheck('az80', (AcornZ80) ? true : false);
+            break;
+        case 'tspr':
+            printf("Sprow processor selected\n");
             break;
 			
         case 'sRT ':
@@ -4025,7 +4176,7 @@ OSStatus err = noErr;
 
         case 'sndc':
             fprintf(stderr, "Sound Chip Enabled selected\n");
-			SoundChipEnabled = 1 - SoundChipEnabled;
+			SoundChipEnabled = !(SoundChipEnabled);
 			SetMenuCommandIDCheck('sndc', (SoundChipEnabled) ? true : false);
             break;
 
@@ -4073,7 +4224,7 @@ OSStatus err = noErr;
         case 'enet':
 			
             fprintf(stderr, "Econet on/off selected\n");
-			EconetEnabled = 1 - EconetEnabled;
+			EconetEnabled =!(EconetEnabled);
 			if (EconetEnabled)
 			{
 				ResetBeebSystem(MachineType, TubeEnabled, 0);
@@ -4087,23 +4238,23 @@ OSStatus err = noErr;
 			
 			break;
 			
-        case 'igil':
-            fprintf(stderr, "Ignore Illegal Instructions selected\n");
-			if (IgnoreIllegalInstructions)
-			{
-				IgnoreIllegalInstructions = false;
-			}
-			else
-			{
-				IgnoreIllegalInstructions = true;
-			}
-			SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
-            break;
+//        case 'igil':
+//           fprintf(stderr, "Ignore Illegal Instructions selected\n");
+//			if (IgnoreIllegalInstructions)
+//			{
+//				IgnoreIllegalInstructions = false;
+//			}
+//			else
+//			{
+//				IgnoreIllegalInstructions = true;
+//			}
+//			SetMenuCommandIDCheck('igil', (IgnoreIllegalInstructions) ? true : false);
+//            break;
 
         case 'hard':
             fprintf(stderr, "Basic Hardware selected\n");
-			BHardware = 1 - BHardware;
-			SetMenuCommandIDCheck('hard', (BHardware) ? true : false);
+			BasicHardwareOnly = !(BasicHardwareOnly);
+			SetMenuCommandIDCheck('hard', (BasicHardwareOnly) ? true : false);
             break;
 
         case 'docu':
@@ -4165,6 +4316,50 @@ OSStatus err = noErr;
 			SetMenuCommandIDCheck('roma' + i, RomWritable[i] ? true : false);
             break;
 
+// test SAI
+        case 'rona':
+        case 'ronb':
+        case 'ronc':
+        case 'rond':
+        case 'rone':
+        case 'ronf':
+        case 'rong':
+        case 'ronh':
+        case 'roni':
+        case 'ronj':
+        case 'ronk':
+        case 'ronl':
+        case 'ronm':
+        case 'ronn':
+        case 'rono':
+        case 'ronp':
+            i = cmdID - 'rona';
+            fprintf(stderr, "Read Rom %1x selected\n", i);
+            MReadRom(i);
+            break;
+
+        case 'roca':
+        case 'rocb':
+        case 'rocc':
+        case 'rocd':
+        case 'roce':
+        case 'rocf':
+        case 'rocg':
+        case 'roch':
+        case 'roci':
+        case 'rocj':
+        case 'rock':
+        case 'rocl':
+        case 'rocm':
+        case 'rocn':
+        case 'roco':
+        case 'rocp':
+            i = cmdID - 'roca';
+            fprintf(stderr, "Clear Rom %1x selected\n", i);
+            MClearRom(i);
+            break;
+
+
 // LED's
 
         case 'ledr':
@@ -4194,6 +4389,7 @@ OSStatus err = noErr;
         case 'savp':
             fprintf(stderr, "Save Preferences\n");
 			SavePreferences();
+            SaveCMOS();
             break;
 
 // UEF State
@@ -4319,7 +4515,8 @@ OSStatus err = noErr;
 			
         case 'trac':
             fprintf(stderr, "trace186\n");
-            trace_186 = 1 - trace_186;
+            // TODO: Fix me
+            // trace_186 = 1 - trace_186;
             break;
 // AMX Mouse
 
@@ -4749,10 +4946,21 @@ OSStatus err = noErr;
 			
 		case 'hdre':
             fprintf(stderr, "Hard Drive On/Off selected\n");
-			HardDriveEnabled = 1 - HardDriveEnabled;
+            SCSIDriveEnabled = 1 - SCSIDriveEnabled;
+            if (SCSIDriveEnabled) IDEDriveEnabled = 0; // Turn off IDE when SCSI/SASI is enabled
 			SCSIReset();
 			SASIReset();
-			SetMenuCommandIDCheck('hdre', (HardDriveEnabled) ? true : false);
+            SetMenuCommandIDCheck('hdre', (SCSIDriveEnabled) ? true : false);
+            SetMenuCommandIDCheck('idre', (IDEDriveEnabled) ? true : false);
+            break;
+
+			case 'idre':
+            fprintf(stderr, "IDE Drive On/Off selected\n");
+            IDEDriveEnabled = 1 - IDEDriveEnabled;
+            if (IDEDriveEnabled) SCSIDriveEnabled = 0; // Turn off SCSI/SASI when IDE is enabled
+            IDEReset();
+            SetMenuCommandIDCheck('idre', (IDEDriveEnabled) ? true : false);
+            SetMenuCommandIDCheck('hdre', (SCSIDriveEnabled) ? true : false);
             break;
 		
         case 'rs42':
@@ -4971,10 +5179,9 @@ OSStatus err = noErr;
 void BeebWin::NewDiscImage(int Drive)
 
 {
-char path[256];  
-OSErr err = noErr;
+    char path[256];
+    OSErr err = noErr;
 
-	*path = 0;
 	err = SaveFile(path, nil);
 
 // For some reason, Return key sticks down if replace an existing file
@@ -4986,8 +5193,8 @@ OSErr err = noErr;
 
 	if (strstr(path, "ssd")) CreateDiscImage(path, Drive, 1, 80);
 	if (strstr(path, "dsd")) CreateDiscImage(path, Drive, 2, 80);
-	if (strstr(path, "adf")) CreateADFSImage(path, Drive, 80);
-	if (strstr(path, "adl")) CreateADFSImage(path, Drive, 160);
+	if (strstr(path, "adf")) CreateADFSImage(path, 80);
+	if (strstr(path, "adl")) CreateADFSImage(path, 160);
 			
 	LoadDisc(Drive, path);
 	
@@ -5127,7 +5334,28 @@ void SaveEmuUEF(FILE *SUEF) {
 	// Emulator Specifics
 	// Note about this block: It should only be handled by beebem from uefstate.cpp if
 	// the UEF has been determined to be from BeebEm (Block 046C)
-	fputc(MachineType,SUEF);
+    
+    int dumb_machineType = 0;
+    switch (MachineType)
+    {
+    case Model::B :
+        dumb_machineType = 0;
+        break;
+    case Model::IntegraB :
+        dumb_machineType = 1;
+        break;
+        case Model::BPlus :
+            dumb_machineType = 2;
+            break;
+        case Model::Master128 :
+            dumb_machineType = 3;
+            break;
+        default:
+            dumb_machineType = 0;
+            break;
+    }
+    
+	fputc(dumb_machineType,SUEF);
 	fputc((NativeFDC)?0:1,SUEF);
 	fputc(TubeEnabled,SUEF);
 	fputc(0,SUEF); // Monitor type, reserved
@@ -5139,9 +5367,29 @@ void SaveEmuUEF(FILE *SUEF) {
 }
 
 void LoadEmuUEF(FILE *SUEF, int Version) {
-	MachineType=fgetc(SUEF);
-	if (Version <= 8 && MachineType == 1)
-		MachineType = 3;
+    int dumb_machineType = 0;
+
+	dumb_machineType = fgetc(SUEF);
+    switch (dumb_machineType)
+    {
+        case 0 :
+            MachineType = Model::B;
+            break;
+        case 1 :
+            MachineType = Model::IntegraB;
+            break;
+        case 2 :
+            MachineType = Model::BPlus;
+            break;
+        case 3 :
+            MachineType = Model::Master128;
+            break;
+        default:
+            MachineType = Model::B;
+            break;
+    }
+	if (Version <= 8 && MachineType == Model::IntegraB)
+		MachineType = Model::Master128;
 	NativeFDC=(fgetc(SUEF)==0)?TRUE:FALSE;
 	TubeEnabled=fgetc(SUEF);
 	mainWin->ResetBeebSystem(MachineType,TubeEnabled,1);
@@ -5944,7 +6192,7 @@ void BeebWin::ExportDiscFiles(int menuId)
     else
         drive = 1;
     
-    if (MachineType != 3 && NativeFDC)
+    if (MachineType != Model::Master128 && NativeFDC)
     {
         // 8271 controller
         Get8271DiscInfo(drive, szDiscFile, &heads);
@@ -6028,7 +6276,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     char path[256];
     bool success = true;
     int drive;
-    int type;
+    DiscType type;
     char szDiscFile[MAX_PATH];
     int heads;
     int side;
@@ -6046,7 +6294,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     else
         drive = 1;
     
-    if (MachineType != 3 && NativeFDC)
+    if (MachineType != Model::Master128 && NativeFDC)
     {
         // 8271 controller
         Get8271DiscInfo(drive, szDiscFile, &heads);
@@ -6055,9 +6303,9 @@ void BeebWin::ImportDiscFiles(int menuId)
     {
         // 1770 controller
         Get1770DiscInfo(drive, &type, szDiscFile);
-        if (type == 0)
+        if (type == DiscType::SSD)
             heads = 1;
-        else if (type == 1)
+        else if (type == DiscType::DSD)
             heads = 2;
         else
         {
@@ -6152,7 +6400,7 @@ void BeebWin::ImportDiscFiles(int menuId)
     fprintf(stderr, "Files successfully imported: %d\n", n);
     
     // Re-read disc image
-    if (MachineType != 3 && NativeFDC)
+    if (MachineType != Model::Master128 && NativeFDC)
     {
         // 8271 controller
         Eject8271DiscImage(drive);
@@ -6166,8 +6414,86 @@ void BeebWin::ImportDiscFiles(int menuId)
         // 1770 controller
         Close1770Disc(drive);
         if (heads == 2)
-            Load1770DiscImage(szDiscFile, drive, 1);
+            Load1770DiscImage(szDiscFile, drive, DiscType::DSD);
         else
-            Load1770DiscImage(szDiscFile, drive, 0);
+            Load1770DiscImage(szDiscFile, drive, DiscType::SSD);
     }
 }
+
+/****************************************************************************/
+void BeebWin::CreateDiscImage(const char *FileName, int DriveNum,
+                              int Heads, int Tracks) {
+	bool Success = true;
+
+	// First check if file already exists
+	FILE *outfile = fopen(FileName, "rb");
+	if (outfile != nullptr) {
+		fclose(outfile);
+
+		char errstr[200];
+		sprintf(errstr, "File already exists:\n  %s\n\nOverwrite file?", FileName);
+//		if (MessageBox(m_hWnd, errstr, WindowTitle, MB_YESNO | MB_ICONQUESTION) != IDYES)
+			return;
+	}
+
+	outfile = fopen(FileName, "wb");
+	if (outfile == nullptr) {
+		char errstr[200];
+		sprintf(errstr, "Could not create disc file:\n  %s", FileName);
+//		MessageBox(m_hWnd, errstr, WindowTitle, MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	const int NumSectors = Tracks * 10;
+
+	// Create the first two sectors on each side - the rest will get created when
+	// data is written to it
+	for (int Sector = 0; Success && Sector < (Heads == 1 ? 2 : 12); Sector++) {
+		unsigned char SecData[256];
+		memset(SecData, 0, sizeof(SecData));
+
+		if (Sector == 1 || Sector == 11)
+		{
+			SecData[6] = (NumSectors >> 8) & 0xff;
+			SecData[7] = NumSectors & 0xff;
+		}
+
+		if (fwrite(SecData, 1, 256, outfile) != 256)
+			Success = false;
+	}
+
+	if (fclose(outfile) != 0)
+		Success = false;
+
+	if (!Success) {
+		char errstr[200];
+		sprintf(errstr, "Failed writing to disc file:\n  %s", FileName);
+//		MessageBox(m_hWnd, errstr, WindowTitle, MB_OK | MB_ICONERROR);
+	}
+	else
+	{
+		// Now load the new image into the correct drive
+		if (Heads == 1)
+		{
+//			if (MachineType == Model::Master128 || !NativeFDC) {
+			if (MachineType == Model::Master128 || !NativeFDC) {
+				Load1770DiscImage(FileName, DriveNum, DiscType::SSD);
+			}
+			else {
+				LoadSimpleDiscImage(FileName, DriveNum, 0, Tracks);
+			}
+		}
+		else
+		{
+//			if (MachineType == Model::Master128 || !NativeFDC) {
+			if (MachineType == Model::Master128 || !NativeFDC) {
+				Load1770DiscImage(FileName, DriveNum, DiscType::DSD);
+			}
+			else {
+				LoadSimpleDSDiscImage(FileName, DriveNum, Tracks);
+			}
+		}
+	}
+}
+
+

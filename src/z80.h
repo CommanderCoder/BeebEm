@@ -73,7 +73,7 @@ extern FASTWORK simz80(FASTREG PC);
 */
 
 #ifndef BIOS
-extern int in(unsigned int);
+extern unsigned char in(unsigned int);
 extern void out(unsigned int, unsigned char);
 #define Input(port) in(port)
 #define Output(port, value) out(port,value)
@@ -89,6 +89,7 @@ void init_z80();
 void Debug_Z80();
 int Z80_Disassemble(int adr, char *s);
 void PrintHex(int PC);
+// TODO remove these once all the updates are complete
 extern int TorchTube;
 extern int Enable_Z80;
 unsigned char ReadZ80Mem(int pc);
@@ -98,6 +99,6 @@ void Disp_RegSet2(char *str);
 
 void z80_NMI_Interrupt(void);
 void z80_IRQ_Interrupt(void);
-void set_Z80_irq_line(int state);
-void set_Z80_nmi_line(int state);
+void set_Z80_irq_line(bool state);
+void set_Z80_nmi_line(bool state);
 

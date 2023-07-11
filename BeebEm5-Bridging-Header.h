@@ -2,7 +2,6 @@
 //  Use this file to import your target's public headers that you would like to expose to Swift.
 //
 
-
 // BEEBEM
 struct CColour{
     unsigned char r;
@@ -16,10 +15,11 @@ void beeb_MainCpuLoop();
 int beeb_end();
 void beeb_video(long height, long width, struct CColour buffer[]);
 void beeb_handlekeys(long eventkind, unsigned long keycode, char charCode);
+void beeb_handlemouse(long eventkind);
+void beeb_SetAMXPosition(unsigned int x, unsigned int y);
 
 int beeb_HandleCommand(unsigned int cmdID);
 void beeb_setFilePath(const char* _path);
-
 
 long beeb_TCHandleCommand(unsigned int cmdID);
 void beeb_TapeControlOpenDialog();

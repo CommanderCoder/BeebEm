@@ -1,0 +1,42 @@
+bool CCoreAudioDevice::AddIOProc(AudioDeviceIOProc ioProc, void* pCallbackData)
+{
+    // Allow only one IOProc at a time
+    if (!m_DeviceId || m_IoProc)
+        return false;
+
+    OSStatus ret = AudioDeviceCreateIOProcID(m_DeviceId, ioProc, pCallbackData, &m_IoProc);
+    if (ret)
+    {
+        CLog::Log(LOGERROR,
+                "CCoreAudioDevice::AddIOProc: "
+                "Unable to add IOProc. Error = {}",
+                GetError(ret));
+        m_IoProc = NULL;
+        return false;
+    }
+
+    Start();
+
+    return true;
+}
+
+bool CCoreAudioDevice::RemoveIOProc()
+{
+    if (!m_DeviceId || !m_IoProc)
+        return false;
+
+    Stop();
+
+    OSStatus ret = AudioDeviceDestroyIOProcID(m_DeviceId, m_IoProc);
+    if (ret)
+        CLog::Log(LOGERROR,
+                "CCoreAudioDevice::RemoveIOProc: "
+                "Unable to remove IOProc. Error = {}",
+                GetError(ret));
+
+    m_IoProc = NULL; // Clear the reference no matter what
+
+    usleep(100000);
+
+    return true;
+}

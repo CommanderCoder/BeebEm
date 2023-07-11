@@ -20,6 +20,7 @@
 #include "tube.h"
 #include "uef.h"
 #include "csw.h"
+#include "uservia.h"
 
 int done = 0;
 extern OSStatus TCWindowCommandHandler(UInt32 cmdID);
@@ -39,12 +40,41 @@ extern "C" void beeb_autorun(char* path)
     strcpy(AutoRunPath, path);
 }
 
+extern "C" void beeb_handlemouse(long eventkind)
+{
+  // here
+    fprintf(stderr, "eventKind is %ld\n", eventkind);
+    switch (eventkind)
+    {
+        // TODO: see main.cc for how it was done previously
+        case mouseDown:
+            AMXButtons |= AMX_LEFT_BUTTON;
+            break;
+        case mouseUp:
+            AMXButtons &= ~AMX_LEFT_BUTTON;
+            break;
+        case 100:
+            AMXButtons |= AMX_RIGHT_BUTTON;
+            break;
+        case 99:
+            AMXButtons &= ~AMX_RIGHT_BUTTON;
+            break;
+            
+    }
+}
+
+extern "C" void beeb_SetAMXPosition(unsigned int x, unsigned int y)
+{
+    // TODO: Put call to BeebWin::SetAMXPosition(x,y) here but how?
+    mainWin->SetAMXPosition(x, y);
+}
+
 extern "C" void beeb_handlekeys(long eventkind, unsigned int keycode, char charCode)
 {
      static int ctrl = 0x0000;
      int LastShift, LastCtrl, LastCaps, LastCmd;
-     int NewShift, NewCtrl=0, NewCaps;
-     static int NewCmd = 0; //remember CMD pressed
+     int NewShift, NewCtrl = 0, NewCaps;
+//     static int NewCmd = 0; //remember CMD pressed
      
     
     switch (eventkind)

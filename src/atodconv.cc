@@ -1,39 +1,38 @@
-/****************************************************************************/
-/*                               Beebem                                     */
-/*                               ------                                     */
-/* This program may be distributed freely within the following restrictions:*/
-/*                                                                          */
-/* 1) You may not charge for this program or for any part of it.            */
-/* 2) This copyright message must be distributed with all copies.           */
-/* 3) This program must be distributed complete with source code.  Binary   */
-/*    only distribution is not permitted.                                   */
-/* 4) The author offers no warrenties, or guarentees etc. - you use it at   */
-/*    your own risk.  If it messes something up or destroys your computer   */
-/*    thats YOUR problem.                                                   */
-/* 5) You may use small sections of code from this program in your own      */
-/*    applications - but you must acknowledge its use.  If you plan to use  */
-/*    large sections then please ask the author.                            */
-/*                                                                          */
-/* If you do not agree with any of the above then please do not use this    */
-/* program.                                                                 */
-/****************************************************************************/
+/****************************************************************
+BeebEm - BBC Micro and Master 128 Emulator
+Copyright (C) 1997  Mike Wyatt
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public 
+License along with this program; if not, write to the Free 
+Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA  02110-1301, USA.
+****************************************************************/
+
 /* Analogue to digital converter support file for the beeb emulator -
    Mike Wyatt 7/6/97 */
+
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 #include <stdio.h>
 
 #include "6502core.h"
 #include "atodconv.h"
 #include "sysvia.h"
-
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 #include "uefstate.h"
 
-
-int JoystickEnabled = 0;
+bool JoystickEnabled = false;
 
 /* X and Y positions for joystick 1 */
 int JoystickX;
@@ -55,7 +54,6 @@ int AtoDTrigger;  /* For next A to D conversion completion */
 /* Address is in the range 0-f - with the fec0 stripped out */
 void AtoDWrite(int Address, int Value)
 {
-
 	if (Address == 0)
 	{
 		int timetoconvert;
@@ -71,10 +69,12 @@ void AtoDWrite(int Address, int Value)
 }
 
 /*--------------------------------------------------------------------------*/
-/* Address is in the range 0-f - with the fec0 stripped out */
-int AtoDRead(int Address)
+
+// Address is in the range 0-f - with the fec0 stripped out
+
+unsigned char AtoDRead(int Address)
 {
-	int Value = 0xff;
+	unsigned char Value = 0xff;
 
 	switch (Address)
 	{
@@ -91,7 +91,7 @@ int AtoDRead(int Address)
 		break;
 	}
 
-	return(Value);
+	return Value;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -142,14 +142,14 @@ void AtoDInit(void)
 /*--------------------------------------------------------------------------*/
 void AtoDEnable(void)
 {
-	JoystickEnabled = 1;
+	JoystickEnabled = true;
 	AtoDInit();
 }
 
 /*--------------------------------------------------------------------------*/
 void AtoDDisable(void)
 {
-	JoystickEnabled = 0;
+	JoystickEnabled = false;
 	AtoDState.datalatch = 0;
 	AtoDState.status = 0x80; /* busy, conversion not complete */
 	AtoDState.high = 0;
@@ -175,10 +175,10 @@ void SaveAtoDUEF(FILE *SUEF) {
 		fput32(AtoDTrigger - TotalCycles,SUEF);
 }
 void LoadAtoDUEF(FILE *SUEF) {
-	AtoDState.datalatch = fgetc(SUEF);
-	AtoDState.status = fgetc(SUEF);
-	AtoDState.high = fgetc(SUEF);
-	AtoDState.low = fgetc(SUEF);
+	AtoDState.datalatch = fget8(SUEF);
+	AtoDState.status = fget8(SUEF);
+	AtoDState.high = fget8(SUEF);
+	AtoDState.low = fget8(SUEF);
 	AtoDTrigger = fget32(SUEF);
 	if (AtoDTrigger != CycleCountTMax)
 		AtoDTrigger+=TotalCycles;

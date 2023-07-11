@@ -1,0 +1,11 @@
+Add clear and RAM like windows BEEBMEM
+Have a submenu from the rom menu to allow the user to choose af file 
+to load, or clear, or set to RAM.
+
+Questions: 
+Should I respect the writable flag with loading?
+    This seems to have been implemented because some ROM needs to check if its writable
+
+Done 
+----
+Add load menu like windows BeebEm 

@@ -25,6 +25,8 @@ keyboard emulation - David Alan Gilbert 30/10/94 */
 #include <stdio.h>
 #include <time.h>
 
+#define SPEECH_ENABLED
+
 #include "6502core.h"
 #include "beebsound.h"
 #include "beebmem.h"
@@ -34,17 +36,15 @@ keyboard emulation - David Alan Gilbert 30/10/94 */
 #include "main.h"
 #include "viastate.h"
 #include "debug.h"
+#ifdef SPEECH_ENABLED
 #include "speech.h"
-
-#ifdef WIN32
-#include <windows.h>
 #endif
 
 /* Clock stuff for Master 128 RTC */
 time_t SysTime;
-//struct tm * CurTime;
-time_t RTCTimeOffset=0;
+time_t RTCTimeOffset = 0;
 bool RTCY2KAdjust = true;
+struct tm * CurTime;
 
 // Shift register stuff
 unsigned char SRMode;
@@ -52,8 +52,8 @@ unsigned char SRCount;
 unsigned char SRData;
 unsigned char SREnabled;
 
-// Fire button for joystick 1 and 2, false=not pressed, true=pressed
-bool JoystickButton[2] = { false, false };
+// Fire button for joysticks 1 and 2, false = not pressed, true = pressed
+bool JoystickButton[2] = {false, false};
 
 extern int DumpAfterEach;
 /* My raw VIA state */
@@ -65,10 +65,10 @@ char WEState=0;
    select on speech proc, B2 is write select on speech proc, b4,b5 select
    screen start address offset , b6 is CAPS lock, b7 is shift lock */
 unsigned char IC32State=0;
-unsigned char OldCMOSState=0;
+bool OldCMOSState=false;
 
 // CMOS logging facilities
-unsigned char CMOSDebug=0;
+bool CMOSDebug=false;
 FILE *CMDF;
 FILE *vialog;
 /* Last value written to the slow data bus - sound reads it later */
@@ -104,11 +104,12 @@ void PulseSysViaCB1(void) {
 
 /*--------------------------------------------------------------------------*/
 void BeebKeyUp(int row,int col) {
-  /* Update keys down count - unless its shift/control */
 	if (row < 0 || col < 0) return;
+
+  /* Update keys down count - unless its shift/control */
 	if ((SysViaKbdState[col][row]) && (row!=0)) KeysDown--;
 
-  SysViaKbdState[col][row]=0;
+  SysViaKbdState[col][row]=false;
 }; /* BeebKeyUp */
 
 /*--------------------------------------------------------------------------*/
@@ -126,10 +127,12 @@ void DoKbdIntCheck() {
   /* Two cases - write enable is OFF the keyboard - basically any key will cause an
      interrupt in a few cycles.
      */
-	
+#ifdef KBDDEBUG
+     int Oldflag=(SysVIAState.ifr & 1);
+#endif
+
   if ((KeysDown>0) && ((SysVIAState.pcr & 0xc)==4)) {
     if ((IC32State & 8)==8) {
-		
       SysVIAState.ifr|=1; /* CA2 */
       UpdateIFRTopBit();
     } else {
@@ -160,7 +163,8 @@ void BeebKeyDown(int row,int col) {
   if (row < 0 || col < 0) return;
   if ((!SysViaKbdState[col][row]) && (row!=0)) KeysDown++;
 
-  SysViaKbdState[col][row]=1;
+  SysViaKbdState[col][row]=true;
+    fprintf(stderr, "Setting row %d, col %d\n", row, col);
 
   DoKbdIntCheck();
 #ifdef KBDDEBUG
@@ -172,7 +176,7 @@ void BeebKeyDown(int row,int col) {
 /*--------------------------------------------------------------------------*/
 /* Return current state of the single bi output of the keyboard matrix - NOT the
   any keypressed interrupt */
-static int KbdOP(void) {
+static bool KbdOP(void) {
   /* Check range validity */
   if ((KBDCol>=KBD_COLS) || (KBDRow>=KBD_ROWS)) return(0); /* Key not down if overrange - perhaps we should do something more? */
 
@@ -187,32 +191,27 @@ static void IC32Write(unsigned char Value) {
   // Additional, Sunday 4th February 2001. I must have been potty. the line above did read January 2000.
   int bit;
   int oldval=IC32State;
-  unsigned char tmpCMOSState;
+  bool tmpCMOSState;
 
   bit=Value & 7;
-
   if (Value & 8) {
     IC32State|=(1<<bit);
   } else {
     IC32State&=0xff-(1<<bit);
   }
-
-//  if ( ( (bit == 1) || (bit == 2) ) && (MachineType != 3) )
-//	  fprintf(stderr, "IC32Write %d, %d, 0x%04x, 0x%02x\n", bit, ( (Value & 8) == 8), ProgramCounter, IC32State);
-
   LEDs.CapsLock=((IC32State&64)==0);
   LEDs.ShiftLock=((IC32State&128)==0);
   /* hmm, CMOS RAM? */
   // Monday 5th February 2001 - Scrapped my CMOS code, and restarted as according to the bible of the god Tom Lees
-  CMOS.Op=((IC32State & 2)>>1);
-  tmpCMOSState=(IC32State & 4)>>1;
-  CMOS.DataStrobe=(tmpCMOSState==OldCMOSState)?0:1;
+  CMOS.Op=(IC32State & 2) !=0;
+  tmpCMOSState=(IC32State & 4) !=0;
+  CMOS.DataStrobe=(tmpCMOSState==OldCMOSState) ? false : true;
   OldCMOSState=tmpCMOSState;
-  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType==3) {
+  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType == Model::Master128) {
 	  CMOSWrite(CMOS.Address,SlowDataBusWriteValue);
 	  if (CMOSDebug) fprintf(CMDF,"Wrote %02x to %02x\n",SlowDataBusWriteValue,CMOS.Address);
   }
-  if (CMOS.Enabled && CMOS.Op && MachineType==3) {
+  if (CMOS.Enabled && CMOS.Op && MachineType == Model::Master128) {
 	  SysVIAState.ora=CMOSRead(CMOS.Address);
 	  if (CMOSDebug) fprintf(CMDF,"Read %02x from %02x\n",SysVIAState.ora,CMOS.Address);
   }
@@ -223,21 +222,23 @@ static void IC32Write(unsigned char Value) {
   // now, this was a change from 0 to 1, but my docs say its a change from 1 to 0. might work better this way.
 #endif
   /* cerr << "IC32State now=" << hex << int(IC32State) << dec << "\n"; */
-
-  if ( (bit == 2) && ( (Value & 8)  == 0) && (MachineType != 3) )		//  Write Command
+#ifdef SPEECH_ENABLED
+  if ( (bit == 2) && ( (Value & 8)  == 0) && (MachineType != Model::Master128) )		//  Write Command
   {
-//	  fprintf(stderr, "Speech SlowDataBusWriteValue 0x%02x, 0x%04x\n", SlowDataBusWriteValue, ProgramCounter);
 	  tms5220_data_w(SlowDataBusWriteValue);
   }
-//  if ( (bit == 1) && ( (Value & 8) == 0) && (MachineType != 3) )		- Read Command
-//	  fprintf(stderr, "Shouldn't happen - Speech SlowDataBusWriteValue 0x%02x, 0x%04x\n", SlowDataBusWriteValue, ProgramCounter);
+#endif
   
-  DoKbdIntCheck(); /* Should really only if write enable on KBD changes */
+  if (!(IC32State & 8) && (oldval & 8)) {
+      KBDRow=(SlowDataBusWriteValue>>4) & 7;
+      KBDCol=(SlowDataBusWriteValue & 0xf);  
+      DoKbdIntCheck(); /* Should really only if write enable on KBD changes */
+  }
 } /* IC32Write */
 
 
-void ChipClock(int Cycles) {
-//	if (WECycles>0) WECycles-=Cycles;
+void ChipClock(int nCycles) {
+//	if (WECycles>0) WECycles-=nCycles;
 //	else
 //	if (WEState) Sound_RegWrite(SlowDataBusWriteValue);
 }
@@ -246,8 +247,6 @@ void ChipClock(int Cycles) {
 static void SlowDataBusWrite(unsigned char Value) {
   SlowDataBusWriteValue=Value;
 
-//  fprintf(stderr, "SlowDataBusWriteValue 0x%02x, 0x%04x, 0x%02x\n", IC32State, ProgramCounter, Value);
-	
 	/*cerr << "Slow data bus write IC32State=" << int(IC32State) << " Value=" << int(Value) << "\n";*/
   if (!(IC32State & 8)) {
     KBDRow=(Value>>4) & 7;
@@ -256,7 +255,7 @@ static void SlowDataBusWrite(unsigned char Value) {
     DoKbdIntCheck(); /* Should really only if write enable on KBD changes */
   } /* kbd write */
 
-  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType==3) 
+  if (CMOS.DataStrobe && CMOS.Enabled && !CMOS.Op && MachineType == Model::Master128)
   {
         CMOSWrite(CMOS.Address,Value);
   }
@@ -275,7 +274,7 @@ static void SlowDataBusWrite(unsigned char Value) {
 static int SlowDataBusRead(void) {
   int result;
 
-  if (CMOS.Enabled && CMOS.Op && MachineType==3) 
+  if (CMOS.Enabled && CMOS.Op && MachineType == Model::Master128)
   {
        SysVIAState.ora=CMOSRead(CMOS.Address); //SysVIAState.ddra ^ CMOSRAM[CMOS.Address];
 	  if (CMOSDebug) fprintf(CMDF,"Read %02x from %02x\n",SysVIAState.ora,CMOS.Address);
@@ -284,21 +283,19 @@ static int SlowDataBusRead(void) {
   if (CMOS.Enabled) result=(SysVIAState.ora & ~SysVIAState.ddra);
   /* I don't know this lot properly - just put in things as we figure them out */
 
-//  if (MachineType!=3) if (!(IC32State & 8)) { if (KbdOP()) result|=128; }
-//  if ((MachineType==3) && (!CMOS.Enabled)) {
-//	  if (KbdOP()) result|=128; 
-//  }
-
-  if (!(IC32State & 8)) { if (KbdOP()) result|=128; }
-  
-   if ((!(IC32State & 2)) && (MachineType != 3) ) {
-    result = tms5220_status_r();
-//    fprintf(stderr, "Speech READ Select SlowDataBusReadValue 0x%02x, 0x%02x, 0x%04x\n", result, IC32State, ProgramCounter);
+  if (MachineType!= Model::Master128) if (!(IC32State & 8)) { if (KbdOP()) result|=128; }
+  if ((MachineType == Model::Master128) && (!CMOS.Enabled)) {
+	  if (KbdOP()) result|=128; 
   }
 
-  if ((!(IC32State & 4)) && (MachineType != 3) ) {
+#ifdef SPEECH_ENABLED
+   if ((!(IC32State & 2)) && (MachineType != Model::Master128) ) {
+    result = tms5220_status_r();
+  }
+#endif 
+
+  if ((!(IC32State & 4)) && (MachineType != Model::Master128) ) {
 	  result = 0xff;
-//	  fprintf(stderr, "Ignored - Speech WRITE Select SlowDataBusReadValue 0x%02x, 0x%02x, 0x%04x\n", result, IC32State, ProgramCounter);
   }
 	  
  
@@ -318,27 +315,24 @@ void SysVIAWrite(int Address, int Value) {
 
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "SysVia: Write address %X value %02X", (int)(Address & 0xf), Value & 0xff);
-		DebugDisplayTrace(DEBUG_SYSVIA, true, info);
+		snprintf(info, sizeof(info), "SysVia: Write address %X value %02X", (int)(Address & 0xf), Value & 0xff);
+		DebugDisplayTrace(DebugType::SysVIA, true, info);
 	}
 
   switch (Address) {
     case 0:
 	  // Clear bit 4 of IFR from ATOD Conversion
-
 	  SysVIAState.ifr&=~16;
       SysVIAState.orb=Value & 0xff;
-
    	  IC32Write(Value);
-	  CMOS.Enabled=((Value & 64)>>6); // CMOS Chip select
+	  CMOS.Enabled=(Value & 64) !=0; // CMOS Chip select
 	  CMOS.Address=(((Value & 128)>>7)) ? SysVIAState.ora : CMOS.Address; // CMOS Address strobe
       if ((SysVIAState.ifr & 8) && ((SysVIAState.pcr & 0x20)==0)) {
-        SysVIAState.ifr&=0xf7;
-        UpdateIFRTopBit();
-      };
+          SysVIAState.ifr&=0xf7;
+          UpdateIFRTopBit();
+      }
 	  SysVIAState.ifr&=~16;
 	  UpdateIFRTopBit();
-
 	  break;
 
     case 1:
@@ -371,9 +365,9 @@ void SysVIAWrite(int Address, int Value) {
       if (SysVIAState.acr & 128) {
         SysVIAState.orb&=0x7f;
         SysVIAState.irb&=0x7f;
-      };
+      }
       UpdateIFRTopBit();
-      SysVIAState.timer1hasshot=0;
+      SysVIAState.timer1hasshot=false;
       break;
 
     case 7:
@@ -395,7 +389,7 @@ void SysVIAWrite(int Address, int Value) {
 	  if (SysVIAState.timer2c == 0) SysVIAState.timer2c = 0x20000; 
 	  SysVIAState.ifr &=0xdf; // clear timer 2 ifr 
       UpdateIFRTopBit();
-      SysVIAState.timer2hasshot=0;
+      SysVIAState.timer2hasshot=false;
       break;
 
     case 10:
@@ -409,6 +403,33 @@ void SysVIAWrite(int Address, int Value) {
 
     case 12:
       SysVIAState.pcr=Value & 0xff;
+
+      SysVIAState.pcr = Value;
+      
+      if ((Value & PCR_CA2_CONTROL) == PCR_CA2_OUTPUT_HIGH)
+      {
+          SysVIAState.ca2 = true;
+      }
+      else if ((Value & PCR_CA2_CONTROL) == PCR_CA2_OUTPUT_LOW)
+      {
+          SysVIAState.ca2 = false;
+      }
+
+    if ((Value & PCR_CB2_CONTROL) == PCR_CB2_OUTPUT_HIGH)
+    {
+        if (!SysVIAState.cb2)
+        {
+            // Light pen strobe on CB2 low -> high transition
+         //   VideoLightPenStrobe();
+         /* TODO: Implement this function */
+        }
+
+        SysVIAState.cb2 = true;
+    }
+    else if ((Value & PCR_CB2_CONTROL) == PCR_CB2_OUTPUT_LOW)
+    {
+        SysVIAState.cb2 = false;
+    }
       break;
 
     case 13:
@@ -437,8 +458,9 @@ void SysVIAWrite(int Address, int Value) {
 
 /*--------------------------------------------------------------------------*/
 /* Address is in the range 0-f - with the fe40 stripped out */
-int SysVIARead(int Address) {
-  int tmp = 0xff;
+unsigned char SysVIARead(int Address)
+{
+  unsigned char tmp = 0xff;
   //fprintf(vialog,"SYSTEM VIA Read of address %02x (%d)\n",Address,Address);
   /* cerr << "SysVIARead: Address=0x" << hex << Address << dec << " at " << TotalCycles << "\n";
   DumpRegs(); */
@@ -448,32 +470,29 @@ int SysVIARead(int Address) {
       SysVIAState.ifr&=~16;
       tmp=SysVIAState.orb & SysVIAState.ddrb;
       if (!JoystickButton[1])
-        tmp |= 32;    /* Fire button 2 released */
+          tmp |= 32;    /* Fire button 2 released */
       if (!JoystickButton[0])
-        tmp |= 16;
-		  if (MachineType == 3) // Model::Master128
-		  {
-			tmp |= 192; /* Speech system non existant */
-		  }
-		  else
-		  {
+          tmp |= 16;    
+      if (MachineType == Model::Master128)
+      {
+          tmp |= 192; /* Speech system non existant */
+      }
+      else
+      {
 #ifdef SPEECH_ENABLED
-			if (SpeechDefault)
-			{
-				if (tms5220_int_r()) tmp |= 64;
-				if (tms5220_ready_r() == 0) tmp |= 128;
-			}
-			else
+          if (SpeechDefault)
+          {
+              if (tms5220_int_r()) tmp |= 64;
+              if (tms5220_ready_r() == 0) tmp |= 128;
+          }
+          else
 #endif
-			{
-			  tmp |= 192; /* Speech system non existant */
-			}
-		  }
-
-//		fprintf(stderr, "SysVIARead 0x%02x, 0x%04x\n", tmp, ProgramCounter);
-
-		UpdateIFRTopBit();
-		break;
+          {
+              tmp |= 192; /* Speech system non existant */
+          }
+      }
+      UpdateIFRTopBit();
+      break;
 
     case 2:
       tmp = SysVIAState.ddrb;
@@ -552,8 +571,8 @@ int SysVIARead(int Address) {
 
 	if (DebugEnabled) {
 		char info[200];
-		sprintf(info, "SysVia: Read address %X value %02X", (int)(Address & 0xf), tmp & 0xff);
-		DebugDisplayTrace(DEBUG_SYSVIA, true, info);
+		snprintf(info, sizeof(info), "SysVia: Read address %X value %02X", (int)(Address & 0xf), tmp & 0xff);
+		DebugDisplayTrace(DebugType::SysVIA, true, info);
 	}
 
   return(tmp);
@@ -577,8 +596,7 @@ static bool t1int = false;
 
   if (SysVIAState.timer1c<-2 && !t1int) {
 	t1int = true;
-	
-    if ((SysVIAState.timer1hasshot==0) || (SysVIAState.acr & 0x40)) {
+    if (!SysVIAState.timer1hasshot || (SysVIAState.acr & 0x40)) {
       /* cerr << "SysVia timer1 int at " << TotalCycles << "\n"; */
       SysVIAState.ifr|=0x40; /* Timer 1 interrupt */
       UpdateIFRTopBit();
@@ -589,7 +607,7 @@ static bool t1int = false;
    	  if ((SysVIAState.ier & 0x40) && CyclesToInt == NO_TIMER_INT_DUE) {
 		CyclesToInt = 3 + SysVIAState.timer1c;
 	  }
-	  SysVIAState.timer1hasshot=1;
+	  SysVIAState.timer1hasshot=true;
 	}
   }
 
@@ -599,20 +617,19 @@ static bool t1int = false;
   }
 	
   if (SysVIAState.timer2c<-2) {
-    if (SysVIAState.timer2hasshot==0) {
+    if (!SysVIAState.timer2hasshot) {
       SysVIAState.ifr|=0x20; /* Timer 2 interrupt */
       UpdateIFRTopBit();
    	  if ((SysVIAState.ier & 0x20) && CyclesToInt == NO_TIMER_INT_DUE) {
 		  CyclesToInt = 3 + SysVIAState.timer2c;
 	  }
-      SysVIAState.timer2hasshot=1;
+      SysVIAState.timer2hasshot=true;
 	}
   }
 	
  if (SysVIAState.timer2c<-3) {
     SysVIAState.timer2c += 0x20000; // Do not reload latches for T2
  }
-
 } /* SysVIA_poll */
 
 void SysVIA_poll(unsigned int ncycles) {
@@ -641,7 +658,7 @@ void SysVIAReset(void) {
   /* Make it no keys down and no dip switches set */
     BeebReleaseAllKeys();
     
-    SRData=0;
+	SRData=0;
 	SRMode=0;
     SRCount=0;
 	SREnabled=0; // Disable Shift register shifting shiftily. (I am nuts) - Richard Gellman
@@ -761,24 +778,61 @@ unsigned char CMOSRead(unsigned char CMOSAddr) {
 
 #if 0 //ACH
 /*-------------------------------------------------------------------------*/
+void RTCInit(void) {
+    struct tm *CurTime;
+    time ( &SysTime );
+    CurTime = localtime ( &SysTime );
+    CMOSRAM[0] = BCD(CurTime->tm_sec);
+    CMOSRAM[2] = BCD(CurTime->tm_min);
+    CMOSRAM[4] = BCD(CurTime->tm_hour);
+    CMOSRAM[6] = BCD((CurTime->tm_wday)+1);
+    CMOSRAM[7] = BCD(CurTime->tm_mday);
+    CMOSRAM[8] = BCD((CurTime->tm_mon)+1);
+    CMOSRAM[9] = BCD((CurTime->tm_year)-(RTCY2KAdjust ? 20 : 0));
+    RTCTimeOffset = SysTime - CMOSConvertClock();
+}
+/*-------------------------------------------------------------------------*/
+void RTCUpdate(void) {
+    struct tm *CurTime;
+    time ( &SysTime );
+    CurTime = localtime ( &SysTime );
+    CMOSRAM[0] = BCD(CurTime->tm_sec);
+    CMOSRAM[2] = BCD(CurTime->tm_min);
+    CMOSRAM[4] = BCD(CurTime->tm_hour);
+    CMOSRAM[6] = BCD((CurTime->tm_wday)+1);
+    CMOSRAM[7] = BCD(CurTime->tm_mday);
+    CMOSRAM[8] = BCD((CurTime->tm_mon)+1);
+    CMOSRAM[9] = BCD(CurTime->tm_year);
+}
+/*-------------------------------------------------------------------------*/
+
 void CMOSWrite(unsigned char CMOSAddr,unsigned char CMOSData) {
-	char TmpPath[256];
-	unsigned char CMA;
 	// Many thanks to Tom Lees for supplying me with info on the 146818 registers 
 	// for these two functions.
-	// Clock registers 0-0x9h shall not be writable
-	// ignore all status registers, so this function shall just write to CMOS
-	// but we can leave it here for future developments
 	if (CMOSAddr>0xd) {
 		CMOSRAM[CMOSAddr]=CMOSData;
-		// write CMOS Ram
-		strcpy(TmpPath,RomPath); strcat(TmpPath,"/beebstate/cmos.ram");
-		CMDF=fopen(TmpPath,"wb");
-		if (CMDF != NULL)
-		{
-			for(CMA=0xe;CMA<64;CMA++) fputc(CMOSRAM[CMA],CMDF);
-			fclose(CMDF);
-		}
+    } else if (CMOSAddr == 0xa) {
+		// Control register A
+        CMOSRAM[CMOSAddr]=CMOSData & 0x7f;  // Top bit not writeable
+        } else if (CMOSAddr==0xb) {
+            // Control register B
+            // Bit-7 Set - 0=clock running, 1=clock update halted
+            if (CMOSData & 0x80) {
+                RTCUpdate();
+            }
+            else if ((CMOSRAM[CMOSAddr] & 0x80) && !(CMOSData & 0x80)) {
+                // New clock settings
+                time(&SysTime);
+                RTCTimeOffset = SysTime - CMOSConvertClock();
+            }
+            CMOSRAM[CMOSAddr] = CMOSData;
+		} else if (CMOSAddr==0xc) {
+            // Control register C - read only
+        } else if (CMOSAddr==0xd) {
+            // Control register D - read only
+        } else {
+            // Clock registers
+            CMOSRAM[CMOSAddr]=CMOSData;
 	}
 }
 
@@ -787,20 +841,9 @@ unsigned char CMOSRead(unsigned char CMOSAddr) {
 	// 0x0 to 0x9 - Clock
 	// 0xa to 0xd - Regs
 	// 0xe to 0x3f - RAM
-	if (CMOSAddr>0xd) return(CMOSRAM[CMOSAddr]);
-	if (CMOSAddr<0xa) {
-		time( &SysTime );
-		CurTime = localtime( &SysTime );
-		if (CMOSAddr==0x00) return(BCD(CurTime->tm_sec));
-		if (CMOSAddr==0x02) return(BCD(CurTime->tm_min));
-		if (CMOSAddr==0x04) return(BCD(CurTime->tm_hour));
-		if (CMOSAddr==0x06) return(BCD((CurTime->tm_wday)+1));
-		if (CMOSAddr==0x07) return(BCD(CurTime->tm_mday));
-		if (CMOSAddr==0x08) return(BCD((CurTime->tm_mon)+1));
-		if (CMOSAddr==0x09) return(BCD((CurTime->tm_year)-20));
-	}
-	if (CMOSAddr>0x9 && CMOSAddr<0xe) return(0);
-	return(0);
+    if (CMOSAddr<0xa)
+        RTCUpdate();
+        return(CMOSRAM[CMOSAddr]);
 }
 #endif
 
