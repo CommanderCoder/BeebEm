@@ -272,7 +272,7 @@ extension BeebViewController{
             FD0LED?.contentTintColor = CBridge.leds.contains(.FD0LED) ? NSColor.yellow: NSColor.darkGray
             FD1LED?.contentTintColor = CBridge.leds.contains(.FD1LED) ? NSColor.yellow: NSColor.darkGray
 
-            CassMotorLabel.isHidden = (CBridge.machineType == 3) // BBC Master
+            CassMotorLabel.isHidden = (CBridge.machineType == Model.Master128) // BBC Master
             MasterPowerOnLabel.isHidden = !CassMotorLabel.isHidden // opposite of CassMotorLabel
             
         } else {

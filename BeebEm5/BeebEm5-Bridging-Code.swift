@@ -11,6 +11,14 @@ import Cocoa
 
 
 
+@objc public enum Model : UInt8 {
+    case B = 0 // 0: BBC B
+    case IntegraB // 1: BBC B with Integra B
+    case BPlus // 2: BBC B+
+    case Master128 // 3: BBC Master 128
+    case Last
+}
+
 @objc enum FileFilter :Int {
     case DISC
     case UEF
@@ -52,7 +60,7 @@ enum CBridge {
     static var windowTitle = "-"
     static var nextCPU = 0
     static var leds: LEDFlags = []
-    static var machineType = 0
+    static var machineType : Model = Model.B
 }
 
 // allow access to this in C
@@ -344,7 +352,7 @@ public func swift_SetLED(_ led: KB_LEDs, _ value: Bool)
 
 
 @_cdecl("swift_SetMachineType")
-public func swift_SetMachineType(_ type: Int)
+public func swift_SetMachineType(_ type: Model)
 {
     CBridge.machineType = type;
 }

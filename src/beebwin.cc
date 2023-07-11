@@ -67,6 +67,7 @@
 #include "ide.h"
 
 #include "Master512CoPro.h"
+#include <map>
 
 extern Master512CoPro master512CoPro;
 extern unsigned char Roms[16][16384];
@@ -3344,18 +3345,24 @@ bool BeebWin::UpdateTiming(void)
 }
 
 /****************************************************************************/
+
+std::map<Model, std::string> MachineName = {
+    { Model::B, "BBC Model B" },
+    { Model::IntegraB, "BBC Model B + Integra-B" },
+    { Model::BPlus, "BBC Model B Plus" },
+    { Model::Master128, "BBC Master 128" },
+};
+
 void BeebWin::DisplayTiming(void)
 {
 #if 0 //ACH - title (DONE)
 CFStringRef pTitle;
     #endif
-
-    char MachineName[4][50] = {"BBC Model B","BBC Model B + Integra-B","BBC Model B Plus","BBC Master 128"};
-
+    
 	if (m_ShowSpeedAndFPS && !m_isFullScreen)
 	{
 		sprintf(m_szTitle, "BeebEm - %s emulator - Speed: %2.2f - fps: %2d",
-                MachineName[MachineType], m_RelativeSpeed, (int)m_FramesPerSecond);
+                MachineName[MachineType].c_str(), m_RelativeSpeed, (int)m_FramesPerSecond);
 
 #if 0 //ACH - title (DONE)
 		pTitle = CFStringCreateWithCString (kCFAllocatorDefault, m_szTitle, kCFStringEncodingASCII);

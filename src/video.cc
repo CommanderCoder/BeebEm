@@ -49,7 +49,7 @@
 
 extern "C" enum KB_LEDS { CASS, CAPS, SHIFT, HD0, HD1, HD2, HD3, FD0, FD1 }s;
 extern "C" int swift_SetLED(KB_LEDS led, bool on);
-extern "C" int swift_SetMachineType(int machinetype);
+extern "C" int swift_SetMachineType(Model machinetype);
 
 
 

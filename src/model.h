@@ -21,7 +21,7 @@ Boston, MA  02110-1301, USA.
 #ifndef MODEL_HEADER
 #define MODEL_HEADER
 
-enum class Model : unsigned char {
+extern "C" enum class Model {
 	B,         // 0: BBC B
 	IntegraB,  // 1: BBC B with Integra B
 	BPlus,     // 2: BBC B+

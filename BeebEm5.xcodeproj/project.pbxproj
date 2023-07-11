@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DC19F0FF273529CA004F0DDD /* led.png in Resources */ = {isa = PBXBuildFile; fileRef = DC19F0FE273529CA004F0DDD /* led.png */; };
 		8B2705EC27E5F71E00AFA82E /* ide.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B2705EB27E5F71D00AFA82E /* ide.cc */; };
 		8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8B7A6B8D27707721002576FC /* Master512CoPro.cc */; };
 		8B92DC2A283FA427007E9581 /* AUNMap in Resources */ = {isa = PBXBuildFile; fileRef = 8B92DC29283FA427007E9581 /* AUNMap */; };
 		8BC8CADA2770B24E006F0FAD /* log.cc in Sources */ = {isa = PBXBuildFile; fileRef = 8BC8CAD92770B24E006F0FAD /* log.cc */; };
+		DC19F0FF273529CA004F0DDD /* led.png in Resources */ = {isa = PBXBuildFile; fileRef = DC19F0FE273529CA004F0DDD /* led.png */; };
 		DC4106F326E54DAC000A1E37 /* BeebApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4106F226E54DAC000A1E37 /* BeebApplication.swift */; };
 		DC41118225A2222A00E59712 /* Bugs.rtf in Resources */ = {isa = PBXBuildFile; fileRef = DC41118125A2222A00E59712 /* Bugs.rtf */; };
 		DC41118525A226BC00E59712 /* diskimg in Resources */ = {isa = PBXBuildFile; fileRef = DC41118425A226BC00E59712 /* diskimg */; };
@@ -618,8 +618,6 @@
 				DC70E78325A3AE6200A7FF3E /* uef.cc in Sources */,
 				DC8716A424CC3A6800FA27DF /* BeebViewController.swift in Sources */,
 				DCE5E85A267B360500F3CD34 /* debug.cc in Sources */,
-				DC70E77C25A3AE6200A7FF3E /* i86.cc in Sources */,
-				DC8716A224CC3A5900FA27DF /* BeebImageView.swift in Sources */,
 				8B7A6B8E27707721002576FC /* Master512CoPro.cc in Sources */,
 				DC70E76025A3AE6200A7FF3E /* beebmem.cc in Sources */,
 				DC70E78225A3AE6200A7FF3E /* 6502core.cc in Sources */,
