@@ -6,6 +6,7 @@
 windows 38da43f
 BeebEm5.xcodeproj/project.xcworkspace/xcshareddata
 Install/BeebEm5\ *
+build/
 
 ## User settings
 xcuserdata/
