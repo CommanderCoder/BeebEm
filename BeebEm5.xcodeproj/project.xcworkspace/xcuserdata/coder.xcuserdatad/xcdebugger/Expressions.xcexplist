@@ -78,6 +78,14 @@
          contextName = "BeebViewController.update_cpu():BeebViewController.swift">
       </ContextState>
       <ContextState
+         contextName = "swift_SelectFiles(dfsNames:files:selectedFiles:):BeebEm5-Bridging-Code.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "dfsNames[2]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "CloseTape():serial.cc">
          <PersistentStrings>
             <PersistentString

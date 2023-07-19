@@ -3206,7 +3206,8 @@ void BeebWin::HandleCommand(int MenuId)
 	case IDM_DISC_EXPORT_1:
 	case IDM_DISC_EXPORT_2:
 	case IDM_DISC_EXPORT_3:
-		ExportDiscFiles(MenuId);
+    // ACH: Selecting files/folders requires Swift mostly
+//		ExportDiscFiles(MenuId);
 		break;
 
 	case IDM_DISC_IMPORT_0:
@@ -5788,9 +5789,9 @@ MessageResult BeebWin::Report(MessageType type, const char *format, ...)
 	{
 		vsprintf(buffer, format, args);
 
+#ifdef BEEBWIN
 		UINT Type = 0;
 
-#ifdef BEEBWIN
 		switch (type)
 		{
 			case MessageType::Error:
@@ -5839,7 +5840,28 @@ MessageResult BeebWin::Report(MessageType type, const char *format, ...)
 			}
 		}
 #else
-        fprintf(stderr,buffer);
+        switch (type)
+        {
+            case MessageType::Error:
+            default:
+                fprintf(stderr,"Error: %s",buffer);
+                break;
+
+            case MessageType::Warning:
+                fprintf(stderr,"Warning: %s",buffer);
+                break;
+
+            case MessageType::Info:
+                fprintf(stderr,"Info: %s",buffer);
+                break;
+
+            case MessageType::Question:
+                fprintf(stderr,"Question: %s",buffer);
+                break;
+
+            case MessageType::Confirm:
+                fprintf(stderr,"Confirm: %s",buffer);
+        }
 #endif
 
 		free(buffer);

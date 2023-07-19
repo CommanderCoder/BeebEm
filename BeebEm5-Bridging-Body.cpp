@@ -189,6 +189,24 @@ extern "C" long beeb_TCHandleCommand(unsigned int cmdID)
     return 0;
 
 }
+
+
+extern "C" long beeb_ExportDiscFiles( unsigned int driveID)
+{
+    auto driveRC = ID2RC.find(driveID);
+    if (driveRC != ID2RC.end())
+    {
+        mainWin->ExportDiscFiles(driveRC->second);
+        return 1;
+    }
+   
+    return 0;
+}
+    
+extern "C" void beeb_ExportDiscFilesToFolder( )
+{
+    mainWin->ExportDiscFilesToFolder();
+}
     
 // user keyboard
 extern "C" long beeb_UKHandleCommand(unsigned int cmdID)

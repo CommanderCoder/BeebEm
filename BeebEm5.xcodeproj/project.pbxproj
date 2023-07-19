@@ -107,6 +107,7 @@
 		DCE7304828E05C4E0067BC36 /* beebmainspeech.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */; };
 		DCF3CDA228ECFB4600040892 /* beebemrcids.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCF3CDA128ECFB4500040892 /* beebemrcids.cpp */; };
 		DCF69F3124B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */; };
+		DCFE1FA5296B458800BDBD85 /* BeebListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFE1FA4296B458800BDBD85 /* BeebListViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -334,6 +335,7 @@
 		DCE7304728E05BDD0067BC36 /* beebmainspeech.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = beebmainspeech.cpp; sourceTree = "<group>"; };
 		DCF3CDA128ECFB4500040892 /* beebemrcids.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = beebemrcids.cpp; path = src/beebemrcids.cpp; sourceTree = "<group>"; };
 		DCF69F3024B325BF006D0DE9 /* BeebEm5-Bridging-Code.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeebEm5-Bridging-Code.swift"; sourceTree = "<group>"; };
+		DCFE1FA4296B458800BDBD85 /* BeebListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeebListViewController.swift; sourceTree = "<group>"; };
 		DCFFFB9F290C4DBE00E59CBA /* todo.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = todo.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -546,6 +548,7 @@
 				DCCCC2A624A338EE00840082 /* Main.storyboard */,
 				DCCCC29E24A338ED00840082 /* AppDelegate.swift */,
 				DC907FDC24B52C8200B99036 /* TapeControlViewController.swift */,
+				DCFE1FA4296B458800BDBD85 /* BeebListViewController.swift */,
 				DC4EFA6629382489001E9292 /* RomConfigViewController.swift */,
 				DC18446E2901FDED004285F9 /* BreakoutBoxViewController.swift */,
 				DC692B26272E876400F8B465 /* KeyboardMappingViewController.swift */,
@@ -874,6 +877,7 @@
 				DC8BE3B124CC797600D12E2B /* Colour.swift in Sources */,
 				DCCCC30F24A3DCC200840082 /* BeebAudio.swift in Sources */,
 				DCAD0EE828CF076F00366E05 /* debug.cc in Sources */,
+				DCFE1FA5296B458800BDBD85 /* BeebListViewController.swift in Sources */,
 				DC4EFA6129380760001E9292 /* UserPortBreakoutBox.cpp in Sources */,
 				DCE5E862267B362C00F3CD34 /* z80_support.cc in Sources */,
 				DCAD0F1128CFA9AD00366E05 /* disc8271.cc in Sources */,

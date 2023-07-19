@@ -325,28 +325,28 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <menu key="submenu" title="Export Files From Disc" id="nsx-2u-csr">
                                                 <items>
-                                                    <menuItem title="Disc 0" identifier="efd0" id="HH0-SJ-gxU">
+                                                    <menuItem title="Disc 0" identifier="efd0" id="HH0-SJ-gxU" userLabel="E Disc 0">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="okr-dq-yo0"/>
+                                                            <action selector="SetDriveNumber:" target="Voe-Tx-rLC" id="jJC-5Z-aXD"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem title="Disc 1" identifier="efd1" id="Zez-7j-wJB">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="m3l-dk-UsT"/>
+                                                            <action selector="SetDriveNumber:" target="Voe-Tx-rLC" id="ypO-Mf-agP"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem title="Disc 2" identifier="efd2" id="EPA-2z-h53">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="h0I-v6-XaE"/>
+                                                            <action selector="SetDriveNumber:" target="Voe-Tx-rLC" id="Gnp-1I-KX3"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem title="Disc 3" identifier="efd3" id="Gl0-WI-FZL">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="cRP-0h-ssx"/>
+                                                            <action selector="SetDriveNumber:" target="Voe-Tx-rLC" id="3TG-O0-zLq"/>
                                                         </connections>
                                                     </menuItem>
                                                 </items>
@@ -509,6 +509,140 @@
                                                     </menuItem>
                                                 </items>
                                             </menu>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem title="Sound" id="l4J-WC-l9k">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Sound" autoenablesItems="NO" id="cC9-d7-m6V">
+                                    <items>
+                                        <menuItem title="Sound Streamer" enabled="NO" id="JU1-8K-0go">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Sound Streamer" id="rNj-Yc-ubR">
+                                                <items>
+                                                    <menuItem title="XAudio 2" state="on" enabled="NO" id="hTP-Zo-eBo">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="d0W-44-rTu"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="DirectSound" enabled="NO" id="ZYw-7j-Xmx">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Zgy-Ex-caf"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem title="Sound On/Off" state="on" keyEquivalent="m" identifier="sond" id="uBm-ZC-eWO">
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="DqI-pB-cEe"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Sound Chip" state="on" identifier="sndc" id="G8Q-5f-HKS">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="pS1-mz-5fj"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="dMJ-AJ-760"/>
+                                        <menuItem title="Sound Effects" id="9kC-tS-lP0">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Sound Effects" id="tOM-zy-QcS">
+                                                <items>
+                                                    <menuItem title="Cassette Relay" identifier="tpcr" id="Wu5-IP-Xiv">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4dH-iI-gLZ"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Cassette Input" identifier="tpso" id="Mar-tt-ip6">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="vW9-Bw-FIx"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Disc Drives" identifier="ddso" id="tGS-Kf-r3Y">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="yIz-qb-aXA"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="x3M-8L-Sny"/>
+                                        <menuItem title="44.1 kHz" state="on" identifier="volf" id="aCS-tx-2Gr">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="hSi-Pw-Plr"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="22.05 kHz" identifier="volf" id="FGG-9i-ADj">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="rNF-WO-hkZ"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="11.025 kHz" identifier="volf" id="59r-Hg-DQu">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="X8N-Xw-08m"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="cmC-Ry-bex"/>
+                                        <menuItem title="Full Volume" identifier="volf" id="Lkj-MQ-EiK">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="bRG-wr-05G"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="High Volume" identifier="volh" id="i37-Xt-VxN">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="IDe-Le-n8k"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Medium Volume" state="on" identifier="volm" id="CrX-ZI-wMJ">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="YbO-6t-waO"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Low Volume" identifier="voll" id="Hhg-kQ-TgK">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="pKu-DC-S9h"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="usZ-XJ-D99"/>
+                                        <menuItem title="Part Samples" state="on" identifier="snev" id="Nrt-CJ-Fpt">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Jop-br-RDT"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Exponential Volume" state="on" identifier="snev" id="oV9-iA-ZiL">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4PQ-Ie-q9K"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="9cb-Zp-aJP"/>
+                                        <menuItem title="Text To Speech" identifier="ttsp" id="X3W-NZ-fnk">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ZKf-OO-egl"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="YAL-Lr-Tlf"/>
+                                        <menuItem title="Music 5000" identifier="mus5" id="R6Q-xj-Q15">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ii3-YM-x0B"/>
+                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -825,140 +959,6 @@
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="HandleCommand:" target="Voe-Tx-rLC" id="gmk-Gf-a4y"/>
-                                            </connections>
-                                        </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
-                            <menuItem title="Sound" id="l4J-WC-l9k">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Sound" autoenablesItems="NO" id="cC9-d7-m6V">
-                                    <items>
-                                        <menuItem title="Sound Streamer" enabled="NO" id="JU1-8K-0go">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Sound Streamer" id="rNj-Yc-ubR">
-                                                <items>
-                                                    <menuItem title="XAudio 2" state="on" enabled="NO" id="hTP-Zo-eBo">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="d0W-44-rTu"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="DirectSound" enabled="NO" id="ZYw-7j-Xmx">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Zgy-Ex-caf"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem title="Sound On/Off" state="on" keyEquivalent="m" identifier="sond" id="uBm-ZC-eWO">
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="DqI-pB-cEe"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Sound Chip" state="on" identifier="sndc" id="G8Q-5f-HKS">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="pS1-mz-5fj"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="dMJ-AJ-760"/>
-                                        <menuItem title="Sound Effects" id="9kC-tS-lP0">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Sound Effects" id="tOM-zy-QcS">
-                                                <items>
-                                                    <menuItem title="Cassette Relay" identifier="tpcr" id="Wu5-IP-Xiv">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4dH-iI-gLZ"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Cassette Input" identifier="tpso" id="Mar-tt-ip6">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="vW9-Bw-FIx"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Disc Drives" identifier="ddso" id="tGS-Kf-r3Y">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="HandleCommand:" target="Voe-Tx-rLC" id="yIz-qb-aXA"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="x3M-8L-Sny"/>
-                                        <menuItem title="44.1 kHz" state="on" identifier="volf" id="aCS-tx-2Gr">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="hSi-Pw-Plr"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="22.05 kHz" identifier="volf" id="FGG-9i-ADj">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="rNF-WO-hkZ"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="11.025 kHz" identifier="volf" id="59r-Hg-DQu">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="X8N-Xw-08m"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="cmC-Ry-bex"/>
-                                        <menuItem title="Full Volume" identifier="volf" id="Lkj-MQ-EiK">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="bRG-wr-05G"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="High Volume" identifier="volh" id="i37-Xt-VxN">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="IDe-Le-n8k"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Medium Volume" state="on" identifier="volm" id="CrX-ZI-wMJ">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="YbO-6t-waO"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Low Volume" identifier="voll" id="Hhg-kQ-TgK">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="pKu-DC-S9h"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="usZ-XJ-D99"/>
-                                        <menuItem title="Part Samples" state="on" identifier="snev" id="Nrt-CJ-Fpt">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="Jop-br-RDT"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Exponential Volume" state="on" identifier="snev" id="oV9-iA-ZiL">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="4PQ-Ie-q9K"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="9cb-Zp-aJP"/>
-                                        <menuItem title="Text To Speech" identifier="ttsp" id="X3W-NZ-fnk">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ZKf-OO-egl"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="YAL-Lr-Tlf"/>
-                                        <menuItem title="Music 5000" identifier="mus5" id="R6Q-xj-Q15">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="HandleCommand:" target="Voe-Tx-rLC" id="ii3-YM-x0B"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -1611,7 +1611,7 @@
                 </windowController>
                 <customObject id="StV-lC-is7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="476" y="463"/>
+            <point key="canvasLocation" x="503" y="449"/>
         </scene>
         <!--TapeControl View Controller-->
         <scene sceneID="z9Z-k8-rcw">
@@ -1622,22 +1622,22 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Z9c-aS-8PV">
-                                <rect key="frame" x="44" y="5" width="224" height="430"/>
+                                <rect key="frame" x="28" y="5" width="256" height="430"/>
                                 <subviews>
                                     <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9I4-Yf-xHc">
-                                        <rect key="frame" x="0.0" y="36" width="224" height="394"/>
+                                        <rect key="frame" x="0.0" y="36" width="256" height="394"/>
                                         <clipView key="contentView" id="bxb-nq-r68">
-                                            <rect key="frame" x="1" y="1" width="222" height="392"/>
+                                            <rect key="frame" x="1" y="1" width="254" height="392"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" rowSizeStyle="automatic" headerView="Ghv-5L-cAi" viewBased="YES" id="o6K-RA-peU">
-                                                    <rect key="frame" x="0.0" y="0.0" width="229" height="367"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="254" height="367"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <size key="intercellSpacing" width="3" height="2"/>
                                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                     <tableColumns>
-                                                        <tableColumn identifier="NAME" width="138.5" minWidth="40" maxWidth="1000" id="Fxd-fp-D7P" userLabel="Filename">
+                                                        <tableColumn identifier="NAME" width="100.5" minWidth="40" maxWidth="1000" id="Fxd-fp-D7P" userLabel="Filename">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Filename">
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1650,11 +1650,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="upp-7c-lhu">
-                                                                    <rect key="frame" x="1" y="1" width="143" height="17"/>
+                                                                    <rect key="frame" x="1" y="1" width="106" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="k3C-f7-Sk5">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="143" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="106" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="DJP-ja-yWj">
                                                                                 <font key="font" metaFont="system"/>
@@ -1682,11 +1682,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="eE8-AA-waO">
-                                                                    <rect key="frame" x="147" y="1" width="47" height="17"/>
+                                                                    <rect key="frame" x="110" y="1" width="63" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5fe-H1-wPI">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="47" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="63" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="2XC-Y1-V1i">
                                                                                 <font key="font" metaFont="system"/>
@@ -1701,7 +1701,7 @@
                                                                 </tableCellView>
                                                             </prototypeCellViews>
                                                         </tableColumn>
-                                                        <tableColumn identifier="LENG" width="10" minWidth="10" maxWidth="3.4028234663852886e+38" id="Yf9-S8-ZYi" userLabel="Length">
+                                                        <tableColumn identifier="LENG" width="72.5" minWidth="10" maxWidth="3.4028234663852886e+38" id="Yf9-S8-ZYi" userLabel="Length">
                                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Length">
                                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1714,11 +1714,11 @@
                                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                             <prototypeCellViews>
                                                                 <tableCellView id="EWX-Zl-Tw2">
-                                                                    <rect key="frame" x="213" y="1" width="1" height="17"/>
+                                                                    <rect key="frame" x="176" y="1" width="76" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b9D-R5-OPq">
-                                                                            <rect key="frame" x="0.0" y="0.0" width="5" height="17"/>
+                                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="EtW-RM-fZP">
                                                                                 <font key="font" metaFont="system"/>
@@ -1737,8 +1737,8 @@
                                                 </tableView>
                                             </subviews>
                                         </clipView>
-                                        <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="Qwu-S2-bRs">
-                                            <rect key="frame" x="1" y="377" width="222" height="16"/>
+                                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="Qwu-S2-bRs">
+                                            <rect key="frame" x="1" y="377" width="254" height="16"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                         <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="XSO-dK-7qR">
@@ -1746,7 +1746,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                         <tableHeaderView key="headerView" wantsLayer="YES" id="Ghv-5L-cAi">
-                                            <rect key="frame" x="0.0" y="0.0" width="229" height="25"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="254" height="25"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableHeaderView>
                                     </scrollView>
@@ -2739,6 +2739,119 @@ DQ
             </objects>
             <point key="canvasLocation" x="1523" y="880"/>
         </scene>
+        <!--Export Files Window Controller-->
+        <scene sceneID="vot-pf-thT">
+            <objects>
+                <windowController storyboardIdentifier="ExportFilesSB" id="GmO-1T-VWK" userLabel="Export Files Window Controller" sceneMemberID="viewController">
+                    <window key="window" title="Export Files" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" tabbingMode="disallowed" id="4Ol-dh-cWa">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="196" y="239" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1440" height="875"/>
+                        <connections>
+                            <outlet property="delegate" destination="GmO-1T-VWK" id="Dla-lP-5Zf"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="CrT-m1-2Aj" kind="relationship" relationship="window.shadowedContentViewController" id="gv2-Of-yhp"/>
+                    </connections>
+                </windowController>
+                <customObject id="oUb-5e-Oqa" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="954" y="1178"/>
+        </scene>
+        <!--Beeb List View Controller-->
+        <scene sceneID="Oe5-0h-WZu">
+            <objects>
+                <viewController id="CrT-m1-2Aj" customClass="BeebListViewController" customModule="BeebEm5" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="K2i-Gk-phg">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Bo3-pV-C7y">
+                                <rect key="frame" x="336" y="13" width="131" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="push" title="Export Selected" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="smv-Wo-wLF">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="exportSelected:" target="CrT-m1-2Aj" id="u2i-Im-Pg2"/>
+                                </connections>
+                            </button>
+                            <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eZ5-L8-f9b">
+                                <rect key="frame" x="0.0" y="49" width="480" height="221"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <clipView key="contentView" id="Q4f-He-6X7">
+                                    <rect key="frame" x="1" y="1" width="478" height="219"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" headerView="n6l-LA-DAT" viewBased="YES" id="bmW-l1-l4L">
+                                            <rect key="frame" x="0.0" y="0.0" width="478" height="191"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <size key="intercellSpacing" width="17" height="0.0"/>
+                                            <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
+                                            <tableColumns>
+                                                <tableColumn identifier="COLUMN" width="461.5" minWidth="40" maxWidth="1000" id="Nti-bo-2ov">
+                                                    <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Column Title">
+                                                        <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
+                                                    </tableHeaderCell>
+                                                    <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" title="Text Cell" id="1lG-g8-4PH">
+                                                        <font key="font" metaFont="system"/>
+                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                        <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                    </textFieldCell>
+                                                    <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                                                    <prototypeCellViews>
+                                                        <tableCellView id="4U1-db-Dpd">
+                                                            <rect key="frame" x="8" y="0.0" width="457" height="24"/>
+                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                            <subviews>
+                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eep-M8-SDh">
+                                                                    <rect key="frame" x="0.0" y="4" width="457" height="16"/>
+                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                                                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="sDc-4Y-03T">
+                                                                        <font key="font" usesAppearanceFont="YES"/>
+                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                                    </textFieldCell>
+                                                                </textField>
+                                                            </subviews>
+                                                            <connections>
+                                                                <outlet property="textField" destination="eep-M8-SDh" id="Fvh-8h-Rrq"/>
+                                                            </connections>
+                                                        </tableCellView>
+                                                    </prototypeCellViews>
+                                                </tableColumn>
+                                            </tableColumns>
+                                        </tableView>
+                                    </subviews>
+                                </clipView>
+                                <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="gIk-eH-jCr">
+                                    <rect key="frame" x="1" y="118" width="238" height="16"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                                <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="NqK-IE-Asl">
+                                    <rect key="frame" x="224" y="17" width="15" height="102"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                                <tableHeaderView key="headerView" wantsLayer="YES" id="n6l-LA-DAT">
+                                    <rect key="frame" x="0.0" y="0.0" width="478" height="28"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableHeaderView>
+                            </scrollView>
+                        </subviews>
+                    </view>
+                    <connections>
+                        <outlet property="tableView" destination="bmW-l1-l4L" id="6xj-4N-Zbj"/>
+                    </connections>
+                </viewController>
+                <customObject id="Eed-uL-0d0" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="954" y="1647"/>
+        </scene>
         <!--ROM Config Window Controller-->
         <scene sceneID="L1R-Vb-fon">
             <objects>
@@ -3061,7 +3174,7 @@ DQ
                 </windowController>
                 <customObject id="6f7-a7-6o1" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-77" y="412"/>
+            <point key="canvasLocation" x="-237" y="413"/>
         </scene>
         <!--BeebEm View Controller-->
         <scene sceneID="hIz-AP-VOD">
@@ -3395,7 +3508,7 @@ DQ
                 </viewController>
                 <customObject id="2Tp-Fl-jBw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-60" y="1160"/>
+            <point key="canvasLocation" x="-226" y="1152"/>
         </scene>
         <!--BreakoutBox Window Controller-->
         <scene sceneID="DBR-Wq-wVO">

@@ -31,7 +31,7 @@ Boston, MA  02110-1301, USA.
 #include "discedit.h"
 
 #ifndef BEEBWIN
-#define _MAX_PATH 256
+#define _MAX_PATH 512
 #endif
 
 #define DFS_LENGTH_TO_SECTORS(l) (((int)l + DFS_SECTOR_SIZE - 1) / DFS_SECTOR_SIZE)
@@ -352,6 +352,7 @@ bool dfs_import_file(const char *szDiscFile,
 	}
 	else
 	{
+        perror(" -- " );
 		// No .INF file, construct dfsname
 		memset(dfsname, 0, sizeof(dfsname));
 		if (strlen(szFile) >= 3 && szFile[1] == '.')

@@ -79,15 +79,15 @@ enum CBridge {
 }
 
 // allow access to this in C
-@_cdecl("swift_GetOneFileWithPreview")
-func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: Int, directory : UnsafeMutablePointer<CChar>, fileexts : FileFilter) -> Int
+@_cdecl("swift_GetFilesWithPreview")
+func swift_GetFilesWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: Int, directory : UnsafeMutablePointer<CChar>, fileexts : FileFilter, multiFiles : Bool = false) -> Int
 {
     let dialog = NSOpenPanel()
     
     dialog.title                   = "Choose a file | BeebEm5"
     dialog.showsResizeIndicator    = true
     dialog.showsHiddenFiles        = false
-    dialog.allowsMultipleSelection = false
+    dialog.allowsMultipleSelection = multiFiles
     dialog.canChooseDirectories    = false
     dialog.canChooseFiles    = true
     dialog.allowsOtherFileTypes = true
@@ -97,6 +97,7 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
 //    let launcherLogPath = NSString("~/Documents").expandingTildeInPath  // need to expand the path if it includes ~
     let launcherLogPath = String( cString: directory)
     dialog.directoryURL = NSURL.fileURL(withPath: launcherLogPath, isDirectory: true)
+    dialog.canCreateDirectories = true
     
     switch fileexts {
     case .DISC:
@@ -116,10 +117,22 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
     }
     
     if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
-        let result = dialog.url // Pathname of the file
+        let result = dialog.urls // Pathnames of the files
 
-        if (result != nil) {
-            let path: String = result!.path
+        if (result.count != 0) {
+            
+            var path: String = (dialog.directoryURL?.path ?? "") + "\0"
+            if result.count == 1
+            {
+                path = dialog.url?.path ?? ""
+            }
+            else
+            {
+                for f in result
+                {
+                    path = path + f.lastPathComponent + "\0"
+                }
+            }
             
             // path contains the file path e.g
             // /Users/ourcodeworld/Desktop/file.txt
@@ -136,6 +149,31 @@ func swift_GetOneFileWithPreview(filepath : UnsafeMutablePointer<CChar>, bytes: 
     return 1 // error
 }
 
+@_cdecl("swift_SelectFolder")
+func swift_SelectFolder(filepath : UnsafeMutablePointer<CChar>, bytes: Int) -> Int
+{
+    let dialog = NSOpenPanel();
+    dialog.title                   = "Choose a folder | BeebEm5"
+    dialog.showsResizeIndicator    = true
+    dialog.canChooseDirectories    = true
+    dialog.canChooseFiles          = false
+    
+    if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
+        guard let result = dialog.url else { return 0} // Pathname of the file
+        let path: String = result.path
+        
+        // path contains the folder e.g
+        // /Users/ourcodeworld/Desktop/
+        
+        // set the filepath back in the C code.. fill with zeros first
+        filepath.assign(repeating: 0, count: bytes)
+        filepath.assign(from: path, count: path.count)
+            
+        print("Picked \(String(cString:filepath))")
+        return 0
+    }
+    return 1 //err
+}
 
 
 @_cdecl("swift_SaveFile")
@@ -157,14 +195,13 @@ func swift_SaveFile(filepath : UnsafeMutablePointer<CChar>, bytes: Int, fileexts
     case .KEYBOARD:
         dialog.allowedFileTypes        = ["kmap"]
     case .DISCFILE:
-        dialog.allowedFileTypes        = ["inf"]
+        dialog.allowedFileTypes        = nil // ["inf"]
     case .ROMCFG:
         dialog.allowedFileTypes        = ["rom"]
     case .PRINTFILE:
         dialog.allowedFileTypes        = nil  // ["inf"]
     }
-    
-    
+
     if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
         guard let result = dialog.url else { return false} // Pathname of the file
 
@@ -201,7 +238,34 @@ public func swift_MoveFile(srcpath : UnsafeMutablePointer<CChar>, destpath : Uns
     return true
 }
 
+@_cdecl("swift_SelectedFiles")
+public func swift_SelectedFiles ( selectedFiles : UnsafeMutablePointer<Int32> , length : Int)  -> Int
+{
+    let beeblist = BeebListViewController.beeblistdata
+    let numSelected = beeblist.selectedFiles.count
 
+    selectedFiles.assign(repeating: 0, count: length)
+    selectedFiles.assign(from: beeblist.selectedFiles, count: numSelected)
+    return numSelected
+}
+
+
+// allow access to this in C
+@_cdecl("swift_SelectFiles")
+public func swift_SelectFiles(dfsNames : UnsafePointer<UnsafePointer<CChar>>, files : UInt)
+{
+    let dn = UnsafeBufferPointer(start: dfsNames, count:Int(files))
+    
+    // fill up the beeblistdata within the view controller
+    let beeblist = BeebListViewController.beeblistdata
+    
+    beeblist.clear();
+    for i in dn.enumerated()
+    {
+        let s = String(cString: i.element)
+        beeblist.setrow(s)
+    }
+}
 
 
 @_cdecl("swift_SetWindowTitleWithCString")

@@ -633,6 +633,7 @@ public:
 	void CreateDiscImage(const char *FileName, int DriveNum, int Heads, int Tracks);
 	void EjectDiscImage(int Drive);
 	void ExportDiscFiles(int menuId);
+    void ExportDiscFilesToFolder();
 	void ImportDiscFiles(int menuId);
 	void SelectHardDriveFolder();
 	void ToggleWriteProtect(int Drive);

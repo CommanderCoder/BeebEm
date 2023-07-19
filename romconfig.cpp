@@ -70,8 +70,8 @@ extern "C" void swift_RCSetModelText(const LPTSTR n);
 extern "C" int swift_RCGetSelectionMark();
 extern "C" void swift_RCSetFocus();
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, PRINTFILE, ROMCFG };
-extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, const char *directory, FileFilter exts);
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, HARDDRIVE, PRINTFILE, ROMCFG };
+extern "C" int swift_GetFilesWithPreview (const char *path, int bytes, const char *directory, FileFilter exts, bool multiFiles);
 extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
 
 RCItem beeb_RCTable[16][2];
@@ -378,7 +378,7 @@ static bool LoadROMConfigFile(HWND hWnd)
 	FileDialog fileDialog(hWnd, pFileName, MAX_PATH, DefaultPath, filter);
 	if (fileDialog.Open())
 #else
-    if (swift_GetOneFileWithPreview(pFileName, MAX_PATH, DefaultPath, ROMCFG)==0)
+    if (swift_GetFilesWithPreview(pFileName, MAX_PATH, DefaultPath, ROMCFG, false)==0)
 #endif
 	{
 		// Save directory as default for next time
@@ -495,7 +495,7 @@ static bool GetROMFile(HWND hWnd, char *pFileName)
     FileDialog fileDialog(hWnd, pFileName, MAX_PATH, DefaultPath, filter);
     if (fileDialog.Open())
 #else
-    if (swift_GetOneFileWithPreview(pFileName, MAX_PATH, DefaultPath, ROMCFG)==0)
+    if (swift_GetFilesWithPreview(pFileName, MAX_PATH, DefaultPath, ROMCFG, false)==0)
 #endif
 	{
 		// Save directory as default for next time

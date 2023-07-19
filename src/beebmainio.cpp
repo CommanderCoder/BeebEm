@@ -83,20 +83,25 @@ extern AVIWriter *aviWriter;
 
 #else
 
-extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, PRINTFILE, ROMCFG };
+extern "C" enum FileFilter { DISC, UEF, IFD, KEYBOARD, DISCFILE, HARDDRIVE, PRINTFILE, ROMCFG };
 
-extern "C" int swift_GetOneFileWithPreview (const char *path, int bytes, const char* directory, FileFilter exts);
+extern "C" int swift_GetFilesWithPreview (const char *path, int bytes, const char* directory, FileFilter exts, bool multiFiles);
 extern "C" int swift_SaveFile (const char *path, int bytes, FileFilter exts);
 extern "C" int swift_MoveFile (const char *src, const char *dest );
+
+extern "C" int swift_SelectFolder (const char *path, int bytes);
 
 
 extern "C" int swift_setPasteboard ( const char* clipboard, int length);
 extern "C" int swift_getPasteboard ( char* clipboard, int length);
 
+extern "C" void swift_SelectFiles (char* dfsNames[], int max);
+extern "C" int swift_SelectedFiles ( int fileSelected[], int max);
+
 extern void beebwin_ModifyMenu(
                         UINT position,
                         UINT newitem,
-                               CHAR* newtext);
+                        CHAR* newtext);
 
 #endif
 
@@ -199,7 +204,7 @@ int BeebWin::ReadDisc(int Drive, bool bCheckForPrefs)
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), DefaultPath, filter);
 	gotName = fileDialog.Open();
 #else
-    bool err = swift_GetOneFileWithPreview(FileName, sizeof(FileName), DefaultPath, DISC);
+    bool err = swift_GetFilesWithPreview(FileName, sizeof(FileName), DefaultPath, DISC, false);
     gotName = !err;
 #endif
 	if (gotName)
@@ -357,7 +362,7 @@ void BeebWin::LoadTape(void)
 		}
 	}
 #else
-    int err = swift_GetOneFileWithPreview(FileName, 256, DefaultPath, UEF);
+    int err = swift_GetFilesWithPreview(FileName, 256, DefaultPath, UEF, false);
     
     if (!err)
     {
@@ -641,7 +646,7 @@ void BeebWin::RestoreState()
 			m_Preferences.SetStringValue("StatesPath", DefaultPath);
 		}
 #else
-    if (swift_GetOneFileWithPreview(FileName, sizeof(FileName), DefaultPath, UEF) == 0) {
+    if (swift_GetFilesWithPreview(FileName, sizeof(FileName), DefaultPath, UEF, false) == 0) {
             
 		LoadUEFState(FileName);
 	}
@@ -1308,7 +1313,7 @@ void BeebWin::LoadUserKeyMap()
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), m_UserDataPath, filter);
 	if (fileDialog.Open())
 #else
-    if (swift_GetOneFileWithPreview(FileName, _MAX_PATH, m_UserDataPath, KEYBOARD)==0)
+    if (swift_GetFilesWithPreview(FileName, _MAX_PATH, m_UserDataPath, KEYBOARD, false)==0)
 #endif
     {
         if (ReadKeyMap(FileName, &UserKeymap))
@@ -1641,13 +1646,16 @@ INT_PTR CALLBACK DiscExportDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LP
 }
 #endif
 
+    
+// populate the menu with disc files
+char szDiscFile[MAX_PATH];
+int heads;
+int side;
+
 void BeebWin::ExportDiscFiles(int menuId)
 {
-	int drive;
+    int drive;
 	DiscType type;
-	char szDiscFile[MAX_PATH];
-	int heads;
-	int side;
 
 	if (menuId == IDM_DISC_EXPORT_0 || menuId == IDM_DISC_EXPORT_2)
 		drive = 0;
@@ -1707,13 +1715,38 @@ void BeebWin::ExportDiscFiles(int menuId)
     // Need to set up a SAVE dialog with the list of files.
     // see DiscExportDlgProc
     
+    char* dfsNames[DFS_MAX_CAT_SIZE];
     
-//    if (0!=swift_SaveFile(szDiscFile, MAX_PATH, DISCFILE))
-//    {
-//        return;
-//    }
+    for (int i = 0; i < dfsCat.numFiles; ++i)
+    {
+        dfsNames[i] = (char*)malloc(100);
+        sprintf(dfsNames[i], "%c.%-7s %06X %06X %06X",
+                dfsCat.fileAttrs[i].directory,
+                dfsCat.fileAttrs[i].filename,
+                dfsCat.fileAttrs[i].loadAddr & 0xffffff,
+                dfsCat.fileAttrs[i].execAddr & 0xffffff,
+                dfsCat.fileAttrs[i].length);
+    }
+
+    //1. select files to be saved - prepare the dialogue
+    swift_SelectFiles(dfsNames, dfsCat.numFiles);
+    
+    for (int i = 0; i < dfsCat.numFiles; ++i)
+        free( dfsNames[i]);
 #endif
-    
+}
+
+// actuall save out the disc files
+void BeebWin::ExportDiscFilesToFolder()
+{
+    //2. select directory to save to
+    numSelected = swift_SelectedFiles(filesSelected, sizeof(filesSelected));
+
+    if (numSelected == 0 || swift_SelectFolder(szExportFolder, MAX_PATH))
+    {
+        return;
+    }
+
 	// Export the files
 	int Count = 0;
 
@@ -1721,7 +1754,7 @@ void BeebWin::ExportDiscFiles(int menuId)
 	{
 		char szErrStr[500];
 
-		success = dfs_export_file(szDiscFile, heads, side, &dfsCat,
+		bool success = dfs_export_file(szDiscFile, heads, side, &dfsCat,
 		                          filesSelected[i], szExportFolder, szErrStr);
 		if (success)
 		{
@@ -1820,7 +1853,7 @@ void BeebWin::ImportDiscFiles(int menuId)
 		return;
 	}
 #else
-    if (0 != swift_GetOneFileWithPreview(fileSelection, sizeof(fileSelection),szFolder,DISCFILE))
+    if (0 != swift_GetFilesWithPreview(fileSelection, sizeof(fileSelection),szFolder,DISCFILE, true))
     {
         return;
     }
@@ -1923,14 +1956,21 @@ void BeebWin::SelectHardDriveFolder()
 	GetDataPath(m_UserDataPath, DefaultPath);
 
 #ifdef BEEBWIN
-
 	FileDialog fileDialog(m_hWnd, FileName, sizeof(FileName), DefaultPath, filter);
 	gotName = fileDialog.Open();
+#else
+    int err = swift_SelectFolder(FileName, _MAX_PATH);
+    gotName = !err;
+#endif
 	if (gotName)
 	{
+#ifdef BEEBWIN
 		unsigned int PathLength = (unsigned int)(strrchr(FileName, '\\') - FileName);
-		strncpy(DefaultPath, FileName, PathLength);
-		DefaultPath[PathLength] = 0;
+        strncpy(DefaultPath, FileName, PathLength);
+        DefaultPath[PathLength] = 0;
+#else
+        strcpy(DefaultPath, FileName);
+#endif
 
 		strcpy(HardDrivePath, DefaultPath);
 		m_Preferences.SetStringValue("HardDrivePath", DefaultPath);
@@ -1943,7 +1983,6 @@ void BeebWin::SelectHardDriveFolder()
 			ResetBeebSystem(MachineType, false);
 		}
 	}
-#endif
 }
 
 /****************************************************************************/

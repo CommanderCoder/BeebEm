@@ -1,7 +1,6 @@
 #  Todo
 
 ## PRIORITY
-* import/export files disc- import done : export requires a dialogue box
 * IDE HDD - not tested? https://acorn.huininga.nl/pub/software/BeebEm/BeebEm-4.14.68000-20160619/Help/harddisks.html
 * music 5000 http://8bs.com/emum5000.htm#m500 - working but needs massive buffers.  need to figure out why the timing is off.
 
@@ -18,7 +17,8 @@
 * textview - part of beebspeech
 * text to speech : use AVSpeechSynthesizer 
 
-
+## DONE
+* import/export files disc- import done : export required a dialogue box and multifile select (select all the files and .inf or sandboxing will mean INF file cannot load)
 * s/w ram board - "edit rom" dialogue required - done
 * motion blur - done
 * printer - done: sets up a file and writes bytes to that file

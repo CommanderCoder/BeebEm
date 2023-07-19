@@ -32,6 +32,9 @@ void beeb_TapeControlCloseDialog();
 long beeb_getTableRowsCount(const char* tablename);
 const char* beeb_getTableCellData(unsigned int property, long itemID);
 
+long beeb_ExportDiscFiles( unsigned int drive);
+void beeb_ExportDiscFilesToFolder();
+
 long beeb_UKHandleCommand(unsigned int cmdID);
 
 int beeb_autorun(char *path);
