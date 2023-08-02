@@ -1626,6 +1626,12 @@ void BeebWin::ChangeAMXPosition(int deltaX, int deltaY)
 
 #ifndef BEEBWIN
 
+// message is key event
+// wParam on Windows is the VK_code for the key
+// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+// but different on MacOS
+// https://stackoverflow.com/questions/3202629/where-can-i-find-a-list-of-mac-virtual-key-codes
+
 int BeebMainKeyUpDown(UINT message, long wParam, long lParam)
 {
     int row, col;
@@ -1644,7 +1650,7 @@ int BeebMainKeyUpDown(UINT message, long wParam, long lParam)
             mainWin->TranslateKey((int)wParam, false, row, col);
             break;
         case kEventRawKeyUp:
-//          fprintf(stderr, "Key pressed: code = %d, '%c'\n", wParam, lParam);
+//          fprintf(stderr, "Key released: code = %d, '%c'\n", wParam, lParam);
                 if (mainWin->TranslateKey((int)wParam, true, row, col) < 0)
                 {
                     if (row == -2)
@@ -2225,6 +2231,26 @@ LRESULT CALLBACK WndProc(HWND hWnd,     // window handle
 }
 #endif
 
+// normally VK for F1 gives [row col] for f1
+// now VK for F1 gives [row col] for f0
+// this map when given F1 will actually give f0, etc.
+// On MAC the Fn virtual keycodes are not in sequential order
+std::map<int,int> VK_map{
+    {122,109}, // F1 -> f0
+    {120,122}, // F2 -> f1
+    {98,120},
+    {118,98},
+    {96,118},
+    {97,96},
+    {99,97},
+    {100,99},
+    {101,100},
+    {109,101} // F10 -> F9
+};
+#define VK_A 0  // could map as vkey 0 -> vkey ..
+#define VK_S 1  // could map as vkey 0 -> vkey ..
+
+
 /****************************************************************************/
 int BeebWin::TranslateKey(int vkey, bool keyUp, int &row, int &col)
 {
@@ -2265,12 +2291,12 @@ int BeebWin::TranslateKey(int vkey, bool keyUp, int &row, int &col)
 		if (m_KeyMapAS)
 		{
 			// Map A & S to CAPS & CTRL - good for some games
-			if (vkey == 65)
+			if (vkey == VK_A)
 			{
 				row = 4;
 				col = 0;
 			}
-			else if (vkey == 83)
+			else if (vkey == VK_S)
 			{
 				row = 0;
 				col = 1;
@@ -2279,17 +2305,13 @@ int BeebWin::TranslateKey(int vkey, bool keyUp, int &row, int &col)
 
 		if (m_KeyMapFunc)
 		{
-			// Map F1-F10 to f0-f9
-			if (vkey >= 113 && vkey <= 121)
-			{
-				row = (*transTable)[vkey - 1][0].row;
-				col = (*transTable)[vkey - 1][0].col;
-			}
-			else if (vkey == 112)
-			{
-				row = 2;
-				col = 0;
-			}
+            // Map F1-F10 to f0-f9
+            auto mapped_vkey = VK_map.find(vkey);
+            if (mapped_vkey != VK_map.end()) // remapping
+            {
+                row = (*transTable)[mapped_vkey->second][0].row;
+                col = (*transTable)[mapped_vkey->second][0].col;
+            }
 		}
 		//Reset IntegraB RTC on Break
 		if (MachineType == Model::IntegraB && row == -2 && col == -2)
