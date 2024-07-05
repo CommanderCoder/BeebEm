@@ -1,7 +1,7 @@
 # BeebEm5
 This code is here for archival purposes.  It is no longer supported.
 
-Please STAR and FORK [beebem-mac](https://github.com/commandercoder/beebem-mac) which is now most current version, and closely mirrors [beebem-windows]([(https://github.com/stardot/beebem-windows]).
+Please STAR and FORK [beebem-mac](https://github.com/commandercoder/beebem-mac) which is now the most current version, and that closely mirrors [beebem-windows]([(https://github.com/stardot/beebem-windows]).
 
 
 ## What was it
